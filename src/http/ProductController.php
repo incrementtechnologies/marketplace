@@ -24,6 +24,7 @@ class ProductController extends APIController
     public function create(Request $request){
     	$data = $request->all();
     	$data['code'] = $this->generateCode();
+      $data['price_settings'] = 'fixed';
     	$this->model = new Product();
     	$this->insertDB($data);
     	return $this->response();
