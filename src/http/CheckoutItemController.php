@@ -13,6 +13,10 @@ class CheckoutItemController extends APIController
     public $merchantClass = 'Increment\Marketplace\Http\MerchantController';
     function __construct(){
     	$this->model = new CheckoutItem();
+
+        $this->notRequired = array(
+            'color', 'size'
+        );
     }
 
     public function create(Request $request){
@@ -23,8 +27,8 @@ class CheckoutItemController extends APIController
             'payload_value' => $data['payload_value'],
             'price' => $data['price'],
             'qty' => $data['qty'],
-            'size' => $data['size'],
-            'color' => $data['color'],
+            'size' => isset($data['size']) ? $data['size'] : null,
+            'color' => isset($data['color']) ? $data['color'] : null,
             'status' => 'printing'
         );
     	$accountId = $data['account_id'];
