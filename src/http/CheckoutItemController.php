@@ -40,15 +40,15 @@ class CheckoutItemController extends APIController
     		return $this->response();
     	}else{
     		$checkout = new Checkout();
-        $checkout->payload = $data['type'];
+            $checkout->payload = $data['type'];
     		$checkout->account_id = $data['account_id'];
-        $checkout->coupon_id = null;
-        $checkout->order_number = app($this->merchantClass)->getOrderNumber($data['account_id']);
+            $checkout->coupon_id = null;
+            $checkout->order_number = app($this->merchantClass)->getOrderNumber($data['account_id']);
     		$checkout->sub_total = 0;
     		$checkout->tax = 0;
     		$checkout->total = 0;
     		$checkout->status = 'added';
-        $checkout->payment_status = 'added';
+            $checkout->payment_status = 'added';
     		$checkout->save();
     		if($checkout->id){
           if($data['payload'] == 'profile'){

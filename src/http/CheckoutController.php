@@ -8,18 +8,7 @@ use Increment\Marketplace\Models\Checkout;
 use Increment\Marketplace\Models\CheckoutItem;
 use Increment\Marketplace\Models\Product;
 use Increment\Marketplace\Models\Pricing;
-use Increment\Marketplace\Models\ShippingAddress;
-use App\Account;
-use App\StripeCard;
-use App\PaymentMethod;
-use App\Client;
-use App\Template;
-use App\Employee;
-use App\CustomObject;
-use App\Attribute;
-use App\PaypalTransaction;
-use App\StripeWebhook;
-use App\BillingInformation;
+use Increment\Marketplace\Models\StripeWebhook;
 use Carbon\Carbon;
 class CheckoutController extends APIController
 {
@@ -27,6 +16,7 @@ class CheckoutController extends APIController
   protected $total = 0;
   protected $tax = 0;
 
+  public $shippingAddressClass = 'Increment\Marketplace\Http\ShippingAddressController';
   function __construct(){
   	$this->model = new Checkout();
 
@@ -39,43 +29,43 @@ class CheckoutController extends APIController
     );
   }
 
-  public function retrieve(Request $request){
-    $data = $request->all();
-    $this->retrieveDB($data);
-    $result = $this->response['data'];
-    $cards = app('Increment\Payment\Http\PaymentMethodController')->getPaymentMethod('account_id', $data['account_id']);
-    if(sizeof($result) > 0){
-      $i = 0;
-      foreach ($result as $key) {
-        $price = $this->getPrice($result[$i], $data['account_id']);
-        $this->response['data'][$i]['partner_details'] = ($result[$i]['partner'] != null && $result[$i]['partner'] != '' && $result[$i]['partner'] > 0) ? $this->retrieveAccountDetails($result[$i]['partner']) : null;
-        $this->response['data'][$i]['account_details'] = $this->retrieveAccountDetails($data['account_id']); 
-        $this->response['data'][$i]['items'] = $this->getItems($result[$i]['id'], $price, $data['account_id']);
-        $this->response['data'][$i]['sub_total'] = $this->subTotal;
-        $this->response['data'][$i]['tax'] = $this->tax;
-        $this->response['data'][$i]['total'] = $this->subTotal - $this->tax;
-        $this->response['data'][$i]['shipping_address'] = $this->getShippingAddress($result[$i]['id']);
-        if($result[$i]['payment_type'] == 'authorized' && $result[$i]['payment_payload'] == 'credit_card'){
-          $this->response['data'][$i]['method'] = app('Increment\Payment\Http\PaymentMethodController')->getPaymentMethod('id', $result[$i]['payment_payload_value']);
-        }else{
-          $this->response['data'][$i]['method'] = null;
-        }
-        $i++;
+public function retrieve(Request $request){
+  $data = $request->all();
+  $this->retrieveDB($data);
+  $result = $this->response['data'];
+  $cards = app('Increment\Payment\Http\PaymentMethodController')->getPaymentMethod('account_id', $data['account_id']);
+  if(sizeof($result) > 0){
+    $i = 0;
+    foreach ($result as $key) {
+      $price = $this->getPrice($result[$i], $data['account_id']);
+      $this->response['data'][$i]['partner_details'] = ($result[$i]['partner'] != null && $result[$i]['partner'] != '' && $result[$i]['partner'] > 0) ? $this->retrieveAccountDetails($result[$i]['partner']) : null;
+      $this->response['data'][$i]['account_details'] = $this->retrieveAccountDetails($data['account_id']); 
+      $this->response['data'][$i]['items'] = $this->getItems($result[$i]['id'], $price, $data['account_id']);
+      $this->response['data'][$i]['sub_total'] = $this->subTotal;
+      $this->response['data'][$i]['tax'] = $this->tax;
+      $this->response['data'][$i]['total'] = $this->subTotal - $this->tax;
+      $this->response['data'][$i]['shipping_address'] = app($this->shippingAddressClass)->getShippingAddress($result[$i]['id']);
+      if($result[$i]['payment_type'] == 'authorized' && $result[$i]['payment_payload'] == 'credit_card'){
+        $this->response['data'][$i]['method'] = app('Increment\Payment\Http\PaymentMethodController')->getPaymentMethod('id', $result[$i]['payment_payload_value']);
+      }else{
+        $this->response['data'][$i]['method'] = null;
       }
+      $i++;
     }
-    
-    $this->response['method'] = $cards;
-    return $this->response();
   }
+  
+  $this->response['method'] = $cards;
+  return $this->response();
+}
 
-  public function getCheckoutItemByAccountId($accountId){
-    $checkout = Checkout::where('account_id', '=', $accountId)->where('status', '=', 'added')->first();
-    if($checkout){
-      return CheckoutItem::where('checkout_id', '=', $checkout->id)->count();
-    }else{
-      return 0;
-    }
+public function getCheckoutItemByAccountId($accountId){
+  $checkout = Checkout::where('account_id', '=', $accountId)->where('status', '=', 'added')->first();
+  if($checkout){
+    return CheckoutItem::where('checkout_id', '=', $checkout->id)->count();
+  }else{
+    return 0;
   }
+}
 
 public function getCheckout($payload, $payloadValue, $accountId){
   $checkout = Checkout::where('account_id', '=', $accountId)->where('status', '=', 'added')->first();
@@ -87,25 +77,6 @@ public function getCheckout($payload, $payloadValue, $accountId){
   }
   return (sizeof($result) > 0) ? $result[0] : null;
 }
-
-  public function getShippingAddress($checkoutId){
-    $result = ShippingAddress::where('checkout_id', '=', $checkoutId)->get();
-    if(sizeof($result) > 0){
-      $i = 0;
-      foreach ($result as $key) {
-        if($result[$i]['payload'] == 'billing'){
-          $result[$i]['payload_details'] = $this->getBillingInformation($result[$i]['payload_value']);
-        }
-        $i++;
-      }
-    }
-    return (sizeof($result) > 0) ? $result[0] : null;
-  }
-
-  public function getBillingInformation($billingId){
-    $billing = BillingInformation::where('id', '=', $billingId)->get();
-    return (sizeof($billing) > 0) ? $billing[0] : null;
-  }
 
   public function retrieveOrderItems(Request $request){
     $data = $request->all();
@@ -274,7 +245,7 @@ public function getCheckout($payload, $payloadValue, $accountId){
         $result[$i]['active'] = false;
         if($payload == 'employee'){
           $result[$i]['profile'] = null;
-          $result[$i]['employee'] = $this->getEmployeeFromOrders($payloadValue);
+          $result[$i]['employee'] = null;
           $result[$i]['template'] = null;
         }else if($payload == 'template'){
           $result[$i]['employee'] = null;
@@ -291,21 +262,6 @@ public function getCheckout($payload, $payloadValue, $accountId){
         $i++;
       }
       return $result;
-    }else{
-      return null;
-    }
-  }
-
-  public function getEmployeeFromOrders($payloadValue){
-    $result = Employee::where('id', '=', $payloadValue)->get();
-    if(sizeof($result) > 0){
-      $id = $result[0]['id'];
-      $result[0]['front_objects'] = $this->getObjectsCustom($result[0]['front_template'], $id);
-      $result[0]['back_objects'] = $this->getObjectsCustom($result[0]['back_template'], $id);
-      $result[0]['front_template_details'] = app('App\Http\Controllers\TemplateController')->getTemplateDetails($result[0]['front_template']);
-      $result[0]['back_template_details'] = app('App\Http\Controllers\TemplateController')->getTemplateDetails($result[0]['back_template']);
-      $result[0]['total_comments'] = app('Increment\Common\Comment\Http\CommentController')->getComments($id);
-      return $result[0];
     }else{
       return null;
     }
@@ -456,92 +412,6 @@ public function getCheckout($payload, $payloadValue, $accountId){
           'error' => 'Unable to charge',
           'timestamps'  => Carbon::now()
         ));
-    }
-  }
-
-  public function getOrderNumber($accountId){
-    $account = Account::where('id', '=', $accountId)->first();
-    if($account){
-      $checkouts = Checkout::where('account_id', '=', $accountId)->count();
-      if($checkouts){
-        if($checkouts >= 1000){
-          return $account->order_suffix.$checkouts;
-        }else if($checkouts >= 100){
-          return $account->order_suffix.'0'.$checkouts;
-        }else if($checkouts >= 10){
-          return $account->order_suffix.'00'.$checkouts;
-        }else if($checkouts >= 0){
-          return $account->order_suffix.'000'.$checkouts;
-        }
-      }else{
-        return $account->order_suffix.'0001';
-      }
-    }
-    return null;
-  }
-
-  public function managePurchasedTemplate($checkoutId){
-    $templates = CheckoutItem::where('checkout_id', '=', $checkoutId)->where('payload', 'template')->get();
-    if(sizeof($templates) > 0){
-      $i = 0;
-      foreach ($templates as $key) {
-        $template = app('App\Http\Controllers\TemplateController')->getTemplateDetails($templates[$i]['payload_value']);
-        if($template != null){
-          $pTemplate = new Template();
-          $pTemplate->account_id  = $templates[$i]['account_id'];
-          $pTemplate->title       = $template['title'];
-          $pTemplate->settings    = $template['settings'];
-          $pTemplate->height      = $template['height'];
-          $pTemplate->width       = $template['width'];
-          $pTemplate->status      = 'purchased';
-          $pTemplate->purchased   = $template['id'];
-          $pTemplate->categories  = $template['categories'];
-          $pTemplate->price       = $template['price'];
-          $pTemplate->created_at  = Carbon::now();
-          $pTemplate->save();
-          if($pTemplate->id){
-            $this->managePurchasedObjects($templates[$i]['payload_value'], $pTemplate->id);
-          }
-        }
-        $i++;
-      }
-    }
-  }
-
-  public function managePurchasedObjects($oldTemplateId, $newTemplateId){
-     $objects = app('App\Http\Controllers\ObjectController')->getPurchasedObjects($oldTemplateId);
-     if(sizeof($objects) > 0){
-        $i = 0;
-        foreach ($objects as $key) {
-          $customObject = new CustomObject();
-          $customObject->template_id = $newTemplateId;
-          $customObject->name = $objects[$i]['name'];
-          $customObject->type = $objects[$i]['type'];
-          $customObject->content = $objects[$i]['content'];
-          $customObject->settings = $objects[$i]['settings'];
-          $customObject->created_at = Carbon::now();
-          $customObject->save();
-          if($customObject->id){
-            $this->managePurchasedAttributes($objects[$i]['attributes'], $customObject->id);
-          }
-          $i++;
-        }
-     }
-  }
-
-  public function managePurchasedAttributes($attributes, $objectId){
-    if(sizeof($attributes) > 0){
-      $i = 0;
-      foreach ($attributes as $key) {
-        $attribute = new Attribute();
-        $attribute->payload = 'object';
-        $attribute->payload_value = $objectId;
-        $attribute->attribute = $attributes[$i]['attribute'];
-        $attribute->value = $attributes[$i]['value'];
-        $attribute->created_at = Carbon::now();
-        $attribute->save();
-        $i++;
-      }
     }
   }
 

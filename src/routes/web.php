@@ -85,8 +85,12 @@ Route::get($route.'test', $controller."test");
 //Orders
 $route = env('PACKAGE_ROUTE', '').'/orders/';
 $controller = 'Increment\Marketplace\Http\OrderController@';
-Route::post($route.'retrieve', $controller."retrieveOrders");
+Route::post($route.'retrieve', $controller."retrieve");
+Route::post($route.'retrieve_orders', $controller."retrieveOrders");
 Route::post($route.'retrieve_items', $controller."retrieveOrderItems");
+Route::post($route.'update', $controller."update");
+Route::post($route.'delete', $controller."delete");
+Route::get($route.'test', $controller."test");
 
 // Shipping Addresses
 $route = env('PACKAGE_ROUTE', '').'/shipping_addresses/';
