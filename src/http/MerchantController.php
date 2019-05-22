@@ -90,6 +90,7 @@ class MerchantController extends APIController
 
       if(sizeof($result) > 0){
         $result[0]['account'] = $this->retrieveAccountDetails($result[0]['account_id']);
+        $result[0]['rating'] = app('Increment\Common\Rating\Http\RatingController')->getRatingByPayload('merchant', $result[0]['account_id']);
         return $result[0];
       }else{
         return null;
