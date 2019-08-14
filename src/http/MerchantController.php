@@ -51,10 +51,14 @@ class MerchantController extends APIController
           $diff = $accountDate->diffInDays($current, false);
           if($diff < 30){
             $this->response['data'][$i]['account'] = $this->retrieveAccountDetails($accountId);
-            $this->response['data'][$i]['rating'] = app('Increment\Common\Rating\Http\RatingController')->getRatingByPayload('merchant', $accountId);
+            if(env('RATING') == true){
+              $this->response['data'][$i]['rating'] = app('Increment\Common\Rating\Http\RatingController')->getRatingByPayload('merchant', $accountId);
+            }
           }else if(app('Increment\Plan\Http\PlanController')->checkPlan($accountId) == true){
             $this->response['data'][$i]['account'] = $this->retrieveAccountDetails($accountId);
-            $this->response['data'][$i]['rating'] = app('Increment\Common\Rating\Http\RatingController')->getRatingByPayload('merchant', $accountId);
+            if(env('RATING') == true){
+              $this->response['data'][$i]['rating'] = app('Increment\Common\Rating\Http\RatingController')->getRatingByPayload('merchant', $accountId);
+            }
           }else{
             //
           }
@@ -90,7 +94,9 @@ class MerchantController extends APIController
 
       if(sizeof($result) > 0){
         $result[0]['account'] = $this->retrieveAccountDetails($result[0]['account_id']);
-        $result[0]['rating'] = app('Increment\Common\Rating\Http\RatingController')->getRatingByPayload('merchant', $result[0]['account_id']);
+        if(env('RATING') == true){
+          $result[0]['rating'] = app('Increment\Common\Rating\Http\RatingController')->getRatingByPayload('merchant', $result[0]['account_id']);
+        }
         return $result[0];
       }else{
         return null;
