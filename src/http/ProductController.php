@@ -14,6 +14,7 @@ class ProductController extends APIController
     public $checkoutController = 'Increment\Marketplace\Http\CheckoutController';
     public $checkoutItemController = 'Increment\Marketplace\Http\CheckoutItemController';
     public $inventoryController = 'Increment\Marketplace\Http\ProductInventoryController';
+    public $productTraceController = 'Increment\Marketplace\Http\ProductTraceController';
     function __construct(){
     	$this->model = new Product();
       $this->notRequired = array(
@@ -43,6 +44,7 @@ class ProductController extends APIController
 
     public function retrieve(Request $request){
       $data = $request->all();
+      $inventoryType = $data['inventory_type'];
       $accountId = $data['account_id'];
       $this->model = new Product();
       $this->retrieveDB($data);
@@ -60,8 +62,15 @@ class ProductController extends APIController
           $this->response['data'][$i]['tag_array'] = $this->manageTags($result[$i]['tags']);
           $this->response['data'][$i]['wishlist_flag'] = app($this->wishlistController)->checkWishlist($result[$i]['id'], $accountId);
           $this->response['data'][$i]['checkout_flag'] = app($this->checkoutController)->checkCheckout($result[$i]['id'], $accountId);
-          $this->response['data'][$i]['inventories'] = app($this->inventoryController)->getInventory($result[$i]['id']);
-          $this->response['data'][$i]['qty'] = $this->getRemainingQty($result[$i]['id']);
+          $this->response['data'][$i]['inventories'] = null;
+          $this->response['data'][$i]['product_traces'] = null;
+          if($inventoryType == 'inventory'){
+            $this->response['data'][$i]['inventories'] = app($this->inventoryController)->getInventory($result[$i]['id']);
+            $this->response['data'][$i]['qty'] = $this->getRemainingQty($result[$i]['id']);
+          }else if($inventoryType == 'product_trace'){
+            $this->response['data'][$i]['product_traces'] =  app($this->productTraceController)->getByParams('product_id', $result[$i]['id']);
+            $this->response['data'][$i]['qty'] = app($this->productTraceController)->getBalanceQty('product_id', $result[$i]['id']);
+          }
           $i++;
         }
       }
@@ -75,6 +84,8 @@ class ProductController extends APIController
     }
 
     public function retrieveProductById($id, $accountId){
+      //on wishlist, add parameter inventory type
+      //on checkout, add parameter inventory type
       $data = array(
         'condition' => array(array(
           'value'   => $id,
