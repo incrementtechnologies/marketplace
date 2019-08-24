@@ -15,6 +15,7 @@ class ProductController extends APIController
     public $checkoutItemController = 'Increment\Marketplace\Http\CheckoutItemController';
     public $inventoryController = 'Increment\Marketplace\Http\ProductInventoryController';
     public $productTraceController = 'Increment\Marketplace\Http\ProductTraceController';
+    public $merchantController = 'Increment\Marketplace\Http\MerchantController';
     function __construct(){
     	$this->model = new Product();
       $this->notRequired = array(
@@ -48,32 +49,7 @@ class ProductController extends APIController
       $accountId = $data['account_id'];
       $this->model = new Product();
       $this->retrieveDB($data);
-      $result = $this->response['data'];
-      // details
-      if(sizeof($result) > 0){
-        $i = 0;
-        foreach ($result as $key) {
-          $this->response['data'][$i]['account'] = $this->retrieveAccountDetails($result[$i]['account_id']);
-          $this->response['data'][$i]['price'] = app($this->productPricingController)->getPrice($result[$i]['id']);
-          $this->response['data'][$i]['color'] = app($this->productAttrController)->getAttribute($result[$i]['id'], 'color');
-          $this->response['data'][$i]['size'] = app($this->productAttrController)->getAttribute($result[$i]['id'], 'size');
-          $this->response['data'][$i]['featured'] = app($this->productImageController)->getProductImage($result[$i]['id'], 'featured');
-          $this->response['data'][$i]['images'] = app($this->productImageController)->getProductImage($result[$i]['id'], null);
-          $this->response['data'][$i]['tag_array'] = $this->manageTags($result[$i]['tags']);
-          $this->response['data'][$i]['wishlist_flag'] = app($this->wishlistController)->checkWishlist($result[$i]['id'], $accountId);
-          $this->response['data'][$i]['checkout_flag'] = app($this->checkoutController)->checkCheckout($result[$i]['id'], $accountId);
-          $this->response['data'][$i]['inventories'] = null;
-          $this->response['data'][$i]['product_traces'] = null;
-          if($inventoryType == 'inventory'){
-            $this->response['data'][$i]['inventories'] = app($this->inventoryController)->getInventory($result[$i]['id']);
-            $this->response['data'][$i]['qty'] = $this->getRemainingQty($result[$i]['id']);
-          }else if($inventoryType == 'product_trace'){
-            $this->response['data'][$i]['product_traces'] =  app($this->productTraceController)->getByParams('product_id', $result[$i]['id']);
-            $this->response['data'][$i]['qty'] = app($this->productTraceController)->getBalanceQty('product_id', $result[$i]['id']);
-          }
-          $i++;
-        }
-      }
+      $this->response['data'] = $this->manageResult($this->response['data'], null, $inventoryType);
       return $this->response();
     }
 
@@ -83,7 +59,8 @@ class ProductController extends APIController
       return $total - $issued;
     }
 
-    public function retrieveProductById($id, $accountId){
+    public function retrieveProductById($id, $accountId, $inventoryType = null){
+      $inventoryType = $inventoryType == null ? env('INVENTORY_TYPE') : $inventoryType;
       //on wishlist, add parameter inventory type
       //on checkout, add parameter inventory type
       $data = array(
@@ -96,8 +73,11 @@ class ProductController extends APIController
 
       $this->model = new Product();
       $this->retrieveDB($data);
-      $result = $this->response['data'];
-      // details
+      $result = $this->manageResult($this->response['data'], $accountId, $inventoryType);
+      return (sizeof($result) > 0) ? $result[0] : null;
+    }
+
+    public function manageResult($result, $accountId, $inventoryType){
       if(sizeof($result) > 0){
         $i = 0;
         foreach ($result as $key) {
@@ -108,16 +88,24 @@ class ProductController extends APIController
           $result[$i]['featured'] = app($this->productImageController)->getProductImage($result[$i]['id'], 'featured');
           $result[$i]['images'] = app($this->productImageController)->getProductImage($result[$i]['id'], null);
           $result[$i]['tag_array'] = $this->manageTags($result[$i]['tags']);
-          $result[$i]['inventories'] = app($this->inventoryController)->getInventory($result[$i]['id']);
-          $result[$i]['qty'] = $this->getRemainingQty($result[$i]['id']);
-          if($accountId != null){
+          if($accountId !== null){
             $result[$i]['wishlist_flag'] = app($this->wishlistController)->checkWishlist($result[$i]['id'], $accountId);
-            $result[$i]['checkout_flag'] = app($this->checkoutController)->checkCheckout($result[$i]['id'], $accountId);
+            $result[$i]['checkout_flag'] = app($this->checkoutController)->checkCheckout($result[$i]['id'], $accountId); 
+          }
+          $result[$i]['inventories'] = null;
+          $result[$i]['product_traces'] = null;
+          $result[$i]['merchant'] = app($this->merchantController)->getByParams('id', $result[$i]['merchant_id']);
+          if($inventoryType == 'inventory'){
+            $result[$i]['inventories'] = app($this->inventoryController)->getInventory($result[$i]['id']);
+            $result[$i]['qty'] = $this->getRemainingQty($result[$i]['id']);
+          }else if($inventoryType == 'product_trace'){
+            $result[$i]['product_traces'] =  app($this->productTraceController)->getByParams('product_id', $result[$i]['id']);
+            $result[$i]['qty'] = app($this->productTraceController)->getBalanceQty('product_id', $result[$i]['id']);
           }
           $i++;
         }
       }
-      return (sizeof($result) > 0) ? $result[0] : null;
+      return $result;
     }
 
     public function manageTags($tags){
