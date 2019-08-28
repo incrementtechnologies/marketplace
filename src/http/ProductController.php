@@ -5,6 +5,7 @@ namespace Increment\Marketplace\Http;
 use Illuminate\Http\Request;
 use App\Http\Controllers\APIController;
 use Increment\Marketplace\Models\Product;
+use Carbon\Carbon;
 class ProductController extends APIController
 {
     public $productImageController = 'Increment\Marketplace\Http\ProductImageController';
@@ -19,7 +20,7 @@ class ProductController extends APIController
     function __construct(){
     	$this->model = new Product();
       $this->notRequired = array(
-        'tags', 'sku'
+        'tags', 'sku', 'rf'
       );
     }
 
@@ -88,6 +89,7 @@ class ProductController extends APIController
           $result[$i]['featured'] = app($this->productImageController)->getProductImage($result[$i]['id'], 'featured');
           $result[$i]['images'] = app($this->productImageController)->getProductImage($result[$i]['id'], null);
           $result[$i]['tag_array'] = $this->manageTags($result[$i]['tags']);
+          $result[$i]['created_at_human'] = Carbon::createFromFormat('Y-m-d H:i:s', $result[$i]['created_at'])->copy()->tz('Asia/Manila')->format('F j, Y H:i A');
           if($accountId !== null){
             $result[$i]['wishlist_flag'] = app($this->wishlistController)->checkWishlist($result[$i]['id'], $accountId);
             $result[$i]['checkout_flag'] = app($this->checkoutController)->checkCheckout($result[$i]['id'], $accountId); 

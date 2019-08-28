@@ -40,12 +40,13 @@ class ProductTraceController extends APIController
 
   public function generateNFC($productId, $data){
     $product = app($this->productController)->retrieveProductById($productId, $data['account_id'], $data['inventory_type']);
+    // product trace code
     $id = $product['code'].'/0/';
-    $merchantName = $product['merchant']['name'].'/0/';
-    $title = $product['title'].'/0/';
+    // $merchantName = $product['merchant']['name'].'/0/';
+    // $title = $product['title'].'/0/';
     $batchNumber = $data['batch_number'].'/0/';
     $manufacturingDate = $data['manufacturing_date'].'/0/';
-    $link = 'https://www.traceag.com.au/product/'.$product['code'].'/0/';
+    // $link = 'https://www.traceag.com.au/product/'.$product['code'].'/0/';
     return Hash::make($id.$merchantName.$title.$batchNumber.$manufacturingDate.$link);
     // product id
     // trace id
