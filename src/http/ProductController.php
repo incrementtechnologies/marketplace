@@ -36,7 +36,7 @@ class ProductController extends APIController
 
     public function generateCode(){
       $code = substr(str_shuffle("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"), 0, 32);
-      $codeExist = Product::where('id', '=', $code)->get();
+      $codeExist = Product::where('code', '=', $code)->get();
       if(sizeof($codeExist) > 0){
         $this->generateCode();
       }else{
@@ -76,6 +76,12 @@ class ProductController extends APIController
       $this->retrieveDB($data);
       $result = $this->manageResult($this->response['data'], $accountId, $inventoryType);
       return (sizeof($result) > 0) ? $result[0] : null;
+    }
+
+    public function getByParams($column, $value){
+      $result = Product::where($column, '=', $value)->get();
+
+      return sizeof($result) > 0 ? $result[0] : null;
     }
 
     public function manageResult($result, $accountId, $inventoryType){

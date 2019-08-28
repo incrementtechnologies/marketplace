@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\APIController;
 use Increment\Marketplace\Models\ProductTrace;
 use Illuminate\Support\Facades\Hash;
+use Carbon\Carbon;
 class ProductTraceController extends APIController
 {
 
@@ -24,6 +25,31 @@ class ProductTraceController extends APIController
     return sizeof($result) > 0 ? $result : null;
   }
 
+  public function retrieve(Request $request){
+    $data = $request->all();
+    $product = app($this->productController)->getByParams('code', $data['code']);
+
+    if($product != null){
+      $data['condition'][] = array(
+        'column'  => 'product_id',
+        'clause'  => '=',
+        'value'   => $product['id']
+      );
+    }
+
+    $this->model = new ProductTrace();
+    $this->retrieveDB($data);
+
+    $i = 0;
+    foreach ($this->response['data'] as $key) {
+      $item = $this->response['data'][$i];
+      // $this->response['data'][$i]['manufacturing_date_human'] = Carbon::createFromFormat('Y-m-d H:i:s', $item['manufacturing_date'])->copy()->tz('Asia/Manila')->format('F j, Y H:i A');
+      $this->response['data'][$i]['created_at_human'] = Carbon::createFromFormat('Y-m-d H:i:s', $item['created_at'])->copy()->tz('Asia/Manila')->format('F j, Y h:i A');
+      $i++;
+    }
+    return $this->response();
+  }
+
   public function getBalanceQty($column, $value){
     $result  = ProductTrace::where($column, '=', $value)->where('status', '=', 'open')->count();
     return $result;
@@ -32,6 +58,7 @@ class ProductTraceController extends APIController
   public function create(Request $request){
     $data = $request->all();
     $data['nfc'] = $this->generateNFC($data['product_id'], $data);
+    $data['code'] = $this->generateCode();
     $data['status'] = 'open';
     $this->model = new ProductTrace();
     $this->insertDB($data);
@@ -47,7 +74,7 @@ class ProductTraceController extends APIController
     $batchNumber = $data['batch_number'].'/0/';
     $manufacturingDate = $data['manufacturing_date'].'/0/';
     // $link = 'https://www.traceag.com.au/product/'.$product['code'].'/0/';
-    return Hash::make($id.$merchantName.$title.$batchNumber.$manufacturingDate.$link);
+    return Hash::make($id.$batchNumber.$manufacturingDate);
     // product id
     // trace id
     // merchant name
@@ -60,6 +87,16 @@ class ProductTraceController extends APIController
     // generate code for nfc
   }
 
+  public function generateCode(){
+    $code = substr(str_shuffle("0123456789012345678901234567890123456789"), 0, 32);
+    $codeExist = ProductTrace::where('code', '=', $code)->get();
+    if(sizeof($codeExist) > 0){
+      $this->generateCode();
+    }else{
+      return $code;
+    }
+  }
+  
   public function linkTags(Request $request){
     //
   }
