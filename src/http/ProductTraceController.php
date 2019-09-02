@@ -50,6 +50,19 @@ class ProductTraceController extends APIController
     return $this->response();
   }
 
+  public function retrieveByParams(Request $request){
+    $data = $request->all();
+    $this->model = new ProductTrace();
+    $this->retrieveDB($data);
+    $i = 0;
+    foreach ($this->response['data'] as $key) {
+      $item = $this->response['data'][$i];
+      $this->response['data'][$i]['product'] = app($this->productController)->getByParams('id', $item['product_id']);
+      $i++;
+    }
+    return $this->response();
+  }
+
   public function getBalanceQty($column, $value){
     $result  = ProductTrace::where($column, '=', $value)->where('status', '=', 'open')->count();
     return $result;
