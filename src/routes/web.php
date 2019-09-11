@@ -119,3 +119,21 @@ Route::post($route.'retrieve_by_params', $controller."retrieveByParams");
 Route::post($route.'update', $controller."update");
 Route::post($route.'delete', $controller."delete");
 Route::get($route.'test', $controller."test");
+
+// Transferrs
+$route = env('PACKAGE_ROUTE', '').'/transfers/';
+$controller = 'Increment\Marketplace\Http\TransferController@';
+Route::post($route.'create', $controller."create");
+Route::post($route.'retrieve', $controller."retrieve");
+Route::post($route.'update', $controller."update");
+Route::post($route.'delete', $controller."delete");
+Route::get($route.'test', $controller."test");
+
+// Transferred Products
+$route = env('PACKAGE_ROUTE', '').'/transferred_products/';
+$controller = 'Increment\Marketplace\Http\TransferredProductController@';
+Route::post($route.'create', $controller."create");
+Route::post($route.'retrieve', $controller."retrieve");
+Route::post($route.'update', $controller."update");
+Route::post($route.'delete', $controller."delete");
+Route::get($route.'test', $controller."test");

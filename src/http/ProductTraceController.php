@@ -10,7 +10,6 @@ use Carbon\Carbon;
 class ProductTraceController extends APIController
 {
 
-
   public $productController = 'Increment\Marketplace\Http\ProductController';
   function __construct(){
   	$this->model = new ProductTrace();
