@@ -68,6 +68,13 @@ class MerchantController extends APIController
     return $this->response();
   }
 
+  public function retrieveAll(Request $request){
+    $data = $request->all();    
+    $this->model = new Merchant();
+    $this->retrieveDB($data);
+    return $this->response();
+  }
+
   public function getOrderNumber($accountId){
     $account = Merchant::where('id', '=', $accountId)->first();
     if($account){
