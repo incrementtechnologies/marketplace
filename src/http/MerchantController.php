@@ -54,10 +54,12 @@ class MerchantController extends APIController
           if(env('RATING') == true){
             $this->response['data'][$i]['rating'] = app('Increment\Common\Rating\Http\RatingController')->getRatingByPayload('merchant', $accountId);
           }
-        }else if(app('Increment\Plan\Http\PlanController')->checkPlan($accountId) == true){
-          $this->response['data'][$i]['account'] = $this->retrieveAccountDetails($accountId);
-          if(env('RATING') == true){
-            $this->response['data'][$i]['rating'] = app('Increment\Common\Rating\Http\RatingController')->getRatingByPayload('merchant', $accountId);
+        }else if(env('PLAN') == true){
+          if(app('Increment\Plan\Http\PlanController')->checkPlan($accountId) == true){
+            $this->response['data'][$i]['account'] = $this->retrieveAccountDetails($accountId);
+            if(env('RATING') == true){
+              $this->response['data'][$i]['rating'] = app('Increment\Common\Rating\Http\RatingController')->getRatingByPayload('merchant', $accountId);
+            }
           }
         }else{
           //
