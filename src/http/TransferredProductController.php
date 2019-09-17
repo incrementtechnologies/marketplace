@@ -19,4 +19,11 @@ class TransferredProductController extends APIController
       $this->response['data'] = true;
       return $this->response();
     }
+
+    public function getByParams($column, $value){
+      $result = TransferredProduct::where($column, '=', $value)->get();
+      return sizeof($result) > 0 ? $result : null;
+    }
+
+
 }
