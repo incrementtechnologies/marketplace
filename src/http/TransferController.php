@@ -19,7 +19,7 @@ class TransferController extends APIController
 
       $this->model = new Transfer();
       $this->retrieveDB($data);
-      $result = $this->response('data');
+      $result = $this->response['data'];
       if(sizeof($result) > 0){
         $i = 0;
         foreach ($result as $key) {
