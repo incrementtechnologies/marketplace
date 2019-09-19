@@ -62,7 +62,7 @@ class ProductTraceController extends APIController
     return $this->response();
   }
 
-  public function getByParams($column, $value){
+  public function getByParamsDetails($column, $value){
     $result  = ProductTrace::where($column, '=', $value)->get();
     if(sizeof($result) > 0){
       $i = 0;
