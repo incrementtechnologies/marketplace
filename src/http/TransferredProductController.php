@@ -38,7 +38,7 @@ class TransferredProductController extends APIController
     public function retrieve(Request $request){
       $data = $request->all();
 
-      $this->model = new Transfer();
+      $this->model = new TransferredProduct();
       $this->retrieveDB($data);
       $result = $this->response['data'];
       if(sizeof($result) > 0){
