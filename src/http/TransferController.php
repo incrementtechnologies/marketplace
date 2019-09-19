@@ -14,6 +14,23 @@ class TransferController extends APIController
       $this->model = new Transfer();
     }
 
+    public function create(Request $request){
+      $data = $request->all();
+      $data['code'] = $this->generateCode();
+      $this->insertDB($data);
+      return $this->response();
+    }
+    
+    public function generateCode(){
+      $code = substr(str_shuffle("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"), 0, 32);
+      $codeExist = Transfer::where('code', '=', $code)->get();
+      if(sizeof($codeExist) > 0){
+        $this->generateCode();
+      }else{
+        return $code;
+      }
+    }
+
     public function retrieve(Request $request){
       $data = $request->all();
 
