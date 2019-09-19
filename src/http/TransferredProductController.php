@@ -17,7 +17,7 @@ class TransferredProductController extends APIController
       $data = $request->all();
       if(sizeof($data['products']) > 0){
         $array = array();
-        for ($i=0; $i < sizeof($data['products']) - 1; $i++) {
+        for ($i=0; $i < sizeof($data['products']); $i++) {
           $array[] = array(
             'transfer_id' => $data['transfer_id'],
             'payload'     => 'product_traces',
