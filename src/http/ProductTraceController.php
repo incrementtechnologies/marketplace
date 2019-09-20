@@ -70,8 +70,7 @@ class ProductTraceController extends APIController
   public function create(Request $request){
     $data = $request->all();
     $qty = intval($data['qty']);
-    for ($i=0; $i < $qty; $i++) { 
-      $data['nfc'] = $this->generateNFC($data['product_id'], $data);
+    for ($i=0; $i < $qty; $i++) {
       $data['code'] = $this->generateCode();
       $data['status'] = 'open';
       $this->model = new ProductTrace();
