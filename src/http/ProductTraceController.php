@@ -62,6 +62,19 @@ class ProductTraceController extends APIController
     return $this->response();
   }
 
+  public function getByParamsDetails($column, $value){
+    $result  = ProductTrace::where($column, '=', $value)->get();
+    if(sizeof($result) > 0){
+      $i = 0;
+      foreach ($result as $key) {
+        $item = $result[$i];
+        $result[$i]['product'] = app($this->productController)->getByParams('id', $item['product_id']);
+        $i++;
+      }
+    }
+    return sizeof($result) > 0 ? $result : null;
+  }
+
   public function getBalanceQty($column, $value){
     $result  = ProductTrace::where($column, '=', $value)->where('status', '=', 'open')->count();
     return $result;
