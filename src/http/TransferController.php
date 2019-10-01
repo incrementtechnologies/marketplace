@@ -10,6 +10,7 @@ use Carbon\Carbon;
 class TransferController extends APIController
 {
    public $transferredProductsClass = 'Increment\Marketplace\Http\TransferredProductController';
+   public $merchantClass = 'Increment\Marketplace\Http\MerchantController';
     function __construct(){
       $this->model = new Transfer();
     }
@@ -42,6 +43,8 @@ class TransferController extends APIController
         foreach ($result as $key) {
           $this->response['data'][$i]['transferred_products'] = app($this->transferredProductsClass)->getByParams('transfer_id', $result[$i]['id']);
           $this->response['data'][$i]['created_at_human'] = Carbon::createFromFormat('Y-m-d H:i:s', $result[$i]['created_at'])->copy()->tz('Asia/Manila')->format('F j, Y H:i A');
+          $this->response['data'][$i]['to_details'] = app($this->merchantClass)->getByParams('id', $result[$i]['to']);
+          $this->response['data'][$i]['account'] = $this->retrieveAccountDetails($result[$i]['account_id']);
           $i++;
         }
       }
