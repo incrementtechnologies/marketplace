@@ -47,7 +47,7 @@ class ProductTraceController extends APIController
       $this->response['data'][$i]['created_at_human'] = Carbon::createFromFormat('Y-m-d H:i:s', $item['created_at'])->copy()->tz('Asia/Manila')->format('F j, Y h:i A');
       $i++;
     }
-    $this->response['datetime_human'] = Carbon::now()->copy()->tz('Asia/Manila')->format('F j Y h i');
+    $this->response['datetime_human'] = Carbon::now()->copy()->tz('Asia/Manila')->format('F j Y h i A');
     return $this->response();
   }
 
