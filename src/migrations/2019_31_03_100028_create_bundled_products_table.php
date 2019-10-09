@@ -11,14 +11,15 @@ class CreateBundledProductsTable extends Migration
      *
      * @return void
      */
+    
     public function up()
     {
         Schema::create('bundled_products', function (Blueprint $table) {
             $table->increments('id');
             $table->string('code');
             $table->bigInteger('account_id');
-            $table->bigInteger('parent');
             $table->bigInteger('product_id');
+            $table->bigInteger('product_trace_id');
             $table->timestamps();
             $table->softDeletes();
         });

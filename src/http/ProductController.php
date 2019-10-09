@@ -17,6 +17,7 @@ class ProductController extends APIController
     public $inventoryController = 'Increment\Marketplace\Http\ProductInventoryController';
     public $productTraceController = 'Increment\Marketplace\Http\ProductTraceController';
     public $merchantController = 'Increment\Marketplace\Http\MerchantController';
+    public $bundledProductController = 'Increment\Marketplace\Http\BundledProductController';
     function __construct(){
     	$this->model = new Product();
       $this->notRequired = array(
@@ -96,6 +97,7 @@ class ProductController extends APIController
           $result[$i]['images'] = app($this->productImageController)->getProductImage($result[$i]['id'], null);
           $result[$i]['tag_array'] = $this->manageTags($result[$i]['tags']);
           $result[$i]['created_at_human'] = Carbon::createFromFormat('Y-m-d H:i:s', $result[$i]['created_at'])->copy()->tz('Asia/Manila')->format('F j, Y H:i A');
+          $result[$i]['bundled_products'] = app($this->bundledProductController)->getByParams('parent', $result[$i]['id']);
           if($accountId !== null){
             $result[$i]['wishlist_flag'] = app($this->wishlistController)->checkWishlist($result[$i]['id'], $accountId);
             $result[$i]['checkout_flag'] = app($this->checkoutController)->checkCheckout($result[$i]['id'], $accountId); 

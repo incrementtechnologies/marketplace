@@ -8,6 +8,9 @@ use App\Http\Controllers\APIController;
 use Increment\Marketplace\Models\BundledProduct;
 class BundledProductController extends APIController
 {
+  
+  public $productTraceController = 'Increment\Marketplace\Http\ProductTraceController';
+  
   function __construct(){
     $this->model = new BundledProduct();
   }
@@ -30,5 +33,18 @@ class BundledProductController extends APIController
       $this->response['data'] = false;
     }
     return $this->response();
+  }
+
+  public function getByParams($column, $value){
+    $result = BundledProduct::where($column, '=', $value)->get();
+    if(sizeof($result) > 0){
+      $i = 0;
+      foreach ($result as $key) {
+        $result[$i]['product_trace_details'] = app($this->productTraceController)->getByParamsDetails('id', $result[$i]['product_trace_id']);
+        $result[$i]['created_at_human'] = Carbon::createFromFormat('Y-m-d H:i:s', $result[$i]['created_at'])->copy()->tz('Asia/Manila')->format('F j, Y H:i A');
+        $i++;
+      }
+    }
+    return sizeof($result) > 0 ? $result : null;
   }
 }
