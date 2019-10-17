@@ -19,7 +19,8 @@ class CreateBundledProductsTable extends Migration
             $table->string('code');
             $table->bigInteger('account_id');
             $table->bigInteger('product_id');
-            $table->bigInteger('product_trace_id');
+            $table->bigInteger('bundled_trace');
+            $table->bigInteger('product_trace');
             $table->timestamps();
             $table->softDeletes();
         });

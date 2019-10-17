@@ -23,8 +23,9 @@ class BundledProductController extends APIController
       for ($i=0; $i < sizeof($data['products_traces']); $i++) {
         $array[] = array(
           'account_id' => $data['account_id'],
-          'parent'     => $data['product_id'],
-          'product_id' => $data['products_traces'][$i]['id'],
+          'product_id'     => $data['product_id'],
+          'product_trace' => $data[$i]['id'],
+          'bundled_trace' => $data['bundled_trace'],
           'created_at'    => Carbon::now()
         );
       }
