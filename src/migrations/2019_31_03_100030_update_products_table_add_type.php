@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class UpdateProductsTableAddPriceSettings extends Migration
+class UpdateProductsTableAddType extends Migration
 {
     /**
      * Run the migrations.
@@ -14,7 +14,7 @@ class UpdateProductsTableAddPriceSettings extends Migration
     public function up()
     {
         Schema::table('products', function (Blueprint $table) {
-            $table->string('price_settings')->after('tags')->default('fixed');
+            $table->string('type')->after('code')->default('regular');
         });
     }
 
