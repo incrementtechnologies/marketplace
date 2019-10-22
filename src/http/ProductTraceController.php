@@ -15,7 +15,7 @@ class ProductTraceController extends APIController
   	$this->model = new ProductTrace();
 
     $this->notRequired = array(
-      'rf', 'nfc'
+      'rf', 'nfc', 'manufacturing_date', 'batch_number'
     );
   }
 
