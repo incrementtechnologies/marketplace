@@ -33,7 +33,7 @@ class BundledSettingController extends APIController
     return $this->response();
   }
   public function getByParams($column, $value){
-    $result = BundledProductList::where($column, '=', $value)->get();
+    $result = BundledSetting::where($column, '=', $value)->get();
     // if(sizeof($result) > 0){
     //   $i = 0;
     //   foreach ($result as $key) {
