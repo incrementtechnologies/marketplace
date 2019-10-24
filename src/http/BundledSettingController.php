@@ -5,9 +5,9 @@ namespace Increment\Marketplace\Http;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\APIController;
-use Increment\Marketplace\Models\BundledProductList;
+use Increment\Marketplace\Models\BundledSetting;
 use Carbon\Carbon;
-class BundledProductListController extends APIController
+class BundledSettingController extends APIController
 {
   
   public $productTraceController = 'Increment\Marketplace\Http\ProductTraceController';
@@ -16,12 +16,6 @@ class BundledProductListController extends APIController
     $this->model = new BundledProductList();
   }
 
-  public function createByParams($merchantId, $productId){
-    $model = new BundledProductList();
-    $model->merchant_id = $merchantId;
-    $model->product_id = $productId;
-    $model->save();
-  }
   public function getByParams($column, $value){
     $result = BundledProductList::where($column, '=', $value)->get();
     // if(sizeof($result) > 0){

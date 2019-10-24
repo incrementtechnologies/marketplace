@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateBundledProductListsTable extends Migration
+class CreateBundledSettingsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -14,10 +14,10 @@ class CreateBundledProductListsTable extends Migration
     
     public function up()
     {
-        Schema::create('bundled_product_lists', function (Blueprint $table) {
+        Schema::create('bundled_settings', function (Blueprint $table) {
             $table->increments('id');
             $table->bigInteger('product_id');
-            $table->bigInteger('merchant_id');
+            $table->unsignedInteger('qty')->default(1);
             $table->timestamps();
             $table->softDeletes();
         });
@@ -30,6 +30,6 @@ class CreateBundledProductListsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('bundled_product_lists');
+        Schema::dropIfExists('bundled_settings');
     }
 }
