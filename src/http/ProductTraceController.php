@@ -81,6 +81,7 @@ class ProductTraceController extends APIController
       foreach ($result as $key) {
         $item = $result[$i];
         $result[$i]['product'] = app($this->productController)->getByParams('id', $item['product_id']);
+        $result[$i]['created_at_human'] = Carbon::createFromFormat('Y-m-d H:i:s', $result[$i]['created_at'])->copy()->tz('Asia/Manila')->format('F j, Y h:i A');
         $i++;
       }
     }
