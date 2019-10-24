@@ -21,6 +21,13 @@ class ProductTraceController extends APIController
 
   public function getByParams($column, $value){
     $result  = ProductTrace::where($column, '=', $value)->orderBy('created_at', 'desc')->limit(5)->get();
+    if(sizeof($result) > 0){
+      $i = 0;
+      foreach ($result as $key) {
+        $result[$i]['created_at_human'] = Carbon::createFromFormat('Y-m-d H:i:s', $result[$i]['created_at'])->copy()->tz('Asia/Manila')->format('F j, Y h:i A');
+        $i++;
+      }
+    }
     return sizeof($result) > 0 ? $result : null;
   }
 
