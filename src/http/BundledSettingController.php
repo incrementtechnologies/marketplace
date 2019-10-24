@@ -34,14 +34,14 @@ class BundledSettingController extends APIController
   }
   public function getByParams($column, $value){
     $result = BundledSetting::where($column, '=', $value)->get();
-    // if(sizeof($result) > 0){
-    //   $i = 0;
-    //   foreach ($result as $key) {
-    //     $result[$i]['product_trace_details'] = app($this->productTraceController)->getByParamsDetails('id', $result[$i]['product_trace_id']);
-    //     $result[$i]['created_at_human'] = Carbon::createFromFormat('Y-m-d H:i:s', $result[$i]['created_at'])->copy()->tz('Asia/Manila')->format('F j, Y H:i A');
-    //     $i++;
-    //   }
-    // }
+    if(sizeof($result) > 0){
+      $i = 0;
+      foreach ($result as $key) {
+        $result[$i]['product'] = app($this->productController)->getByParams('id', $result[$i]['product_id']);
+        $result[$i]['created_at_human'] = Carbon::createFromFormat('Y-m-d H:i:s', $result[$i]['created_at'])->copy()->tz('Asia/Manila')->format('F j, Y H:i A');
+        $i++;
+      }
+    }
     return sizeof($result) > 0 ? $result : null;
   }
 }

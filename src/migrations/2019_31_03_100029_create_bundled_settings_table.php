@@ -16,6 +16,7 @@ class CreateBundledSettingsTable extends Migration
     {
         Schema::create('bundled_settings', function (Blueprint $table) {
             $table->increments('id');
+            $table->bigInteger('bundled');
             $table->bigInteger('product_id');
             $table->unsignedInteger('qty')->default(1);
             $table->timestamps();

@@ -7,5 +7,5 @@ use App\APIModel;
 class BundledSetting extends APIModel
 {
     protected $table = 'bundled_settings';
-    protected $fillable = ['product_id', 'qty'];
+    protected $fillable = ['bundled', 'product_id', 'qty'];
 }
