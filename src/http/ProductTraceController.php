@@ -11,6 +11,7 @@ class ProductTraceController extends APIController
 {
 
   public $productController = 'Increment\Marketplace\Http\ProductController';
+  public $bundledProductController = 'Increment\Marketplace\Http\BundledProductController';
   function __construct(){
   	$this->model = new ProductTrace();
 
@@ -66,6 +67,7 @@ class ProductTraceController extends APIController
     foreach ($this->response['data'] as $key) {
       $item = $this->response['data'][$i];
       $this->response['data'][$i]['product'] = app($this->productController)->getByParams('id', $item['product_id']);
+      $this->response['data'][$i]['bundled_product'] = app($this->bundledProductController)->getByParams('product_trace', $item['id']);
       if($this->response['data'][$i]['product'] != null){
         $this->response['data'][$i]['product']['qty'] = $this->getBalanceQty('product_id', $item['product_id']);
       }

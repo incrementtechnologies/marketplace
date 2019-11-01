@@ -54,7 +54,7 @@ class BundledProductController extends APIController
   }
 
   public function getByParams($column, $value){
-    $result = BundledProduct::where($column, '=', $value)->get();
+    $result = BundledProduct::where($column, '=', $value)->where('deleted_at', '=', null)->get();
     if(sizeof($result) > 0){
       $i = 0;
       foreach ($result as $key) {
