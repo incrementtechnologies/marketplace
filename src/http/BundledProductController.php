@@ -60,8 +60,8 @@ class BundledProductController extends APIController
     return intval($qty ? $qty : 0);
   }
 
-  public function checkIfExist($bundledTrace, $productOnSettings){
-    $qty = BundledProduct::where('bundled_trace', '=', $bundledTrace)->where('product_on_settings', '=', $productOnSettings)->where('deleted_at', '=', null)->count();
+  public function checkIfExist($bundledTrace, $productTrace){
+    $qty = BundledProduct::where('bundled_trace', '=', $bundledTrace)->where('product_trace', '=', $productTrace)->where('deleted_at', '=', null)->count();
     return intval($qty ? $qty : 0);
   }
 
