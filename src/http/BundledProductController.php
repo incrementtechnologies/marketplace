@@ -56,7 +56,7 @@ class BundledProductController extends APIController
   }
 
   public function getRemainingQty($bundledTrace, $productOnSettings){
-    $qty = BundledProduct::where('bundled_trace', '=', $bundledTrace)->where('product_on_settings', '=', $productOnSettings)->where('deleted_at', '!=', null)->count();
+    $qty = BundledProduct::where('bundled_trace', '=', $bundledTrace)->where('product_on_settings', '=', $productOnSettings)->where('deleted_at', '=', null)->count();
     return intval($qty ? $qty : 0);
   }
 
