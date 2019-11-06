@@ -61,8 +61,8 @@ class BundledProductController extends APIController
   }
 
   public function checkIfExist($bundledTrace, $productTrace){
-    $qty = BundledProduct::where('bundled_trace', '=', $bundledTrace)->where('product_trace', '=', $productTrace)->where('deleted_at', '=', null)->count();
-    return intval($qty ? $qty : 0);
+    $result = BundledProduct::where('bundled_trace', '=', $bundledTrace)->where('product_trace', '=', $productTrace)->where('deleted_at', '=', null)->get();
+    return sizeof($result) > 0 ? true : false;
   }
 
   public function getByParams($column, $value){

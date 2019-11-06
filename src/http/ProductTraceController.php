@@ -87,7 +87,7 @@ class ProductTraceController extends APIController
       $productTrace = $item['id'];
       $this->response['data'][$i]['product'] = app($this->productController)->getByParams('id', $item['product_id']);
       $this->response['data'][$i]['bundled_product'] = app($this->bundledProductController)->getByParams('product_trace', $item['id']);
-      $this->response['status'] = app($this->bundledProductController)->checkIfExist($bundledTrace, $productTrace);
+      $this->response['data'][$i]['exist_flag'] = app($this->bundledProductController)->checkIfExist($bundledTrace, $productTrace);
       if($this->response['data'][$i]['product'] != null){
         $this->response['data'][$i]['product']['qty'] = $this->getBalanceQty('product_id', $item['product_id']);
       }
