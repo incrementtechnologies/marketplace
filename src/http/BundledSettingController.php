@@ -42,14 +42,11 @@ class BundledSettingController extends APIController
     $this->retrieveDB($data);
     $result = $this->response['data'];
     $status = 1;
-    $bundled = null;
+    $bundled = app($this->productTraceController)->getByParamsDetails('id', $result['bundled_trace']);
+    $bundled = sizeof($bundled) > 0 ? $bundled[0] : null;
     if(sizeof($result) > 0){
       $i = 0;
       foreach ($result as $key) {
-        if($bundled == null){
-          $result = app($this->productTraceController)->getByParamsDetails('id', $result[$i]['bundled_trace']);
-          $bundled = sizeof($result) > 0 ? $result[0] : null;
-        }
         $this->response['data'][$i]['product'] = app($this->productController)->getByParams('id', $result[$i]['product_id']);
         $this->response['data'][$i]['created_at_human'] = Carbon::createFromFormat('Y-m-d H:i:s', $result[$i]['created_at'])->copy()->tz('Asia/Manila')->format('F j, Y H:i A');
         $qtyAdded = app($this->bundledProductController)->getRemainingQty($data['bundled_trace'], $result[$i]['product_id']);
