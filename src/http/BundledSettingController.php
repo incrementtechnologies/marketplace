@@ -12,6 +12,7 @@ class BundledSettingController extends APIController
 {
   
   public $productController = 'Increment\Marketplace\Http\ProductController';
+  public $productTraceController = 'Increment\Marketplace\Http\ProductTraceController';
   public $bundledProductController = 'Increment\Marketplace\Http\BundledProductController';
   
   function __construct(){
@@ -40,22 +41,27 @@ class BundledSettingController extends APIController
     $this->model = new BundledSetting();
     $this->retrieveDB($data);
     $result = $this->response['data'];
-    $status = true;
+    $status = 1;
+    $bundled = null;
     if(sizeof($result) > 0){
       $i = 0;
       foreach ($result as $key) {
+        if($bundled == null){
+          $result = app($this->productTraceController)->getByParamsDetails('id', $result[$i]['bundled_trace']);
+          $bundled = sizeof($result) > 0 ? $result[0] : null;
+        }
         $this->response['data'][$i]['product'] = app($this->productController)->getByParams('id', $result[$i]['product_id']);
         $this->response['data'][$i]['created_at_human'] = Carbon::createFromFormat('Y-m-d H:i:s', $result[$i]['created_at'])->copy()->tz('Asia/Manila')->format('F j, Y H:i A');
         $qtyAdded = app($this->bundledProductController)->getRemainingQty($data['bundled_trace'], $result[$i]['product_id']);
         $remainingQty = intval($result[$i]['qty']) - $qtyAdded;
         $this->response['data'][$i]['remaining_qty'] = $remainingQty;
-        if($status == true && $remainingQty > 0){
-          $status = false;
+        if($status == 1 && $remainingQty > 0){
+          $status = 0;
         }
         $i++;
       }
     }
-
+    $status = $bundled != null && $bundled['rf'] != null ? 2 : $status;
     $this->response['status'] = $status;
     return $this->response();
   }
