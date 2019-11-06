@@ -78,4 +78,17 @@ class BundledProductController extends APIController
     }
     return sizeof($result) > 0 ? $result : null;
   }
+
+  public function updateDeletedAt(Request $request){
+    $data = $request->all();
+    BundledProduct::where('bundled_trace', '=', $data['bundled_trace'])->where('product_trace', '=', $data['product_trace'])->update(
+      array(
+        'deleted_at' => Carbon::now()
+    ));
+    return array(
+      'data' => true,
+      'error' => null,
+      'timestamps' => Carbon::now()
+    );
+  }
 }
