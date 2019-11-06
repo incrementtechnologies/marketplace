@@ -6,11 +6,13 @@ namespace Increment\Marketplace\Http;
 use Illuminate\Http\Request;
 use App\Http\Controllers\APIController;
 use Increment\Marketplace\Models\BundledSetting;
+use Increment\Marketplace\Models\BundledProduct;
 use Carbon\Carbon;
 class BundledSettingController extends APIController
 {
   
   public $productController = 'Increment\Marketplace\Http\ProductController';
+  public $bundledProductController = 'Increment\Marketplace\Http\BundledProductController';
   
   function __construct(){
     $this->model = new BundledSetting();
@@ -27,6 +29,23 @@ class BundledSettingController extends APIController
       foreach ($result as $key) {
         $this->response['data'][$i]['product'] = app($this->productController)->getByParams('id', $result[$i]['product_id']);
         $this->response['data'][$i]['created_at_human'] = Carbon::createFromFormat('Y-m-d H:i:s', $result[$i]['created_at'])->copy()->tz('Asia/Manila')->format('F j, Y H:i A');
+        $i++;
+      }
+    }
+    return $this->response();
+  }
+
+  public function retrieveWithTrace(Request $request){
+    $data = $request->all();
+    $this->model = new BundledSetting();
+    $this->retrieveDB($data);
+    $result = $this->response['data'];
+    if(sizeof($result) > 0){
+      $i = 0;
+      foreach ($result as $key) {
+        $this->response['data'][$i]['product'] = app($this->productController)->getByParams('id', $result[$i]['product_id']);
+        $this->response['data'][$i]['created_at_human'] = Carbon::createFromFormat('Y-m-d H:i:s', $result[$i]['created_at'])->copy()->tz('Asia/Manila')->format('F j, Y H:i A');
+        $this->response['data'][$i]['remaining_qty'] = app($this->bundledProductController)->getRemainingQty($data['bundled_trace'], $result[$i]['product_id']);
         $i++;
       }
     }

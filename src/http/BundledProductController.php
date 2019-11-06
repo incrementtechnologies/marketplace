@@ -26,6 +26,7 @@ class BundledProductController extends APIController
           'product_id'     => $data['product_id'],
           'product_trace' => $data['products_traces'][$i]['id'],
           'bundled_trace' => $data['bundled_trace'],
+          'product_on_settings' => $data['product_on_settings'],
           'created_at'    => Carbon::now()
         );
       }
@@ -47,30 +48,16 @@ class BundledProductController extends APIController
       foreach ($result as $key) {
         $this->response['data'][$i]['product_trace_details'] = app($this->productTraceController)->getByParamsDetails('id', $result[$i]['product_trace']);
         $this->response['data'][$i]['created_at_human'] = Carbon::createFromFormat('Y-m-d H:i:s', $result[$i]['created_at'])->copy()->tz('Asia/Manila')->format('F j, Y H:i A');
-        
         $i++;
       }
     }
-    $this->response['status'] = $this->checkBundledStatus($result[$i]); // true or false
+    
     return $this->response();
   }
 
-  public function checkBundledStatus($data){
-    // get the settings first
-    // get the size of the product on traces
-    // then compare to the size of the settings
-    // if less than return false
-    // else continue then return true if end
-    $settings = app($this->bundledSetting)->getByParamsDetails('bundled', $data['product_id']);
-    if($settings != null){
-      $i = 0;
-      foreach ($settings as $key) {
-        
-        $i++;
-      }
-    }else{
-      return false;
-    }
+  public function getRemainingQty($bundledTrace, $productOnSettings){
+    $qty = BundledProduct::where('bundled_trace', '=', $bundledTrace)->where('product_on_settings', '=', $productOnSettings)->where('deleted_at', '!=', null)->get('qty');
+    return $qty ? $qty : 0;
   }
 
   public function getByParams($column, $value){
