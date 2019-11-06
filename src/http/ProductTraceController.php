@@ -76,6 +76,27 @@ class ProductTraceController extends APIController
     return $this->response();
   }
 
+  public function retrieveByBundled(Request $request){
+    $data = $request->all();
+    $this->model = new ProductTrace();
+    $this->retrieveDB($data);
+    $i = 0;
+    foreach ($this->response['data'] as $key) {
+      $item = $this->response['data'][$i];
+      $bundledTrace = $data['bundled_trace'];
+      $productTrace = $item['id'];
+      $this->response['data'][$i]['product'] = app($this->productController)->getByParams('id', $item['product_id']);
+      $this->response['data'][$i]['bundled_product'] = app($this->bundledProductController)->getByParams('product_trace', $item['id']);
+      $this->response['status'] = app($this->bundledProductController)->checkIfExist($bundledTrace, $productTrace);
+      if($this->response['data'][$i]['product'] != null){
+        $this->response['data'][$i]['product']['qty'] = $this->getBalanceQty('product_id', $item['product_id']);
+      }
+      $i++;
+    }
+    
+    return $this->response();
+  }
+
   public function getByParamsDetails($column, $value){
     $result  = ProductTrace::where($column, '=', $value)->get();
     if(sizeof($result) > 0){
