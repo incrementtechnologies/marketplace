@@ -44,4 +44,9 @@ class BundledSettingController extends APIController
     }
     return sizeof($result) > 0 ? $result : null;
   }
+
+  public function getByParamsDetails($column, $value){
+    $result = BundledSetting::where($column, '=', $value)->get();
+    return sizeof($result) > 0 ? $result : null;
+  }
 }
