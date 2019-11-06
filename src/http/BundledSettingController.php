@@ -42,7 +42,7 @@ class BundledSettingController extends APIController
     $this->retrieveDB($data);
     $result = $this->response['data'];
     $status = 1;
-    $bundled = app($this->productTraceController)->getByParamsDetails('id', $result['bundled_trace']);
+    $bundled = app($this->productTraceController)->getByParamsDetails('id', $data['bundled_trace']);
     $bundled = sizeof($bundled) > 0 ? $bundled[0] : null;
     if(sizeof($result) > 0){
       $i = 0;
