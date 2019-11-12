@@ -62,6 +62,26 @@ class BundledSettingController extends APIController
     $this->response['status'] = $status;
     return $this->response();
   }
+
+  public function getStatusByProductTrace($bundled, $bundledTrace){
+    $result = BundledSetting::where('bundled', '=', $bundled)->get();
+    $status = 1;
+    if(sizeof($result) > 0){
+      $i = 0;
+      foreach ($result as $key) {
+        $qtyAdded = app($this->bundledProductController)->getRemainingQty($bundledTrace, $result[$i]['product_id']);
+        $remainingQty = intval($result[$i]['qty']) - $qtyAdded;
+        $this->response['data'][$i]['remaining_qty'] = $remainingQty;
+        if($status == 1 && $remainingQty > 0){
+          $status = 0;
+        }
+        $i++;
+      }
+    }
+    return $status;
+  }
+
+
   public function getByParams($column, $value){
     $result = BundledSetting::where($column, '=', $value)->get();
     if(sizeof($result) > 0){
