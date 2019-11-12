@@ -66,7 +66,7 @@ class ProductTraceController extends APIController
     $i = 0;
     foreach ($this->response['data'] as $key) {
       $item = $this->response['data'][$i];
-      $this->response['data'][$i]['product'] = app($this->productController)->getByParams('id', $item['product_id']);
+      $this->response['data'][$i]['product'] = app($this->productController)->getProductByParams('id', $item['product_id']);
       $this->response['data'][$i]['bundled_product'] = app($this->bundledProductController)->getByParams('product_trace', $item['id']);
       if($this->response['data'][$i]['product'] != null){
         $this->response['data'][$i]['product']['qty'] = $this->getBalanceQty('product_id', $item['product_id']);

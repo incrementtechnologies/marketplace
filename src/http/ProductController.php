@@ -82,8 +82,18 @@ class ProductController extends APIController
 
     public function getByParams($column, $value){
       $result = Product::where($column, '=', $value)->get();
-
       return sizeof($result) > 0 ? $result[0] : null;
+    }
+
+    public function getProductByParams($column, $value){
+      $result = Product::where($column, '=', $value)->get();
+      if(sizeof($result) > 0){
+        $i= 0;
+        foreach ($result as $key) {
+           $result[$i]['merchant'] = app($this->merchantController)->getByParams('id', $result[$i]['merchant_id']);
+         } 
+      }
+      return sizeof($result) > 0 ? $result[0] : null;      
     }
 
     public function manageResult($result, $accountId, $inventoryType){
