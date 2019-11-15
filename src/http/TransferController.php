@@ -63,7 +63,7 @@ class TransferController extends APIController
           $result = $this->response['data'];
       }else if($data['column'] == 'name'){
         $tempResult = DB::table('transfers as T1')
-          ->join('merchants as T2', 'T2.id', '=', 'T1.from')
+          ->join('merchants as T2', 'T2.id', '=', 'T1.to')
           ->where('T2.name', 'like', $data['value'])
           ->orderBy($data['column'], $data['sort']['value'])
           ->select('T1.*')
