@@ -50,21 +50,26 @@ class TransferController extends APIController
           'sort' => $sort
         );
         $this->model = new Transfer();
-        $result = $this->retrieveDB($parameter);
+        $this->retrieveDB($parameter);
+        $result = $this->response['data'];
       }else if($data['column'] == 'username'){
-        $result = DB::table('transfers as T1')
+        $tempResult = DB::table('transfers as T1')
           ->join('accounts as T2', 'T2.id', '=', 'T1.from')
           ->where('T2.username', 'like', $data['value'])
           ->orderBy($data['column'], $data['sort']['value'])
           ->select('T1.*')
           ->get();
+          $this->response['data'] = json_decode($tempResult, true);
+          $result = $this->response['data'];
       }else if($data['column'] == 'name'){
-        $result = DB::table('transfers as T1')
+        $tempResult = DB::table('transfers as T1')
           ->join('merchants as T2', 'T2.id', '=', 'T1.from')
           ->where('T2.name', 'like', $data['value'])
           ->orderBy($data['column'], $data['sort']['value'])
           ->select('T1.*')
           ->get();
+          $this->response['data'] = json_decode($tempResult, true);
+          $result = $this->response['data'];
       }
       if(sizeof($result) > 0){
         $i = 0;
