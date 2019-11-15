@@ -44,7 +44,7 @@ class TransferController extends APIController
           'condition' => array(array(
               'column'  => $data['column'],
               'value'  => $data['value'],
-              'clause'  => $data['like']
+              'clause'  => 'like'
             )
           ),
           'sort' => $data['sort']
