@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\APIController;
 use Increment\Marketplace\Models\Transfer;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 class TransferController extends APIController
 {
    public $transferredProductsClass = 'Increment\Marketplace\Http\TransferredProductController';
@@ -34,10 +35,37 @@ class TransferController extends APIController
 
     public function retrieve(Request $request){
       $data = $request->all();
-
-      $this->model = new Transfer();
-      $this->retrieveDB($data);
-      $result = $this->response['data'];
+      $result = array();
+      if($data['column'] == 'created_at'){
+        $sort = array(
+          $data['sort']['column'] => $data['sort']['value']
+        );
+        $parameter = array(
+          'condition' => array(array(
+              'column'  => $data['column'],
+              'value'  => $data['value'],
+              'clause'  => $data['like']
+            )
+          ),
+          'sort' => $data['sort']
+        );
+        $this->model = new Transfer();
+        $result = $this->retrieveDB($parameter);
+      }else if($data['column'] == 'username'){
+        $result = DB::table('transfers as T1')
+          ->join('accounts as T2', 'T2.id', '=', 'T1.from')
+          ->where('T2.username', 'like', $data['value'])
+          ->orderBy($data['column'], $data['sort']['value'])
+          ->select('T1.*')
+          ->get();
+      }else if($data['column'] == 'name'){
+        $result = DB::table('transfers as T1')
+          ->join('merchants as T2', 'T2.id', '=', 'T1.from')
+          ->where('T2.name', 'like', $data['value'])
+          ->orderBy($data['column'], $data['sort']['value'])
+          ->select('T1.*')
+          ->get();
+      }
       if(sizeof($result) > 0){
         $i = 0;
         foreach ($result as $key) {
