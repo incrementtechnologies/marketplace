@@ -47,7 +47,7 @@ class TransferController extends APIController
               'clause'  => 'like'
             )
           ),
-          'sort' => $data['sort']
+          'sort' => $sort
         );
         $this->model = new Transfer();
         $result = $this->retrieveDB($parameter);
