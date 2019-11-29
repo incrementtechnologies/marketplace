@@ -5,8 +5,11 @@ namespace Increment\Marketplace\Http;
 use Illuminate\Http\Request;
 use App\Http\Controllers\APIController;
 use Increment\Marketplace\Models\ProductTrace;
+use Increment\Marketplace\Models\BundledProduct;
+use Increment\Marketplace\Models\TransferredProduct;
 use Illuminate\Support\Facades\Hash;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 class ProductTraceController extends APIController
 {
 
@@ -71,7 +74,7 @@ class ProductTraceController extends APIController
       $this->response['data'][$i]['product'] = app($this->productController)->getProductByParams('id', $item['product_id']);
       $this->response['data'][$i]['bundled_product'] = app($this->bundledProductController)->getByParams('product_trace', $item['id']);
       if($this->response['data'][$i]['product'] != null){
-        $this->response['data'][$i]['product']['qty'] = $this->getBalanceQty('product_id', $item['product_id']);
+        $this->response['data'][$i]['product']['qty'] = $this->getBalanceQty('product_id', $item['product_id'], 'active');
         if($this->response['data'][$i]['product']['type'] == 'bundled'){
           $bundled = $this->response['data'][$i]['product']['id'];
           $this->response['data'][$i]['product']['bundled_status'] = app($this->bundledSettingController)->getStatusByProductTrace($bundled, $item['id']);
@@ -117,9 +120,24 @@ class ProductTraceController extends APIController
     return sizeof($result) > 0 ? $result : null;
   }
 
-  public function getBalanceQty($column, $value){
-    $result  = ProductTrace::where($column, '=', $value)->where('status', '=', 'open')->count();
-    return $result;
+  public function getBalanceQty($column, $value, $flag = 'active'){
+    $result  = ProductTrace::where($column, '=', $value)->where('status', '=', $flag)->get();
+    $counter = 0;
+    if(sizeof($result) > 0){
+      $i = 0;
+      foreach ($result as $key) {
+        $item = $result[$i];
+        $bundled = BundledProduct::where('product_trace', '=', $item['id'])->where('deleted_at', '=', null)->get();
+
+        $transferred = TransferredProduct::where('payload_value', '=', $item['id'])->where('deleted_at', '=', null)->get();
+
+        if(sizeof($bundled) == 0 && sizeof($transferred) == 0){
+          $counter++;
+        }
+        $i++;
+      }
+    }
+    return $counter;
   }
 
   public function create(Request $request){
@@ -127,7 +145,7 @@ class ProductTraceController extends APIController
     $qty = intval($data['qty']);
     for ($i=0; $i < $qty; $i++) {
       $data['code'] = $this->generateCode();
-      $data['status'] = 'open';
+      $data['status'] = 'inactive';
       $this->model = new ProductTrace();
       $this->insertDB($data);
     }
