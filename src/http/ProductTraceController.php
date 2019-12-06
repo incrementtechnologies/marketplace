@@ -197,6 +197,7 @@ class ProductTraceController extends APIController
     }else{
       $this->model = new ProductTrace();
       $this->updateDB($data);
+      $this->response['data'] = $data['id'];
     }
     return $this->response();
   }
