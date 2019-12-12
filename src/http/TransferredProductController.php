@@ -66,5 +66,10 @@ class TransferredProductController extends APIController
       return sizeof($result) > 0 ? $result : null;
     }
 
+    public function getSize($column, $value){
+      $result = TransferredProduct::where($column, '=', $value)->count();
+      return $result;
+    }
+
 
 }
