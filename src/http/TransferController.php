@@ -12,6 +12,7 @@ class TransferController extends APIController
 {
    public $transferredProductsClass = 'Increment\Marketplace\Http\TransferredProductController';
    public $merchantClass = 'Increment\Marketplace\Http\MerchantController';
+   public $productClass = 'Increment\Marketplace\Http\ProductController';
     function __construct(){
       $this->model = new Transfer();
     }
@@ -88,6 +89,24 @@ class TransferController extends APIController
         }
       }
 
+      return $this->response();
+    }
+
+    public function retrieveConsignments(Request $request){
+      $data = $request->all();
+      $result = DB::table('transfers as T1')
+      ->join('transferred_products as T2', 'T2.transfer_id', '=', 'T1.id')
+      ->where('T1.to', '=', $data['merchant_id'])
+      ->get(['T2.*']);
+
+      $result = $result->groupBy('product_id');
+      $i = 0;
+      foreach ($result as $key => $value) {
+        $product =  app($this->productClass)->getProductByParams('id', $key);
+        $product['qty'] = sizeof($value);
+        $this->response['data'][$i] = $product;
+        $i++;
+      }
       return $this->response();
     }
 }
