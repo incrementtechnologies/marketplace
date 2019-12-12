@@ -120,4 +120,11 @@ class TransferController extends APIController
       }
       return $this->response();
     }
+
+    public function basicRetrieve(Request $request){
+      $data = $request->all();
+      $this->model = new Transfer();
+      $this->retrieveDB($data);
+      return $this->reponse();
+    }
 }
