@@ -125,6 +125,6 @@ class TransferController extends APIController
       $data = $request->all();
       $this->model = new Transfer();
       $this->retrieveDB($data);
-      return $this->reponse();
+      return $this->response();
     }
 }
