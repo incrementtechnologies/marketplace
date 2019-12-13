@@ -99,15 +99,13 @@ class TransferController extends APIController
       ->where('T1.to', '=', $data['merchant_id'])
       ->get(['T2.*']);
 
-
-
       $result = $result->groupBy('product_id');
       $i = 0;
       foreach ($result as $key => $value) {
         $size = 0;
         foreach ($value as $keyInner) {
-          $tSize = app($this->transferredProductsClass)->getSize('payload_value', $keyInner->payload_value);
-          if($tSize == 1){
+          $tSize = app($this->transferredProductsClass)->getSize('payload_value', $keyInner->payload_value, $keyInner->created_at);
+          if($tSize == 0){
             $size++;
           }
         }
