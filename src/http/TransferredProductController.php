@@ -68,7 +68,7 @@ class TransferredProductController extends APIController
     }
 
     public function getSize($column, $value, $date){
-      $result = TransferredProduct::where($column, '=', $value)->where('created_at', '>=', $date)->where('deleted_at', '=', null)->count();
+      $result = TransferredProduct::where($column, '=', $value)->where('created_at', '>=', $date)->count();
       return $result;
     }
 
