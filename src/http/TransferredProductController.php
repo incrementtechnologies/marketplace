@@ -24,6 +24,7 @@ class TransferredProductController extends APIController
             'transfer_id' => $data['transfer_id'],
             'payload'     => 'product_traces',
             'payload_value' => $data['products'][$i]['id'],
+            'product_id'    => $data['products'][$i]['product_id'],
             'created_at'    => Carbon::now()
           );
         }
