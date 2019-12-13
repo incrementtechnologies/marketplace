@@ -101,6 +101,7 @@ class TransferController extends APIController
 
       $result = $result->groupBy('product_id');
       $i = 0;
+      $this->response['data'] = array();
       foreach ($result as $key => $value) {
         $size = 0;
         foreach ($value as $keyInner) {
@@ -113,8 +114,8 @@ class TransferController extends APIController
           $product =  app($this->productClass)->getProductByParams('id', $key);
           $product['qty'] = $size;
           $this->response['data'][$i] = $product;
+          $i++;
         }
-        $i++;
       }
       return $this->response();
     }
