@@ -47,8 +47,8 @@ class TransferController extends APIController
               'value'  => $data['value'],
               'clause'  => 'like'
             ), array(
-              'column' => 'account_id',
-              'value'  => $data['account_id'],
+              'column' => $data['filter_value'],
+              'value'  => $data['merchant_id'],
               'clause' => '=' 
             )
           ),
@@ -61,7 +61,7 @@ class TransferController extends APIController
         $tempResult = DB::table('transfers as T1')
           ->join('accounts as T2', 'T2.id', '=', 'T1.from')
           ->where('T2.username', 'like', $data['value'])
-          ->where('T1.account_id', '=', $data['account_id'])
+          ->where('T1.'.$data['filter_value'], '=', $data['merchant_id'])
           ->orderBy($data['column'], $data['sort']['value'])
           ->select('T1.*')
           ->get();
@@ -71,7 +71,7 @@ class TransferController extends APIController
         $tempResult = DB::table('transfers as T1')
           ->join('merchants as T2', 'T2.id', '=', 'T1.to')
           ->where('T2.name', 'like', $data['value'])
-          ->where('T1.account_id', '=', $data['account_id'])
+          ->where('T1.'.$data['filter_value'], '=', $data['merchant_id'])
           ->orderBy($data['column'], $data['sort']['value'])
           ->select('T1.*')
           ->get();
