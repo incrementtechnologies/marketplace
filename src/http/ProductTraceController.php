@@ -14,6 +14,7 @@ class ProductTraceController extends APIController
 {
 
   public $productController = 'Increment\Marketplace\Http\ProductController';
+  public $transferController = 'Increment\Marketplace\Http\TransferController';
   public $bundledProductController = 'Increment\Marketplace\Http\BundledProductController';
   public $bundledSettingController = 'Increment\Marketplace\Http\BundledSettingController';
   function __construct(){
@@ -74,8 +75,14 @@ class ProductTraceController extends APIController
       $this->response['data'][$i]['product'] = app($this->productController)->getProductByParams('id', $item['product_id']);
       $this->response['data'][$i]['bundled_product'] = app($this->bundledProductController)->getByParams('product_trace', $item['id']);
       if($this->response['data'][$i]['product'] != null){
-        $this->response['data'][$i]['product']['qty'] = $this->getBalanceQty('product_id', $item['product_id'], 'active');
-        if($this->response['data'][$i]['product']['type'] == 'bundled'){
+        $type = $this->response['data'][$i]['product']['type'];
+        $this->response['data'][$i]['product']['qty'] = null;
+        if($data['account_type'] == 'MANUFACTURER' || $type == 'bundled'){
+          $this->response['data'][$i]['product']['qty'] = $this->getBalanceQty('product_id', $item['product_id'], 'active');  
+        }else{
+          $this->response['data'][$i]['product']['qty'] = app($this->transferController)->getQtyTransferred($data['merchant_id'], $item['product_id']);
+        }
+        if($type == 'bundled'){
           $bundled = $this->response['data'][$i]['product']['id'];
           $this->response['data'][$i]['product']['bundled_status'] = app($this->bundledSettingController)->getStatusByProductTrace($bundled, $item['id']);
         }
@@ -98,7 +105,13 @@ class ProductTraceController extends APIController
       $this->response['data'][$i]['bundled_product'] = app($this->bundledProductController)->getByParams('product_trace', $item['id']);
       $this->response['data'][$i]['exist_flag'] = app($this->bundledProductController)->checkIfExist($bundledTrace, $productTrace);
       if($this->response['data'][$i]['product'] != null){
-        $this->response['data'][$i]['product']['qty'] = $this->getBalanceQty('product_id', $item['product_id']);
+        // $this->response['data'][$i]['product']['qty'] = $this->getBalanceQty('product_id', $item['product_id']);
+        $merchant = intval($item['merchant_id']);
+        if($data['account_type'] == 'MANUFACTURER' || $merchant == intval($data['merchant_id'])){
+          $this->response['data'][$i]['product']['qty'] = $this->getBalanceQty('product_id', $item['product_id'], 'active');
+        }else{
+          $this->response['data'][$i]['product']['qty'] = app($this->transferController)->getQtyTransferred($data['merchant_id'], $item['product_id']);
+        }
       }
       $i++;
     }

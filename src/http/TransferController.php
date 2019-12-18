@@ -97,6 +97,8 @@ class TransferController extends APIController
       $result = DB::table('transfers as T1')
       ->join('transferred_products as T2', 'T2.transfer_id', '=', 'T1.id')
       ->where('T1.to', '=', $data['merchant_id'])
+      ->where('T2.deleted_at', '=', null)
+      ->where('T1.deleted_at', '=', null)
       ->get(['T2.*']);
 
       $result = $result->groupBy('product_id');
@@ -118,6 +120,27 @@ class TransferController extends APIController
         }
       }
       return $this->response();
+    }
+
+    public function getQtyTransferred($merchantId, $productId){
+      $result = DB::table('transfers as T1')
+      ->join('transferred_products as T2', 'T2.transfer_id', '=', 'T1.id')
+      ->where('T1.to', '=', $merchantId)
+      ->where('T2.product_id', '=', $productId)
+      ->where('T2.deleted_at', '=', null)
+      ->where('T1.deleted_at', '=', null)
+      ->get(['T2.*']);
+      $result = $result->groupBy('product_id');
+      $qty = 0;
+      foreach ($result as $key => $value) {
+        foreach ($value as $keyInner) {
+          $tSize = app($this->transferredProductsClass)->getSize('payload_value', $keyInner->payload_value, $keyInner->created_at);
+          if($tSize == 0){
+            $qty++;
+          }
+        }
+      }
+      return $qty;
     }
 
     public function basicRetrieve(Request $request){
