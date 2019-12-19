@@ -15,6 +15,7 @@ class ProductTraceController extends APIController
 
   public $productController = 'Increment\Marketplace\Http\ProductController';
   public $transferController = 'Increment\Marketplace\Http\TransferController';
+  public $transferredProductController = 'Increment\Marketplace\Http\TransferredProductController';
   public $bundledProductController = 'Increment\Marketplace\Http\BundledProductController';
   public $bundledSettingController = 'Increment\Marketplace\Http\BundledSettingController';
   function __construct(){
@@ -92,6 +93,46 @@ class ProductTraceController extends APIController
           $bundled = $this->response['data'][$i]['product']['id'];
           $this->response['data'][$i]['product']['bundled_status'] = app($this->bundledSettingController)->getStatusByProductTrace($bundled, $item['id']);
         }
+      }
+      $i++;
+    }
+    return $this->response();
+  }
+
+  public function retrieveWithTransfer(Request $request){
+    $data = $request->all();
+    $this->model = new ProductTrace();
+    $this->retrieveDB($data);
+    $i = 0;
+    $result = $this->response['data'];
+    $this->response['data'] = array();
+    foreach ($result as $key) {
+      $item = $result[$i];
+      $result[$i]['product'] = app($this->productController)->getProductByParams('id', $item['product_id']);
+      $item = $result[$i];
+      if($this->checkOwnProduct($item, $data['merchant_id']) == false){
+        $this->response['data'] = null;
+        $this->response['error'] = 'You don\'t own this product!';
+        return $this->response();
+      }
+      $result[$i]['created_at_human'] = Carbon::createFromFormat('Y-m-d H:i:s', $item['created_at'])->copy()->tz('Asia/Manila')->format('F j, Y h:i A');
+      $result[$i]['bundled_product'] = app($this->bundledProductController)->getByParams('product_trace', $item['id']);
+      if($result[$i]['product'] != null){
+        $type = $result[$i]['product']['type'];
+        $result[$i]['product']['qty'] = null;
+        if($data['account_type'] == 'MANUFACTURER' || $type == 'bundled'){
+          $result[$i]['product']['qty'] = $this->getBalanceQty('product_id', $item['product_id'], 'active');  
+        }else{
+          $result[$i]['product']['qty'] = app($this->transferController)->getQtyTransferred($data['merchant_id'], $item['product_id']);
+        }
+        if($type == 'bundled'){
+          $bundled = $result[$i]['product']['id'];
+          $result[$i]['product']['bundled_status'] = app($this->bundledSettingController)->getStatusByProductTrace($bundled, $item['id']);
+        }
+      }
+      $transfer = app($this->transferredProductController)->getByParams('payload_value', $item['id']);
+      if($transfer == null){
+        $this->response['data'][] = $result[$i];
       }
       $i++;
     }
