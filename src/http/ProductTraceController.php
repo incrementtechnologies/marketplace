@@ -140,7 +140,7 @@ class ProductTraceController extends APIController
       $bundled = app($this->bundledProductController)->getByParamsNoDetails('product_trace', $trace['id']);
       if($bundled != null){
         $bundledTransfer = app($this->transferController)->getOwn($bundled['bundled_trace']);
-        if(intval($bundledTransfer['to']) == intval($merchantId)){
+        if(intval($bundledTransfer->to) == intval($merchantId)){
           return true;
         }else{
           return false;
