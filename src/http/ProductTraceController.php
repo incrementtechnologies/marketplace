@@ -110,11 +110,6 @@ class ProductTraceController extends APIController
       $item = $result[$i];
       $result[$i]['product'] = app($this->productController)->getProductByParams('id', $item['product_id']);
       $item = $result[$i];
-      if($this->checkOwnProduct($item, $data['merchant_id']) == false){
-        $this->response['data'] = null;
-        $this->response['error'] = 'You don\'t own this product!';
-        return $this->response();
-      }
       $result[$i]['created_at_human'] = Carbon::createFromFormat('Y-m-d H:i:s', $item['created_at'])->copy()->tz('Asia/Manila')->format('F j, Y h:i A');
       $result[$i]['bundled_product'] = app($this->bundledProductController)->getByParams('product_trace', $item['id']);
       if($result[$i]['product'] != null){
