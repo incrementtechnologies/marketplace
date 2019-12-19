@@ -132,7 +132,7 @@ class ProductTraceController extends APIController
       $this->response['data'][$i]['exist_flag'] = app($this->bundledProductController)->checkIfExist($bundledTrace, $productTrace);
       if($this->response['data'][$i]['product'] != null){
         // $this->response['data'][$i]['product']['qty'] = $this->getBalanceQty('product_id', $item['product_id']);
-        $merchant = intval($item['merchant_id']);
+        $merchant = intval($item['product']['merchant_id']);
         if($data['account_type'] == 'MANUFACTURER' || $merchant == intval($data['merchant_id'])){
           $this->response['data'][$i]['product']['qty'] = $this->getBalanceQty('product_id', $item['product_id'], 'active');
         }else{
