@@ -143,6 +143,17 @@ class TransferController extends APIController
       return $qty;
     }
 
+    public function getOwn($traceId){
+      $result = DB::table('transfers as T1')
+      ->join('transferred_products as T2', 'T2.transfer_id', '=', 'T1.id')
+      ->where('T2.payload_value', '=', $traceId)
+      ->where('T2.deleted_at', '=', null)
+      ->where('T1.deleted_at', '=', null)
+      ->orderBy('T2.created_at', 'desc')
+      ->first(['T1.id as t_id', 'T1.*', 'T2.*']);
+      return $result;
+    }
+
     public function basicRetrieve(Request $request){
       $data = $request->all();
       $this->model = new Transfer();
