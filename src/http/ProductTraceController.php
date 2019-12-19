@@ -119,9 +119,15 @@ class ProductTraceController extends APIController
     $i = 0;
     foreach ($this->response['data'] as $key) {
       $item = $this->response['data'][$i];
+      $this->response['data'][$i]['product'] = app($this->productController)->getByParams('id', $item['product_id']);
+      $item = $this->response['data'][$i];
       $bundledTrace = $data['bundled_trace'];
       $productTrace = $item['id'];
-      $this->response['data'][$i]['product'] = app($this->productController)->getByParams('id', $item['product_id']);
+      if($this->checkOwnProduct($item, $data['merchant_id']) == false){
+        $this->response['data'] = null;
+        $this->response['error'] = 'You don\'t own this product!';
+        return $this->response();
+      }
       $this->response['data'][$i]['bundled_product'] = app($this->bundledProductController)->getByParams('product_trace', $item['id']);
       $this->response['data'][$i]['exist_flag'] = app($this->bundledProductController)->checkIfExist($bundledTrace, $productTrace);
       if($this->response['data'][$i]['product'] != null){
