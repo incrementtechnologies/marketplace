@@ -59,6 +59,14 @@ class ProductTraceController extends APIController
       $this->response['data'][$i]['product'] = $product;
       // $this->response['data'][$i]['manufacturing_date_human'] = Carbon::createFromFormat('Y-m-d H:i:s', $item['manufacturing_date'])->copy()->tz('Asia/Manila')->format('F j, Y H:i A');
       $this->response['data'][$i]['created_at_human'] = Carbon::createFromFormat('Y-m-d H:i:s', $item['created_at'])->copy()->tz('Asia/Manila')->format('F j, Y h:i A');
+      $bundled = BundledProduct::where('product_trace', '=', $item['id'])->where('deleted_at', '=', null)->get();
+      $transferred = TransferredProduct::where('payload_value', '=', $item['id'])->where('deleted_at', '=', null)->get();
+      if($bundled){
+        $this->response['data'][$i]['status'] = 'bundled';
+      }
+      if($transferred){
+        $this->response['data'][$i]['status'] = 'transferred';
+      }
       $i++;
     }
     $this->response['datetime_human'] = Carbon::now()->copy()->tz('Asia/Manila')->format('F j Y h i A');
