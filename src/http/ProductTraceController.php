@@ -61,10 +61,10 @@ class ProductTraceController extends APIController
       $this->response['data'][$i]['created_at_human'] = Carbon::createFromFormat('Y-m-d H:i:s', $item['created_at'])->copy()->tz('Asia/Manila')->format('F j, Y h:i A');
       $bundled = BundledProduct::where('product_trace', '=', $item['id'])->where('deleted_at', '=', null)->get();
       $transferred = TransferredProduct::where('payload_value', '=', $item['id'])->where('deleted_at', '=', null)->get();
-      if($bundled){
+      if(sizeof($bundled) > 0){
         $this->response['data'][$i]['status'] = 'bundled';
       }
-      if($transferred){
+      if(sizeof($transferred) > 0){
         $this->response['data'][$i]['status'] = 'transferred';
       }
       $i++;
