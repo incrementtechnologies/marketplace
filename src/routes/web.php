@@ -115,6 +115,7 @@ Route::get($route.'test', $controller."test");
 $route = env('PACKAGE_ROUTE', '').'/product_traces/';
 $controller = 'Increment\Marketplace\Http\ProductTraceController@';
 Route::post($route.'create', $controller."create");
+Route::post($route.'create_bundled', $controller."createBundled");
 Route::post($route.'retrieve', $controller."retrieve");
 Route::post($route.'retrieve_by_params', $controller."retrieveByParams");
 Route::post($route.'retrieve_by_bundled', $controller."retrieveByBundled");

@@ -248,6 +248,23 @@ class ProductTraceController extends APIController
     return $this->response();
   }
 
+  public function createBundled(Request $request){
+    $data = $request->all();
+    $data['code'] = $this->generateCode();
+    $data['status'] = 'inactive';
+    $this->model = new ProductTrace();
+    $this->insertDB($data);
+    if($this->response['data'] > 0){
+      // add product to bundled
+      $result = app($this->bundledProductController)->insertData($data['products'], $this->response['data']);
+      if($result == false){
+        $this->response['data'] = null;
+        $this->repsonse['error'] = 'Unable to manage the request!';
+      }
+    }
+    return $this->response();
+  }
+
   public function generateNFC($productId, $data){
     $product = app($this->productController)->retrieveProductById($productId, $data['account_id'], $data['inventory_type']);
     // product trace code

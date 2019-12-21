@@ -38,6 +38,18 @@ class BundledProductController extends APIController
     return $this->response();
   }
 
+  public function insertData($data, $bundledTrace){
+    $i = 0;
+    foreach ($data as $key) {
+      $data[$i]['code'] = 1;
+      $data[$i]['created_at'] = Carbon::now();
+      $data[$i]['bundled_trace'] = $bundledTrace;
+      $i++;
+    }
+    $result = BundledProduct::insert($data);
+    return $result ? true : false;
+  }
+
   public function retrieve(Request $request){
     $data = $request->all();
     $this->model = new BundledProduct();
