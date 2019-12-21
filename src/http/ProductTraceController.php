@@ -178,7 +178,6 @@ class ProductTraceController extends APIController
       $item = $this->response['data'][$i];
       $this->response['data'][$i]['product'] = app($this->productController)->getByParams('id', $item['product_id']);
       $item = $this->response['data'][$i];
-      $bundledTrace = $data['bundled_trace'];
       $productTrace = $item['id'];
       if($this->checkOwnProduct($item, $data['merchant_id']) == false){
         $this->response['data'] = null;
@@ -186,7 +185,6 @@ class ProductTraceController extends APIController
         return $this->response();
       }
       $this->response['data'][$i]['bundled_product'] = app($this->bundledProductController)->getByParams('product_trace', $item['id']);
-      $this->response['data'][$i]['exist_flag'] = app($this->bundledProductController)->checkIfExist($bundledTrace, $productTrace);
       if($this->response['data'][$i]['product'] != null){
         // $this->response['data'][$i]['product']['qty'] = $this->getBalanceQty('product_id', $item['product_id']);
         $merchant = intval($item['product']['merchant_id']);
