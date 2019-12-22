@@ -53,6 +53,7 @@ class BundledSettingController extends APIController
         $this->response['data'][$i]['product'] = app($this->productController)->getByParams('id', $result[$i]['product_id']);
         $this->response['data'][$i]['created_at_human'] = Carbon::createFromFormat('Y-m-d H:i:s', $result[$i]['created_at'])->copy()->tz('Asia/Manila')->format('F j, Y H:i A');
         $qtyAdded = app($this->bundledProductController)->getRemainingQty($data['bundled_trace'], $result[$i]['product_id']);
+        echo $qtyAdded;
         $remainingQty = intval($result[$i]['qty']) - intval($qtyAdded);
         $this->response['data'][$i]['remaining_qty'] = $remainingQty;
         if($status == 1 && $remainingQty > 0){
