@@ -41,7 +41,6 @@ class BundledProductController extends APIController
   public function insertData($data, $bundledTrace){
     $i = 0;
     foreach ($data as $key) {
-      $data[$i]['code'] = 1;
       $data[$i]['created_at'] = Carbon::now();
       $data[$i]['bundled_trace'] = $bundledTrace;
       $i++;
