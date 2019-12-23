@@ -123,7 +123,7 @@ class BundledProductController extends APIController
             'payload_value' => $data['bundled_trace'],
             'product_id'  => $key['product_on_settings']
           );
-          $parameter = $newArray;
+          $parameter[] = $newArray;
         }
         app($this->transferredProductClass)->insert($parameter);
       }else{
