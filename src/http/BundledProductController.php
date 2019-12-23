@@ -121,7 +121,8 @@ class BundledProductController extends APIController
             'transfer_id' => $transferred['transfer_id'],
             'payload'     => 'product_traces',
             'payload_value' => $key['product_trace'],
-            'product_id'  => $key['product_on_settings']
+            'product_id'  => $key['product_on_settings'],
+            'created_at'  => Carbon::now()
           );
           $parameter[] = $newArray;
         }
