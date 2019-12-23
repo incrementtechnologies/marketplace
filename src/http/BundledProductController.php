@@ -111,7 +111,7 @@ class BundledProductController extends APIController
 
   public function delete(Request $request){
     $data = $request->all();
-    $transferred = app($this->transferredProductClass)->getByParamsOnly('product_traces', $data['bundled_trace']);
+    $transferred = app($this->transferredProductClass)->getByParamsOnly('payload_value', $data['bundled_trace']);
     if($transferred != null){
       $bundledItems = BundledProduct::where('bundled_trace', '=', $data['bundled_trace'])->get();
       if(sizeof($bundledItems) > 0){
