@@ -312,4 +312,11 @@ class ProductTraceController extends APIController
     }
     return $this->response();
   }
+
+  public function deleteByParams($id){
+    ProductTrace::where('id', '=', $id)->update(array(
+      'deleted_at' => Carbon::now()
+    ));
+    return true;
+  }
 }

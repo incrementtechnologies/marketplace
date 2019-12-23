@@ -107,4 +107,16 @@ class BundledProductController extends APIController
       'timestamps' => Carbon::now()
     );
   }
+
+  public function delete(Request $request){
+    $data = $request->all();
+    BundledProduct::where('bundled_trace', '=', $data['bundled_trace'])->update(
+      array(
+        'deleted_at' => Carbon::now()
+      )
+    );
+    app($this->productTraceController)->deleteByParams($data['bundled_trace']);
+    $this->response['data'] = true;
+    return $this->response();
+  }
 }
