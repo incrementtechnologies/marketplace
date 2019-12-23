@@ -11,6 +11,7 @@ class BundledProductController extends APIController
 {
   
   public $productTraceController = 'Increment\Marketplace\Http\ProductTraceController';
+  public $transferredProductClass = 'Increment\Marketplace\Http\TransferredProductController';
   
   function __construct(){
     $this->model = new BundledProduct();
@@ -110,6 +111,25 @@ class BundledProductController extends APIController
 
   public function delete(Request $request){
     $data = $request->all();
+    $transferred = app($this->transferredProductClass)->getByParamsOnly('product_traces', $data['bundled_trace']);
+    if($transferred != null){
+      $bundledItems = BundledProduct::where('bundled_trace', '=', $data['bundled_trace'])->get();
+      if(sizeof($bundledItems) > 0){
+        $parameter = array();
+        foreach ($bundledItems as $key) {
+          $newArray = array(
+            'transfer_id' => $transferred['transfer_id'],
+            'payload'     => 'product_traces',
+            'payload_value' => $data['bundled_trace'],
+            'product_id'  => $key['product_on_settings']
+          );
+          $parameter = $newArray;
+        }
+        app($this->transferredProductClass)->insert($parameter);
+      }else{
+        // nothing
+      }
+    }
     BundledProduct::where('bundled_trace', '=', $data['bundled_trace'])->update(
       array(
         'deleted_at' => Carbon::now()
