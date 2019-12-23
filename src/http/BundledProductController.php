@@ -120,7 +120,7 @@ class BundledProductController extends APIController
           $newArray = array(
             'transfer_id' => $transferred['transfer_id'],
             'payload'     => 'product_traces',
-            'payload_value' => $data['bundled_trace'],
+            'payload_value' => $key['product_trace'],
             'product_id'  => $key['product_on_settings']
           );
           $parameter[] = $newArray;
