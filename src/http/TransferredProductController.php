@@ -82,5 +82,11 @@ class TransferredProductController extends APIController
       return $result;
     }
 
+    public function deleteByParams($id){
+      TransferredProduct::where('id', '=', $id)->update(array(
+        'deleted_at' => Carbon::now()
+      ));
+      return true;
+    }
 
 }
