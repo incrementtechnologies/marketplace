@@ -234,6 +234,36 @@ class ProductTraceController extends APIController
     return $counter;
   }
 
+  public function getBalanceQtyWithInBundled($column, $value){
+    $result  = ProductTrace::where($column, '=', $value)->where('status', '=', $flag)->get();
+    $counter = 0;
+    $bundledQty = 0;
+    if(sizeof($result) > 0){
+      $i = 0;
+      foreach ($result as $key) {
+        $item = $result[$i];
+        $bundled = BundledProduct::where('product_trace', '=', $item['id'])->where('deleted_at', '=', null)->get();
+
+        $transferred = TransferredProduct::where('payload_value', '=', $item['id'])->where('deleted_at', '=', null)->get();
+
+        if(sizeof($bundled) == 0 && sizeof($transferred) == 0){
+          $counter++;
+        }
+        if(sizeof($bundled) > 0){
+          $bundledTransferred = TransferredProduct::where('payload_value', '=', $bundled[0]['bundled_trace'])->where('deleted_at', '=', null)->get();
+          if(sizeof($bundledTransferred) == 0){
+            $bundledQty++;
+          }
+        }
+        $i++;
+      }
+    }
+    return array(
+      'qty'             => $counter,
+      'qty_in_bundled'  => $bundledQty
+    );
+  }
+
   public function create(Request $request){
     $data = $request->all();
     $qty = intval($data['qty']);

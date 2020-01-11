@@ -6,6 +6,7 @@ namespace Increment\Marketplace\Http;
 use Illuminate\Http\Request;
 use App\Http\Controllers\APIController;
 use Increment\Marketplace\Models\Transfer;
+use Increment\Marketplace\Models\TransferredProduct;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 class TransferController extends APIController
@@ -107,16 +108,24 @@ class TransferController extends APIController
       $this->response['data'] = array();
       foreach ($result as $key => $value) {
         $size = 0;
+        $bundledQty = 0;
         foreach ($value as $keyInner) {
           $tSize = app($this->transferredProductsClass)->getSize('payload_value', $keyInner->payload_value, $keyInner->created_at);
           $bundled = app($this->bundledProductController)->getByParamsNoDetails('product_trace', $keyInner->payload_value);
           if($tSize == 0 && $bundled == null){
             $size++;
           }
+          if($bundled != null){
+            $bundledTransferred = TransferredProduct::where('payload_value', '=', $bundled['bundled_trace'])->where('deleted_at', '=', null)->get();
+            if(sizeof($bundledTransferred) == 0){
+              $bundledQty++;
+            }
+          }
         }
         if($size > 0){
           $product =  app($this->productClass)->getProductByParams('id', $key);
           $product['qty'] = $size;
+          $product['qty_in_bundled'] = $bundledQty;
           $this->response['data'][$i] = $product;
           $i++;
         }

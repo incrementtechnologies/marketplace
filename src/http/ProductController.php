@@ -124,7 +124,7 @@ class ProductController extends APIController
             $result[$i]['qty'] = $this->getRemainingQty($result[$i]['id']);
           }else if($inventoryType == 'product_trace'){
             $result[$i]['product_traces'] =  app($this->productTraceController)->getByParams('product_id', $result[$i]['id']);
-            $result[$i]['qty'] = app($this->productTraceController)->getBalanceQty('product_id', $result[$i]['id']);
+            $result[$i] = app($this->productTraceController)->getBalanceQtyWithInBundled('product_id', $result[$i]['id']);
           }
           $i++;
         }
