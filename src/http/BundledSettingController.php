@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\APIController;
 use Increment\Marketplace\Models\BundledSetting;
 use Increment\Marketplace\Models\BundledProduct;
+use Increment\Marketplace\Models\Product;
 use Carbon\Carbon;
 class BundledSettingController extends APIController
 {
@@ -30,6 +31,12 @@ class BundledSettingController extends APIController
     }else{
       $this->model = new BundledSetting();
       $this->insertDB($data);
+      $bundled = BundledSetting::where('bundled', '=', $data['bundled'])->where('deleted_at', '=', null)->get();
+      if(sizeof($bundled) > 1){
+        Product::where('id', '=', $data['bundled'])->where('status', '=', 'pending')->update(array(
+          'type' => 'custom_bundled'
+        ));
+      }
     }
     return $this->response();
   }
@@ -78,6 +85,21 @@ class BundledSettingController extends APIController
     }
     $status = $bundled != null && $bundled['rf'] != null ? 2 : $status;
     $this->response['status'] = $status;
+    return $this->response();
+  }
+
+  public function delete(Request $request){
+    $data = $request->all();
+    $deleteData = array(
+      'id' => $data['id']
+    );
+    $this->deleteDB($data);
+    $bundled = BundledSetting::where('bundled', '=', $data['bundled'])->where('deleted_at', '=', null)->get();
+    if(sizeof($bundled) == 1 || sizeof($bundled) == 0){
+      Product::where('id', '=', $data['bundled'])->where('status', '=', 'pending')->update(array(
+        'type' => 'bundled'
+      ));
+    }
     return $this->response();
   }
 

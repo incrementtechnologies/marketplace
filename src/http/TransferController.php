@@ -13,6 +13,7 @@ class TransferController extends APIController
    public $transferredProductsClass = 'Increment\Marketplace\Http\TransferredProductController';
    public $merchantClass = 'Increment\Marketplace\Http\MerchantController';
    public $productClass = 'Increment\Marketplace\Http\ProductController';
+  public $bundledProductController = 'Increment\Marketplace\Http\BundledProductController';
     function __construct(){
       $this->model = new Transfer();
     }
@@ -108,7 +109,8 @@ class TransferController extends APIController
         $size = 0;
         foreach ($value as $keyInner) {
           $tSize = app($this->transferredProductsClass)->getSize('payload_value', $keyInner->payload_value, $keyInner->created_at);
-          if($tSize == 0){
+          $bundled = app($this->bundledProductController)->getByParamsNoDetails('product_trace', $$keyInner->payload_value);
+          if($tSize == 0 && $bundled == null){
             $size++;
           }
         }
@@ -135,7 +137,8 @@ class TransferController extends APIController
       foreach ($result as $key => $value) {
         foreach ($value as $keyInner) {
           $tSize = app($this->transferredProductsClass)->getSize('payload_value', $keyInner->payload_value, $keyInner->created_at);
-          if($tSize == 0){
+          $bundled = app($this->bundledProductController)->getByParamsNoDetails('product_trace', $$keyInner->payload_value);
+          if($tSize == 0 && $bundled == null){
             $qty++;
           }
         }
