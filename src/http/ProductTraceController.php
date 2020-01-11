@@ -234,7 +234,7 @@ class ProductTraceController extends APIController
     return $counter;
   }
 
-  public function getBalanceQtyWithInBundled($column, $value){
+  public function getBalanceQtyWithInBundled($column, $value, $flag = 'active'){
     $result  = ProductTrace::where($column, '=', $value)->where('status', '=', $flag)->get();
     $counter = 0;
     $bundledQty = 0;
