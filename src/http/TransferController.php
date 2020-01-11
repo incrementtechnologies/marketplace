@@ -109,7 +109,7 @@ class TransferController extends APIController
         $size = 0;
         foreach ($value as $keyInner) {
           $tSize = app($this->transferredProductsClass)->getSize('payload_value', $keyInner->payload_value, $keyInner->created_at);
-          $bundled = app($this->bundledProductController)->getByParamsNoDetails('product_trace', $$keyInner->payload_value);
+          $bundled = app($this->bundledProductController)->getByParamsNoDetails('product_trace', $keyInner->payload_value);
           if($tSize == 0 && $bundled == null){
             $size++;
           }
