@@ -92,11 +92,14 @@ class ProductTraceController extends APIController
       if($this->response['data'][$i]['product'] != null){
         $type = $this->response['data'][$i]['product']['type'];
         $this->response['data'][$i]['product']['qty'] = null;
-        if($data['account_type'] == 'MANUFACTURER' || $type == 'bundled'){
-          $this->response['data'][$i]['product']['qty'] = $this->getBalanceQty('product_id', $item['product_id'], 'active');  
-        }else{
-          $this->response['data'][$i]['product']['qty'] = app($this->transferController)->getQtyTransferred($data['merchant_id'], $item['product_id']);
-        }
+        $qty = $this->getBalanceQtyWithInBundled('product_id', $item['product_id'], 'active');
+        $this->response['data'][$i]['product']['qty'] = $qty['qty'];
+        $this->response['data'][$i]['product']['qty_in_bundled'] = $qty['qty_in_bundled'];
+        // if($data['account_type'] == 'MANUFACTURER' || $type == 'bundled'){
+        //   $this->response['data'][$i]['product']['qty'] = $this->getBalanceQty('product_id', $item['product_id'], 'active');  
+        // }else{
+        //   $this->response['data'][$i]['product']['qty'] = app($this->transferController)->getQtyTransferred($data['merchant_id'], $item['product_id']);
+        // }
         if($type == 'bundled'){
           $bundled = $this->response['data'][$i]['product']['id'];
           $this->response['data'][$i]['product']['bundled_status'] = app($this->bundledSettingController)->getStatusByProductTrace($bundled, $item['id']);
@@ -123,11 +126,14 @@ class ProductTraceController extends APIController
       if($result[$i]['product'] != null){
         $type = $result[$i]['product']['type'];
         $result[$i]['product']['qty'] = null;
-        if($data['account_type'] == 'MANUFACTURER' || $type == 'bundled'){
-          $result[$i]['product']['qty'] = $this->getBalanceQty('product_id', $item['product_id'], 'active');  
-        }else{
-          $result[$i]['product']['qty'] = app($this->transferController)->getQtyTransferred($data['merchant_id'], $item['product_id']);
-        }
+        // if($data['account_type'] == 'MANUFACTURER' || $type == 'bundled'){
+        //   $result[$i]['product']['qty'] = $this->getBalanceQty('product_id', $item['product_id'], 'active');  
+        // }else{
+        //   $result[$i]['product']['qty'] = app($this->transferController)->getQtyTransferred($data['merchant_id'], $item['product_id']);
+        // }
+        $qty = $this->getBalanceQtyWithInBundled('product_id', $item['product_id'], 'active');
+        $result[$i]['product']['qty'] = $qty['qty'];
+        $result[$i]['product']['qty_in_bundled'] = $qty['qty_in_bundled'];
         if($type == 'bundled'){
           $bundled = $result[$i]['product']['id'];
           $result[$i]['product']['bundled_status'] = app($this->bundledSettingController)->getStatusByProductTrace($bundled, $item['id']);
@@ -188,11 +194,14 @@ class ProductTraceController extends APIController
       if($this->response['data'][$i]['product'] != null){
         // $this->response['data'][$i]['product']['qty'] = $this->getBalanceQty('product_id', $item['product_id']);
         $merchant = intval($item['product']['merchant_id']);
-        if($data['account_type'] == 'MANUFACTURER' || $merchant == intval($data['merchant_id'])){
-          $this->response['data'][$i]['product']['qty'] = $this->getBalanceQty('product_id', $item['product_id'], 'active');
-        }else{
-          $this->response['data'][$i]['product']['qty'] = app($this->transferController)->getQtyTransferred($data['merchant_id'], $item['product_id']);
-        }
+        $qty = $this->getBalanceQtyWithInBundled('product_id', $item['product_id'], 'active');
+        $this->response['data'][$i]['product']['qty'] = $qty['qty'];
+        $this->response['data'][$i]['product']['qty_in_bundled'] = $qty['qty_in_bundled'];
+        // if($data['account_type'] == 'MANUFACTURER' || $merchant == intval($data['merchant_id'])){
+        //   $this->response['data'][$i]['product']['qty'] = $this->getBalanceQty('product_id', $item['product_id'], 'active');
+        // }else{
+        //   $this->response['data'][$i]['product']['qty'] = app($this->transferController)->getQtyTransferred($data['merchant_id'], $item['product_id']);
+        // }
       }
       $i++;
     }
