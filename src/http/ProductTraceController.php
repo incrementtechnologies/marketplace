@@ -24,6 +24,8 @@ class ProductTraceController extends APIController
     $this->notRequired = array(
       'rf', 'nfc', 'manufacturing_date', 'batch_number'
     );
+
+    $this->localization();
   }
 
   public function getByParams($column, $value){
@@ -31,7 +33,7 @@ class ProductTraceController extends APIController
     if(sizeof($result) > 0){
       $i = 0;
       foreach ($result as $key) {
-        $result[$i]['created_at_human'] = Carbon::createFromFormat('Y-m-d H:i:s', $result[$i]['created_at'])->copy()->tz('Asia/Manila')->format('F j, Y h:i A');
+        $result[$i]['created_at_human'] = Carbon::createFromFormat('Y-m-d H:i:s', $result[$i]['created_at'])->copy()->tz($this->response['timezone'])->format('F j, Y h:i A');
         $i++;
       }
     }
@@ -58,7 +60,7 @@ class ProductTraceController extends APIController
       $item = $this->response['data'][$i];
       $this->response['data'][$i]['product'] = $product;
       // $this->response['data'][$i]['manufacturing_date_human'] = Carbon::createFromFormat('Y-m-d H:i:s', $item['manufacturing_date'])->copy()->tz('Asia/Manila')->format('F j, Y H:i A');
-      $this->response['data'][$i]['created_at_human'] = Carbon::createFromFormat('Y-m-d H:i:s', $item['created_at'])->copy()->tz('Asia/Manila')->format('F j, Y h:i A');
+      $this->response['data'][$i]['created_at_human'] = Carbon::createFromFormat('Y-m-d H:i:s', $item['created_at'])->copy()->tz($this->response['timezone'])->format('F j, Y h:i A');
       $bundled = BundledProduct::where('product_trace', '=', $item['id'])->where('deleted_at', '=', null)->get();
       $transferred = TransferredProduct::where('payload_value', '=', $item['id'])->where('deleted_at', '=', null)->get();
       if(sizeof($bundled) > 0){
@@ -69,7 +71,7 @@ class ProductTraceController extends APIController
       }
       $i++;
     }
-    $this->response['datetime_human'] = Carbon::now()->copy()->tz('Asia/Manila')->format('F j Y h i A');
+    $this->response['datetime_human'] = Carbon::now()->copy()->tz($this->response['timezone'])->format('F j Y h i A');
     return $this->response();
   }
 
@@ -87,7 +89,7 @@ class ProductTraceController extends APIController
         $this->response['error'] = 'You don\'t own this product!';
         return $this->response();
       }
-      $this->response['data'][$i]['created_at_human'] = Carbon::createFromFormat('Y-m-d H:i:s', $item['created_at'])->copy()->tz('Asia/Manila')->format('F j, Y h:i A');
+      $this->response['data'][$i]['created_at_human'] = Carbon::createFromFormat('Y-m-d H:i:s', $item['created_at'])->copy()->tz($this->response['timezone'])->format('F j, Y h:i A');
       $this->response['data'][$i]['bundled_product'] = app($this->bundledProductController)->getByParams('product_trace', $item['id']);
       if($this->response['data'][$i]['product'] != null){
         $type = $this->response['data'][$i]['product']['type'];
@@ -121,7 +123,7 @@ class ProductTraceController extends APIController
       $item = $result[$i];
       $result[$i]['product'] = app($this->productController)->getProductByParams('id', $item['product_id']);
       $item = $result[$i];
-      $result[$i]['created_at_human'] = Carbon::createFromFormat('Y-m-d H:i:s', $item['created_at'])->copy()->tz('Asia/Manila')->format('F j, Y h:i A');
+      $result[$i]['created_at_human'] = Carbon::createFromFormat('Y-m-d H:i:s', $item['created_at'])->copy()->tz($this->response['timezone'])->format('F j, Y h:i A');
       $result[$i]['bundled_product'] = app($this->bundledProductController)->getByParams('product_trace', $item['id']);
       if($result[$i]['product'] != null){
         $type = $result[$i]['product']['type'];
@@ -216,7 +218,7 @@ class ProductTraceController extends APIController
       foreach ($result as $key) {
         $item = $result[$i];
         $result[$i]['product'] = app($this->productController)->getByParams('id', $item['product_id']);
-        $result[$i]['created_at_human'] = Carbon::createFromFormat('Y-m-d H:i:s', $result[$i]['created_at'])->copy()->tz('Asia/Manila')->format('F j, Y h:i A');
+        $result[$i]['created_at_human'] = Carbon::createFromFormat('Y-m-d H:i:s', $result[$i]['created_at'])->copy()->tz($this->response['timezone'])->format('F j, Y h:i A');
         $i++;
       }
     }

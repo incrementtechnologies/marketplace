@@ -101,7 +101,7 @@ public function getCheckout($payload, $payloadValue, $accountId){
     if(sizeof($result) > 0){
       $i = 0;
       foreach ($result as $key) {
-        $this->response['data'][$i]['order_date'] = Carbon::createFromFormat('Y-m-d H:i:s', $result[$i]['created_at'])->copy()->tz('Asia/Manila')->format('F j, Y');
+        $this->response['data'][$i]['order_date'] = Carbon::createFromFormat('Y-m-d H:i:s', $result[$i]['created_at'])->copy()->tz($this->response['timezone'])->format('F j, Y h:i A');
         $this->response['data'][$i]['account'] = $this->retrieveAccountDetails($result[$i]['account_id']);
         $this->response['data'][$i]['partner_details'] = ($result[$i]['partner'] != null && $result[$i]['partner'] != '' && $result[$i]['partner'] > 0) ? $this->retrieveAccountDetails($result[$i]['partner']) : null;
         $i++;

@@ -13,6 +13,7 @@ class TransferredProductController extends APIController
     public $productTraceController = 'Increment\Marketplace\Http\ProductTraceController';
     function __construct(){
       $this->model = new TransferredProduct();
+      $this->localization();
     }
 
     public function create(Request $request){
@@ -46,7 +47,7 @@ class TransferredProductController extends APIController
         $i = 0;
         foreach ($result as $key) {
           $this->response['data'][$i]['product_trace_details'] = app($this->productTraceController)->getByParamsDetails('id', $result[$i]['payload_value']);
-          $this->response['data'][$i]['created_at_human'] = Carbon::createFromFormat('Y-m-d H:i:s', $result[$i]['created_at'])->copy()->tz('Asia/Manila')->format('F j, Y H:i A');
+          $this->response['data'][$i]['created_at_human'] = Carbon::createFromFormat('Y-m-d H:i:s', $result[$i]['created_at'])->copy()->tz($this->response['timezone'])->format('F j, Y H:i A');
           $i++;
         }
       }
@@ -60,7 +61,7 @@ class TransferredProductController extends APIController
         $i = 0;
         foreach ($result as $key) {
           $result[$i]['product_trace_details'] = app($this->productTraceController)->getByParamsDetails('id', $result[$i]['payload_value']);
-          $result[$i]['created_at_human'] = Carbon::createFromFormat('Y-m-d H:i:s', $result[$i]['created_at'])->copy()->tz('Asia/Manila')->format('F j, Y H:i A');
+          $result[$i]['created_at_human'] = Carbon::createFromFormat('Y-m-d H:i:s', $result[$i]['created_at'])->copy()->tz($this->response['timezone'])->format('F j, Y H:i A');
           $i++;
         }
       }

@@ -51,7 +51,7 @@ class BundledSettingController extends APIController
       $i = 0;
       foreach ($result as $key) {
         $this->response['data'][$i]['product'] = app($this->productController)->getByParams('id', $result[$i]['product_id']);
-        $this->response['data'][$i]['created_at_human'] = Carbon::createFromFormat('Y-m-d H:i:s', $result[$i]['created_at'])->copy()->tz('Asia/Manila')->format('F j, Y H:i A');
+        $this->response['data'][$i]['created_at_human'] = Carbon::createFromFormat('Y-m-d H:i:s', $result[$i]['created_at'])->copy()->tz($this->response['timezone'])->format('F j, Y h:i A');
         $remainingQty = intval($result[$i]['qty']);
         $this->response['data'][$i]['remaining_qty'] = $remainingQty;
         $i++;
@@ -73,7 +73,7 @@ class BundledSettingController extends APIController
       $i = 0;
       foreach ($result as $key) {
         $this->response['data'][$i]['product'] = app($this->productController)->getByParams('id', $result[$i]['product_id']);
-        $this->response['data'][$i]['created_at_human'] = Carbon::createFromFormat('Y-m-d H:i:s', $result[$i]['created_at'])->copy()->tz('Asia/Manila')->format('F j, Y H:i A');
+        $this->response['data'][$i]['created_at_human'] = Carbon::createFromFormat('Y-m-d H:i:s', $result[$i]['created_at'])->copy()->tz($this->response['timezone'])->format('F j, Y H:i A');
         $qtyAdded = app($this->bundledProductController)->getRemainingQty($data['bundled_trace'], $result[$i]['product_id']);
         $remainingQty = intval($result[$i]['qty']) - intval($qtyAdded);
         $this->response['data'][$i]['remaining_qty'] = $remainingQty;
@@ -123,12 +123,13 @@ class BundledSettingController extends APIController
 
 
   public function getByParams($column, $value){
+    $this->localization();
     $result = BundledSetting::where($column, '=', $value)->get();
     if(sizeof($result) > 0){
       $i = 0;
       foreach ($result as $key) {
         $result[$i]['product'] = app($this->productController)->getByParams('id', $result[$i]['product_id']);
-        $result[$i]['created_at_human'] = Carbon::createFromFormat('Y-m-d H:i:s', $result[$i]['created_at'])->copy()->tz('Asia/Manila')->format('F j, Y H:i A');
+        $result[$i]['created_at_human'] = Carbon::createFromFormat('Y-m-d H:i:s', $result[$i]['created_at'])->copy()->tz($this->response['timezone'])->format('F j, Y H:i A');
         $i++;
       }
     }

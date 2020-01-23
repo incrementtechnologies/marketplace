@@ -14,12 +14,13 @@ class ProductInventoryController extends APIController
     }
 
     public function getInventory($productId){
+      $this->localization();
       $result = ProductInventory::where('product_id', '=', $productId)->get();
 
       if(sizeof($result) > 0){
         $i = 0;
         foreach ($result as $key) {
-         $result[$i]['created_at_human'] = Carbon::createFromFormat('Y-m-d H:i:s', $result[$i]['created_at'])->copy()->tz('Asia/Manila')->format('F j, Y H:i');
+         $result[$i]['created_at_human'] = Carbon::createFromFormat('Y-m-d H:i:s', $result[$i]['created_at'])->copy()->tz($this->response['timezone'])->format('F j, Y H:i');
          $i++; 
         }
       }

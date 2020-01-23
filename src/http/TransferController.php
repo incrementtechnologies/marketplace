@@ -17,6 +17,7 @@ class TransferController extends APIController
   public $bundledProductController = 'Increment\Marketplace\Http\BundledProductController';
     function __construct(){
       $this->model = new Transfer();
+      $this->localization();
     }
 
     public function create(Request $request){
@@ -84,7 +85,7 @@ class TransferController extends APIController
         $i = 0;
         foreach ($result as $key) {
           $this->response['data'][$i]['transferred_products'] = app($this->transferredProductsClass)->getByParams('transfer_id', $result[$i]['id']);
-          $this->response['data'][$i]['created_at_human'] = Carbon::createFromFormat('Y-m-d H:i:s', $result[$i]['created_at'])->copy()->tz('Asia/Manila')->format('F j, Y H:i A');
+          $this->response['data'][$i]['created_at_human'] = Carbon::createFromFormat('Y-m-d H:i:s', $result[$i]['created_at'])->copy()->tz($this->response['timezone'])->format('F j, Y H:i A');
           $this->response['data'][$i]['to_details'] = app($this->merchantClass)->getByParams('id', $result[$i]['to']);
           $this->response['data'][$i]['account'] = $this->retrieveAccountDetails($result[$i]['account_id']);
           $i++;
