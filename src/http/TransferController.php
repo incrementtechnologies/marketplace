@@ -117,7 +117,6 @@ class TransferController extends APIController
           if($tSize == 0 && $bundled == null){
             $comsumed = 0;
             $comsumed = app($this->landBlockProductClass)->getTotalConsumedByTrace($data['merchant_id'], $keyInner->payload_value);
-            echo $comsumed;
             $size += (1 - $comsumed);
           }
           if($bundled != null){
