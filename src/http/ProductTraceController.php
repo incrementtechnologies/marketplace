@@ -18,6 +18,7 @@ class ProductTraceController extends APIController
   public $transferredProductController = 'Increment\Marketplace\Http\TransferredProductController';
   public $bundledProductController = 'Increment\Marketplace\Http\BundledProductController';
   public $bundledSettingController = 'Increment\Marketplace\Http\BundledSettingController';
+  public $landBlockProductClass = 'App\Http\Controllers\LandBlockProductController';
   function __construct(){
   	$this->model = new ProductTrace();
 
@@ -94,7 +95,7 @@ class ProductTraceController extends APIController
       if($this->response['data'][$i]['product'] != null){
         $type = $this->response['data'][$i]['product']['type'];
         $this->response['data'][$i]['product']['qty'] = null;
-        $qty = $this->getBalanceQtyWithInBundled('product_id', $item['product_id'], 'active');
+        $qty = $this->getBalanceQtyWithInBundled('product_id', $item['product_id'], 'active', $data['merchant_id']);
         $this->response['data'][$i]['product']['qty'] = $qty['qty'];
         $this->response['data'][$i]['product']['qty_in_bundled'] = $qty['qty_in_bundled'];
         // if($data['account_type'] == 'MANUFACTURER' || $type == 'bundled'){
@@ -133,7 +134,7 @@ class ProductTraceController extends APIController
         // }else{
         //   $result[$i]['product']['qty'] = app($this->transferController)->getQtyTransferred($data['merchant_id'], $item['product_id']);
         // }
-        $qty = $this->getBalanceQtyWithInBundled('product_id', $item['product_id'], 'active');
+        $qty = $this->getBalanceQtyWithInBundled('product_id', $item['product_id'], 'active', $result[$i]['product']['merchant_id']);
         $result[$i]['product']['qty'] = $qty['qty'];
         $result[$i]['product']['qty_in_bundled'] = $qty['qty_in_bundled'];
         if($type == 'bundled'){
@@ -196,7 +197,7 @@ class ProductTraceController extends APIController
       if($this->response['data'][$i]['product'] != null){
         // $this->response['data'][$i]['product']['qty'] = $this->getBalanceQty('product_id', $item['product_id']);
         $merchant = intval($item['product']['merchant_id']);
-        $qty = $this->getBalanceQtyWithInBundled('product_id', $item['product_id'], 'active');
+        $qty = $this->getBalanceQtyWithInBundled('product_id', $item['product_id'], 'active', $item['product']['merchant_id']);
         $this->response['data'][$i]['product']['qty'] = $qty['qty'];
         $this->response['data'][$i]['product']['qty_in_bundled'] = $qty['qty_in_bundled'];
         // if($data['account_type'] == 'MANUFACTURER' || $merchant == intval($data['merchant_id'])){
@@ -245,7 +246,7 @@ class ProductTraceController extends APIController
     return $counter;
   }
 
-  public function getBalanceQtyWithInBundled($column, $value, $flag = 'active'){
+  public function getBalanceQtyWithInBundled($column, $value, $flag = 'active', $merchantId = null){
     $result  = ProductTrace::where($column, '=', $value)->where('status', '=', $flag)->get();
     $counter = 0;
     $bundledQty = 0;
@@ -258,7 +259,13 @@ class ProductTraceController extends APIController
         $transferred = TransferredProduct::where('payload_value', '=', $item['id'])->where('deleted_at', '=', null)->get();
 
         if(sizeof($bundled) == 0 && sizeof($transferred) == 0){
-          $counter++;
+          if($merchantId == null){
+            $counter++;
+          }else{
+            $comsumed = 0;
+            $comsumed = app($this->landBlockProductClass)->getTotalConsumedByTrace($merchantId, $item['id']);
+            $counter += (1 - $comsumed);
+          }
         }
         if(sizeof($bundled) > 0){
           $bundledTransferred = TransferredProduct::where('payload_value', '=', $bundled[0]['bundled_trace'])->where('deleted_at', '=', null)->get();

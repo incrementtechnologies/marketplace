@@ -11,10 +11,10 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 class TransferController extends APIController
 {
-   public $transferredProductsClass = 'Increment\Marketplace\Http\TransferredProductController';
-   public $merchantClass = 'Increment\Marketplace\Http\MerchantController';
-   public $productClass = 'Increment\Marketplace\Http\ProductController';
-   public $bundledProductController = 'Increment\Marketplace\Http\BundledProductController';
+    public $transferredProductsClass = 'Increment\Marketplace\Http\TransferredProductController';
+    public $merchantClass = 'Increment\Marketplace\Http\MerchantController';
+    public $productClass = 'Increment\Marketplace\Http\ProductController';
+    public $bundledProductController = 'Increment\Marketplace\Http\BundledProductController';
     public $landBlockProductClass = 'App\Http\Controllers\LandBlockProductController';
     function __construct(){
       $this->model = new Transfer();
