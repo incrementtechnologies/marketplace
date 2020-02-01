@@ -14,7 +14,8 @@ class TransferController extends APIController
    public $transferredProductsClass = 'Increment\Marketplace\Http\TransferredProductController';
    public $merchantClass = 'Increment\Marketplace\Http\MerchantController';
    public $productClass = 'Increment\Marketplace\Http\ProductController';
-  public $bundledProductController = 'Increment\Marketplace\Http\BundledProductController';
+   public $bundledProductController = 'Increment\Marketplace\Http\BundledProductController';
+    public $landBlockProductClass = 'App\Http\Controllers\LandBlockProductController';
     function __construct(){
       $this->model = new Transfer();
       $this->localization();
@@ -114,6 +115,8 @@ class TransferController extends APIController
           $tSize = app($this->transferredProductsClass)->getSize('payload_value', $keyInner->payload_value, $keyInner->created_at);
           $bundled = app($this->bundledProductController)->getByParamsNoDetails('product_trace', $keyInner->payload_value);
           if($tSize == 0 && $bundled == null){
+            $comsumed = app($this->landBlockProductClass)->getTotalConsumedByTrace($data['merchant_id'], $keyInner->payload_value);
+            $size += (1 - $comsumed);
             $size++;
           }
           if($bundled != null){
