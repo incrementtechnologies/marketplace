@@ -105,8 +105,7 @@ class ProductController extends APIController
         foreach ($result as $key) {
           $result[$i]['account'] = $this->retrieveAccountDetails($result[$i]['account_id']);
           $result[$i]['price'] = app($this->productPricingController)->getPrice($result[$i]['id']);
-          $result[$i]['color'] = app($this->productAttrController)->getAttribute($result[$i]['id'], 'color');
-          $result[$i]['size'] = app($this->productAttrController)->getAttribute($result[$i]['id'], 'size');
+          $result[$i]['variation'] = app($this->productAttrController)->getAttribute('product_id', $result[$i]['id']);
           $result[$i]['featured'] = app($this->productImageController)->getProductImage($result[$i]['id'], 'featured');
           $result[$i]['images'] = app($this->productImageController)->getProductImage($result[$i]['id'], null);
           $result[$i]['tag_array'] = $this->manageTags($result[$i]['tags']);

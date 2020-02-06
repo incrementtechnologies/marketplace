@@ -15,4 +15,9 @@ class ProductAttributeController extends APIController
       $result = ProductAttribute::where('product_id', '=', $id)->where('payload', '=', $payload)->get();
       return (sizeof($result) > 0) ? $result : null;
     }
+
+    public function getByParams($column, $value){
+      $result = ProductAttribute::where($column, '=', $value)->orderBy('created_at', 'desc')->get();
+      return (sizeof($result) > 0) ? $result[0] : null;
+    }
 }
