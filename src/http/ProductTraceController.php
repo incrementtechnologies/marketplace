@@ -312,7 +312,7 @@ class ProductTraceController extends APIController
         $consumed = app($this->landBlockProductClass)->getTotalConsumedByTrace($merchantId, $item['payload_value']);
         $size += (1 - $consumed);
         if(intval($item['payload_value']) == intval($productTraceId)){
-          $traceQty = $consumed;
+          $traceQty = (1 - $consumed);
         }
       }
       if($bundled != null){
