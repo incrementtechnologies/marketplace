@@ -57,6 +57,7 @@ class ProductTraceController extends APIController
     $this->retrieveDB($data);
 
     $i = 0;
+    $response = array();
     foreach ($this->response['data'] as $key) {
       $item = $this->response['data'][$i];
       $this->response['data'][$i]['product'] = $product;
@@ -64,14 +65,12 @@ class ProductTraceController extends APIController
       $this->response['data'][$i]['created_at_human'] = Carbon::createFromFormat('Y-m-d H:i:s', $item['created_at'])->copy()->tz($this->response['timezone'])->format('F j, Y h:i A');
       $bundled = BundledProduct::where('product_trace', '=', $item['id'])->where('deleted_at', '=', null)->get();
       $transferred = TransferredProduct::where('payload_value', '=', $item['id'])->where('deleted_at', '=', null)->get();
-      if(sizeof($bundled) > 0){
-        $this->response['data'][$i]['status'] = 'bundled';
-      }
-      if(sizeof($transferred) > 0){
-        $this->response['data'][$i]['status'] = 'transferred';
+      if(sizeof($bundled) <= 0 || sizeof($transferred) <= 0){
+        $response[] = $this->response['data'][$i];
       }
       $i++;
     }
+    $this->response['data'] =  $response;
     $this->response['datetime_human'] = Carbon::now()->copy()->tz($this->response['timezone'])->format('F j Y h i A');
     return $this->response();
   }
