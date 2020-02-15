@@ -160,7 +160,7 @@ class ProductTraceController extends APIController
 
   public function checkOwnProduct($trace, $merchantId){
     $result = app($this->transferController)->getOwn($trace['id']);
-    if($trace['product']['type'] == 'regular'){
+    if($trace['product']){
       $bundled = app($this->bundledProductController)->getByParamsNoDetails('product_trace', $trace['id']);
       if($bundled != null){
         $bundledTransfer = app($this->transferController)->getOwn($bundled['bundled_trace']);
