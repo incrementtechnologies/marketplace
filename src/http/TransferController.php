@@ -158,7 +158,7 @@ class TransferController extends APIController
               $item = $this->response['data'][$center];
               $id = intval($item['id']);
               if($id == $key){
-                $this->response['data'][$center]['qty'] += sizeof($value);
+                $this->response['data'][$center]['qty_in_bundled'] += sizeof($value);
                 break;
               }else if($id > $key){
                 // set $i as center
@@ -170,8 +170,8 @@ class TransferController extends APIController
             }
           }else{
             $product =  app($this->productClass)->getProductByParams('id', $key);
-            $product['qty'] = sizeof($value);
-            $product['qty_in_bundled'] = 0;
+            $product['qty'] = 0;
+            $product['qty_in_bundled'] = sizeof($value);
             $this->response['data'][] = $product;
           }
         }
