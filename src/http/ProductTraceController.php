@@ -100,10 +100,17 @@ class ProductTraceController extends APIController
           $this->response['data'][$i]['product']['qty_in_bundled'] = $qty['qty_in_bundled'];
           $this->response['data'][$i]['product']['trace_qty'] = 1;
         }else{
-          $qty = $this->getBalanceQtyOtherUser($item['product_id'], $data['merchant_id'], $item['id']);
-          $this->response['data'][$i]['product']['qty'] = $qty['qty'];
-          $this->response['data'][$i]['product']['qty_in_bundled'] = $qty['qty_in_bundled'];   
-          $this->response['data'][$i]['product']['trace_qty'] = $qty['trace_qty'];       
+          $bundled = $this->response['data'][$i]['bundled_product'];
+          if($bundled != null){
+            $this->response['data'][$i]['product']['qty'] = 0; // what about if existing item
+            $this->response['data'][$i]['product']['qty_in_bundled'] = $bundled[0]['size'];   
+            $this->response['data'][$i]['product']['trace_qty'] = app($this->landBlockProductClass)->getRemainingByTrace($data['merchant_id'], $item['id'], $item['product_id']);
+          }else{
+            $qty = $this->getBalanceQtyOtherUser($item['product_id'], $data['merchant_id'], $item['id']);
+            $this->response['data'][$i]['product']['qty'] = $qty['qty'];
+            $this->response['data'][$i]['product']['qty_in_bundled'] = $qty['qty_in_bundled'];   
+            $this->response['data'][$i]['product']['trace_qty'] = $qty['trace_qty'];   
+          }    
         }
         // if($data['account_type'] == 'MANUFACTURER' || $type == 'bundled'){
         //   $this->response['data'][$i]['product']['qty'] = $this->getBalanceQty('product_id', $item['product_id'], 'active');  

@@ -86,6 +86,7 @@ class BundledProductController extends APIController
         $result[$i]['product_trace_details'] = app($this->productTraceController)->getByParamsDetails('id', $result[$i]['product_trace']);
         $result[$i]['bundled_trace_details'] = app($this->productTraceController)->getByParamsDetails('id', $result[$i]['bundled_trace']);
         $result[$i]['created_at_human'] = Carbon::createFromFormat('Y-m-d H:i:s', $result[$i]['created_at'])->copy()->tz($this->response['timezone'])->format('F j, Y h:i A');
+        $result[$i]['size'] = BundledProduct::where('bundled_trace', '=', $result[$i]['bundled_trace'])->where('deleted_at', '=', null)->count();
         $i++;
       }
     }
