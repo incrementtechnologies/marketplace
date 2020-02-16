@@ -111,7 +111,9 @@ class TransferController extends APIController
       foreach ($result as $key => $value) {
         $size = 0;
         $bundledQty = 0;
+        $productTrace = null;
         foreach ($value as $keyInner) {
+          $productTrace = $keyInner->payload_value;
           $tSize = app($this->transferredProductsClass)->getSize('payload_value', $keyInner->payload_value, $keyInner->created_at);
           $bundled = app($this->bundledProductController)->getByParamsNoDetails('product_trace', $keyInner->payload_value);
           if($tSize == 0 && $bundled == null){
@@ -130,12 +132,50 @@ class TransferController extends APIController
           $product =  app($this->productClass)->getProductByParams('id', $key);
           $product['qty'] = $size;
           $product['qty_in_bundled'] = $bundledQty;
-          $this->response['data'][$i] = $product;
+          $this->response['data'][] = $product;
+          $this->manageQtyWithBundled($product, $productTrace);
           $i++;
         }
       }
-      array_multisort(array_column($this->response['data'], 'type'), SORT_ASC, $this->response['data']);
       return $this->response();
+    }
+
+    public function manageQtyWithBundled($product, $productTrace){
+      if($product['type'] != 'regular'){
+        $bundled = app($this->bundledProductController)->getProductsByParamsNoDetails('bundled_trace', $productTrace);
+        $bundled = $bundled->groupBy('product_on_settings');
+        foreach ($bundled as $key => $value) {
+          if(array_search($key, array_column($this->response['data'], 'id')) == true){
+            $i = 0;
+            array_multisort(array_column($this->response['data'], 'id'), SORT_ASC, $this->response['data']);
+            $size = sizeof($this->response['data']);
+            while ($i < $size) {
+              $tempSize = $size - $i;
+              $center = ($tempSize % 2 == 0) ? intval($tempSize / 2)  - 1: intval($tempSize / 2);
+              $center += $i;
+              // check less than
+              // check greater than
+              $item = $this->response['data'][$center];
+              $id = intval($item['id']);
+              if($id == $key){
+                $this->response['data'][$center]['qty'] += sizeof($value);
+                break;
+              }else if($id > $key){
+                // set $i as center
+                $i = $center;
+              }else if($id < $key){
+                // set $size as center
+                $size = $center;
+              }
+            }
+          }else{
+            $product =  app($this->productClass)->getProductByParams('id', $key);
+            $product['qty'] = sizeof($value);
+            $product['qty_in_bundled'] = 0;
+            $this->response['data'][] = $product;
+          }
+        }
+      }
     }
 
     public function getQtyTransferred($merchantId, $productId){
