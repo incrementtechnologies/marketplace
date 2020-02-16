@@ -134,7 +134,7 @@ class TransferController extends APIController
           $i++;
         }
       }
-      $this->response['data'] = array_multisort(array_column($this->response['data'], 'type'), SORT_ASC, $this->response['data']);
+      array_multisort(array_column($this->response['data'], 'type'), SORT_ASC, $this->response['data']);
       return $this->response();
     }
 
