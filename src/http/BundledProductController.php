@@ -147,4 +147,32 @@ class BundledProductController extends APIController
     $this->response['data'] = true;
     return $this->response();
   }
+
+  public function deleteByParams($column, $value, $transferId){
+    $bundledItems = BundledProduct::where($column, '=', $value)->where('deleted_at', '=', null)->get();
+    if(sizeof($bundledItems) > 0){
+      $parameter = array();
+      foreach ($bundledItems as $key) {
+        $newArray = array(
+          'transfer_id' => $transferId,
+          'payload'     => 'product_traces',
+          'payload_value' => $key['product_trace'],
+          'product_id'  => $key['product_on_settings'],
+          'created_at'  => Carbon::now()
+        );
+        $parameter[] = $newArray;
+      }
+      app($this->transferredProductClass)->insert($parameter);
+    }else{
+      // nothing
+    }
+    BundledProduct::where('bundled_trace', '=', $value)->update(
+      array(
+        'deleted_at' => Carbon::now()
+      )
+    );
+    app($this->transferredProductClass)->deleteByTwoParams($transferId, $value);
+    app($this->productTraceController)->deleteByParams($value);
+    return true;
+  }
 }
