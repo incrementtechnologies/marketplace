@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Increment\Marketplace\Http;
 
 use Illuminate\Http\Request;
