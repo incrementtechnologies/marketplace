@@ -19,10 +19,15 @@ class MerchantController extends APIController
 
   public function create(Request $request){
     $data = $request->all();
-    $data['code'] = $this->generateCode();
-    $data['status'] = 'not_verified';
-    $this->model = new Merchant();
-    $this->insertDB($data);
+    if($this->getByParams('account_id', $data['account_id']) == null){
+      $data['code'] = $this->generateCode();
+      $data['status'] = 'not_verified';
+      $this->model = new Merchant();
+      $this->insertDB($data);
+    }else{
+      $this->response['data'] = null;
+      $this->response['error'] = 'Already existed.';
+    }
     return $this->response();
   }
 
