@@ -143,22 +143,25 @@ class TransferController extends APIController
     }
 
     public function addBundledToExistingProducts($productId, $size){
-      $i = 0;
-      $selected = null;
-      foreach ($this->response['data'] as $key) {
-        if(intval($this->response['data'][$i]['id']) == $productId){
-          $this->response['data'][$i]['qty_in_bundled'] += $size;
-          $selected = $i;
-          break;
-        }
-        $i++;
-      }
-      // if($selected == null){
-      //   $product =  app($this->productClass)->getProductByParams('id', $productId);
-      //   $product['qty'] = 0;
-      //   $product['qty_in_bundled'] = $size;
-      //   $this->response['data'][] = $selected ? $product;
+      // $i = 0;
+      // $selected = null;
+      // foreach ($this->response['data'] as $key) {
+      //   if(intval($this->response['data'][$i]['id']) == $productId){
+      //     $this->response['data'][$i]['qty_in_bundled'] += $size;
+      //     $selected = $i;
+      //     break;
+      //   }
+      //   $i++;
       // }
+      $key = array_search($productId, array_column($this->response['data'], 'id'));
+      if($key){
+        $this->response['data'][$key]['qty_in_bundled'] += $size;
+      }else{
+        $product =  app($this->productClass)->getProductByParams('id', $productId);
+        $product['qty'] = 0;
+        $product['qty_in_bundled'] = $size;
+        $this->response['data'][] = $product;        
+      }
     }
 
     public function manageQtyWithBundled($product, $productTrace){
