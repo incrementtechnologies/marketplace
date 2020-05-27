@@ -143,27 +143,36 @@ class TransferController extends APIController
     }
 
     public function getResultProductStatusByKey($productId){
-      array_multisort(array_column($this->response['data'], 'id'), SORT_ASC, $this->response['data']);
+      // array_multisort(array_column($this->response['data'], 'id'), SORT_ASC, $this->response['data']);
+      // $i = 0;
+      // $selected = false;
+      // $size = sizeof($this->response['data']);
+      // while ($i < $size) {
+      //   $tempSize = $size - $i;
+      //   $center = ($tempSize % 2 == 0) ? intval($tempSize / 2)  - 1: intval($tempSize / 2);
+      //   $center += $i;
+      //   // check less than
+      //   // check greater than
+      //   $item = $this->response['data'][$center];
+      //   $id = intval($item['id']);
+      //   if($id == $productId){
+      //     $selected = $center;
+      //     break;
+      //   }else if($id > $productId){
+      //     // set $i as center
+      //     $i = $center;
+      //   }else if($id < $productId){
+      //     // set $size as center
+      //     $size = $center;
+      //   }
+      // }
+      // return $selected;
       $i = 0;
-      $size = sizeof($this->response['data']);
-      while ($i < $size) {
-        $tempSize = $size - $i;
-        $center = ($tempSize % 2 == 0) ? intval($tempSize / 2)  - 1: intval($tempSize / 2);
-        $center += $i;
-        // check less than
-        // check greater than
-        $item = $this->response['data'][$center];
-        $id = intval($item['id']);
-        if($id == $productId){
-          return $center;
-          break;
-        }else if($id > $productId){
-          // set $i as center
-          $i = $center;
-        }else if($id < $productId){
-          // set $size as center
-          $size = $center;
+      foreach ($this->response['data'] as $key) {
+        if(intval($key['id']) == $productId){
+          return $i;
         }
+        $i++;
       }
       return false;
     }
@@ -175,7 +184,7 @@ class TransferController extends APIController
         foreach ($bundled as $key => $value) {
           $status = $this->getResultProductStatusByKey(intval($key));
           if($status != false){
-            // $this->response['data'][$status]['qty_in_bundled'] += sizeof($value);
+            $this->response['data'][$status]['qty_in_bundled'] += sizeof($value);
           }else{
             $product =  app($this->productClass)->getProductByParams('id', $key);
             $product['qty'] = 0;
