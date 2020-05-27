@@ -181,10 +181,11 @@ class TransferController extends APIController
 
     public function manageQtyWithBundled($product, $productTrace){
       if($product['type'] != 'regular'){
+        echo $productTrace;
         $bundled = app($this->bundledProductController)->getProductsByParamsNoDetails('bundled_trace', $productTrace);
         $bundled = $bundled->groupBy('product_on_settings');
         foreach ($bundled as $key => $value) {
-          echo $key;
+          // echo $key;
           // $status = $this->getResultProductStatusByKey(intval($key));
           // if($status != false){
           //   $this->response['data'][$status]['qty_in_bundled'] += sizeof($value);
