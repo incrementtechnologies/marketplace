@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\APIController;
 use Increment\Marketplace\Models\BundledProduct;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 class BundledProductController extends APIController
 {
   
@@ -102,8 +103,8 @@ class BundledProductController extends APIController
     return BundledProduct::where($column, '=', $value)->where('deleted_at', '=', null)->get();
   }
 
-  public function getProductsByParamsNoDetailsGroupBy($column, $value, $groupBy){
-    return BundledProduct::where($column, '=', $value)->where('deleted_at', '=', null)->groupBy($groupBy)->get();
+  public function getProductsByParamsNoDetailsDBFormat($column, $value){
+    return DB::table('bundled_products')->where($column, '=', $value)->where('deleted_at', '=', null)->get();
   }
 
   public function updateDeletedAt(Request $request){
