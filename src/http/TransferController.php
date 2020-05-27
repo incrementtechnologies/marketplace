@@ -148,8 +148,10 @@ class TransferController extends APIController
         $bundled = $bundled->groupBy('product_on_settings');
         $this->response['others'][] = $bundled;
         foreach ($bundled as $key => $value) {
+          $product = null;
+          $index = null;
           $index = array_search(intval($key), array_column($this->response['data'], 'id'), true);
-          if($index){
+          if($index && $index != false){
             $this->response['data'][$index]['qty_in_bundled'] += sizeof($value);
           }else{
             $product =  app($this->productClass)->getProductByParams('id', intval($key));
