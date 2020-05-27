@@ -168,9 +168,9 @@ class TransferController extends APIController
       // }
       // return $selected;
       $i = 0;
-      $selected = false;
+      $selected = null;
       foreach ($this->response['data'] as $key) {
-        if(intval($key['id']) == $productId){
+        if(intval($this->response['data'][$i]['id']) == $productId){
           $selected = $i;
           break;
         }
@@ -181,20 +181,18 @@ class TransferController extends APIController
 
     public function manageQtyWithBundled($product, $productTrace){
       if($product['type'] != 'regular'){
-        echo $productTrace.'/';
         $bundled = app($this->bundledProductController)->getProductsByParamsNoDetails('bundled_trace', $productTrace);
         $bundled = $bundled->groupBy('product_on_settings');
         foreach ($bundled as $key => $value) {
-          // echo $key;
-          // $status = $this->getResultProductStatusByKey(intval($key));
-          // if($status != false){
-          //   $this->response['data'][$status]['qty_in_bundled'] += sizeof($value);
-          // }else{
-          //   $product =  app($this->productClass)->getProductByParams('id', $key);
-          //   $product['qty'] = 0;
-          //   $product['qty_in_bundled'] = sizeof($value);
-          //   $this->response['data'][] = $product;
-          // }
+          $status = $this->getResultProductStatusByKey(intval($key));
+          if($status != null){
+            $this->response['data'][$status]['qty_in_bundled'] += sizeof($value);
+          }else{
+            $product =  app($this->productClass)->getProductByParams('id', $key);
+            $product['qty'] = 0;
+            $product['qty_in_bundled'] = sizeof($value);
+            $this->response['data'][] = $product;
+          }
         }
       }
     }
