@@ -102,6 +102,10 @@ class BundledProductController extends APIController
     return BundledProduct::where($column, '=', $value)->where('deleted_at', '=', null)->get();
   }
 
+  public function getProductsByParamsNoDetailsGroupBy($column, $value, $groupBy){
+    return BundledProduct::where($column, '=', $value)->where('deleted_at', '=', null)->groupBy($groupBy)->get();
+  }
+
   public function updateDeletedAt(Request $request){
     $data = $request->all();
     BundledProduct::where('bundled_trace', '=', $data['bundled_trace'])->where('product_trace', '=', $data['product_trace'])->update(
