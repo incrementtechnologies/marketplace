@@ -153,12 +153,12 @@ class TransferController extends APIController
         }
         $i++;
       }
-      if($selected == null){
-        $product =  app($this->productClass)->getProductByParams('id', $productId);
-        $product['qty'] = 0;
-        $product['qty_in_bundled'] = $size;
-        $this->response['data'][] = $product;
-      }
+      // if($selected == null){
+      //   $product =  app($this->productClass)->getProductByParams('id', $productId);
+      //   $product['qty'] = 0;
+      //   $product['qty_in_bundled'] = $size;
+      //   $this->response['data'][] = $selected ? $product;
+      // }
     }
 
     public function manageQtyWithBundled($product, $productTrace){
