@@ -186,14 +186,14 @@ class TransferController extends APIController
         foreach ($bundled as $key => $value) {
           echo $key;
           // $status = $this->getResultProductStatusByKey(intval($key));
-          if($status != false){
-            $this->response['data'][$status]['qty_in_bundled'] += sizeof($value);
-          }else{
-            $product =  app($this->productClass)->getProductByParams('id', $key);
-            $product['qty'] = 0;
-            $product['qty_in_bundled'] = sizeof($value);
-            $this->response['data'][] = $product;
-          }
+          // if($status != false){
+          //   $this->response['data'][$status]['qty_in_bundled'] += sizeof($value);
+          // }else{
+          //   $product =  app($this->productClass)->getProductByParams('id', $key);
+          //   $product['qty'] = 0;
+          //   $product['qty_in_bundled'] = sizeof($value);
+          //   $this->response['data'][] = $product;
+          // }
         }
       }
     }
