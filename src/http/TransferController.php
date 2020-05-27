@@ -154,13 +154,13 @@ class TransferController extends APIController
         // check greater than
         $item = $this->response['data'][$center];
         $id = intval($item['id']);
-        if($id == $key){
+        if($id == $productId){
           return $center;
           break;
-        }else if($id > $key){
+        }else if($id > $productId){
           // set $i as center
           $i = $center;
-        }else if($id < $key){
+        }else if($id < $productId){
           // set $size as center
           $size = $center;
         }
