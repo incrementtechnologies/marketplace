@@ -168,13 +168,15 @@ class TransferController extends APIController
       // }
       // return $selected;
       $i = 0;
+      $selected = false;
       foreach ($this->response['data'] as $key) {
         if(intval($key['id']) == $productId){
-          return $i;
+          $selected = $i;
+          break;
         }
         $i++;
       }
-      return false;
+      return $selected;
     }
 
     public function manageQtyWithBundled($product, $productTrace){
