@@ -142,34 +142,40 @@ class TransferController extends APIController
       return $this->response();
     }
 
+    public function getResultProductStatusByKey($productId){
+      array_multisort(array_column($this->response['data'], 'id'), SORT_ASC, $this->response['data']);
+      $i = 0;
+      $size = sizeof($this->response['data']);
+      while ($i < $size) {
+        $tempSize = $size - $i;
+        $center = ($tempSize % 2 == 0) ? intval($tempSize / 2)  - 1: intval($tempSize / 2);
+        $center += $i;
+        // check less than
+        // check greater than
+        $item = $this->response['data'][$center];
+        $id = intval($item['id']);
+        if($id == $key){
+          return $center;
+          break;
+        }else if($id > $key){
+          // set $i as center
+          $i = $center;
+        }else if($id < $key){
+          // set $size as center
+          $size = $center;
+        }
+      }
+      return false;
+    }
+
     public function manageQtyWithBundled($product, $productTrace){
       if($product['type'] != 'regular'){
         $bundled = app($this->bundledProductController)->getProductsByParamsNoDetails('bundled_trace', $productTrace);
         $bundled = $bundled->groupBy('product_on_settings');
         foreach ($bundled as $key => $value) {
-          if(array_search($key, array_column($this->response['data'], 'id')) == true){
-            $i = 0;
-            array_multisort(array_column($this->response['data'], 'id'), SORT_ASC, $this->response['data']);
-            $size = sizeof($this->response['data']);
-            while ($i < $size) {
-              $tempSize = $size - $i;
-              $center = ($tempSize % 2 == 0) ? intval($tempSize / 2)  - 1: intval($tempSize / 2);
-              $center += $i;
-              // check less than
-              // check greater than
-              $item = $this->response['data'][$center];
-              $id = intval($item['id']);
-              if($id == $key){
-                $this->response['data'][$center]['qty_in_bundled'] += sizeof($value);
-                break;
-              }else if($id > $key){
-                // set $i as center
-                $i = $center;
-              }else if($id < $key){
-                // set $size as center
-                $size = $center;
-              }
-            }
+          $status = $this->getResultProductStatusByKey($key);
+          if($status != false){
+            $this->response['data'][$status]['qty_in_bundled'] += sizeof($value);
           }else{
             $product =  app($this->productClass)->getProductByParams('id', $key);
             $product['qty'] = 0;
