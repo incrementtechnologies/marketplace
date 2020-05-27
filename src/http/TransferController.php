@@ -148,14 +148,17 @@ class TransferController extends APIController
       foreach ($this->response['data'] as $key) {
         if(intval($this->response['data'][$i]['id']) == $productId){
           $this->response['data'][$i]['qty_in_bundled'] += $size;
+          $selected = $i;
           break;
         }
         $i++;
       }
-      $product =  app($this->productClass)->getProductByParams('id', $productId);
-      $product['qty'] = 0;
-      $product['qty_in_bundled'] = $size;
-      $this->response['data'][] = $product;
+      if($selected == null){
+        $product =  app($this->productClass)->getProductByParams('id', $productId);
+        $product['qty'] = 0;
+        $product['qty_in_bundled'] = $size;
+        $this->response['data'][] = $product;
+      }
     }
 
     public function manageQtyWithBundled($product, $productTrace){
