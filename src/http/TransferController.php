@@ -151,6 +151,7 @@ class TransferController extends APIController
           $product = null;
           $index = null;
           $index = array_search(intval($key), array_column($this->response['data'], 'id'), true);
+          echo $index.'/';
           if($index && $index != false){
             $this->response['data'][$index]['qty_in_bundled'] += sizeof($value);
           }else{
