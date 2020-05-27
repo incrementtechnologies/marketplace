@@ -154,6 +154,7 @@ class TransferController extends APIController
       //   $i++;
       // }
       $key = array_search($productId, array_column($this->response['data'], 'id'));
+      echo $key.'/';
       if($key){
         $this->response['data'][$key]['qty_in_bundled'] += $size;
       }else{
