@@ -135,7 +135,7 @@ class TransferController extends APIController
           $product['qty'] = $size;
           $product['qty_in_bundled'] = $bundledQty;
           $this->response['data'][] = $product;
-          $this->manageQtyWithBundled($product, $productTrace);
+          // $this->manageQtyWithBundled($product, $productTrace);
           $i++;
         }
       }
@@ -173,7 +173,7 @@ class TransferController extends APIController
         $bundled = app($this->bundledProductController)->getProductsByParamsNoDetails('bundled_trace', $productTrace);
         $bundled = $bundled->groupBy('product_on_settings');
         foreach ($bundled as $key => $value) {
-          $status = $this->getResultProductStatusByKey($key);
+          $status = $this->getResultProductStatusByKey(intval($key));
           if($status != false){
             $this->response['data'][$status]['qty_in_bundled'] += sizeof($value);
           }else{
