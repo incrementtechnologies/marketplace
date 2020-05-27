@@ -146,17 +146,18 @@ class TransferController extends APIController
       if($product['type'] != 'regular'){
         $bundled = app($this->bundledProductController)->getProductsByParamsNoDetails('bundled_trace', $productTrace);
         $bundled = $bundled->groupBy('product_on_settings');
-        foreach ($bundled as $key => $value) {
-          $index = array_search(intval($key), array_column($this->response['data'], 'id'), true);
-          if($index != false){
-            $this->response['data'][$index]['qty_in_bundled'] += sizeof($value);
-          }else{
-            $product =  app($this->productClass)->getProductByParams('id', intval($key));
-            $product['qty'] = 0;
-            $product['qty_in_bundled'] = sizeof($value);
-            $this->response['data'][] = $product;
-          }
-        }
+        $this->response['others'] = $bundled;
+        // foreach ($bundled as $key => $value) {
+        //   $index = array_search(intval($key), array_column($this->response['data'], 'id'), true);
+        //   if($index != false){
+        //     $this->response['data'][$index]['qty_in_bundled'] += sizeof($value);
+        //   }else{
+        //     $product =  app($this->productClass)->getProductByParams('id', intval($key));
+        //     $product['qty'] = 0;
+        //     $product['qty_in_bundled'] = sizeof($value);
+        //     $this->response['data'][] = $product;
+        //   }
+        // }
       }
     }
 
