@@ -57,6 +57,16 @@ class ProductController extends APIController
       return $this->response();
     }
 
+     public function retrieveBasic(Request $request){
+      $data = $request->all();
+      $inventoryType = $data['inventory_type'];
+      $accountId = $data['account_id'];
+      $this->model = new Product();
+      $this->retrieveDB($data);
+      $this->response['data'] = $this->manageResultBasic($this->response['data'], null, $inventoryType);
+      return $this->response();
+    }
+
     public function getRemainingQty($id){
       $issued = intval(app($this->checkoutItemController)->getQty('product', $id));
       $total = intval(app($this->inventoryController)->getQty($id));
@@ -98,6 +108,30 @@ class ProductController extends APIController
          } 
       }
       return sizeof($result) > 0 ? $result[0] : null;      
+    }
+    
+    public function manageResultBasic($result, $accountId, $inventoryType){
+      if(sizeof($result) > 0){
+        $i = 0;
+        foreach ($result as $key) {
+          $result[$i]['featured'] = app($this->productImageController)->getProductImage($result[$i]['id'], 'featured');
+          $result[$i]['tag_array'] = $this->manageTags($result[$i]['tags']);
+          $result[$i]['created_at_human'] = Carbon::createFromFormat('Y-m-d H:i:s', $result[$i]['created_at'])->copy()->tz($this->response['timezone'])->format('F j, Y H:i A');
+          $result[$i]['inventories'] = null;
+          $result[$i]['product_traces'] = null;
+          if($inventoryType == 'inventory'){
+            $result[$i]['inventories'] = app($this->inventoryController)->getInventory($result[$i]['id']);
+            $result[$i]['qty'] = $this->getRemainingQty($result[$i]['id']);
+          }else if($inventoryType == 'product_trace'){
+            // $result[$i]['product_traces'] =  app($this->productTraceController)->getByParams('product_id', $result[$i]['id']);
+            $qty = app($this->productTraceController)->getBalanceQtyWithInBundled('product_id', $result[$i]['id']);
+            $result[$i]['qty'] = $qty['qty'];
+            $result[$i]['qty_in_bundled'] = $qty['qty_in_bundled'];
+          }
+          $i++;
+        }
+      }
+      return $result;
     }
 
     public function manageResult($result, $accountId, $inventoryType){
