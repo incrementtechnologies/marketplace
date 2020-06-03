@@ -51,6 +51,7 @@ $route = env('PACKAGE_ROUTE', '').'/products/';
 $controller = 'Increment\Marketplace\Http\ProductController@';
 Route::post($route.'create', $controller."create");
 Route::post($route.'retrieve', $controller."retrieve");
+Route::post($route.'retrieve_basic', $controller."retrieveBasic");
 Route::post($route.'update', $controller."update");
 Route::post($route.'delete', $controller."delete");
 Route::get($route.'test', $controller."test");
