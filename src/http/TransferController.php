@@ -102,11 +102,12 @@ class TransferController extends APIController
       $result = DB::table('transfers as T1')
       ->join('transferred_products as T2', 'T2.transfer_id', '=', 'T1.id')
       ->join('products as T3', function($join){
-          if(isset($data['type']) && $data['type'] != 'regular'){
-            $join->on('T3.id', '=', 'T2.product_id')->where('T3.type', '=', 'bundled')->orWhere('T3.type', '=', 'custom_bundled');
-          }else{
-            $join->on('T3.id', '=', 'T2.product_id')->where('T3.type', '=', 'regular');
-          }
+          $join->on('T3.id', '=', 'T2.product_id');
+          // if(isset($data['type']) && $data['type'] != 'regular'){
+          //   $join->on('T3.id', '=', 'T2.product_id')->where('T3.type', '=', 'bundled')->orWhere('T3.type', '=', 'custom_bundled');
+          // }else{
+          //   $join->on('T3.id', '=', 'T2.product_id')->where('T3.type', '=', 'regular');
+          // }
        })
       ->where('T1.to', '=', $data['merchant_id'])
       ->where('T2.deleted_at', '=', null)
