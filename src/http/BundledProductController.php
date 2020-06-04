@@ -99,6 +99,11 @@ class BundledProductController extends APIController
     return sizeof($result) > 0 ? $result[0] : null;
   }
 
+  public function getByParamsNoDetailsWithLimit($column, $value, $limit){
+    $result = BundledProduct::where($column, '=', $value)->where('deleted_at', '=', null)->limit($limit)->get();
+    return sizeof($result) > 0 ? $result[0] : null;
+  }
+
   public function getProductsByParamsNoDetails($column, $value){
     return BundledProduct::where($column, '=', $value)->where('deleted_at', '=', null)->get();
   }

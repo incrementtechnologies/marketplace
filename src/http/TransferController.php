@@ -116,7 +116,7 @@ class TransferController extends APIController
         foreach ($value as $keyInner) {
           $productTrace = $keyInner->payload_value;
           $tSize = app($this->transferredProductsClass)->getSize('payload_value', $keyInner->payload_value, $keyInner->created_at);
-          $bundled = app($this->bundledProductController)->getByParamsNoDetails('product_trace', $keyInner->payload_value);
+          $bundled = app($this->bundledProductController)->getByParamsNoDetailsWithLimit('product_trace', $keyInner->payload_value, 1);
           $trace = app($this->productTraceClass)->getByParamsByFlag('id', $productTrace);
           if($tSize == 0 && $bundled == null && $trace == true){
             $comsumed = 0;
@@ -124,7 +124,7 @@ class TransferController extends APIController
             $size += (1 - $comsumed);
           }
           if($bundled != null){
-            $bundledTransferred = TransferredProduct::where('payload_value', '=', $bundled['bundled_trace'])->where('deleted_at', '=', null)->get();
+            $bundledTransferred = TransferredProduct::where('payload_value', '=', $bundled['bundled_trace'])->where('deleted_at', '=', null)->limit(1)->get();
             if(sizeof($bundledTransferred) == 0){
               $bundledQty++;
             }
@@ -146,7 +146,6 @@ class TransferController extends APIController
       if($product['type'] != 'regular'){
         $bundled = app($this->bundledProductController)->getProductsByParamsNoDetailsDBFormat('bundled_trace', $productTrace);
         $bundled = $bundled->groupBy('product_on_settings');
-        $this->response['others'][] = $bundled;
         foreach ($bundled as $key => $value) {
           $product = null;
           $index = null;
