@@ -101,9 +101,10 @@ class TransferController extends APIController
       $data = $request->all();
       $result = DB::table('transfers as T1')
       ->join('transferred_products as T2', 'T2.transfer_id', '=', 'T1.id')
-      ->join('products as T3', 'T3.merchant_id', '=', 'T1.to')
+      ->join('products as T3', function($join){
+          $join->on('T1.to', '=', 'T3.merchant_id')->where('T3.type', '=', isset($data['type']) ? $data['type'] : 'regular');
+       })
       ->where('T1.to', '=', $data['merchant_id'])
-      ->where('T3.type', '=', isset($data['type']) ? $data['type'] : 'regular')
       ->where('T2.deleted_at', '=', null)
       ->where('T1.deleted_at', '=', null)
       ->get(['T2.*']);
