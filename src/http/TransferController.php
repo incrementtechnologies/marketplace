@@ -103,7 +103,7 @@ class TransferController extends APIController
       ->join('transferred_products as T2', 'T2.transfer_id', '=', 'T1.id')
       ->join('products as T3', 'T3.merchant_id', '=', 'T1.to')
       ->where('T1.to', '=', $data['merchant_id'])
-      ->where('T3.type', '=', $data['type'])
+      ->where('T3.type', '=', isset($data['type']) ? $data['type'] : 'regular')
       ->where('T2.deleted_at', '=', null)
       ->where('T1.deleted_at', '=', null)
       ->get(['T2.*']);
