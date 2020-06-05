@@ -112,7 +112,7 @@ class TransferController extends APIController
       ->where('T1.to', '=', $data['merchant_id'])
       ->where('T2.deleted_at', '=', null)
       ->where('T1.deleted_at', '=', null)
-      ->get(['T2.*']);
+      ->get(['T2.product_id, T2.created_at, T2.payload_value']);
 
       $result = $result->groupBy('product_id');
       $i = 0;
@@ -132,14 +132,14 @@ class TransferController extends APIController
             $size += (1 - $comsumed);
           }
           if($bundled != null){
-            $bundledTransferred = TransferredProduct::where('payload_value', '=', $bundled['bundled_trace'])->where('deleted_at', '=', null)->limit(1)->get();
-            if(sizeof($bundledTransferred) == 0){
+            $bundledTransferred = TransferredProduct::where('payload_value', '=', $bundled['bundled_trace'])->where('deleted_at', '=', null)->limit(1)->count();
+            if($bundledTransferred == 0){
               $bundledQty++;
             }
           }
         }
         if($size > 0){
-          $product =  app($this->productClass)->getProductByParams('id', $key);
+          $product =  app($this->productClass)->getProductByParamsConsignments('id', $key);
           $product['qty'] = $size;
           $product['qty_in_bundled'] = $bundledQty;
           $this->response['data'][] = $product;
@@ -161,7 +161,7 @@ class TransferController extends APIController
           if(is_int($index)){
             $this->response['data'][$index]['qty_in_bundled'] += sizeof($value);
           }else{
-            $product =  app($this->productClass)->getProductByParams('id', intval($key));
+            $product =  app($this->productClass)->getProductByParamsConsignments('id', intval($key));
             $product['qty'] = 0;
             $product['qty_in_bundled'] = sizeof($value);
             $this->response['data'][] = $product;

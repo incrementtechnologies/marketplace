@@ -121,4 +121,9 @@ class MerchantController extends APIController
     $result = Merchant::where($column, '=', $value)->get();
     return sizeof($result) > 0 ? $result[0] : null;
   }
+
+  public function getByParamsConsignments($column, $value){
+    $result = Merchant::where($column, '=', $value)->get(['id', 'name']);
+    return sizeof($result) > 0 ? $result[0] : null;
+  }
 }
