@@ -104,6 +104,7 @@ class TransferController extends APIController
       ->where('T1.to', '=', $data['merchant_id'])
       ->where('T2.deleted_at', '=', null)
       ->where('T1.deleted_at', '=', null)
+      ->limit(10)
       ->get(['T2.product_id', 'T2.created_at', 'T2.payload_value']);
 
       $result = $result->groupBy('product_id');
