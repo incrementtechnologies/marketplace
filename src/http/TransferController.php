@@ -108,8 +108,6 @@ class TransferController extends APIController
 
       $result = $result->groupBy('product_id');
       $i = 0;
-      // $this->response['data'] = $result;
-      return $this->response();
       foreach ($result as $key => $value) {
         $size = 0;
         $bundledQty = 0;
