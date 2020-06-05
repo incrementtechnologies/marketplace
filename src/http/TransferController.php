@@ -134,7 +134,7 @@ class TransferController extends APIController
           $product['qty'] = $size;
           $product['qty_in_bundled'] = $bundledQty;
           $this->response['data'][] = $product;
-          $this->manageQtyWithBundled($product, $productTrace);
+          // $this->manageQtyWithBundled($product, $productTrace);
           $i++;
         }
       }
