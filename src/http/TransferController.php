@@ -114,7 +114,7 @@ class TransferController extends APIController
         $productTrace = null;
         foreach ($value as $keyInner) {
           $productTrace = $keyInner->payload_value;
-          $tSize = app($this->transferredProductsClass)->getSize('payload_value', $keyInner->payload_value, $keyInner->created_at);
+          $tSize = app($this->transferredProductsClass)->getSizeLimit('payload_value', $keyInner->payload_value, $keyInner->created_at);
           $bundled = app($this->bundledProductController)->getByParamsNoDetailsWithLimit('product_trace', $keyInner->payload_value, 1);
           $trace = app($this->productTraceClass)->getByParamsByFlag('id', $productTrace);
           if($tSize == 0 && $bundled == null && $trace == true){
@@ -134,7 +134,7 @@ class TransferController extends APIController
           $product['qty'] = $size;
           $product['qty_in_bundled'] = $bundledQty;
           $this->response['data'][] = $product;
-          // $this->manageQtyWithBundled($product, $productTrace);
+          $this->manageQtyWithBundled($product, $productTrace);
           $i++;
         }
       }
@@ -145,19 +145,19 @@ class TransferController extends APIController
       if($product['type'] != 'regular'){
         $bundled = app($this->bundledProductController)->getProductsByParamsNoDetailsDBFormat('bundled_trace', $productTrace);
         $this->response['others'] = $bundled;
-        // foreach ($bundled as $key => $value) {
-        //   $product = null;
-        //   $index = null;
-        //   $index = array_search(intval($key), array_column($this->response['data'], 'id'), true);
-        //   if(is_int($index)){
-        //     $this->response['data'][$index]['qty_in_bundled'] += sizeof($value->);
-        //   }else{
-        //     $product =  app($this->productClass)->getProductByParamsConsignments('id', intval($key));
-        //     $product['qty'] = 0;
-        //     $product['qty_in_bundled'] = sizeof($value);
-        //     $this->response['data'][] = $product;
-        //   }
-        // }
+        foreach ($bundled as $key => $value) {
+          $product = null;
+          $index = null;
+          $index = array_search(intval($key), array_column($this->response['data'], 'id'), true);
+          if(is_int($index)){
+            $this->response['data'][$index]['qty_in_bundled'] += sizeof($value->);
+          }else{
+            $product =  app($this->productClass)->getProductByParamsConsignments('id', intval($key));
+            $product['qty'] = 0;
+            $product['qty_in_bundled'] = sizeof($value);
+            $this->response['data'][] = $product;
+          }
+        }
       }
     }
 

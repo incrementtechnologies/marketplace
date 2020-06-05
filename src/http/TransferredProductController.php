@@ -116,6 +116,11 @@ class TransferredProductController extends APIController
       return $result;
     }
 
+    public function getSizeLimit($column, $value, $date){
+      $result = TransferredProduct::where($column, '=', $value)->where('created_at', '>', $date)->limit(1)->count();
+      return $result;
+    }
+
     public function deleteByParams($id){
       TransferredProduct::where('id', '=', $id)->update(array(
         'deleted_at' => Carbon::now()
