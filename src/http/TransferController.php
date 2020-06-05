@@ -106,9 +106,9 @@ class TransferController extends APIController
       ->where('T1.deleted_at', '=', null)
       ->get(['T2.product_id', 'T2.created_at', 'T2.payload_value']);
 
-      $result1 = $result->groupBy('product_id');
+      $result = $result->groupBy('product_id');
       $i = 0;
-      $this->response['data'] = $result;
+      // $this->response['data'] = $result;
       return $this->response();
       foreach ($result as $key => $value) {
         $size = 0;
