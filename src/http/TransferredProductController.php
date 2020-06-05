@@ -116,6 +116,11 @@ class TransferredProductController extends APIController
       return $result;
     }
 
+    public function getSizeNoDate($column, $value){
+      $result = TransferredProduct::where($column, '=', $value)->count();
+      return $result;
+    }
+
     public function getSizeLimit($column, $value, $date){
       $result = TransferredProduct::where($column, '=', $value)->where('created_at', '>', $date)->limit(1)->count();
       return $result;
