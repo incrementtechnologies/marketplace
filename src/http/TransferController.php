@@ -150,11 +150,11 @@ class TransferController extends APIController
           $index = null;
           $index = array_search(intval($key->product_on_settings), array_column($this->response['data'], 'id'), true);
           if(is_int($index)){
-            $this->response['data'][$index]['qty_in_bundled'] += sizeof($key->size);
+            $this->response['data'][$index]['qty_in_bundled'] += intval($key->size);
           }else{
             $product =  app($this->productClass)->getProductByParamsConsignments('id', intval($key->product_on_settings));
             $product['qty'] = 0;
-            $product['qty_in_bundled'] = sizeof($value);
+            $product['qty_in_bundled'] = intval($key->size);
             $this->response['data'][] = $product;
           }
         }
