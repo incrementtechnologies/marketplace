@@ -109,7 +109,7 @@ class BundledProductController extends APIController
   }
 
   public function getProductsByParamsNoDetailsDBFormat($column, $value){
-    return DB::table('bundled_products')->where($column, '=', $value)->where('deleted_at', '=', null)->get();
+    return DB::table('bundled_products')->where($column, '=', $value)->where('deleted_at', '=', null)->groupBy('product_on_settings')->get();
   }
 
   public function updateDeletedAt(Request $request){
