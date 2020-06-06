@@ -123,7 +123,7 @@ class TransferController extends APIController
             // only to end user
             // should add user type on the parameter
             $comsumed = 0;
-            $comsumed = app($this->landBlockProductClass)->getTotalConsumedByTrace($data['merchant_id'], $keyInner->payload_value, $keyInner->product_id);
+            $comsumed = app($this->landBlockProductClass)->getTotalConsumedByTrace($data['merchant_id'], $productTrace, $key);
             $size += (1 - $comsumed);
           }
 
