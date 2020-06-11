@@ -112,7 +112,7 @@ class ProductController extends APIController
 
 
     public function getProductByParamsConsignments($column, $value){
-      $result = Product::where($column, '=', $value)->get(['id', 'type', 'title', 'merchant_id']);
+      $result = Product::where($column, '=', $value)->get(['id', 'code', 'type', 'title', 'merchant_id']);
       if(sizeof($result) > 0){
         $i= 0;
         foreach ($result as $key) {
