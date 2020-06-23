@@ -129,7 +129,7 @@ class ProductController extends APIController
           $result[$i]['merchant'] = app($this->merchantController)->getByParamsConsignments('id', $result[$i]['merchant_id']);
           $result[$i]['featured'] = app($this->productImageController)->getProductImage($result[$i]['id'], 'featured');
           // $result[$i]['images'] = app($this->productImageController)->getProductImage($result[$i]['id'], null);
-          // $result[$i]['variation'] = app($this->productAttrController)->getByParams('product_id', $result[$i]['id']);
+          $result[$i]['variation'] = app($this->productAttrController)->getByParams('product_id', $result[$i]['id']);
          } 
       }
       return sizeof($result) > 0 ? $result[0] : null;      
