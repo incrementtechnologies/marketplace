@@ -41,6 +41,18 @@ class ProductTraceController extends APIController
     return sizeof($result) > 0 ? $result : null;
   }
 
+  public function getByParamsLimitOne($column, $value){
+    $result  = ProductTrace::where($column, '=', $value)->orderBy('created_at', 'desc')->get();
+    if(sizeof($result) > 0){
+      $i = 0;
+      foreach ($result as $key) {
+        $result[$i]['created_at_human'] = Carbon::createFromFormat('Y-m-d H:i:s', $result[$i]['created_at'])->copy()->tz($this->response['timezone'])->format('F j, Y h:i A');
+        $i++;
+      }
+    }
+    return sizeof($result) > 0 ? $result[0] : null;
+  }
+
   public function retrieve(Request $request){
     $data = $request->all();
     $product = app($this->productController)->getProductByParams('code', $data['code']);

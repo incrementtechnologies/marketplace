@@ -135,6 +135,18 @@ class ProductController extends APIController
       return sizeof($result) > 0 ? $result[0] : null;      
     }
 
+
+    public function getProductByVariations($column, $value){
+      $result = Product::where($column, '=', $value)->get(['id', 'code', 'type', 'title', 'merchant_id']);
+      if(sizeof($result) > 0){
+        $i= 0;
+        foreach ($result as $key) {
+          $result[$i]['variation'] = app($this->productAttrController)->getByParams('product_id', $result[$i]['id']);
+         } 
+      }
+      return sizeof($result) > 0 ? $result[0] : null;      
+    }
+
     
     public function manageResultBasic($result, $accountId, $inventoryType){
       if(sizeof($result) > 0){
