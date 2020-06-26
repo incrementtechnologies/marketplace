@@ -96,6 +96,20 @@ class ProductTraceController extends APIController
       $item = $this->response['data'][$i];
       $this->response['data'][$i]['product'] = app($this->productController)->getProductByParams('id', $item['product_id']);
       $item = $this->response['data'][$i];
+      if(isset($data['nfc']) && ($item['nfc'] == null || $item['nfc'] == '')){
+        $nfcResult = ProductTrace::where('nfc', '=', $data['nfc'])->get();
+        if(sizeof($nfcResult) > 0){
+          $this->response['data'] = null;
+          $this->response['error'] = 'Tag is already taken!';
+          return $this->response();
+        }else{
+          ProductTrace::where('id', '=', $item['id'])->update(array(
+            'nfc' => $data['nfc'],
+            'updated_at' => Carbon::now()
+          ));
+          $this->response['data'][$i]['nfc'] = $data['nfc'];
+        }
+      }
       if($this->checkOwnProduct($item, $data['merchant_id']) == false){
         $this->response['data'] = null;
         $this->response['error'] = 'You don\'t own this product!';
@@ -421,13 +435,9 @@ class ProductTraceController extends APIController
   public function update(Request $request){
     $data = $request->all();
     $result = ProductTrace::where('rf', '=', $data['rf'])->get();
-    $resultNFC = ProductTrace::where('nfc', '=', $data['nfc'])->get();
     if(sizeof($result) > 0){
       $this->response['data'] = null;
       $this->response['error'] = 'Drum tag is already used!';
-    }else if(sizeof($resultNFC) > 0){
-      $this->response['data'] = null;
-      $this->response['error'] = 'NFC tag is already used!';
     }else{
       $this->model = new ProductTrace();
       $this->updateDB($data);
