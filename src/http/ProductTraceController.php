@@ -96,6 +96,7 @@ class ProductTraceController extends APIController
       $item = $this->response['data'][$i];
       $this->response['data'][$i]['product'] = app($this->productController)->getProductByParams('id', $item['product_id']);
       $item = $this->response['data'][$i];
+      
       if(isset($data['nfc']) && ($item['nfc'] == null || $item['nfc'] == '')){
         $nfcResult = ProductTrace::where('nfc', '=', $data['nfc'])->get();
         if(sizeof($nfcResult) > 0){
@@ -110,11 +111,19 @@ class ProductTraceController extends APIController
           $this->response['data'][$i]['nfc'] = $data['nfc'];
         }
       }
+
+      if(isset($data['nfc']) && $item['nfc'] != null && $item['nfc'] != $data['nfc']){
+        $this->response['data'] = null;
+        $this->response['error'] = 'Duplicate tag!';
+        return $this->response();
+      }
+
       if($this->checkOwnProduct($item, $data['merchant_id']) == false){
         $this->response['data'] = null;
         $this->response['error'] = 'You don\'t own this product!';
         return $this->response();
       }
+
       $this->response['data'][$i]['created_at_human'] = Carbon::createFromFormat('Y-m-d H:i:s', $item['created_at'])->copy()->tz($this->response['timezone'])->format('F j, Y h:i A');
       $this->response['data'][$i]['bundled_product'] = app($this->bundledProductController)->getByParams('product_trace', $item['id']);
       if($this->response['data'][$i]['product'] != null){
