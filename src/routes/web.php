@@ -167,3 +167,12 @@ Route::post($route.'retrieve_with_trace', $controller."retrieveWithTrace");
 Route::post($route.'update', $controller."update");
 Route::post($route.'delete', $controller."delete");
 Route::get($route.'test', $controller."test");
+
+// Customers
+$route = env('PACKAGE_ROUTE', '').'/customers/';
+$controller = 'Increment\Marketplace\Http\CustomerController@';
+Route::post($route.'create', $controller."create");
+Route::post($route.'retrieve', $controller."retrieve");
+Route::post($route.'update', $controller."update");
+Route::post($route.'delete', $controller."delete");
+Route::get($route.'test', $controller."test");
