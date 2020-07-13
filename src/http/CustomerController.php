@@ -25,7 +25,7 @@ class CustomerController extends APIController
         $params = array(
           'code'        => $this->generateCode(),
           'merchant'    => $data['merchant'],
-          'merchant_id' => $data['merchant_id'],
+          'merchant_id' => $getMerchant[0]['id'],
           'status'      => 'pending'
         );
         $this->insertDB($params);
