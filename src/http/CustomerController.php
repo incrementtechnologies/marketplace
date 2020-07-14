@@ -14,6 +14,9 @@ class CustomerController extends APIController
 
   function __construct(){
     $this->model = new Customer();
+    $this->notRequired = array(
+      'merchant_id', 'email'
+    );
   }
 
   public function create(Request $request){
@@ -22,8 +25,9 @@ class CustomerController extends APIController
       $getMerchant = app($this->merchantClass)->getByParams('business_code', $data['business_code']);
       if($getMerchant != null){
         $this->model = new Customer();
+        $code = $this->generateCode();
         $params = array(
-          'code'        => $this->generateCode(),
+          'code'        => $code,
           'merchant'    => $data['merchant'],
           'merchant_id' => $getMerchant['id'],
           'status'      => 'pending'
@@ -36,6 +40,7 @@ class CustomerController extends APIController
             'view'    => 'email.customerinvitation'
           );
           $data['email'] = $account[0]['email'];
+          $data['code'] = $code;
           $data['username'] = $account[0]['username'];
           app($this->emailClass)->sendCustomerInvitation($data, $template);
         }
@@ -51,11 +56,25 @@ class CustomerController extends APIController
         $this->response['error'] = 'Email address is required!';
         return $this->response();
       }
-      $template = array(
-        'subject' => 'YOUR INVITATION TO AGRICORD',
-        'view'    => 'email.noncustomerinvitation'
+      $this->model = new Customer();
+      $code = $this->generateCode();
+      $params = array(
+        'code'        => $code,
+        'merchant'    => $data['merchant'],
+        'email'       => $data['email'],
+        'status'      => 'pending'
       );
-      app($this->emailClass)->sendCustomerInvitation($data, $template);
+      $this->insertDB($params);
+      if($this->response['data'] > 0){
+        $template = array(
+          'subject' => 'YOUR INVITATION TO AGRICORD',
+          'view'    => 'email.noncustomerinvitation'
+        );
+        $data['email'] = $data['email']
+        $data['code'] = $code;
+        $data['username'] = $data['email']
+        app($this->emailClass)->sendCustomerInvitation($data, $template);
+      }
       return $this->response();
     }
   }

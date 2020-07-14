@@ -18,7 +18,7 @@ class CreateCustomersTable extends Migration
             $table->increments('id');
             $table->bigInteger('code');
             $table->bigInteger('merchant');
-            $table->bigInteger('merchant_id');
+            $table->bigInteger('merchant_id')->nullable();
             $table->string('status')->default('pending');
             $table->timestamps();
             $table->softDeletes();

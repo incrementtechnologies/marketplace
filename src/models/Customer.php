@@ -6,5 +6,5 @@ use App\APIModel;
 class Customer extends APIModel
 {
     protected $table = 'customers';
-    protected $fillable = ['code', 'merchant', 'merchant_id', 'status'];
+    protected $fillable = ['code', 'merchant', 'merchant_id', 'email', 'status'];
 }
