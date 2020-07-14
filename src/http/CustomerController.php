@@ -24,6 +24,11 @@ class CustomerController extends APIController
     if(isset($data['business_code'])){
       $getMerchant = app($this->merchantClass)->getByParams('business_code', $data['business_code']);
       if($getMerchant != null){
+        if($this->checkIfExist($data['merchant'], 'merchant_id', $getMerchant['id']) == true){
+          $this->response['data'] = null;
+          $this->response['error'] = 'Merchant already existed to the list.';
+          return $this->response();
+        }
         $this->model = new Customer();
         $code = $this->generateCode();
         $params = array(
@@ -54,6 +59,11 @@ class CustomerController extends APIController
       if(!isset($data['email'])){
         $this->response['data'] = null;
         $this->response['error'] = 'Email address is required!';
+        return $this->response();
+      }
+      if($this->checkIfExist($data['merchant'], 'email', $data['email']) == true){
+        $this->response['data'] = null;
+        $this->response['error'] = 'Email already existed to the list.';
         return $this->response();
       }
       $this->model = new Customer();
@@ -94,6 +104,11 @@ class CustomerController extends APIController
       }
     }
     return $this->response();
+  }
+
+  public function checkIfExist($merchant, $column, $value){
+    $result = Customer::where('merchant', '=', $merchant)->where($column, '=', $value)->get();
+    return sizeof($result) > 0 ? true : false;
   }
 
   public function generateCode(){
