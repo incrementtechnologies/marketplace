@@ -70,13 +70,30 @@ class CustomerController extends APIController
           'subject' => 'YOUR INVITATION TO AGRICORD',
           'view'    => 'email.noncustomerinvitation'
         );
-        $data['email'] = $data['email']
+        $data['email'] = $data['email'];
         $data['code'] = $code;
-        $data['username'] = $data['email']
+        $data['username'] = $data['email'];
         app($this->emailClass)->sendCustomerInvitation($data, $template);
       }
       return $this->response();
     }
+  }
+
+  public function retrieve(Request $request){
+    $data = $request->all();
+    $this->retrieveDB($data);
+    $result = $this->response['data'];
+    if(sizeof($result) > 0){
+      $i = 0;
+      foreach ($result as $key) {
+        $this->response['data'][$i]['merchant_details'] = null;
+        if($result[$i]['merchant_id'] != null){
+          $this->response['data'][$i]['merchant_details'] = app($this->merchantClass)->getByParams('id', $result[$i]['merchant_id']);
+        }
+        $i++;
+      }
+    }
+    return $this->response();
   }
 
   public function generateCode(){
