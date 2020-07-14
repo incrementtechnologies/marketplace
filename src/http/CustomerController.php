@@ -25,18 +25,18 @@ class CustomerController extends APIController
         $params = array(
           'code'        => $this->generateCode(),
           'merchant'    => $data['merchant'],
-          'merchant_id' => $getMerchant[0]['id'],
+          'merchant_id' => $getMerchant['id'],
           'status'      => 'pending'
         );
         $this->insertDB($params);
         if($this->response['data'] > 0){
-          $account = app('Increment\Account\Http\AccountController')->retrieveById($getMerchant[0]['account_id']);
+          $account = app('Increment\Account\Http\AccountController')->retrieveById($getMerchant['account_id']);
           $template = array(
             'subject' => 'NEW MERCHANT LINK REQUEST',
             'view'    => 'email.customerinvitation'
           );
-          $data['email'] = $account['email'];
-          $data['username'] = $account['username'];
+          $data['email'] = $account[0]['email'];
+          $data['username'] = $account[0]['username'];
           app($this->emailClass)->sendCustomerInvitation($data, $template);
         }
         return $this->response();
