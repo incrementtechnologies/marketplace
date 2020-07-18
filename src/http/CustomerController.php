@@ -89,6 +89,38 @@ class CustomerController extends APIController
     }
   }
 
+  public function update(Request $request){
+    $data = $request->all();
+    $this->updateDB($data);
+    if($this->response['data']){
+
+      // Send to receiver
+      $getMerchant = app($this->merchantClass)->getByParams('id', $data['merchant_id']);
+      $account = app('Increment\Account\Http\AccountController')->retrieveById($getMerchant['account_id']);
+      $template = array(
+        'subject' => 'BUSINESS LINK AGE SUCCESSFUL',
+        'view'    => 'email.customerconfirmationreceiver'
+      );
+      $data['email'] = $account[0]['email'];
+      $data['username'] = $account[0]['username'];
+      $data['receiver_merchant_id'] = $data['merchant_id'];
+      app($this->emailClass)->sendCustomerInvitation($data, $template);
+
+
+      // Send to sender
+      $getMerchant = app($this->merchantClass)->getByParams('id', $data['merchant']);
+      $account = app('Increment\Account\Http\AccountController')->retrieveById($getMerchant['account_id']);
+      $template = array(
+        'subject' => 'BUSINESS LINK AGE SUCCESSFUL',
+        'view'    => 'email.customerconfirmationsender'
+      );
+      $data['email'] = $account[0]['email'];
+      $data['username'] = $account[0]['username'];
+      $data['receiver_merchant_id'] = $data['merchant'];
+      app($this->emailClass)->sendCustomerInvitation($data, $template);
+    }
+  }
+
   public function retrieve(Request $request){
     $data = $request->all();
     $this->retrieveDB($data);
