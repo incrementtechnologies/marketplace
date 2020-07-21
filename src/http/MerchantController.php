@@ -122,6 +122,16 @@ class MerchantController extends APIController
     return sizeof($result) > 0 ? $result[0] : null;
   }
 
+
+  public function getByParamsWithAccount($column, $value){
+    $result = Merchant::where($column, '=', $value)->get();
+    if(sizeof($result) > 0){
+      $result[0]['account'] = app('Increment\Account\Http\AccountController')->retrieveById($result[0]['account_id']);
+    }
+    return sizeof($result) > 0 ? $result[0] : null;
+  }
+
+
   public function getByParamsConsignments($column, $value){
     $result = Merchant::where($column, '=', $value)->get(['id', 'name']);
     return sizeof($result) > 0 ? $result[0] : null;

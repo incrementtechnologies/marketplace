@@ -133,9 +133,9 @@ class CustomerController extends APIController
       foreach ($result as $key) {
         $this->response['data'][$i]['merchant_details'] = null;
         if($result[$i]['merchant_id'] != null){
-          $this->response['data'][$i]['merchant_details'] = app($this->merchantClass)->getByParams('id', $result[$i]['merchant_id']);
+          $this->response['data'][$i]['merchant_details'] = app($this->merchantClass)->getByParamsWithAccount('id', $result[$i]['merchant_id']);
         }
-        $this->response['data'][$i]['merchant_sender_details'] = app($this->merchantClass)->getByParams('id', $result[$i]['merchant']);
+        $this->response['data'][$i]['merchant_sender_details'] = app($this->merchantClass)->getByParamsWithAccount('id', $result[$i]['merchant']);
         $i++;
       }
     }
