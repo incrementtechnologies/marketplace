@@ -89,6 +89,32 @@ class CustomerController extends APIController
     }
   }
 
+  public function resend(Request $request){
+    $data = $request->all();
+    if($data['merchant_id'] == null){
+      $getMerchant = app($this->merchantClass)->getByParams('id', $data['merchant_id']);
+      if($getMerchant != null){
+        $account = app('Increment\Account\Http\AccountController')->retrieveById($getMerchant['account_id']);
+        $template = array(
+          'subject' => 'NEW MERCHANT LINK REQUEST',
+          'view'    => 'email.customerinvitation'
+        );
+        $data['email'] = $account[0]['email'];
+        $data['code'] = $code;
+        $data['username'] = $account[0]['username'];
+        app($this->emailClass)->sendCustomerInvitation($data, $template);
+      }
+    }else{
+      $template = array(
+        'subject' => 'YOUR INVITATION TO AGRICORD',
+        'view'    => 'email.noncustomerinvitation'
+      );
+      $data['username'] = $data['email'];
+      app($this->emailClass)->sendCustomerInvitation($data, $template);
+    }
+    return $this->response();
+  }
+
   public function update(Request $request){
     $data = $request->all();
     $this->updateDB($data);
