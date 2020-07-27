@@ -167,6 +167,23 @@ class CustomerController extends APIController
     return $this->response();
   }
 
+  public function retrieveList(Request $request){
+    $data = $request->all();
+    $this->retrieveDB($data);
+    $result = $this->response['data'];
+    if(sizeof($result) > 0){
+      $i = 0;
+      $this->response['data'] = [];
+      foreach ($result as $key) {
+        if($result[$i]['merchant_id'] != null){
+          $this->response['data'][] = app($this->merchantClass)->getByParams('id', $result[$i]['merchant_id']);
+        }
+        $i++;
+      }
+    }
+    return $this->response();
+  }
+
   public function checkIfExist($merchant, $column, $value){
     $result = Customer::where('merchant', '=', $merchant)->where($column, '=', $value)->get();
     return sizeof($result) > 0 ? true : false;
