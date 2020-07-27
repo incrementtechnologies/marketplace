@@ -100,7 +100,6 @@ class CustomerController extends APIController
           'view'    => 'email.customerinvitation'
         );
         $data['email'] = $account[0]['email'];
-        $data['code'] = $code;
         $data['username'] = $account[0]['username'];
         app($this->emailClass)->sendCustomerInvitation($data, $template);
       }
