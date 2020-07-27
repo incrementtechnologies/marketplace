@@ -91,7 +91,7 @@ class CustomerController extends APIController
 
   public function resend(Request $request){
     $data = $request->all();
-    if($data['merchant_id'] == null){
+    if($data['merchant_id'] != null){
       $getMerchant = app($this->merchantClass)->getByParams('id', $data['merchant_id']);
       if($getMerchant != null){
         $account = app('Increment\Account\Http\AccountController')->retrieveById($getMerchant['account_id']);
