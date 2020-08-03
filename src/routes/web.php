@@ -178,3 +178,21 @@ Route::post($route.'resend', $controller."resend");
 Route::post($route.'update', $controller."update");
 Route::post($route.'delete', $controller."delete");
 Route::get($route.'test', $controller."test");
+
+// Order Requests
+$route = env('PACKAGE_ROUTE', '').'/order_requests/';
+$controller = 'Increment\Marketplace\Http\OrderRequestController@';
+Route::post($route.'create', $controller."create");
+Route::post($route.'retrieve', $controller."retrieve");
+Route::post($route.'update', $controller."update");
+Route::post($route.'delete', $controller."delete");
+Route::get($route.'test', $controller."test");
+
+// Order Request Items
+$route = env('PACKAGE_ROUTE', '').'/order_request_items/';
+$controller = 'Increment\Marketplace\Http\OrderRequestItemController@';
+Route::post($route.'create', $controller."create");
+Route::post($route.'retrieve', $controller."retrieve");
+Route::post($route.'update', $controller."update");
+Route::post($route.'delete', $controller."delete");
+Route::get($route.'test', $controller."test");
