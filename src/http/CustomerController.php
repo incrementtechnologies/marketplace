@@ -66,25 +66,31 @@ class CustomerController extends APIController
         $this->response['error'] = 'Email already existed to the list.';
         return $this->response();
       }
-      $this->model = new Customer();
-      $code = $this->generateCode();
-      $params = array(
-        'code'        => $code,
-        'merchant'    => $data['merchant'],
-        'email'       => $data['email'],
-        'status'      => 'pending'
-      );
-      $this->insertDB($params);
-      if($this->response['data'] > 0){
-        $template = array(
-          'subject' => 'YOUR INVITATION TO AGRICORD',
-          'view'    => 'email.noncustomerinvitation'
+      $account = app('Increment\Account\Http\AccountController')->retrieveByEmail($data['email']);
+      if($account != null){
+        $getMerchant = app($this->merchantClass)->getByParams('account_id', $account['id']);
+      }else{
+        $this->model = new Customer();
+        $code = $this->generateCode();
+        $params = array(
+          'code'        => $code,
+          'merchant'    => $data['merchant'],
+          'email'       => $data['email'],
+          'status'      => 'pending'
         );
-        $data['email'] = $data['email'];
-        $data['code'] = $code;
-        $data['username'] = $data['email'];
-        app($this->emailClass)->sendCustomerInvitation($data, $template);
+        $this->insertDB($params);
+        if($this->response['data'] > 0){
+          $template = array(
+            'subject' => 'YOUR INVITATION TO AGRICORD',
+            'view'    => 'email.noncustomerinvitation'
+          );
+          $data['email'] = $data['email'];
+          $data['code'] = $code;
+          $data['username'] = $data['email'];
+          app($this->emailClass)->sendCustomerInvitation($data, $template);
+        }
       }
+      
       return $this->response();
     }
   }

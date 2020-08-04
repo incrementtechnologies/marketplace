@@ -10,5 +10,6 @@ class OrderRequestController extends APIController
 {
   function __construct(){
     $this->model = new OrderRequest();
+    $this->notRequired = array('date_delivered', 'delivered_by');
   }
 }
