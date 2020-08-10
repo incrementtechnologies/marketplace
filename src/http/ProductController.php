@@ -38,7 +38,7 @@ class ProductController extends APIController
 
 
     public function generateCode(){
-      $code = substr(str_shuffle("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"), 0, 32);
+      $code = 'PR_'.substr(str_shuffle($this->codeSource), 0, 61);
       $codeExist = Product::where('code', '=', $code)->get();
       if(sizeof($codeExist) > 0){
         $this->generateCode();
