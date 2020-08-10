@@ -17,7 +17,7 @@ class OrderRequestController extends APIController
     $data = $request->all();
     $data['code'] = $this->generateCode();
     $data['status'] = 'pending';
-    $this->model = new Product();
+    $this->model = new OrderRequest();
     $this->insertDB($data);
     return $this->response();
   }
