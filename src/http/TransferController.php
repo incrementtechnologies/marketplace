@@ -111,6 +111,7 @@ class TransferController extends APIController
       // $this->response['data'] = $result;
       // return $this->response();
       $i = 0;
+      $testArray = array();
       foreach ($result as $key => $value) {
         $size = 1;
         $bundledQty = 0;
@@ -143,9 +144,12 @@ class TransferController extends APIController
               $bundledQty++;
             }
           }
+          $testArray[] = array(
+            'product_id' => $keyInner->product_id,
+            'trace' =>  $keyInner->payload_value,
+            'test'  => $test;
+          );
         }
-        $result[$i]['test'] = $test;
-        $i++;
         // if($size > 0){
         //   $product =  app($this->productClass)->getProductByParamsConsignments('id', $key);
         //   $product['qty'] = $size;
