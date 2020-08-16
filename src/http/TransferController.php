@@ -121,18 +121,25 @@ class TransferController extends APIController
         foreach ($value as $keyInner) {
           $productTrace = $keyInner->payload_value;
           $tSize = app($this->transferredProductsClass)->getSizeLimit('payload_value', $keyInner->payload_value, $keyInner->created_at);
-          
+
           $bundled = app($this->bundledProductController)->getByParamsNoDetailsWithLimit('product_trace', $keyInner->payload_value, 1);
           $trace = app($this->productTraceClass)->getByParamsByFlag('id', $productTrace);
-
-          if($tSize == 0 && $bundled == null && $trace == true && $data['type'] == 'USER'){
-            // only to end user
-            // should add user type on the parameter
+          if($data['type'] != 'USER'){
+            $size++;
+          }else if($tSize == 0 && $bundled == null && $trace == true){
             $comsumed = 0;
             $comsumed = app($this->landBlockProductClass)->getTotalConsumedByTrace($data['merchant_id'], $productTrace, $keyInner->product_id);
             $size += (1 - $comsumed);
             $consumedValue = $size;
           }
+          // if($tSize == 0 && $bundled == null && $trace == true && $data['type'] == 'USER'){
+          //   // only to end user
+          //   // should add user type on the parameter
+          //   $comsumed = 0;
+          //   $comsumed = app($this->landBlockProductClass)->getTotalConsumedByTrace($data['merchant_id'], $productTrace, $keyInner->product_id);
+          //   $size += (1 - $comsumed);
+          //   $consumedValue = $size;
+          // }
 
           if($bundled != null){
             $bundledTransferred = TransferredProduct::where('payload_value', '=', $bundled['bundled_trace'])->where('deleted_at', '=', null)->limit(1)->count();
