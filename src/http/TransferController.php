@@ -161,7 +161,7 @@ class TransferController extends APIController
         //   $i++;
         // }
       }
-      $this->response['data'] = $result;
+      $this->response['data'] = $testArray;
       return $this->response();
     }
 
