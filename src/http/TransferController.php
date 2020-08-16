@@ -125,7 +125,7 @@ class TransferController extends APIController
           $bundled = app($this->bundledProductController)->getByParamsNoDetailsWithLimit('product_trace', $keyInner->payload_value, 1);
           $trace = app($this->productTraceClass)->getByParamsByFlag('id', $productTrace);
           if($data['type'] != 'USER'){
-            $size++;
+            $size += ($tSize > 0) ? 0 : 1;
           }else if($tSize == 0 && $bundled == null && $trace == true){
             $comsumed = 0;
             $comsumed = app($this->landBlockProductClass)->getTotalConsumedByTrace($data['merchant_id'], $productTrace, $keyInner->product_id);
