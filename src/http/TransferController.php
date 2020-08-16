@@ -117,6 +117,7 @@ class TransferController extends APIController
         $bundledQty = 0;
         $productTrace = null;
         $test = null;
+        $consumedValue = null;
         foreach ($value as $keyInner) {
           $productTrace = $keyInner->payload_value;
           $tSize = app($this->transferredProductsClass)->getSizeLimit('payload_value', $keyInner->payload_value, $keyInner->created_at);
@@ -136,6 +137,7 @@ class TransferController extends APIController
             $comsumed = 0;
             $comsumed = app($this->landBlockProductClass)->getTotalConsumedByTrace($data['merchant_id'], $productTrace, $keyInner->product_id);
             $size += (1 - $comsumed);
+            $consumedValue = $size;
           }
 
           if($bundled != null){
@@ -147,7 +149,8 @@ class TransferController extends APIController
           $testArray[] = array(
             'product_id' => $keyInner->product_id,
             'trace' =>  $keyInner->payload_value,
-            'test'  => $test
+            'test'  => $test,
+            'consumed' => $consumedValue
           );
         }
         // if($size > 0){
