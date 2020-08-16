@@ -113,9 +113,14 @@ class TransferController extends APIController
         $size = 1;
         $bundledQty = 0;
         $productTrace = null;
+        $test = null;
         foreach ($value as $keyInner) {
           $productTrace = $keyInner->payload_value;
           $tSize = app($this->transferredProductsClass)->getSizeLimit('payload_value', $keyInner->payload_value, $keyInner->created_at);
+
+          if(intval($keyInner->payload_value) == 68){
+            $test = $tSize;
+          }
           $bundled = app($this->bundledProductController)->getByParamsNoDetailsWithLimit('product_trace', $keyInner->payload_value, 1);
           $trace = app($this->productTraceClass)->getByParamsByFlag('id', $productTrace);
 
@@ -140,6 +145,7 @@ class TransferController extends APIController
           $product['qty'] = $size;
           $product['qty_in_bundled'] = $bundledQty;
           $product['productTrace'] = $productTrace;
+          $product['test'] = $test;
           $this->response['data'][] = $product;
           $this->manageQtyWithBundled($product, $productTrace);
           $i++;
