@@ -108,6 +108,8 @@ class TransferController extends APIController
       ->limit(10)
       ->get(['T2.product_id', 'T2.created_at', 'T2.payload_value']);
       $result = $result->groupBy('product_id');
+      $this->response['data'] = $result;
+      return $this->response();
       $i = 0;
       foreach ($result as $key => $value) {
         $size = 1;
@@ -121,7 +123,7 @@ class TransferController extends APIController
           if($tSize > 0){
             $size = 0;
           }
-          
+
           $bundled = app($this->bundledProductController)->getByParamsNoDetailsWithLimit('product_trace', $keyInner->payload_value, 1);
           $trace = app($this->productTraceClass)->getByParamsByFlag('id', $productTrace);
 
