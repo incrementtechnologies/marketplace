@@ -139,6 +139,7 @@ class TransferController extends APIController
           $product =  app($this->productClass)->getProductByParamsConsignments('id', $key);
           $product['qty'] = $size;
           $product['qty_in_bundled'] = $bundledQty;
+          $product['productTrace'] = $productTrace;
           $this->response['data'][] = $product;
           $this->manageQtyWithBundled($product, $productTrace);
           $i++;
