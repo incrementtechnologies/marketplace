@@ -113,7 +113,7 @@ class TransferController extends APIController
       $i = 0;
       $testArray = array();
       foreach ($result as $key => $value) {
-        $size = 1;
+        $size = 0;
         $bundledQty = 0;
         $productTrace = null;
         $test = null;
@@ -121,17 +121,11 @@ class TransferController extends APIController
         foreach ($value as $keyInner) {
           $productTrace = $keyInner->payload_value;
           $tSize = app($this->transferredProductsClass)->getSizeLimit('payload_value', $keyInner->payload_value, $keyInner->created_at);
-
-          if($tSize > 0){
-            $size = 0;
-            $test = $tSize;
-          }
-
+          
           $bundled = app($this->bundledProductController)->getByParamsNoDetailsWithLimit('product_trace', $keyInner->payload_value, 1);
           $trace = app($this->productTraceClass)->getByParamsByFlag('id', $productTrace);
 
           if($tSize == 0 && $bundled == null && $trace == true && $data['type'] == 'USER'){
-            $size = 0;
             // only to end user
             // should add user type on the parameter
             $comsumed = 0;
@@ -146,25 +140,25 @@ class TransferController extends APIController
               $bundledQty++;
             }
           }
-          $testArray[] = array(
-            'product_id' => $keyInner->product_id,
-            'trace' =>  $keyInner->payload_value,
-            'test'  => $test,
-            'consumed' => $consumedValue
-          );
+          // $testArray[] = array(
+          //   'product_id' => $keyInner->product_id,
+          //   'trace' =>  $keyInner->payload_value,
+          //   'test'  => $test,
+          //   'consumed' => $consumedValue
+          // );
         }
-        // if($size > 0){
-        //   $product =  app($this->productClass)->getProductByParamsConsignments('id', $key);
-        //   $product['qty'] = $size;
-        //   $product['qty_in_bundled'] = $bundledQty;
-        //   $product['productTrace'] = $productTrace;
-        //   $product['test'] = $test;
-        //   $this->response['data'][] = $product;
-        //   $this->manageQtyWithBundled($product, $productTrace);
-        //   $i++;
-        // }
+        if($size > 0){
+          $product =  app($this->productClass)->getProductByParamsConsignments('id', $key);
+          $product['qty'] = $size;
+          $product['qty_in_bundled'] = $bundledQty;
+          $product['productTrace'] = $productTrace;
+          $product['test'] = $test;
+          $this->response['data'][] = $product;
+          $this->manageQtyWithBundled($product, $productTrace);
+          $i++;
+        }
       }
-      $this->response['data'] = $testArray;
+      // $this->response['data'] = $testArray;
       return $this->response();
     }
 
