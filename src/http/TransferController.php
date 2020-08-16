@@ -147,7 +147,7 @@ class TransferController extends APIController
           $testArray[] = array(
             'product_id' => $keyInner->product_id,
             'trace' =>  $keyInner->payload_value,
-            'test'  => $test;
+            'test'  => $test
           );
         }
         // if($size > 0){
