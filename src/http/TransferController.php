@@ -118,9 +118,10 @@ class TransferController extends APIController
           $productTrace = $keyInner->payload_value;
           $tSize = app($this->transferredProductsClass)->getSizeLimit('payload_value', $keyInner->payload_value, $keyInner->created_at);
 
-          if(intval($keyInner->payload_value) == 68){
-            $test = $tSize;
+          if($tSize > 0){
+            $size = 0;
           }
+          
           $bundled = app($this->bundledProductController)->getByParamsNoDetailsWithLimit('product_trace', $keyInner->payload_value, 1);
           $trace = app($this->productTraceClass)->getByParamsByFlag('id', $productTrace);
 
