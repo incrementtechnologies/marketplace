@@ -21,10 +21,16 @@ class OrderRequestController extends APIController
     $merchant = app($this->merchantClass)->getColumnByParams('id', $data['merchant_id'], 'prefix');
     $counter = OrderRequest::where('merchant_id', '=', $data['merchant_id'])->count();
     $data['status'] = 'pending';
-    $data['order_number'] = $merhant ? $merchant['prefix'].$counter: $counter;
+    $data['order_number'] = $merchant ? $merchant['prefix'].$this->toCode($counter): $this->toCode($counter);
     $this->model = new OrderRequest();
     $this->insertDB($data);
     return $this->response();
+  }
+
+  public function toCode($size){
+    $length = strlen((string)$size);
+    $code = '00000000';
+    return substr_replace($code, $size, parseInt(7 - $length));
   }
 
 
