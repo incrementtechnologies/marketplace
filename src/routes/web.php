@@ -174,6 +174,7 @@ $controller = 'Increment\Marketplace\Http\CustomerController@';
 Route::post($route.'create', $controller."create");
 Route::post($route.'retrieve', $controller."retrieve");
 Route::post($route.'retrieve_list', $controller."retrieveList");
+Route::post($route.'retrieve_allowed_only', $controller."retrieveAllowedOnly");
 Route::post($route.'resend', $controller."resend");
 Route::post($route.'update', $controller."update");
 Route::post($route.'delete', $controller."delete");

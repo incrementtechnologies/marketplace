@@ -48,7 +48,8 @@ class OrderRequestController extends APIController
           'status'        => $key['status'],
           'delivered_by'  => null,
           'delivered_date'=> null,
-          'code'          => $key['code']
+          'code'          => $key['code'],
+          'added_by'      => $key['code']
         );
         $array[] = $item;
       }

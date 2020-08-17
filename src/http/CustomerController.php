@@ -184,6 +184,54 @@ class CustomerController extends APIController
     return $this->response();
   }
 
+  public function retrieveAllowedOnly(Request $request){
+    $data = $request->all();
+    $this->retrieveDB($data);
+    $result = $this->response['data'];
+    
+    if(sizeof($result) > 0){
+      $i = 0;
+      $array = array();
+      foreach ($result as $key) {
+        $name = null;
+        $merchant = null;
+        if($key['merchant_id'] == null){
+          $name = $key['email'];
+        }else{
+          $merchant = app($this->merchantClass)->getColumnByParams('id', $key['merchant_id']);
+          $name = $merchant ? $merchant['name'] : null;
+        }
+
+        $type = null;
+        if($key['merchant'] != $data['merchant_id']){
+          $merchant = app($this->merchantClass)->getColumnByParams('id', $key['merchant_id']);
+          $type = $merchant ? $merchant['account']['account_type'] : null;
+        }else{
+          if($key['merchant_id'] != null){
+            $type = $merchant ? $merchant['account']['account_type'] : null;
+          }
+        }
+              
+        $item = array(
+          'name'    => $name,
+          'type'    => $type,
+          'status'  => $key['status'],
+          'id'      => $key['id']
+        );
+        $array[] = $item;
+      }
+      $this->response['data'] = $array;
+    }
+
+    if(sizeof($data['condition']) == 1){
+      $this->response['size'] = OrderRequest::where($data['condition'][0]['column'], '=', $data['condition'][0]['value'])->orWhere()->count();
+    }else if(sizeof($data['condition']) == 2){
+      $this->response['size'] = OrderRequest::where($data['condition'][0]['column'], '=', $data['condition'][0]['value'])->orWhere($data['condition'][1]['column'], '=', $data['condition'][1]['value'])->count();
+    }
+
+    return $this->response();
+  }
+
   public function retrieveList(Request $request){
     $data = $request->all();
     $this->retrieveDB($data);
