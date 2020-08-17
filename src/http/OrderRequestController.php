@@ -54,6 +54,7 @@ class OrderRequestController extends APIController
       }
       $this->response['data'] = $array;
     }
+    $this->response['size'] = OrderRequest::where($data['condition'][0]['column'], '=', $data['condition'][0]['value'])->count();
     return $this->response();
   }
 }
