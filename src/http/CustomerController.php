@@ -216,6 +216,7 @@ class CustomerController extends APIController
           'name'    => $name,
           'type'    => $type,
           'status'  => $key['status'],
+          'merchant'  => $key['merchant'],
           'id'      => $key['id']
         );
         $array[] = $item;
