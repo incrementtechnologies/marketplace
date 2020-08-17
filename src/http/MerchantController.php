@@ -138,7 +138,7 @@ class MerchantController extends APIController
   }
 
   public function getColumnByParams($column, $value, $getColumns){
-    $result = Merchant::select($getColumns)where($column, '=', $value)->get();
+    $result = Merchant::select($getColumns)->where($column, '=', $value)->get();
     return sizeof($result) > 0 ? $result[0] : null;
   }
 }
