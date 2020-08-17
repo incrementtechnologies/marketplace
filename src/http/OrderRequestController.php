@@ -18,7 +18,10 @@ class OrderRequestController extends APIController
   public function create(Request $request){
     $data = $request->all();
     $data['code'] = $this->generateCode();
+    $merchant = app($this->merchantClass)->getColumnByParams('id', $data['merchant_id'], 'prefix');
+    $counter = OrderRequest::where('merchant_id', '=', $data['merchant_id'])->count();
     $data['status'] = 'pending';
+    $data['order_number'] = $merhant ? $merchant['prefix'].$counter: $counter;
     $this->model = new OrderRequest();
     $this->insertDB($data);
     return $this->response();
@@ -51,7 +54,7 @@ class OrderRequestController extends APIController
           'code'          => $key['code'],
           'added_by'      => $key['code'],
           'id'      => $key['id'],
-          'id'      => $key['order_number']
+          'order_number'      => $key['order_number']
         );
         $array[] = $item;
       }
