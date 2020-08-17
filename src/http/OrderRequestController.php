@@ -30,7 +30,7 @@ class OrderRequestController extends APIController
   public function toCode($size){
     $length = strlen((string)$size);
     $code = '00000000';
-    return substr_replace($code, $size, parseInt(7 - $length));
+    return substr_replace($code, $size, intval(7 - $length));
   }
 
 
