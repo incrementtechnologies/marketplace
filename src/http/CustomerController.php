@@ -224,9 +224,9 @@ class CustomerController extends APIController
     }
 
     if(sizeof($data['condition']) == 1){
-      $this->response['size'] = OrderRequest::where($data['condition'][0]['column'], '=', $data['condition'][0]['value'])->orWhere()->count();
+      $this->response['size'] = Customer::where($data['condition'][0]['column'], '=', $data['condition'][0]['value'])->orWhere()->count();
     }else if(sizeof($data['condition']) == 2){
-      $this->response['size'] = OrderRequest::where($data['condition'][0]['column'], '=', $data['condition'][0]['value'])->orWhere($data['condition'][1]['column'], '=', $data['condition'][1]['value'])->count();
+      $this->response['size'] = Customer::where($data['condition'][0]['column'], '=', $data['condition'][0]['value'])->orWhere($data['condition'][1]['column'], '=', $data['condition'][1]['value'])->count();
     }
 
     return $this->response();
