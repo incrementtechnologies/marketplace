@@ -205,10 +205,10 @@ class CustomerController extends APIController
         $type = null;
         if($key['merchant'] != $data['merchant_id']){
           $merchant = app($this->merchantClass)->getByParamsWithAccount('id', $key['merchant_id']);
-          $type = $merchant ? $merchant['account']['account_type'] : null;
+          $type = $merchant ? $merchant['account'][0]['account_type'] : null;
         }else{
           if($key['merchant_id'] != null){
-            $type = $merchant ? $merchant['account']['account_type'] : null;
+            $type = $merchant ? $merchant['account'][0]['account_type'] : null;
           }
         }
               
