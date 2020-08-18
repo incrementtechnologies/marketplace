@@ -106,6 +106,11 @@ class ProductController extends APIController
       return sizeof($result) > 0 ? $result[0] : null;
     }
 
+    public function getProductColumnByParams($column, $value, $productColumn){
+      $result = Product::where($column, '=', $value)->get();
+      return sizeof($result) > 0 ? $result[0][$productColumn] : null;
+    }
+
     public function getProductByParams($column, $value){
       $result = Product::where($column, '=', $value)->get();
       if(sizeof($result) > 0){
