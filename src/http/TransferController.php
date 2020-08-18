@@ -41,6 +41,8 @@ class TransferController extends APIController
 
     public function retrieve(Request $request){
       $data = $request->all();
+      $data['offset'] = isset($data['offset']) ? $data['offset'] : 0;
+      $data['limit'] = isset($data['offset']) ? $data['limit'] : 5;
       $result = array();
       if($data['column'] == 'created_at'){
         $sort = array(
@@ -57,7 +59,9 @@ class TransferController extends APIController
               'clause' => '=' 
             )
           ),
-          'sort' => $sort
+          'sort'    => $sort,
+          'limit'   => $data['limit'],
+          'offset'  => $data['offset']
         );
         $this->model = new Transfer();
         $this->retrieveDB($parameter);
@@ -69,6 +73,8 @@ class TransferController extends APIController
           ->where('T1.'.$data['filter_value'], '=', $data['merchant_id'])
           ->orderBy($data['column'], $data['sort']['value'])
           ->select('T1.*')
+          ->offset($data['offset'])
+          ->limit($data['limit'])
           ->get();
           $this->response['data'] = json_decode($tempResult, true);
           $result = $this->response['data'];
@@ -79,6 +85,8 @@ class TransferController extends APIController
           ->where('T1.'.$data['filter_value'], '=', $data['merchant_id'])
           ->orderBy($data['column'], $data['sort']['value'])
           ->select('T1.*')
+          ->offset($data['offset'])
+          ->limit($data['limit'])
           ->get();
           $this->response['data'] = json_decode($tempResult, true);
           $result = $this->response['data'];
