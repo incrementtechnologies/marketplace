@@ -21,7 +21,7 @@ class CustomerController extends APIController
 
 
   public function manageMerchant($data, $column, $value, $flag){
-    $getMerchant = app($this->merchantClass)->getByParams($column, $value);
+    $merchant = app($this->merchantClass)->getByParams($column, $value);
     if($merchant != null){
       if($this->checkIfExist($data['merchant'], 'merchant_id', $merchant['id']) == true){
         if($flag == true){
