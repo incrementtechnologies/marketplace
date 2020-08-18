@@ -192,7 +192,9 @@ class TransferController extends APIController
             'code'  =>  $key['code'],
             'name'  =>  $this->retrieveName($key['account_id']),
             'number_of_items'   =>  app($this->transferredProductsClass)->getSizeNoDate('transfer_id', $key['id']),
-            'trasferred_on' => Carbon::createFromFormat('Y-m-d H:i:s', $key['created_at'])->copy()->tz($this->response['timezone'])->format('F j, Y H:i A')
+            'trasferred_on' => Carbon::createFromFormat('Y-m-d H:i:s', $key['created_at'])->copy()->tz($this->response['timezone'])->format('F j, Y H:i A'),
+            'to'    => app($this->merchantClass)->getColumnByParams('id', $result[$i]['to'], 'name'),
+            'from'  => app($this->merchantClass)->getColumnByParams('id', $result[$i]['from'], 'name')
           );
           $array[] = $item;
           $i++;
