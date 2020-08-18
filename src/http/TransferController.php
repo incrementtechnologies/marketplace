@@ -66,6 +66,7 @@ class TransferController extends APIController
         $this->model = new Transfer();
         $this->retrieveDB($parameter);
         $result = $this->response['data'];
+        $this->response['size'] = DB::select( DB::raw("SELECT FOUND_ROWS() AS size;"));
       }else if($data['column'] == 'username'){
         $tempResult = DB::table('transfers as T1')
           ->join('accounts as T2', 'T2.id', '=', 'T1.from')
@@ -76,6 +77,8 @@ class TransferController extends APIController
           ->offset($data['offset'])
           ->limit($data['limit'])
           ->get();
+
+          $this->response['size'] = DB::select( DB::raw("SELECT FOUND_ROWS() AS size;"));
           $this->response['data'] = json_decode($tempResult, true);
           $result = $this->response['data'];
       }else if($data['column'] == 'name'){
@@ -88,6 +91,8 @@ class TransferController extends APIController
           ->offset($data['offset'])
           ->limit($data['limit'])
           ->get();
+
+          $this->response['size'] = DB::select( DB::raw("SELECT FOUND_ROWS() AS size;"));
           $this->response['data'] = json_decode($tempResult, true);
           $result = $this->response['data'];
       }
