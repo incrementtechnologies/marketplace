@@ -66,10 +66,13 @@ class TransferController extends APIController
         );
         $this->model = new Transfer();
         $this->retrieveDB($parameter);
-        $size = DB::select( DB::raw("SQL_CALC_FOUND_ROWS AS size;"));
+        $size = Transfer::where($data['column'], 'like', $data['value'])->where($data['filter_value'], '=', $data['merchant_id'])->count();
         $result = $this->response['data'];
       }else if($data['column'] == 'username'){
         $tempResult = DB::table('transfers as T1')
+          ->select([
+              DB::raw("SQL_CALC_FOUND_ROWS id")
+          ])
           ->join('accounts as T2', 'T2.id', '=', 'T1.from')
           ->where('T2.username', 'like', $data['value'])
           ->where('T1.'.$data['filter_value'], '=', $data['merchant_id'])
@@ -79,11 +82,14 @@ class TransferController extends APIController
           ->limit($data['limit'])
           ->get();
 
-          $size = DB::select( DB::raw("SQL_CALC_FOUND_ROWS AS size;"));
+          $size = DB::select("SELECT FOUND_ROWS() as `rows`")[0]->rows;
           $this->response['data'] = json_decode($tempResult, true);
           $result = $this->response['data'];
       }else if($data['column'] == 'name'){
         $tempResult = DB::table('transfers as T1')
+          ->select([
+              DB::raw("SQL_CALC_FOUND_ROWS id")
+          ])
           ->join('merchants as T2', 'T2.id', '=', 'T1.to')
           ->where('T2.name', 'like', $data['value'])
           ->where('T1.'.$data['filter_value'], '=', $data['merchant_id'])
@@ -93,7 +99,7 @@ class TransferController extends APIController
           ->limit($data['limit'])
           ->get();
 
-          $size = DB::select( DB::raw("SQL_CALC_FOUND_ROWS AS size;"));
+          $size = DB::select("SELECT FOUND_ROWS() as `rows`")[0]->rows;
           $this->response['data'] = json_decode($tempResult, true);
           $result = $this->response['data'];
       }
