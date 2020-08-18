@@ -133,6 +133,7 @@ Route::post($route.'create', $controller."create");
 Route::post($route.'retrieve', $controller."retrieve");
 Route::post($route.'basic_retrieve', $controller."basicRetrieve");
 Route::post($route.'retrieve_consignments', $controller."retrieveConsignments");
+Route::post($route.'retrieve_allowed_only', $controller."retrieveAllowedOnly");
 Route::post($route.'update', $controller."update");
 Route::post($route.'delete', $controller."delete");
 Route::get($route.'test', $controller."test");
