@@ -65,8 +65,8 @@ class TransferController extends APIController
         );
         $this->model = new Transfer();
         $this->retrieveDB($parameter);
-        $result = $this->response['data'];
         $this->response['size'] = DB::select( DB::raw("SELECT FOUND_ROWS() AS size;"));
+        $result = $this->response['data'];
       }else if($data['column'] == 'username'){
         $tempResult = DB::table('transfers as T1')
           ->join('accounts as T2', 'T2.id', '=', 'T1.from')
