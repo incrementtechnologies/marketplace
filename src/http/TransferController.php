@@ -282,7 +282,7 @@ class TransferController extends APIController
       if(sizeof($result) > 0){
         $array = array();
         foreach ($result as $key) {
-          $trace = app($this->productTraceController)->getByParamsDetails('id', $key['payload_value']);
+          $trace = app($this->productTraceClass)->getByParamsDetails('id', $key['payload_value']);
           $item = array(
             'title'         => $trace[0]['product']['title'],
             'batch_number'  => $trace[0]['batch_number'],
