@@ -110,7 +110,7 @@ class TransferController extends APIController
       }
 
       if(sizeof($size) > 0){
-        $this->response['size'] = intval($size[0]['size']);
+        $this->response['size'] = intval($size[0]->size);
       }
 
       return $this->response();
