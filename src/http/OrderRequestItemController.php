@@ -26,7 +26,8 @@ class OrderRequestItemController extends APIController
           'title'   => app($this->productClass)->getProductColumnByParams('id', $key['product_id'], 'title'),
           'id'      => $key['id'],
           'qty'     => $key['qty'],
-          'product_id'     => $key['product_id']
+          'product_id'     => $key['product_id'],
+          'order_request_id'     => $key['order_request_id']
         );
         $array[] = $item;
       }
