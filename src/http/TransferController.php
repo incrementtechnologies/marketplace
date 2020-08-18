@@ -278,7 +278,10 @@ class TransferController extends APIController
     public function retrieveTransferredItems(Request $request){
       $data = $request->all();
       $this->retrieveDB($data);
-      $result = $this->response['data'];
+      if(sizeof($this->response['data']) <= 0){
+        return $this->response();
+      }
+      $result = app($this->transferredProductsClass)->getAllByParamsOnly('transfer_id', $this->response['data'][0]['id']);
       if(sizeof($result) > 0){
         $array = array();
         foreach ($result as $key) {
