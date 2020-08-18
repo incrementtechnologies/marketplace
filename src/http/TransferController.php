@@ -120,6 +120,89 @@ class TransferController extends APIController
       return $this->response();
     }
 
+    public function retrieveAllowedOnly(Request $request){
+      $data = $request->all();
+      $data['offset'] = isset($data['offset']) ? $data['offset'] : 0;
+      $data['limit'] = isset($data['offset']) ? $data['limit'] : 5;
+      $size = null;
+      $result = array();
+      if($data['column'] == 'created_at'){
+        $sort = array(
+          $data['sort']['column'] => $data['sort']['value']
+        );
+        $parameter = array(
+          'condition' => array(array(
+              'column'  => $data['column'],
+              'value'  => $data['value'],
+              'clause'  => 'like'
+            ), array(
+              'column' => $data['filter_value'],
+              'value'  => $data['merchant_id'],
+              'clause' => '=' 
+            )
+          ),
+          'sort'    => $sort,
+          'limit'   => $data['limit'],
+          'offset'  => $data['offset']
+        );
+        $this->model = new Transfer();
+        $this->retrieveDB($parameter);
+        $size = Transfer::where($data['column'], 'like', $data['value'])->where($data['filter_value'], '=', $data['merchant_id'])->count();
+        $result = $this->response['data'];
+      }else if($data['column'] == 'username'){
+        $tempResult = DB::table('transfers as T1')
+          ->select([
+              DB::raw("SQL_CALC_FOUND_ROWS id")
+          ])
+          ->join('accounts as T2', 'T2.id', '=', 'T1.from')
+          ->where('T2.username', 'like', $data['value'])
+          ->where('T1.'.$data['filter_value'], '=', $data['merchant_id'])
+          ->orderBy($data['column'], $data['sort']['value'])
+          ->select('T1.*')
+          ->offset($data['offset'])
+          ->limit($data['limit'])
+          ->get();
+
+          $size = DB::select("SELECT FOUND_ROWS() as `rows`")[0]->rows;
+          $this->response['data'] = json_decode($tempResult, true);
+          $result = $this->response['data'];
+      }else if($data['column'] == 'name'){
+        $tempResult = DB::table('transfers as T1')
+          ->select([
+              DB::raw("SQL_CALC_FOUND_ROWS id")
+          ])
+          ->join('merchants as T2', 'T2.id', '=', 'T1.to')
+          ->where('T2.name', 'like', $data['value'])
+          ->where('T1.'.$data['filter_value'], '=', $data['merchant_id'])
+          ->orderBy($data['column'], $data['sort']['value'])
+          ->select('T1.*')
+          ->offset($data['offset'])
+          ->limit($data['limit'])
+          ->get();
+
+          $size = DB::select("SELECT FOUND_ROWS() as `rows`")[0]->rows;
+          $this->response['data'] = json_decode($tempResult, true);
+          $result = $this->response['data'];
+      }
+      if(sizeof($result) > 0){
+        $i = 0;
+        $array = array();
+        foreach ($result as $key) {
+          $item = array(
+            'code'  =>  $key['code'],
+            'name'  =>  $this->retrieveName($key['account_id']),
+            'number_of_items'   =>  app($this->transferredProductsClass)->getSizeNoDate('transfer_id', $key['id']),
+            'trasferred_on' => Carbon::createFromFormat('Y-m-d H:i:s', $key['created_at'])->copy()->tz($this->response['timezone'])->format('F j, Y H:i A')
+          );
+          $array[] = $item;
+          $i++;
+        }
+        $this->response['data'] =  $array;
+      }
+      $this->response['size'] = $size;
+      return $this->response();
+    }
+
     public function retrieveConsignments(Request $request){
       $data = $request->all();
       $result = DB::table('transfers as T1')
