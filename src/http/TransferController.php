@@ -275,6 +275,26 @@ class TransferController extends APIController
       return $this->response();
     }
 
+    public function retrieveTransferredItems(Request $request){
+      $data = $request->all();
+      $this->retrieveDB($data);
+      $result = $this->response['data'];
+      if(sizeof($result) > 0){
+        $array = array();
+        foreach ($result as $key) {
+          $trace = app($this->productTraceController)->getByParamsDetails('id', $key['payload_value']);
+          $item = array(
+            'title'         => $trace[0]['product']['title'],
+            'batch_number'  => $trace[0]['batch_number'],
+            'manufacturing_date' => $trace[0]['manufacturing_date']
+          );
+          $array[] = $item;
+        }
+        $this->response['data'] = $array;
+      }
+      return $this->response();
+    }
+
     public function manageQtyWithBundled($product, $productTrace){
       if($product['type'] != 'regular'){
         $bundled = app($this->bundledProductController)->getProductsByParamsNoDetailsDBFormat('bundled_trace', $productTrace);
