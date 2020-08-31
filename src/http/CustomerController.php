@@ -160,7 +160,7 @@ class CustomerController extends APIController
         $data['email'] = $account[0]['email'];
         $data['username'] = $account[0]['username'];
         $data['receiver_merchant_id'] = $data['merchant_id'];
-        app($this->emailClass)->sendCustomerInvitation($data, $template);
+        app($this->emailClass)->sendCustomerConfirmation($data, $template);
       }
     }
     return $this->response();
