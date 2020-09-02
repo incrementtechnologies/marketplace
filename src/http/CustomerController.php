@@ -195,28 +195,20 @@ class CustomerController extends APIController
       foreach ($result as $key) {
         $name = null;
         $merchant = null;
+       
+        if($data['merchant_id'] == $key['merchant']){
+          $merchant = app($this->merchantClass)->getByParamsWithAccount('id', $key['merchant_id']);
+        }else{
+          $merchant = app($this->merchantClass)->getByParamsWithAccount('id', $key['merchant']);
+        }
+
         if($key['merchant_id'] == null){
           $name = $key['email'];
         }else{
-          if($data['merchant_id'] == $key['merchant']){
-            $merchant = app($this->merchantClass)->getByParamsWithAccount('id', $key['merchant_id']);
-            $name = $merchant ? $merchant['name'] : null;
-          }else{
-            $merchant = app($this->merchantClass)->getByParamsWithAccount('id', $key['merchant']);
-            $name = $merchant ? $merchant['name'] : null;
-          }
-          
+          $name = $merchant ? $merchant['name'] : null;
         }
 
-        $type = null;
-        if($key['merchant'] != $data['merchant_id']){
-          $merchant = app($this->merchantClass)->getByParamsWithAccount('id', $key['merchant_id']);
-          $type = $merchant ? $merchant['account'][0]['account_type'] : null;
-        }else{
-          if($key['merchant_id'] != null){
-            $type = $merchant ? $merchant['account'][0]['account_type'] : null;
-          }
-        }
+        $type = $merchant ? $merchant['account'][0]['account_type'] : null;
               
         $item = array(
           'name'    => $name,
