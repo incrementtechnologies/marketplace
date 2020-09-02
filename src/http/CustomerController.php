@@ -198,8 +198,14 @@ class CustomerController extends APIController
         if($key['merchant_id'] == null){
           $name = $key['email'];
         }else{
-          $merchant = app($this->merchantClass)->getByParamsWithAccount('id', $key['merchant_id']);
-          $name = $merchant ? $merchant['name'] : null;
+          if($data['merchant_id'] == $key['merchant']){
+            $merchant = app($this->merchantClass)->getByParamsWithAccount('id', $key['merchant_id']);
+            $name = $merchant ? $merchant['name'] : null;
+          }else{
+            $merchant = app($this->merchantClass)->getByParamsWithAccount('id', $key['merchant']);
+            $name = $merchant ? $merchant['name'] : null;
+          }
+          
         }
 
         $type = null;
