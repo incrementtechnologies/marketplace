@@ -398,7 +398,7 @@ class TransferController extends APIController
       ->get();
       $result = $result->groupBy('product_id');
       $data['offset'] = isset($data['offset']) ? $data['offset'] : 0;
-      $data['limit'] = isset($data['offset']) ? $data['limit'] : 5;
+      $data['limit'] = isset($data['limit']) ? $data['limit'] : 5;
       $i = 1;
       $size = $result->count();
       $testArray = array();
