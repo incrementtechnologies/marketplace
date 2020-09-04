@@ -322,7 +322,12 @@ class TransferController extends APIController
         // updated_at: "2020-03-25 07:59:24"
         $item = array(
           'title' => app($this->productClass)->getProductColumnByParams('id', $key, 'title'),
-          'id' => $key
+          'id' => $key,
+          'merchant' => array(
+            'name'  => 'test'
+          ),
+          'qty' => 0,
+          'qty_in_bundled' => 0
         );
         $testArray[] = $item;
       }
