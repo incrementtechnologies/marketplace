@@ -405,7 +405,7 @@ class TransferController extends APIController
     if(sizeof($result) > 0){  
       foreach($result as $key){
         $item = array(
-          'title' => $this->retrieveProduct($key)[0]->title,
+          'title' => app($this->productClass)->getProductColumnByParams($key),
           'id' => $key
         );
         $testArray[] = $item;
@@ -497,13 +497,5 @@ class TransferController extends APIController
       $this->model = new Transfer();
       $this->retrieveDB($data);
       return $this->response();
-    }
-
-    public function retrieveProduct($productId){
-      $result = DB::table('products')
-      ->select('products.title')
-      ->where('products.id', '=', $productId)
-      ->get();
-      return $result;
     }
 }
