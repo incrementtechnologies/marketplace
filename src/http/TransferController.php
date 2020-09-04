@@ -406,7 +406,6 @@ class TransferController extends APIController
     // return $this->response();
     if(sizeof($result) > 0){  
       foreach($result as $key => $value){
-        echo $key;
         $item = array(
           'title' => app($this->productClass)->getProductColumnByParams('id', $key, 'title'),
           'id' => $key
