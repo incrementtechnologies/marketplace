@@ -325,7 +325,7 @@ class TransferController extends APIController
           'title'     => $product ? $product['title'] : null,
           'id'        => $key,
           'merchant'  => array(
-            'name'    => 'test'
+            'name'    => $product ? app($this->merchantClass)->getColumnValueByParams('id', $product['merchant_id'], 'name') : null
           ),
           'qty'     => 0,
           'qty_in_bundled' => 0,
