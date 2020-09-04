@@ -402,6 +402,8 @@ class TransferController extends APIController
     $i = 1;
     $size = $result->count();
     $testArray = array();
+    $this->response['data'] = $result;
+    return $this->response();
     if(sizeof($result) > 0){  
       foreach($result as $key){
         $item = array(
