@@ -275,6 +275,79 @@ class TransferController extends APIController
       return $this->response();
     }
 
+    
+    public function retrieveByPagination(Request $request){
+      $data = $request->all();
+      $data['offset'] = isset($data['offset']) ? $data['offset'] : 0;
+      $data['limit'] = isset($data['offset']) ? $data['limit'] : 5;
+      $result = DB::table('transfers as T1')
+      ->join('transferred_products as T2', 'T2.transfer_id', '=', 'T1.id')
+      ->where('T1.to', '=', $data['merchant_id'])
+      ->where('T2.deleted_at', '=', null)
+      ->where('T1.deleted_at', '=', null)
+      ->get();
+      $result = $result->groupBy('product_id');
+      $i = 1;
+      $size = $result->count();
+      $testArray = array();
+      if(sizeof($result) > 0){  
+        foreach($result as $key){
+          foreach($key as $innerKey){
+            $item = array(
+              'code'  =>  $innerKey->code,
+              'name'  =>  $this->retrieveName($innerKey->account_id),
+              'number_of_items'   =>  app($this->transferredProductsClass)->getSizeNoDate('transfer_id', $innerKey->id),
+              'trasferred_on' => Carbon::createFromFormat('Y-m-d H:i:s', $innerKey->created_at)->copy()->tz($this->response['timezone'])->format('F j, Y H:i A'),
+              'to'    => app($this->merchantClass)->getColumnValueByParams('id', $innerKey->to, 'name'),
+              'from'  => app($this->merchantClass)->getColumnValueByParams('id', $innerKey->from, 'name')
+            );
+            if(!in_array($item, $testArray)){
+              $count = count($testArray);
+              if($count >= $data['limit']){
+                array_shift($testArray);
+              }
+              $testArray[] = $item;
+            }
+          } 
+          $this->response['data'] = $testArray;
+        break;
+        }
+      }
+    $this->response['size'] = $size;
+    return $this->response();
+  }
+
+  public function retrieveProductTitle(Request $request){
+    $data = $request->all();
+      $result = DB::table('transfers as T1')
+      ->join('transferred_products as T2', 'T2.transfer_id', '=', 'T1.id')
+      ->where('T1.to', '=', $data['merchant_id'])
+      ->where('T2.deleted_at', '=', null)
+      ->where('T1.deleted_at', '=', null)
+      ->get();
+      $result = $result->groupBy('product_id');
+      $data['offset'] = isset($data['offset']) ? $data['offset'] : 0;
+      $data['limit'] = isset($data['offset']) ? $data['limit'] : 5;
+      $i = 1;
+      $size = $result->count();
+      $testArray = array();
+      if(sizeof($result) > 0){  
+        foreach($result as $key){
+          foreach($key as $innerKey){
+            $item = array(
+              'title' => $this->retrieveProduct($innerKey->product_id)[0]->title,
+              'id' => $innerKey->product_id
+            );
+            $testArray[] = $item;
+          }
+          $this->response['data'] = $testArray;
+        break;
+        }
+      }
+    $this->response['size'] = $size;
+    return $this->response();
+  }
+
     public function retrieveTransferredItems(Request $request){
       $data = $request->all();
       $this->retrieveDB($data);
@@ -356,5 +429,13 @@ class TransferController extends APIController
       $this->model = new Transfer();
       $this->retrieveDB($data);
       return $this->response();
+    }
+
+    public function retrieveProduct($productId){
+      $result = DB::table('products')
+      ->select('products.title')
+      ->where('products.id', '=', $productId)
+      ->get();
+      return $result;
     }
 }

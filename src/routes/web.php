@@ -132,6 +132,7 @@ $controller = 'Increment\Marketplace\Http\TransferController@';
 Route::post($route.'create', $controller."create");
 Route::post($route.'retrieve', $controller."retrieve");
 Route::post($route.'basic_retrieve', $controller."basicRetrieve");
+Route::post($route.'retrieve_by_pagination', $controller."retrieveByPagination");
 Route::post($route.'retrieve_consignments', $controller."retrieveConsignments");
 Route::post($route.'retrieve_allowed_only', $controller."retrieveAllowedOnly");
 Route::post($route.'retrieve_transferred_items', $controller."retrieveTransferredItems");
