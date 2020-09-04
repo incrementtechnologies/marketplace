@@ -390,31 +390,28 @@ class TransferController extends APIController
 
   public function retrieveProductTitle(Request $request){
     $data = $request->all();
-      $result = DB::table('transfers as T1')
-      ->join('transferred_products as T2', 'T2.transfer_id', '=', 'T1.id')
-      ->where('T1.to', '=', $data['merchant_id'])
-      ->where('T2.deleted_at', '=', null)
-      ->where('T1.deleted_at', '=', null)
-      ->get();
-      $result = $result->groupBy('product_id');
-      $data['offset'] = isset($data['offset']) ? $data['offset'] : 0;
-      $data['limit'] = isset($data['limit']) ? $data['limit'] : 5;
-      $i = 1;
-      $size = $result->count();
-      $testArray = array();
-      if(sizeof($result) > 0){  
-        foreach($result as $key){
-          foreach($key as $innerKey){
-            $item = array(
-              'title' => $this->retrieveProduct($innerKey->product_id)[0]->title,
-              'id' => $innerKey->product_id
-            );
-            $testArray[] = $item;
-          }
-          $this->response['data'] = $testArray;
-        break;
-        }
+    $result = DB::table('transfers as T1')
+    ->join('transferred_products as T2', 'T2.transfer_id', '=', 'T1.id')
+    ->where('T1.to', '=', $data['merchant_id'])
+    ->where('T2.deleted_at', '=', null)
+    ->where('T1.deleted_at', '=', null)
+    ->get();
+    $result = $result->groupBy('product_id');
+    $data['offset'] = isset($data['offset']) ? $data['offset'] : 0;
+    $data['limit'] = isset($data['limit']) ? $data['limit'] : 5;
+    $i = 1;
+    $size = $result->count();
+    $testArray = array();
+    if(sizeof($result) > 0){  
+      foreach($result as $key){
+        $item = array(
+          'title' => $this->retrieveProduct($key)[0]->title,
+          'id' => $key
+        );
+        $testArray[] = $item;
       }
+    }
+    $this->response['data'] = $testArray;
     $this->response['size'] = $size;
     return $this->response();
   }
