@@ -205,6 +205,14 @@ class TransferController extends APIController
       return $this->response();
     }
 
+    public function retrieveConsignmentsImprove(Request $request){
+      // get all products ? as this is based on consigments ?
+      // limit
+      // offset
+      // get inventory
+      // get total inventory both bundled and traces
+    }
+
     public function retrieveConsignments(Request $request){
       $data = $request->all();
       $result = DB::table('transfers as T1')
