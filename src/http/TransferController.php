@@ -401,11 +401,12 @@ class TransferController extends APIController
     $data['limit'] = isset($data['limit']) ? $data['limit'] : 5;
     $i = 1;
     $size = $result->count();
-    $testArray = array();
-    $this->response['data'] = $result;
+    // $testArray = array();
+    // $this->response['data'] = $result;
     return $this->response();
     if(sizeof($result) > 0){  
       foreach($result as $key){
+        echo $key;
         $item = array(
           'title' => app($this->productClass)->getProductColumnByParams('id', $key, 'title'),
           'id' => $key
