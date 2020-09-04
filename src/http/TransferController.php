@@ -401,9 +401,9 @@ class TransferController extends APIController
     $data['limit'] = isset($data['limit']) ? $data['limit'] : 5;
     $i = 1;
     $size = $result->count();
-    // $testArray = array();
+    $testArray = array();
     // $this->response['data'] = $result;
-    return $this->response();
+    // return $this->response();
     if(sizeof($result) > 0){  
       foreach($result as $key){
         echo $key;
