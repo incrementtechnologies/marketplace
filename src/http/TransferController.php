@@ -320,14 +320,16 @@ class TransferController extends APIController
         // title: "2 x WETTER"
         // type: "bundled"
         // updated_at: "2020-03-25 07:59:24"
+        $product = app($this->productClass)->getByParams('id', $key);
         $item = array(
-          'title' => app($this->productClass)->getProductColumnByParams('id', $key, 'title'),
-          'id' => $key,
-          'merchant' => array(
-            'name'  => 'test'
+          'title'     => $product ? $product['title'] : null,
+          'id'        => $key,
+          'merchant'  => array(
+            'name'    => 'test'
           ),
-          'qty' => 0,
-          'qty_in_bundled' => 0
+          'qty'     => 0,
+          'qty_in_bundled' => 0,
+          'type'    => $product ? $product['type'] : null
         );
         $testArray[] = $item;
       }
