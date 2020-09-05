@@ -288,8 +288,8 @@ class TransferController extends APIController
     $data['offset'] = isset($data['offset']) ? $data['offset'] : 0;
     $data['limit'] = isset($data['offset']) ? $data['limit'] : 5;
     $result = DB::table('transferred_products as T1')
-    ->where('T1.to', '=', $data['merchant_id'])
-    ->where('T1.deleted_at', '=', null)
+    ->where('T1.merchant_id', '=', $data['merchant_id'])
+    ->where('T1.status', '=', 'active')
     ->get();
     $result = $result->groupBy('product_id');
     $size = $result->count();
