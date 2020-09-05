@@ -289,6 +289,7 @@ class TransferController extends APIController
     $data['limit'] = isset($data['offset']) ? $data['limit'] : 5;
     $result = DB::table('transfers as T1')
     ->join('transferred_products as T2', 'T2.transfer_id', '=', 'T1.id')
+    ->join('products as T3', 'T3.id', '=', 'T1.product_id')
     ->where('T1.to', '=', $data['merchant_id'])
     ->where('T2.deleted_at', '=', null)
     ->where('T1.deleted_at', '=', null)
