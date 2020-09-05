@@ -295,7 +295,6 @@ class TransferController extends APIController
     ->get(['T1.*', 'T2.title']);
     $result = $result->groupBy('product_id');
     $size = $result->count();
-    $result = $result->limit($data['limit'])->offset($data['offset']);
     $testArray = array();
     if(sizeof($result) > 0){  
       foreach($result as $key => $value){
