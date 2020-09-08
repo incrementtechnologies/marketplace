@@ -22,8 +22,8 @@ class OrderRequestItemController extends APIController
     $result = $this->response['data'];
     if(sizeof($result) > 0){
       $array = array();
-      $merchant = app($this->productClass)->getProductColumnByParams('id', $key['product_id'], 'merchant_id');
       foreach ($result as $key) {
+        $merchant = app($this->productClass)->getProductColumnByParams('id', $key['product_id'], 'merchant_id');
         $item = array(
           'title'   => app($this->productClass)->getProductColumnByParams('id', $key['product_id'], 'title'),
           'id'      => $key['id'],
