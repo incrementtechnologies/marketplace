@@ -10,6 +10,7 @@ class OrderRequestItemController extends APIController
 {
 
   public $productClass = 'Increment\Marketplace\Http\ProductController';
+  public $merchantClass = 'Increment\Marketplace\Http\MerchantController';
 
   function __construct(){
     $this->model = new OrderRequestItem();
@@ -21,13 +22,15 @@ class OrderRequestItemController extends APIController
     $result = $this->response['data'];
     if(sizeof($result) > 0){
       $array = array();
+      $merchant = app($this->productClass)->getProductColumnByParams('id', $key['product_id'], 'merchant_id');
       foreach ($result as $key) {
         $item = array(
           'title'   => app($this->productClass)->getProductColumnByParams('id', $key['product_id'], 'title'),
           'id'      => $key['id'],
           'qty'     => $key['qty'],
           'product_id'     => $key['product_id'],
-          'order_request_id'     => $key['order_request_id']
+          'order_request_id'     => $key['order_request_id'],
+          'merchant'     => app($this->merchantClass)->getProductColumnByParams('id', $merchant, 'name')
         );
         $array[] = $item;
       }
