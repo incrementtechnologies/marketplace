@@ -23,14 +23,14 @@ class OrderRequestItemController extends APIController
     if(sizeof($result) > 0){
       $array = array();
       foreach ($result as $key) {
-        $merchant = app($this->productClass)->getProductColumnByParams('id', $key['product_id'], 'merchant_id');
+        $product = app($this->productClass)->getByParams('id', $key['product_id']);
         $item = array(
-          'title'   => app($this->productClass)->getProductColumnByParams('id', $key['product_id'], 'title'),
+          'title'   => $product ? $product['title'] : null,
           'id'      => $key['id'],
           'qty'     => $key['qty'],
           'product_id'     => $key['product_id'],
           'order_request_id'     => $key['order_request_id'],
-          'merchant'     => app($this->merchantClass)->getProductColumnByParams('id', $merchant, 'name')
+          'merchant'     => $product ? app($this->merchantClass)->getColumnValueByParams('id', $product['merchant_id'], 'name') : null
         );
         $array[] = $item;
       }
