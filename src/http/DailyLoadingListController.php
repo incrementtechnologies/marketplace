@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\APIController;
 use Increment\Marketplace\Models\DailyLoadingList;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 class DailyLoadingListController extends APIController
 {
 
@@ -34,6 +35,28 @@ class DailyLoadingListController extends APIController
         'delivered_by' => $data['account_id'],
         'updated_at'   => Carbon::now()
       ));
+    }
+    return $this->response();
+  }
+
+  public function retrieveBasic(Request $request){
+    $data = $request->all();
+    $tempResult = DB::table('daily_loading_lists as T1')
+      ->select([
+          DB::raw("SQL_CALC_FOUND_ROWS id")
+      ])
+      ->join('order_requests as T2', 'T2.id', '=', 'T1.order_request_id')
+      ->where('T1.merchant_id', '=', $data['merchant_id'])
+      ->where('T1.account_id', '=', $data['account_id'])
+      ->orderBy($data['sort']['column'], $data['sort']['value'])
+      ->select('T2.*')
+      ->offset($data['offset'])
+      ->limit($data['limit'])
+      ->get();
+    $this->response['size'] = DB::select("SELECT FOUND_ROWS() as `rows`")[0]->rows;
+    $results = json_decode($tempResult, true);
+    if(sizeof($result) > 0){
+      $this->response['data'] = app($this->orderRequestClass)->manageResults($result);
     }
     return $this->response();
   }
