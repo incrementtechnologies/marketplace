@@ -10,6 +10,7 @@ class DailyLoadingListController extends APIController
 {
 
   public $merchantClass = 'Increment\Marketplace\Http\MerchantController';
+  public $orderRequestClass = 'Increment\Marketplace\Http\OrderRequestController';
 
   function __construct(){
     $this->model = new DailyLoadingList();
@@ -17,9 +18,23 @@ class DailyLoadingListController extends APIController
 
   public function create(Request $request){
     $data = $request->all();
+    
+    if($this->checkIfExist('order_request_id', $data['order_request_id']) == true){
+      $this->response['error'] = 'Already exist to the list!';
+      $this->response['data'] = null;
+      return $this->response();
+    }
+
     $data['code'] = $this->generateCode();
     $this->model = new DailyLoadingList();
     $this->insertDB($data);
+
+    if($this->response['data'] > 0){
+      app($this->orderRequestClass)->updateByParams($data['order_request_id'], array(
+        'delivered_by' => $data['account_id'],
+        'updated_at'   => Carbon::now()
+      ));
+    }
     return $this->response();
   }
 
@@ -31,5 +46,10 @@ class DailyLoadingListController extends APIController
     }else{
       return $code;
     }
+  }
+
+  public function checkIfExist($column, $value){
+    $result = DailyLoadingList::where($column, '=', $value)->get();
+    return sizeof($result) > 0 ? true : false;
   }
 }

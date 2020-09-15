@@ -10,6 +10,7 @@ class OrderRequestController extends APIController
 {
 
   public $merchantClass = 'Increment\Marketplace\Http\MerchantController';
+  public $dailyLoadingListClass = 'Increment\Marketplace\Http\DailyLoadingListController';
   function __construct(){
     $this->model = new OrderRequest();
     $this->notRequired = array('date_delivered', 'delivered_by');
@@ -55,12 +56,13 @@ class OrderRequestController extends APIController
           'merchant_to' => app($this->merchantClass)->getColumnByParams('id', $key['merchant_to'], ['name', 'address']),
           'date_of_delivery'  => Carbon::createFromFormat('Y-m-d H:i:s', $key['date_of_delivery'])->copy()->tz($this->response['timezone'])->format('F j, Y'),
           'status'        => $key['status'],
-          'delivered_by'  => null,
+          'delivered_by'  => $key['delivered_by'] ? $this->retrieveName($key['delivered_by']) : null,
           'delivered_date'=> null,
           'code'          => $key['code'],
           'added_by'      => $key['code'],
           'id'      => $key['id'],
-          'order_number'      => $key['order_number']
+          'order_number'      => $key['order_number'],
+          'daily_loading_list' => app($this->dailyLoadingListClass)->checkIfExist('order_request_id', $key['id'])
         );
         $array[] = $item;
       }
@@ -68,5 +70,9 @@ class OrderRequestController extends APIController
     }
     $this->response['size'] = OrderRequest::where($data['condition'][0]['column'], '=', $data['condition'][0]['value'])->count();
     return $this->response();
+  }
+
+  public function updateByParams($id, $array){
+    return OrderRequest::where('id', '=', $id)->update($array);
   }
 }
