@@ -55,8 +55,8 @@ class DailyLoadingListController extends APIController
       ->get();
     $this->response['size'] = DB::select("SELECT FOUND_ROWS() as `rows`")[0]->rows;
     $results = json_decode($tempResult, true);
-    if(sizeof($result) > 0){
-      $this->response['data'] = app($this->orderRequestClass)->manageResults($result);
+    if(sizeof($results) > 0){
+      $this->response['data'] = app($this->orderRequestClass)->manageResults($results);
     }
     return $this->response();
   }

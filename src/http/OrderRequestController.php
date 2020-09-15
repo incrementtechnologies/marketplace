@@ -56,7 +56,7 @@ class OrderRequestController extends APIController
     return $this->response();
   }
 
-  public function manageResults($results){
+  public function manageResults($result){
     $array = array();
     foreach ($result as $key) {
       $item = array(
