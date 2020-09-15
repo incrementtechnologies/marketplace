@@ -33,6 +33,7 @@ class DailyLoadingListController extends APIController
     if($this->response['data'] > 0){
       app($this->orderRequestClass)->updateByParams($data['order_request_id'], array(
         'delivered_by' => $data['account_id'],
+        'status'       => 'in_progress'    
         'updated_at'   => Carbon::now()
       ));
     }
