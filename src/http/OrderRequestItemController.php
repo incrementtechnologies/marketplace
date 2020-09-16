@@ -16,6 +16,18 @@ class OrderRequestItemController extends APIController
     $this->model = new OrderRequestItem();
   }
 
+  public function create(Request $request){
+    $data = $request->all();
+    if($this->checkIfExist($data['order_request_id'], $data['product_id']) == true){
+      $this->response['error'] = 'Already exist to the list!';
+      $this->response['data'] = null;
+      return $this->response();
+    }
+    $this->model = new OrderRequestItem();
+    $this->retrieveDB($data);
+    return $this->response();
+  }
+
   public function retrieve(Request $request){
     $data = $request->all();
     $this->retrieveDB($data);
@@ -38,5 +50,10 @@ class OrderRequestItemController extends APIController
       $this->response['data'] = $array;
     }
     return $this->response();
+  }
+
+  public function checkIfExist($orderRequestId, $productId){
+    $result = OrderRequestItem::where('order_request_id', '=', $orderRequestId)->where('product_id', '=', $productId)->get();
+    return sizeof($result) > 0 ? true : false;
   }
 }
