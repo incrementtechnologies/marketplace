@@ -84,9 +84,9 @@ class DailyLoadingListController extends APIController
         $dailyLoadinglistId = null;
         $merchant = $product ? app($this->merchantClass)->getColumnValueByParams('id', $product['merchant_id'], 'name') : null;
         foreach ($value as $keyValues) {
-          $totalQty += intval($keyValues->qty);
-          $orderRequestId = $keyValues->order_request_id;
-          $dailyLoadinglistId = $keyValues->daily_loading_list_id;
+          $totalQty += intval($keyValues['qty']);
+          $orderRequestId = $keyValues['order_request_id'];
+          $dailyLoadinglistId = $keyValues['daily_loading_list_id'];
         }
         $this->response['data'][] = array(
           'merchant'  => $merchant == null ? null : array(
