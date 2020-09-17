@@ -62,6 +62,26 @@ class DailyLoadingListController extends APIController
     return $this->response();
   }
 
+  public function retrieveSummaryTotal(Request $request){
+    $data = $request->all();
+    
+    $tempResult = DB::table('daily_loading_lists as T1')
+      ->join('order_request_items as T2', 'T2.order_request_id', '=', 'T1.order_request_id')
+      ->where('T1.merchant_id', '=', $data['merchant_id'])
+      ->where('T1.account_id', '=', $data['account_id'])
+      ->groupBy('product_id')
+      ->select(['T2.merchant_id', 'T2.product_id', 'T1.id as daily_loading_list_id', DB::raw('COUNT(order_request_items.qty) as qty')])
+      ->get();
+
+    $results = json_decode($tempResult, true);
+    
+    if(sizeof($results) > 0){
+      $this->response['data'] =$results;
+    }
+    
+    return $this->response();
+  }
+
   public function generateCode(){
     $code = 'DLL_'.substr(str_shuffle($this->codeSource), 0, 61);
     $codeExist = DailyLoadingList::where('code', '=', $code)->get();
