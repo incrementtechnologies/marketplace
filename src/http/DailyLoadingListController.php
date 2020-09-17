@@ -12,6 +12,7 @@ class DailyLoadingListController extends APIController
 
   public $merchantClass = 'Increment\Marketplace\Http\MerchantController';
   public $orderRequestClass = 'Increment\Marketplace\Http\OrderRequestController';
+  public $productClass = 'Increment\Marketplace\Http\ProductController';
 
   function __construct(){
     $this->model = new DailyLoadingList();
@@ -75,7 +76,29 @@ class DailyLoadingListController extends APIController
     $results = json_decode($tempResult->groupBy('product_id'), true);
     
     if(sizeof($results) > 0){
-      $this->response['data'] =$results;
+      foreach ($results as $key => $value) {
+        $array = null;
+        $totalQty = 0
+        $product = app($this->productClass)->getByParams('id', $key);
+        $orderRequestId = null;
+        $dailyLoadinglistId = null;
+        $merchant = $product ? app($this->merchantClass)->getColumnValueByParams('id', $product['merchant_id'], 'name') : null;
+        foreach ($value as $keyValues) {
+          $totalQty += intval($keyValues->qty);
+          $orderRequestId = $keyValues->order_request_id;
+          $dailyLoadinglistId = $keyValues->daily_loading_list_id;
+        }
+        $this->response['data'][] = array(
+          'merchant'  => $merchant == null ? null : array(
+            'name'   => $merchant,
+            'id'     => $product['merchant_id']
+          ),
+          'title'     => $product ? $product['title'] : null,
+          'qty'       => $totalQty,
+          'daily_loading_list_id' = $dailyLoadinglistId,
+          'order_request_id' = $orderRequestId
+        );
+      }
     }
     
     return $this->response();
