@@ -78,7 +78,7 @@ class DailyLoadingListController extends APIController
     if(sizeof($results) > 0){
       foreach ($results as $key => $value) {
         $array = null;
-        $totalQty = 0
+        $totalQty = 0;
         $product = app($this->productClass)->getByParams('id', $key);
         $orderRequestId = null;
         $dailyLoadinglistId = null;
