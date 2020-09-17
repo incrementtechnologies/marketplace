@@ -96,7 +96,8 @@ class DailyLoadingListController extends APIController
           'title'     => $product ? $product['title'] : null,
           'qty'       => $totalQty,
           'daily_loading_list_id' => $dailyLoadinglistId,
-          'order_request_id' => $orderRequestId
+          'order_request_id' => $orderRequestId,
+          'counter'     => 0
         );
       }
     }
