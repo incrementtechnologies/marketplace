@@ -51,6 +51,7 @@ class DailyLoadingListController extends APIController
       ->join('order_requests as T2', 'T2.id', '=', 'T1.order_request_id')
       ->where('T1.merchant_id', '=', $data['merchant_id'])
       ->where('T1.account_id', '=', $data['account_id'])
+      ->where('T1.status', '=', 'approved')
       ->orderBy($data['sort']['column'], $data['sort']['value'])
       ->select('T2.*')
       ->offset($data['offset'])
