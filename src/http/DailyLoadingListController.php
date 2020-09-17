@@ -72,7 +72,7 @@ class DailyLoadingListController extends APIController
       ->select(['T2.*', 'T1.id as daily_loading_list_id'])
       ->get();
 
-    $results = json_decode($tempResult, true);
+    $results = json_decode($tempResult->groupBy('product_id'), true);
     
     if(sizeof($results) > 0){
       $this->response['data'] =$results;
