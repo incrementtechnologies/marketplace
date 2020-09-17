@@ -28,6 +28,7 @@ class DailyLoadingListController extends APIController
     }
 
     $data['code'] = $this->generateCode();
+    $data['status'] = 'pending';
     $this->model = new DailyLoadingList();
     $this->insertDB($data);
 
