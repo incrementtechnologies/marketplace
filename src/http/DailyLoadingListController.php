@@ -70,7 +70,7 @@ class DailyLoadingListController extends APIController
       ->where('T1.merchant_id', '=', $data['merchant_id'])
       ->where('T1.account_id', '=', $data['account_id'])
       ->groupBy('product_id')
-      ->select(['T1.merchant_id', 'T2.product_id', 'T1.id as daily_loading_list_id', DB::raw('COUNT(order_request_items.qty) as qty')])
+      ->select(['T1.merchant_id', 'T2.product_id', 'T1.id as daily_loading_list_id', DB::raw('COUNT(T2.qty) as qty')])
       ->get();
 
     $results = json_decode($tempResult, true);
