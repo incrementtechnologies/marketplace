@@ -79,4 +79,9 @@ class OrderRequestController extends APIController
   public function updateByParams($id, $array){
     return OrderRequest::where('id', '=', $id)->update($array);
   }
+
+  public function getColumnByParams($column, $value, $getColumns){
+    $result = OrderRequest::select($getColumns)->where($column, '=', $value)->get();
+    return sizeof($result) > 0 ? $result[0] : null;
+  }
 }

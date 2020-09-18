@@ -166,6 +166,7 @@ class TransferController extends APIController
           $this->response['data'][$i]['created_at_human'] = Carbon::createFromFormat('Y-m-d H:i:s', $result[$i]['created_at'])->copy()->tz($this->response['timezone'])->format('F j, Y H:i A');
           $this->response['data'][$i]['to_details'] = app($this->merchantClass)->getByParamsConsignments('id', $result[$i]['to']);
           $this->response['data'][$i]['from_details'] = app($this->merchantClass)->getByParamsConsignments('id', $result[$i]['from']);
+          $this->response['data'][$i]['order_requests'] = app($this->orderRequestClass)->getColumnByParams('id', $result[$i]['order_request_id'], ['order_number', 'id']);
           $this->response['data'][$i]['account'] = $this->retrieveAccountDetailsTransfer($result[$i]['account_id']);
           $i++;
         }
@@ -250,7 +251,8 @@ class TransferController extends APIController
             'number_of_items'   =>  app($this->transferredProductsClass)->getSizeNoDate('transfer_id', $key['id']),
             'trasferred_on' => Carbon::createFromFormat('Y-m-d H:i:s', $key['created_at'])->copy()->tz($this->response['timezone'])->format('F j, Y H:i A'),
             'to'    => app($this->merchantClass)->getColumnValueByParams('id', $result[$i]['to'], 'name'),
-            'from'  => app($this->merchantClass)->getColumnValueByParams('id', $result[$i]['from'], 'name')
+            'from'  => app($this->merchantClass)->getColumnValueByParams('id', $result[$i]['from'], 'name'),
+            'order_requests' => app($this->orderRequestClass)->getColumnByParams('id', $result[$i]['order_request_id'], ['order_number', 'id'])
           );
           $array[] = $item;
           $i++;
