@@ -211,6 +211,7 @@ Route::post($route.'create', $controller."create");
 Route::post($route.'retrieve', $controller."retrieve");
 Route::post($route.'retrieve_basic', $controller."retrieveBasic");
 Route::post($route.'retrieve_summary_total', $controller."retrieveSummaryTotal");
+Route::post($route.'approved', $controller."approved");
 Route::post($route.'update', $controller."update");
 Route::post($route.'delete', $controller."delete");
 Route::get($route.'test', $controller."test");

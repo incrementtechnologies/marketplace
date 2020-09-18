@@ -111,6 +111,15 @@ class DailyLoadingListController extends APIController
     return $this->response();
   }
 
+  public function approved(Request $request){
+    $data = $request->all();
+    DailyLoadingList::where('merchant_id', '=', $data['merchant_id'])->where('account_id', '=', $data['account_id'])->update(array(
+      'status'  => 'approved',
+      'updated_at' => Carbon::now()
+    ));
+    return $this->response();
+  }
+
   public function generateCode(){
     $code = 'DLL_'.substr(str_shuffle($this->codeSource), 0, 61);
     $codeExist = DailyLoadingList::where('code', '=', $code)->get();
