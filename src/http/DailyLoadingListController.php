@@ -72,6 +72,8 @@ class DailyLoadingListController extends APIController
       ->join('order_request_items as T2', 'T2.order_request_id', '=', 'T1.order_request_id')
       ->where('T1.merchant_id', '=', $data['merchant_id'])
       ->where('T1.account_id', '=', $data['account_id'])
+      ->where('T1.deleted_at', '=', null)
+      ->where('T2.deleted_at', '=', null)
       ->where('T1.status', '=', 'pending')
       ->select(['T2.*', 'T1.id as daily_loading_list_id'])
       ->get();
