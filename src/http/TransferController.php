@@ -20,12 +20,55 @@ class TransferController extends APIController
     function __construct(){
       $this->model = new Transfer();
       $this->localization();
+
+      $this->notRequired = array(
+        'order_request_id'
+      );
     }
 
     public function create(Request $request){
       $data = $request->all();
       $data['code'] = $this->generateCode();
       $this->insertDB($data);
+      return $this->response();
+    }
+
+    public function createDeliveries(Request $request){
+      $data = $request->all();
+      $data['code'] = $this->generateCode();
+      $this->insertDB($data);
+
+      if($this->response['data'] > 0){
+        $products = $data['products'];
+
+        foreach ($products as $key) {
+
+          $existTrace = TransferredProduct::where('payload_value', '=', $key['product_trace'])->orderBy('created_at', 'desc')->limit(1)->get();
+
+          if(sizeof($existTrace) > 0){
+            TransferredProduct::where('id', '=', $existTrace[0]['id'])->updateBy(
+              array(
+                'status' => 'inactive',
+                'updated_at'  => Carbon::now()
+              )
+            );
+          }
+
+          $item = array(
+            'transfer_id' => $this->response['data'],
+            'payload'     => 'product_traces',
+            'payload_value' => $key['product_trace'],
+            'product_id'  => $key['product_id'],
+            'merchant_id'  => $data['to'],
+            'status'      => 'active',
+            'created_at'  => Carbon::now()
+          );
+
+          TransferredProduct::insert($item);
+
+        }
+      }
+
       return $this->response();
     }
     
