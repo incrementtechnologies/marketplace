@@ -48,7 +48,7 @@ class TransferController extends APIController
           $existTrace = TransferredProduct::where('payload_value', '=', $key['product_trace'])->orderBy('created_at', 'desc')->limit(1)->get();
 
           if(sizeof($existTrace) > 0){
-            TransferredProduct::where('id', '=', $existTrace[0]['id'])->updateBy(
+            TransferredProduct::where('id', '=', $existTrace[0]['id'])->update(
               array(
                 'status' => 'inactive',
                 'updated_at'  => Carbon::now()
