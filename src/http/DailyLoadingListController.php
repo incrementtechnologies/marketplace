@@ -100,6 +100,7 @@ class DailyLoadingListController extends APIController
           'qty'       => $totalQty,
           'daily_loading_list_id' => $dailyLoadinglistId,
           'order_request_id' => $orderRequestId,
+          'product_id' => $key,
           'counter'     => 0
         );
       }
