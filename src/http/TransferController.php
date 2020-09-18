@@ -17,8 +17,8 @@ class TransferController extends APIController
     public $productTraceClass = 'Increment\Marketplace\Http\ProductTraceController';
     public $bundledProductController = 'Increment\Marketplace\Http\BundledProductController';
     public $landBlockProductClass = 'App\Http\Controllers\LandBlockProductController';
-    public $orderRequestClass = 'App\Http\Controllers\OrderRequestController';
-    public $dailyLoadingListClass = 'App\Http\Controllers\DailyLoadingListController';
+    public $orderRequestClass = 'Increment\Marketplace\Http\OrderRequestController';
+    public $dailyLoadingListClass = 'Increment\Marketplace\Http\DailyLoadingListController';
     function __construct(){
       $this->model = new Transfer();
       $this->localization();
