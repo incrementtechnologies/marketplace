@@ -134,4 +134,8 @@ class DailyLoadingListController extends APIController
     $result = DailyLoadingList::where($column, '=', $value)->get();
     return sizeof($result) > 0 ? true : false;
   }
+
+  public function updateByParams($column,, $value, $array){
+    return DailyLoadingList::where($column, '=', $value)->update($array);
+  }
 }

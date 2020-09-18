@@ -17,6 +17,8 @@ class TransferController extends APIController
     public $productTraceClass = 'Increment\Marketplace\Http\ProductTraceController';
     public $bundledProductController = 'Increment\Marketplace\Http\BundledProductController';
     public $landBlockProductClass = 'App\Http\Controllers\LandBlockProductController';
+    public $orderRequestClass = 'App\Http\Controllers\OrderRequestController';
+    public $dailyLoadingListClass = 'App\Http\Controllers\DailyLoadingListController';
     function __construct(){
       $this->model = new Transfer();
       $this->localization();
@@ -67,6 +69,17 @@ class TransferController extends APIController
           TransferredProduct::insert($item);
 
         }
+
+        app($this->orderRequestClass)->updateByParams($data['order_request_id'], array(
+          'status'  => 'completed',
+          'date_delivered'  => Carbon::now(),
+          'updated_at'  => Carbon::now()
+        ));
+
+        app($this->dailyLoadingListClass)->updateByParams('order_request_id', $data['order_request_id'], array(
+          'status'  => 'completed',
+          'updated_at'  => Carbon::now()
+        ));
       }
 
       return $this->response();
