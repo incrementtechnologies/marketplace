@@ -60,7 +60,7 @@ class OrderRequestController extends APIController
     $array = array();
     foreach ($result as $key) {
       $item = array(
-        'merchant_to' => app($this->merchantClass)->getColumnByParams('id', $key['merchant_to'], ['name', 'address']),
+        'merchant_to' => app($this->merchantClass)->getColumnByParams('id', $key['merchant_to'], ['name', 'address', 'id']),
         'date_of_delivery'  => Carbon::createFromFormat('Y-m-d H:i:s', $key['date_of_delivery'])->copy()->tz($this->response['timezone'])->format('F j, Y'),
         'status'        => $key['status'],
         'delivered_by'  => $key['delivered_by'] ? $this->retrieveName($key['delivered_by']) : null,
