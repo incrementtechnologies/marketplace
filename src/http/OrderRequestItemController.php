@@ -24,7 +24,7 @@ class OrderRequestItemController extends APIController
       return $this->response();
     }
     $this->model = new OrderRequestItem();
-    $this->retrieveDB($data);
+    $this->insertDB($data);
     return $this->response();
   }
 
