@@ -18,13 +18,14 @@ class OrderRequestItemController extends APIController
 
   public function create(Request $request){
     $data = $request->all();
+    dd($data);
     if($this->checkIfExist($data['order_request_id'], $data['product_id']) == true){
       $this->response['error'] = 'Already exist to the list!';
       $this->response['data'] = null;
       return $this->response();
     }
     $this->model = new OrderRequestItem();
-    $this->retrieveDB($data);
+    $this->insertDB($data);
     return $this->response();
   }
 
