@@ -53,7 +53,7 @@ class DailyLoadingListController extends APIController
       ->where('T1.account_id', '=', $data['account_id'])
       ->where('T1.status', '=', $data['status'])
       ->orderBy($data['sort']['column'], $data['sort']['value'])
-      ->select('T2.*')
+      ->select(['T2.*', 'T1.id AS daily_loading_list_id'])
       ->offset($data['offset'])
       ->limit($data['limit'])
       ->get();
