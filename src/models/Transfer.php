@@ -6,5 +6,5 @@ use App\APIModel;
 class Transfer extends APIModel
 {
     protected $table = 'transfers';
-    protected $fillable = ['account_id', 'from', 'to'];
+    protected $fillable = ['account_id', 'from', 'to', 'order_request_id'];
 }

@@ -17,15 +17,71 @@ class TransferController extends APIController
     public $productTraceClass = 'Increment\Marketplace\Http\ProductTraceController';
     public $bundledProductController = 'Increment\Marketplace\Http\BundledProductController';
     public $landBlockProductClass = 'App\Http\Controllers\LandBlockProductController';
+    public $orderRequestClass = 'Increment\Marketplace\Http\OrderRequestController';
+    public $dailyLoadingListClass = 'Increment\Marketplace\Http\DailyLoadingListController';
     function __construct(){
       $this->model = new Transfer();
       $this->localization();
+
+      $this->notRequired = array(
+        'order_request_id'
+      );
     }
 
     public function create(Request $request){
       $data = $request->all();
       $data['code'] = $this->generateCode();
       $this->insertDB($data);
+      return $this->response();
+    }
+
+    public function createDeliveries(Request $request){
+      $data = $request->all();
+      $data['code'] = $this->generateCode();
+      $this->insertDB($data);
+
+      if($this->response['data'] > 0){
+        $products = $data['products'];
+
+        foreach ($products as $key) {
+
+          $existTrace = TransferredProduct::where('payload_value', '=', $key['product_trace'])->orderBy('created_at', 'desc')->limit(1)->get();
+
+          if(sizeof($existTrace) > 0){
+            TransferredProduct::where('id', '=', $existTrace[0]['id'])->update(
+              array(
+                'status' => 'inactive',
+                'updated_at'  => Carbon::now()
+              )
+            );
+          }
+
+          $item = array(
+            'transfer_id' => $this->response['data'],
+            'payload'     => 'product_traces',
+            'payload_value' => $key['product_trace'],
+            'product_id'  => $key['product_id'],
+            'merchant_id'  => $data['to'],
+            'status'      => 'active',
+            'created_at'  => Carbon::now()
+          );
+
+          TransferredProduct::insert($item);
+
+        }
+
+        app($this->orderRequestClass)->updateByParams($data['order_request_id'], array(
+          'status'  => 'completed',
+          'date_delivered'  => Carbon::now(),
+          'updated_at'  => Carbon::now()
+        ));
+
+        app($this->dailyLoadingListClass)->updateByParams('order_request_id', $data['order_request_id'], array(
+          'status'  => 'completed',
+          'updated_at'  => Carbon::now()
+        ));
+      }
+
       return $this->response();
     }
     
@@ -110,6 +166,7 @@ class TransferController extends APIController
           $this->response['data'][$i]['created_at_human'] = Carbon::createFromFormat('Y-m-d H:i:s', $result[$i]['created_at'])->copy()->tz($this->response['timezone'])->format('F j, Y H:i A');
           $this->response['data'][$i]['to_details'] = app($this->merchantClass)->getByParamsConsignments('id', $result[$i]['to']);
           $this->response['data'][$i]['from_details'] = app($this->merchantClass)->getByParamsConsignments('id', $result[$i]['from']);
+          $this->response['data'][$i]['order_requests'] = app($this->orderRequestClass)->getColumnByParams('id', $result[$i]['order_request_id'], ['order_number', 'id']);
           $this->response['data'][$i]['account'] = $this->retrieveAccountDetailsTransfer($result[$i]['account_id']);
           $i++;
         }
@@ -194,7 +251,8 @@ class TransferController extends APIController
             'number_of_items'   =>  app($this->transferredProductsClass)->getSizeNoDate('transfer_id', $key['id']),
             'trasferred_on' => Carbon::createFromFormat('Y-m-d H:i:s', $key['created_at'])->copy()->tz($this->response['timezone'])->format('F j, Y H:i A'),
             'to'    => app($this->merchantClass)->getColumnValueByParams('id', $result[$i]['to'], 'name'),
-            'from'  => app($this->merchantClass)->getColumnValueByParams('id', $result[$i]['from'], 'name')
+            'from'  => app($this->merchantClass)->getColumnValueByParams('id', $result[$i]['from'], 'name'),
+            'order_requests' => app($this->orderRequestClass)->getColumnByParams('id', $result[$i]['order_request_id'], ['order_number', 'id'])
           );
           $array[] = $item;
           $i++;

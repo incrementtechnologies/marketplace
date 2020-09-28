@@ -12,6 +12,7 @@ class DailyLoadingListController extends APIController
 
   public $merchantClass = 'Increment\Marketplace\Http\MerchantController';
   public $orderRequestClass = 'Increment\Marketplace\Http\OrderRequestController';
+  public $productClass = 'Increment\Marketplace\Http\ProductController';
 
   function __construct(){
     $this->model = new DailyLoadingList();
@@ -27,6 +28,7 @@ class DailyLoadingListController extends APIController
     }
 
     $data['code'] = $this->generateCode();
+    $data['status'] = 'pending';
     $this->model = new DailyLoadingList();
     $this->insertDB($data);
 
@@ -49,6 +51,7 @@ class DailyLoadingListController extends APIController
       ->join('order_requests as T2', 'T2.id', '=', 'T1.order_request_id')
       ->where('T1.merchant_id', '=', $data['merchant_id'])
       ->where('T1.account_id', '=', $data['account_id'])
+      ->where('T1.status', '=', 'approved')
       ->orderBy($data['sort']['column'], $data['sort']['value'])
       ->select('T2.*')
       ->offset($data['offset'])
@@ -69,16 +72,51 @@ class DailyLoadingListController extends APIController
       ->join('order_request_items as T2', 'T2.order_request_id', '=', 'T1.order_request_id')
       ->where('T1.merchant_id', '=', $data['merchant_id'])
       ->where('T1.account_id', '=', $data['account_id'])
-      ->groupBy('product_id')
-      ->select(['T2.merchant_id', 'T2.product_id', 'T1.id as daily_loading_list_id', DB::raw('COUNT(order_request_items.qty) as qty')])
+      ->where('T1.deleted_at', '=', null)
+      ->where('T2.deleted_at', '=', null)
+      ->where('T1.status', '=', 'pending')
+      ->select(['T2.*', 'T1.id as daily_loading_list_id'])
       ->get();
 
-    $results = json_decode($tempResult, true);
+    $results = json_decode($tempResult->groupBy('product_id'), true);
     
     if(sizeof($results) > 0){
-      $this->response['data'] =$results;
+      foreach ($results as $key => $value) {
+        $array = null;
+        $totalQty = 0;
+        $product = app($this->productClass)->getByParams('id', $key);
+        $orderRequestId = null;
+        $dailyLoadinglistId = null;
+        $merchant = $product ? app($this->merchantClass)->getColumnValueByParams('id', $product['merchant_id'], 'name') : null;
+        foreach ($value as $keyValues) {
+          $totalQty += intval($keyValues['qty']);
+          $orderRequestId = $keyValues['order_request_id'];
+          $dailyLoadinglistId = $keyValues['daily_loading_list_id'];
+        }
+        $this->response['data'][] = array(
+          'merchant'  => $merchant == null ? null : array(
+            'name'   => $merchant,
+            'id'     => $product['merchant_id']
+          ),
+          'title'     => $product ? $product['title'] : null,
+          'qty'       => $totalQty,
+          'daily_loading_list_id' => $dailyLoadinglistId,
+          'order_request_id' => $orderRequestId,
+          'product_id' => $key,
+          'counter'     => 0
+        );
+      }
     }
     
+    return $this->response();
+  }
+
+  public function approved(Request $request){
+    $data = $request->all();
+    DailyLoadingList::where('merchant_id', '=', $data['merchant_id'])->where('account_id', '=', $data['account_id'])->update(array(
+      'status'  => 'approved',
+      'updated_at' => Carbon::now()
+    ));
     return $this->response();
   }
 
@@ -95,5 +133,9 @@ class DailyLoadingListController extends APIController
   public function checkIfExist($column, $value){
     $result = DailyLoadingList::where($column, '=', $value)->get();
     return sizeof($result) > 0 ? true : false;
+  }
+
+  public function updateByParams($column, $value, $array){
+    return DailyLoadingList::where($column, '=', $value)->update($array);
   }
 }
