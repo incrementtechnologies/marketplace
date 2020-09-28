@@ -69,7 +69,8 @@ class OrderRequestController extends APIController
         'added_by'      => $key['code'],
         'id'      => $key['id'],
         'order_number'      => $key['order_number'],
-        'daily_loading_list' => app($this->dailyLoadingListClass)->checkIfExist('order_request_id', $key['id'])
+        'daily_loading_list' => app($this->dailyLoadingListClass)->checkIfExist('order_request_id', $key['id']),
+        'daily_loading_list_id' => isset($key['daily_loading_list_id'] ? $key['daily_loading_list_id'] : null)
       );
       $array[] = $item;
     }
