@@ -131,6 +131,19 @@ class DailyLoadingListController extends APIController
     }
   }
 
+  public function delete(Request $request){
+    $data = $request->all();
+    $this->model = new DailyLoadingList();
+    $this->deleteDB($data);
+    if($this->response['data']){
+      app($this->orderRequestClass)->updateByParams($data['order_request_id'], array(
+        'status'  => 'pending',
+        'delivered_by' => null
+      ));
+    }
+    return $this->response();
+  }
+
   public function checkIfExist($column, $value){
     $result = DailyLoadingList::where($column, '=', $value)->get();
     return sizeof($result) > 0 ? true : false;
