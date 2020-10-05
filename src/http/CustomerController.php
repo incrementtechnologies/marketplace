@@ -285,7 +285,9 @@ class CustomerController extends APIController
       $results[$i]['merchant_id'] = $element->merchant_id;
       $i++;
     }
-    return $results;
+
+    $this->response['data'] = $results;
+    return $this->response();
   }
 
   public function retrieveList(Request $request){
