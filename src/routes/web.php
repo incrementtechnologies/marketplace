@@ -192,6 +192,7 @@ $route = env('PACKAGE_ROUTE', '').'/order_requests/';
 $controller = 'Increment\Marketplace\Http\OrderRequestController@';
 Route::post($route.'create', $controller."create");
 Route::post($route.'retrieve', $controller."retrieve");
+Route::post($route.'retrieve_by_level', $controller."retrieveSecondLevel");
 Route::post($route.'update', $controller."update");
 Route::post($route.'delete', $controller."delete");
 Route::get($route.'test', $controller."test");
