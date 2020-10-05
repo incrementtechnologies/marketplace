@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\APIController;
 use Increment\Marketplace\Models\Customer;
 use Carbon\Carbon;
+use DB;
 class CustomerController extends APIController
 {
 
@@ -231,6 +232,60 @@ class CustomerController extends APIController
     }
 
     return $this->response();
+  }
+
+  public $con = null;
+  public function retrieveAll(Request $request) {
+    $data = $request->all();
+    $this->con = $data['condition'];
+    $results = array();
+    $name = null;
+    if($this->con[0]['value'] != '%') {
+      $name = DB::table('customers as T1')
+        ->leftJoin('merchants as T2', 'T1.merchant_id', '=', 'T2.id')
+        ->leftJoin('accounts as T3', 'T2.account_id', '=', 'T3.id')
+        ->Where($this->con[1]['column'], $this->con[1]['clause'], $this->con[1]['value'])
+        ->where(function($query) {
+          if($this->con[0]['column'] == 'email') {
+            return $query->Where('T1.'.$this->con[0]['column'], $this->con[0]['clause'], $this->con[0]['value'])
+                        ->orWhere('T2.name', $this->con[0]['clause'], $this->con[0]['value']);
+          } else if ($this->con[0]['column'] == 'account_type') {
+            return $query->Where('T3.'.$this->con[0]['column'], $this->con[0]['clause'], $this->con[0]['value']);
+          } else {
+            return $query->Where('T1.'.$this->con[0]['column'], $this->con[0]['clause'], $this->con[0]['value']);
+          }
+        })
+        ->orWhere($this->con[2]['column'], $this->con[2]['clause'], $this->con[2]['value'])
+        ->select('T1.merchant', 'T1.merchant_id', 'T2.name', 'T3.account_type', 'T1.email', 'T1.code', 'T1.status')
+        ->skip($data['offset'])
+        ->take($data['limit'])
+        ->orderBy($this->con[0]['column'], $data['sort'][$this->con[0]['column']])
+        ->orderBy('name', $data['sort'][$this->con[0]['column']])
+        ->get();
+    } else {
+      $name = DB::table('customers as T1')
+        ->leftJoin('merchants as T2', 'T1.merchant_id', '=', 'T2.id')
+        ->leftJoin('accounts as T3', 'T2.account_id', '=', 'T3.id')
+        ->Where($this->con[1]['column'], $this->con[1]['clause'], $this->con[1]['value'])
+        ->orWhere($this->con[2]['column'], $this->con[2]['clause'], $this->con[2]['value'])
+        ->select('T1.merchant', 'T1.merchant_id', 'T2.name', 'T3.account_type', 'T1.email', 'T1.code', 'T1.status')
+        ->skip($data['offset'])
+        ->take($data['limit'])
+        ->orderBy($this->con[0]['column'], $data['sort'][$this->con[0]['column']])
+        ->orderBy('name', $data['sort'][$this->con[0]['column']])
+        ->get();
+    }
+    $i = 0;
+    foreach($name as $element) {
+      $results[$i]['name'] = ($element->email == null) ? ($element->name) : ($element->email);
+      $results[$i]['code'] = $element->code;
+      $results[$i]['status'] = $element->status;
+      $results[$i]['account_type'] = $element->account_type;
+      $results[$i]['merchant'] = $element->merchant;
+      $results[$i]['merchant_id'] = $element->merchant_id;
+      $i++;
+    }
+    return $results;
   }
 
   public function retrieveList(Request $request){
