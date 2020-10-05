@@ -80,6 +80,14 @@ class OrderRequestController extends APIController
   public function retrieveSecondLevel(Request $request){
     $data = $request->all();
     $con = $data['condition'];
+    // dd($data['sort']['name']);
+      // dd($data);
+    // $result = DB::table('order_requests')
+    // ->join('merchants','order_requests.merchant_to','=','merchants.id')
+    // ->join('accounts', 'accounts.id', '=', 'order_requests.delivered_by')
+    // ->where($con[1]['column'], $con[1]['clause'], $con[1]['value'])
+    // ->whereNull('order_requests.delivered_by')
+    // ->select('order_requests.*', 'merchants.name')->skip($data['offset'])->take($data['limit'])->get();
     if($con[1]['column'] === 'name'){
     $result = DB::table('order_requests')
       ->join('merchants','order_requests.merchant_to','=','merchants.id')
