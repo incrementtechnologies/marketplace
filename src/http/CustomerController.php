@@ -257,7 +257,8 @@ class CustomerController extends APIController
           }
         })
         ->orWhere($this->con[2]['column'], $this->con[2]['clause'], $this->con[2]['value'])
-        ->select('T1.merchant', 'T1.merchant_id', 'T2.name', 'T3.account_type', 'T1.email', 'T1.code', 'T1.status')
+        ->WhereNull('T1.deleted_at')
+        ->select('T1.merchant', 'T1.merchant_id', 'T2.name', 'T3.account_type', 'T1.email', 'T1.code', 'T1.status', 'T1.id')
         ->skip($data['offset'])
         ->take($data['limit'])
         ->orderBy($this->con[0]['column'], $data['sort'][$this->con[0]['column']])
@@ -269,7 +270,8 @@ class CustomerController extends APIController
         ->leftJoin('accounts as T3', 'T2.account_id', '=', 'T3.id')
         ->Where($this->con[1]['column'], $this->con[1]['clause'], $this->con[1]['value'])
         ->orWhere($this->con[2]['column'], $this->con[2]['clause'], $this->con[2]['value'])
-        ->select('T1.merchant', 'T1.merchant_id', 'T2.name', 'T3.account_type', 'T1.email', 'T1.code', 'T1.status')
+        ->WhereNull('T1.deleted_at')
+        ->select('T1.merchant', 'T1.merchant_id', 'T2.name', 'T3.account_type', 'T1.email', 'T1.code', 'T1.status', 'T1.id')
         ->skip($data['offset'])
         ->take($data['limit'])
         ->orderBy($this->con[0]['column'], $data['sort'][$this->con[0]['column']])
@@ -281,12 +283,14 @@ class CustomerController extends APIController
       $results[$i]['name'] = ($element->email == null) ? ($element->name) : ($element->email);
       $results[$i]['code'] = $element->code;
       $results[$i]['status'] = $element->status;
-      $results[$i]['account_type'] = $element->account_type;
+      $results[$i]['type'] = $element->account_type;
       $results[$i]['merchant'] = $element->merchant;
       $results[$i]['merchant_id'] = $element->merchant_id;
+      $results[$i]['id'] = $element->id;
       $i++;
     }
 
+    $this->response['size'] = count($results);
     $this->response['data'] = $results;
     return $this->response();
   }
