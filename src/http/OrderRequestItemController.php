@@ -42,6 +42,7 @@ class OrderRequestItemController extends APIController
           'qty'     => $key['qty'],
           'counter' => 0,
           'product_id'     => $key['product_id'],
+          'type'    => $product['type'],
           'order_request_id'     => $key['order_request_id'],
           'merchant'     => $product ? app($this->merchantClass)->getColumnValueByParams('id', $product['merchant_id'], 'name') : null
         );
