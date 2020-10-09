@@ -5,6 +5,7 @@ namespace Increment\Marketplace\Http;
 use Illuminate\Http\Request;
 use App\Http\Controllers\APIController;
 use Increment\Marketplace\Models\OrderRequest;
+use Increment\Marketplace\Models\DailyLoadingList;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 class OrderRequestController extends APIController
@@ -81,6 +82,7 @@ class OrderRequestController extends APIController
   public function retrieveSecondLevel(Request $request){
     $data = $request->all();
     $con = $data['condition'];
+    dd($data['sort']);
     // dd($data['sort']['name']);
       // dd($data);
     // $result = DB::table('order_requests')
@@ -155,6 +157,20 @@ class OrderRequestController extends APIController
     }else{
       return null;
     }    
+  }
+
+  public function newUpdate(Request $request){
+    $data = $request->all();
+    dd($data);
+    $result = OrderRequest::firstOrNew(['id' => $data['id']]);
+    $result->fill([
+      'delivered_by' => null,
+      'date_delivered' => null,
+      'status' => $data['status']
+    ]);
+    DailyLoadingList::where('order_request_id', '=', $data['id'])->delete();
+    $this->response['data'] = $result;
+    return $this->response();
   }
 
   public function updateByParams($id, $array){
