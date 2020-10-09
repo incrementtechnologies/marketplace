@@ -162,7 +162,7 @@ class OrderRequestController extends APIController
   public function newUpdate(Request $request){
     $data = $request->all();
     
-    OrderRequest::where('id', '=',  $data['id'])->update(array(
+    $result = OrderRequest::where('id', '=',  $data['id'])->update(array(
       'delivered_by' => null,
       'date_delivered' => null,
       'status' => $data['status']
