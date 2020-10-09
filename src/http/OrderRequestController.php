@@ -161,14 +161,16 @@ class OrderRequestController extends APIController
 
   public function newUpdate(Request $request){
     $data = $request->all();
-    dd($data);
-    $result = OrderRequest::firstOrNew(['id' => $data['id']]);
-    $result->fill([
+    
+    OrderRequest::where('id', '=',  $data['id'])->update(array(
       'delivered_by' => null,
       'date_delivered' => null,
       'status' => $data['status']
-    ]);
-    DailyLoadingList::where('order_request_id', '=', $data['id'])->delete();
+    ));
+
+    DailyLoadingList::where('order_request_id', '=', $data['id'])->update(array(
+      'deleted_at' => Carbon::now()
+    ));
     $this->response['data'] = $result;
     return $this->response();
   }
