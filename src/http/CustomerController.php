@@ -279,7 +279,7 @@ class CustomerController extends APIController
             }
           })
           ->whereNull('T1.deleted_at')
-          ->orWhere($this->con[2]['column'], $this->con[2]['clause'], $this->con[2]['value'])
+          ->orWhere($this->con[2]['column'], '=', $this->con[2]['value'])
           ->count();
 
     } else {
@@ -288,7 +288,7 @@ class CustomerController extends APIController
         ->leftJoin('accounts as T3', 'T2.account_id', '=', 'T3.id')
         ->Where($this->con[1]['column'], $this->con[1]['clause'], $this->con[1]['value'])
         ->whereNull('T1.deleted_at')
-        ->orWhere($this->con[2]['column'], $this->con[2]['clause'], $this->con[2]['value'])
+        ->orWhere($this->con[2]['column'], '=', $this->con[2]['value'])
         ->select('T1.merchant', 'T1.merchant_id', 'T2.name', 'T3.account_type', 'T1.email', 'T1.code', 'T1.status', 'T1.id')
         ->skip($data['offset'])
         ->take($data['limit'])
