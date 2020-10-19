@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\APIController;
 use Increment\Marketplace\Models\Customer;
 use Carbon\Carbon;
+use Illuminate\Support\Str;
 use DB;
 class CustomerController extends APIController
 {
@@ -241,12 +242,12 @@ class CustomerController extends APIController
     $this->con = $data['condition'];
     $results = array();
     $name = null;
-    if($this->con[0]['value'] != '%') {
+    if($this->con[0]['value'] != '%%') {
       $name = DB::table('customers as T1')
         ->leftJoin('merchants as T2', 'T1.merchant_id', '=', 'T2.id')
         ->leftJoin('accounts as T3', 'T2.account_id', '=', 'T3.id')
         ->Where($this->con[1]['column'], $this->con[1]['clause'], $this->con[1]['value'])
-        ->where(function($query) {
+        ->Where(function($query) {
           if($this->con[0]['column'] == 'email') {
             return $query->Where('T1.'.$this->con[0]['column'], $this->con[0]['clause'], $this->con[0]['value'])
                         ->orWhere('T2.name', $this->con[0]['clause'], $this->con[0]['value']);
@@ -269,7 +270,7 @@ class CustomerController extends APIController
           ->leftJoin('merchants as T2', 'T1.merchant_id', '=', 'T2.id')
           ->leftJoin('accounts as T3', 'T2.account_id', '=', 'T3.id')
           ->Where($this->con[1]['column'], $this->con[1]['clause'], $this->con[1]['value'])
-          ->where(function($query) {
+          ->Where(function($query) {
             if($this->con[0]['column'] == 'email') {
               return $query->Where('T1.'.$this->con[0]['column'], $this->con[0]['clause'], $this->con[0]['value'])
                           ->orWhere('T2.name', $this->con[0]['clause'], $this->con[0]['value']);
@@ -317,6 +318,32 @@ class CustomerController extends APIController
       } else {
         $name = $element->name;
       }
+      $column = $this->con[0]['column'];
+      if($this->con[0]['value'] != '%%') {
+        if($column == 'email') {
+          if(Str::contains(Str::lower($name), Str::lower(explode('%', $this->con[0]['value'])[1]))) {
+            $results[$i]['name'] = $name;
+            $results[$i]['code'] = $element->code;
+            $results[$i]['status'] = $element->status;
+            $results[$i]['type'] = $element->account_type;
+            $results[$i]['merchant'] = $element->merchant;
+            $results[$i]['merchant_id'] = $element->merchant_id;
+            $results[$i]['id'] = $element->id;
+            $i++;
+          }
+        } else {
+          if(Str::contains(Str::lower($element->$column), Str::lower(explode('%', $this->con[0]['value'])[1]))) {
+            $results[$i]['name'] = $name;
+            $results[$i]['code'] = $element->code;
+            $results[$i]['status'] = $element->status;
+            $results[$i]['type'] = $element->account_type;
+            $results[$i]['merchant'] = $element->merchant;
+            $results[$i]['merchant_id'] = $element->merchant_id;
+            $results[$i]['id'] = $element->id;
+            $i++;
+          }
+        }
+      } else {
       $results[$i]['name'] = $name;
       $results[$i]['code'] = $element->code;
       $results[$i]['status'] = $element->status;
@@ -325,6 +352,7 @@ class CustomerController extends APIController
       $results[$i]['merchant_id'] = $element->merchant_id;
       $results[$i]['id'] = $element->id;
       $i++;
+      }
     }
     
     $this->response['data'] = $results;
