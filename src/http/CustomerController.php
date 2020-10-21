@@ -243,8 +243,8 @@ class CustomerController extends APIController
     $name = null;
     if($this->con[0]['value'] != '%%') {
       $name = DB::table('customers as T1')
-        ->leftJoin('merchants as T2', 'T1.merchant_id', '=', 'T2.id')
-        ->leftJoin('accounts as T3', 'T2.account_id', '=', 'T3.id')
+        ->leftJoin('merchants as T2', 'T2.id', '=', 'T1.merchant_id')
+        ->leftJoin('accounts as T3', 'T3.id', '=', 'T2.account_id')
         ->Where($this->con[1]['column'], $this->con[1]['clause'], $this->con[1]['value'])
         ->Where(function($query) {
           if($this->con[0]['column'] == 'email') {
@@ -264,7 +264,6 @@ class CustomerController extends APIController
         ->orderBy($this->con[0]['column'], $data['sort'][$this->con[0]['column']])
         ->orderBy('name', $data['sort'][$this->con[0]['column']])
         ->get();
-
         $this->response['size'] = DB::table('customers as T1')
           ->leftJoin('merchants as T2', 'T1.merchant_id', '=', 'T2.id')
           ->leftJoin('accounts as T3', 'T2.account_id', '=', 'T3.id')
@@ -285,8 +284,8 @@ class CustomerController extends APIController
 
     } else {
       $name = DB::table('customers as T1')
-        ->leftJoin('merchants as T2', 'T1.merchant_id', '=', 'T2.id')
-        ->leftJoin('accounts as T3', 'T2.account_id', '=', 'T3.id')
+        ->leftJoin('merchants as T2', 'T2.id', '=', 'T1.merchant_id')
+        ->leftJoin('accounts as T3', 'T3.id', '=', 'T2.account_id')
         ->Where($this->con[1]['column'], $this->con[1]['clause'], $this->con[1]['value'])
         ->whereNull('T1.deleted_at')
         ->orWhere($this->con[2]['column'], '=', $this->con[2]['value'])
@@ -296,7 +295,6 @@ class CustomerController extends APIController
         ->orderBy($this->con[0]['column'], $data['sort'][$this->con[0]['column']])
         ->orderBy('name', $data['sort'][$this->con[0]['column']])
         ->get();
-
         $this->response['size'] = DB::table('customers as T1')
           ->leftJoin('merchants as T2', 'T1.merchant_id', '=', 'T2.id')
           ->leftJoin('accounts as T3', 'T2.account_id', '=', 'T3.id')
@@ -311,10 +309,12 @@ class CustomerController extends APIController
       $merchant = null;
       if($element->email != null){
         $name = $element->email;
-      }else if($element->merchant != $data['merchant_id']){
-        $merchant = app($this->merchantClass)->getByParamsWithAccount('id', $element->merchant);
-        $name = $merchant['name'];
-      } else {
+      }
+      // else if($element->merchant != $data['merchant_id']){
+      //   $merchant = app($this->merchantClass)->getByParamsWithAccount('id', $element->merchant);
+      //   $name = $merchant['name'];
+      // }
+       else {
         $name = $element->name;
       }
       $column = $this->con[0]['column'];
