@@ -49,7 +49,7 @@ class OrderRequestController extends APIController
 
   public function retrieve(Request $request){
     $data = $request->all();
-    $this->retrieveDB($data);
+    $this->retrieveDBWithSort($data);
     $result = $this->response['data'];
     if(sizeof($result) > 0){
       $this->response['data'] = $this->manageResults($result);
@@ -82,7 +82,6 @@ class OrderRequestController extends APIController
   public function retrieveSecondLevel(Request $request){
     $data = $request->all();
     $con = $data['condition'];
-    dd($data['sort']);
     // dd($data['sort']['name']);
       // dd($data);
     // $result = DB::table('order_requests')
