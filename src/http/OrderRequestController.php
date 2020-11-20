@@ -121,7 +121,7 @@ class OrderRequestController extends APIController
       ->select('order_requests.*', 'merchants.name')->skip($data['offset'])->take($data['limit'])
       ->orderBy('username',$data['sort']['username'])->get();
     }
-      if(sizeof($request) > 0){
+      if(sizeof($result) > 0){
         $this->response['data'] =  $this->manageLevelResult($result);
       }
     $this->response['size'] = OrderRequest::where($data['condition'][0]['column'], '=', $data['condition'][0]['value'])->count();
