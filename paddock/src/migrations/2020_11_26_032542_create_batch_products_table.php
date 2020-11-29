@@ -22,6 +22,7 @@ class CreateBatchProductsTable extends Migration
             $table->bigInteger('product_trace_id');
             $table->double('applied_rate');
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

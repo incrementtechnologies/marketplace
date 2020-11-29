@@ -18,6 +18,7 @@ class CreateCropsTable extends Migration
             $table->bigInteger('merchant_id');
             $table->string('name');
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

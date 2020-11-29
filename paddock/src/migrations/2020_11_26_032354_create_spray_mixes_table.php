@@ -24,6 +24,7 @@ class CreateSprayMixesTable extends Migration
             $table->integer('maximum_rate');
             $table->string('status');
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

@@ -20,6 +20,7 @@ class CreateSprayMixProductsTable extends Migration
             $table->double('rate', 8, 3);
             $table->string('status');
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

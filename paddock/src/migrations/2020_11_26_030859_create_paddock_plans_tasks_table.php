@@ -18,11 +18,12 @@ class CreatePaddockPlansTasksTable extends Migration
             $table->bigInteger('paddock_plan_id');
             $table->bigInteger('paddock_id');
             $table->string('category');
-            $table->date('due_date');
+            $table->dateTime('due_date');
             $table->string('nickname');
             $table->bigInteger('spray_mix_id');
             $table->string('status');
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

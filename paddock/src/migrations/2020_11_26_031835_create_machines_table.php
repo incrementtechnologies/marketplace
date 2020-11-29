@@ -22,6 +22,7 @@ class CreateMachinesTable extends Migration
             $table->string('type');
             $table->integer('capacity');
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

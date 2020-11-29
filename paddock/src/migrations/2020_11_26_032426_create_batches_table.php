@@ -22,6 +22,7 @@ class CreateBatchesTable extends Migration
             $table->longText('notes')->nullable();
             $table->double('water');
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

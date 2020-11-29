@@ -25,6 +25,7 @@ class CreatePaddocksTable extends Migration
             $table->integer('arable_area');
             $table->integer('spray_area');
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

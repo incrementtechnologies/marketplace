@@ -16,10 +16,11 @@ class CreatePaddockPlansTable extends Migration
         Schema::create('paddock_plans', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->bigInteger('paddock_id');
-            $table->date('start_date');
-            $table->date('end_date');
+            $table->dateTime('start_date');
+            $table->dateTime('end_date');
             $table->bigInteger('crop_id');
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

@@ -22,6 +22,7 @@ class CreateBatchPaddockTasksTable extends Migration
             $table->bigInteger('paddock_plan_task_id');
             $table->double('area', 8, 2);
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 
