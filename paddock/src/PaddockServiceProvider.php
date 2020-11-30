@@ -1,6 +1,6 @@
 <?php
 
-namespace Increment\Imarket\Paddock;
+namespace Increment\Marketplace\Paddock;
 
 use Illuminate\Support\ServiceProvider;
 

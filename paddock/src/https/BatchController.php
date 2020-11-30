@@ -1,10 +1,10 @@
 <?php
 
-namespace Increment\Imarket\Paddock\Http;
+namespace Increment\Marketplace\Paddock\Http;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\APIController;
-use Increment\Imarket\Paddock\Models\Batch;
+use Increment\Marketplace\Paddock\Models\Batch;
 use Carbon\Carbon;
 
 class BatchController extends APIController
