@@ -1,10 +1,10 @@
 <?php
 
-namespace Increment\Imarket\Paddock\Models;
+namespace Increment\Marketplace\Paddock\Models;
 use Illuminate\Database\Eloquent\Model;
 use App\APIModel;
 class Batch extends APIModel
 {
-    protected $table = 'batch';
+    protected $table = 'batches';
     protected $fillable = ['spray_mix_id', 'machine_id', 'merchant_id', 'account_id', 'notes', 'water'];
 }

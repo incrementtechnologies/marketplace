@@ -1,10 +1,10 @@
 <?php
 
-namespace Increment\Imarket\Paddock\Http;
+namespace Increment\Marketplace\Paddock\Http;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\APIController;
-use Increment\Imarket\Paddock\Models\Crop;
+use Increment\Marketplace\Paddock\Models\Crop;
 use Carbon\Carbon;
 
 class CropController extends APIController

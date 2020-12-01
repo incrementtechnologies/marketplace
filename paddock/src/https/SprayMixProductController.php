@@ -1,10 +1,10 @@
 <?php
 
-namespace Increment\Imarket\Paddock\Http;
+namespace Increment\Marketplace\Paddock\Http;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\APIController;
-use Increment\Imarket\Paddock\Models\SprayMixProduct;
+use Increment\Marketplace\Paddock\Models\SprayMixProduct;
 use Carbon\Carbon;
 
 class SprayMixProductController extends APIController

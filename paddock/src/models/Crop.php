@@ -1,6 +1,6 @@
 <?php
 
-namespace Increment\Imarket\Paddock\Models;
+namespace Increment\Marketplace\Paddock\Models;
 use Illuminate\Database\Eloquent\Model;
 use App\APIModel;
 class Crop extends APIModel
