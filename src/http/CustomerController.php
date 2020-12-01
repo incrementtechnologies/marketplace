@@ -257,7 +257,7 @@ class CustomerController extends APIController
           }
         })
         ->whereNull('T1.deleted_at')
-        // ->orWhere($this->con[2]['column'], '=', $this->con[2]['value'])
+        ->orWhere($this->con[2]['column'], '=', $this->con[2]['value'])
         ->select('T1.merchant', 'T1.merchant_id', 'T2.name', 'T3.account_type', 'T1.email', 'T1.code', 'T1.status', 'T1.id')
         ->skip($data['offset'])
         ->take($data['limit'])
@@ -289,7 +289,7 @@ class CustomerController extends APIController
         ->leftJoin('accounts', 'accounts.id', '=', 'merchants.account_id')
         ->Where($this->con[1]['column'], $this->con[1]['clause'], $this->con[1]['value'])
         ->whereNull('customers.deleted_at')
-        // ->orWhere($this->con[2]['column'], '=', $this->con[2]['value'])
+        ->orWhere($this->con[2]['column'], '=', $this->con[2]['value'])
         ->select('customers.merchant', 'customers.merchant_id', 'merchants.name', 'accounts.account_type', 'customers.email', 'customers.code', 'customers.status', 'customers.id')
         ->skip($data['offset'])
         ->take($data['limit'])
