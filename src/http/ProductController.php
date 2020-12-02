@@ -5,6 +5,9 @@ namespace Increment\Marketplace\Http;
 use Illuminate\Http\Request;
 use App\Http\Controllers\APIController;
 use Increment\Marketplace\Models\Product;
+use Illuminate\Support\Facades\Storage;
+use Increment\Common\Image\Models\Image;
+use Increment\Common\Payload\Models\Payload;
 use Carbon\Carbon;
 class ProductController extends APIController
 {
@@ -94,6 +97,44 @@ class ProductController extends APIController
       return $total - $issued;
     }
 
+    public function fileUpload(Request $request){
+      $data = $request->all();
+      if(isset($data['file_url'])){
+        $date = Carbon::now()->toDateString();
+        $time = str_replace(':', '_',Carbon::now()->toTimeString());
+        $ext = $request->file('file')->extension();
+        // $fileUrl = str_replace(' ', '_', $data['file_url']);
+        // $fileUrl = str_replace('%20', '_', $fileUrl);
+        $filename = $data['account_id'].'_'.$data['file_url'];
+        $result = $request->file('file')->storeAs('files', $filename);
+        $url = '/storage/files/'.$filename;
+        $this->model = new Image();
+        $insertData = array(
+          'account_id'    => $data['account_id'],
+          'url'           => $url
+        );
+        $this->insertDB($insertData);
+        // $this->response['data'] = $url;
+        $payload_id = $this->response['data'];
+        $this->model = new Payload();
+        $payloadData = array(
+          'account_id' => $data['account_id'],
+          'payload' => 'product'.$data['product_id'],
+          'category' => $data['product_code'],
+          'payload_value' => array(
+            'url' => $url,
+            'filename' => $filename
+          )
+        );
+        $this->insertDB($payloadData);
+        return $this->response();
+      }
+      return response()->json(array(
+        'data'  => null,
+        'error' => null,
+        'timestamps' => Carbon::now()
+      ));
+    }
     public function retrieveProductById($id, $accountId, $inventoryType = null){
       $inventoryType = $inventoryType == null ? env('INVENTORY_TYPE') : $inventoryType;
       //on wishlist, add parameter inventory type

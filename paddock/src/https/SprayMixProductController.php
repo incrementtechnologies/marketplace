@@ -11,7 +11,7 @@ class SprayMixProductController extends APIController
 {
     //
     function __construct(){
-        $this->model = new SprayMixroduct();
+        $this->model = new SprayMixProduct();
         $this->notRequired = array();
-    }    
+    }
 }

@@ -55,6 +55,7 @@ Route::post($route.'retrieve_basic', $controller."retrieveBasic");
 Route::post($route.'retrieve_mobile', $controller."retrieveMobile");
 Route::post($route.'update', $controller."update");
 Route::post($route.'delete', $controller."delete");
+Route::post($route.'file_upload', $controller."fileUpload");
 Route::get($route.'test', $controller."test");
 
 // Product Attributes
