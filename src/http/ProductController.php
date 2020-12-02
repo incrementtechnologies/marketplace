@@ -94,6 +94,9 @@ class ProductController extends APIController
       return $total - $issued;
     }
 
+    public function fileUpload(Request $request){
+      
+    }
     public function retrieveProductById($id, $accountId, $inventoryType = null){
       $inventoryType = $inventoryType == null ? env('INVENTORY_TYPE') : $inventoryType;
       //on wishlist, add parameter inventory type
