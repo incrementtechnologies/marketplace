@@ -24,7 +24,7 @@ class PaddockController extends APIController
         $this->retrieveDB($data);
         for ($i = 0; $i < count($this->response['data']); $i++){
             $paddockData = $this->response['data'];
-            $paddock_id = $this->response['data']['0']['id'];
+            $paddock_id = $this->response['data'][$i]['id'];
             $paddock_data = PaddockPlan::select()->where('paddock_id', '=', $paddock_id)->orderBy('created_at','desc')->limit(2)->get();
             $this->response['data'][$i]['paddock_data'] = $paddock_data;
         }
