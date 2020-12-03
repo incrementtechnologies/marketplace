@@ -245,25 +245,28 @@ class CustomerController extends APIController
       $name = DB::table('customers as T1')
         ->leftJoin('merchants as T2', 'T2.id', '=', 'T1.merchant_id')
         ->leftJoin('accounts as T3', 'T3.id', '=', 'T2.account_id')
-        ->Where($this->con[1]['column'], $this->con[1]['clause'], $this->con[1]['value'])
-        ->Where(function($query) {
-          if($this->con[0]['column'] == 'email') {
-            return $query->Where('T1.'.$this->con[0]['column'], $this->con[0]['clause'], $this->con[0]['value'])
-                        ->orWhere('T2.name', $this->con[0]['clause'], $this->con[0]['value']);
-          } else if ($this->con[0]['column'] == 'account_type') {
-            return $query->Where('T3.'.$this->con[0]['column'], $this->con[0]['clause'], $this->con[0]['value']);
-          } else {
-            return $query->Where('T1.'.$this->con[0]['column'], $this->con[0]['clause'], $this->con[0]['value']);
-          }
-        })
         ->whereNull('T1.deleted_at')
-        ->orWhere($this->con[2]['column'], '=', $this->con[2]['value'])
-        ->select('T1.merchant', 'T1.merchant_id', 'T2.name', 'T3.account_type', 'T1.email', 'T1.code', 'T1.status', 'T1.id')
+        ->Where(function($quer){
+              $quer->Where($this->con[1]['column'], $this->con[1]['clause'], $this->con[1]['value'])
+              ->Where(function($query) {
+                if($this->con[0]['column'] == 'email') {
+                  return $query->Where('T1.'.$this->con[0]['column'], $this->con[0]['clause'], $this->con[0]['value'])
+                              ->orWhere('T2.name', $this->con[0]['clause'], $this->con[0]['value']);
+                } else if ($this->con[0]['column'] == 'account_type') {
+                  return $query->Where('T3.'.$this->con[0]['column'], $this->con[0]['clause'], $this->con[0]['value']);
+                } else {
+                  return $query->Where('T1.'.$this->con[0]['column'], $this->con[0]['clause'], $this->con[0]['value']);
+                }
+              })
+              ->orWhere($this->con[2]['column'], '=', $this->con[2]['value']);
+        })
+        ->select('T1.merchant', 'T1.merchant_id', 'T2.name', 'T3.account_type', 'T1.email', 'T1.code', 'T1.status', 'T1.id', 'T1.deleted_at')
         ->skip($data['offset'])
         ->take($data['limit'])
         ->orderBy($this->con[0]['column'], $data['sort'][$this->con[0]['column']])
         ->orderBy('name', $data['sort'][$this->con[0]['column']])
         ->get();
+       
         $this->response['size'] = sizeof($name);
         // DB::table('customers as T1')
         //   ->leftJoin('merchants as T2', 'T1.merchant_id', '=', 'T2.id')
@@ -282,15 +285,16 @@ class CustomerController extends APIController
         //   ->whereNull('T1.deleted_at')
         //   ->orWhere($this->con[2]['column'], '=', $this->con[2]['value'])
         //   ->count();
-
     } else {
       $name = DB::table('customers')
         ->leftJoin('merchants', 'merchants.id', '=', 'customers.merchant_id')
         ->leftJoin('accounts', 'accounts.id', '=', 'merchants.account_id')
-        ->Where($this->con[1]['column'], $this->con[1]['clause'], $this->con[1]['value'])
         ->whereNull('customers.deleted_at')
-        ->orWhere($this->con[2]['column'], '=', $this->con[2]['value'])
-        ->select('customers.merchant', 'customers.merchant_id', 'merchants.name', 'accounts.account_type', 'customers.email', 'customers.code', 'customers.status', 'customers.id')
+        ->Where(function($query) {
+            $query->Where($this->con[1]['column'], $this->con[1]['clause'], $this->con[1]['value'])
+                  ->orWhere($this->con[2]['column'], '=', $this->con[2]['value']);
+        })
+        ->select('customers.merchant', 'customers.merchant_id', 'merchants.name', 'accounts.account_type', 'customers.email', 'customers.code', 'customers.status', 'customers.id', 'customers.deleted_at')
         ->skip($data['offset'])
         ->take($data['limit'])
         ->orderBy($this->con[0]['column'], $data['sort'][$this->con[0]['column']])
@@ -298,6 +302,7 @@ class CustomerController extends APIController
         ->get();
         // dd(sizeOf($name);
         $this->response['size'] = sizeof($name);
+
     }
     $i = 0;
     foreach($name as $element) {
@@ -309,7 +314,6 @@ class CustomerController extends APIController
        else {
         $name = $element->name;
       }
-      // dd($name);
       $column = $this->con[0]['column'];
       if($this->con[0]['value'] != '%%') {
         if($column == 'email') {
