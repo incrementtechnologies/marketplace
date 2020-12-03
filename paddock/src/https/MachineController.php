@@ -17,7 +17,7 @@ class MachineController extends APIController
     }    
 
     public function retrieve(Request $request){
-        $data = $retrieve->all();
+        $data = $request->all();
         $this->model = new Machine();
         $this->retrieveDB($data);
         for ($i = 0; $i < count($this->response['data']); $i++){
