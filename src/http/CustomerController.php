@@ -12,6 +12,7 @@ class CustomerController extends APIController
 {
 
   public $merchantClass = 'Increment\Marketplace\Http\MerchantController';
+  public $accountClass = 'Increment\Account\Http\AccountController';
   public $emailClass = 'App\Http\Controllers\EmailController';
 
   function __construct(){
@@ -308,15 +309,20 @@ class CustomerController extends APIController
     foreach($name as $element) {
       $name = null;
       $merchant = null;
+      $type = null;
       if($element->email != null){
         $name = $element->email;
+        $type = $element->account_type;
       }else{
         if(intVal($element->merchant) != intVal($data['merchant_id'])){
           $merchant = app($this->merchantClass)->getByParamsWithAccount('id', $element->merchant);
+          $accounts = app($this->accountClass)->retrieveById($element->merchant);
+          $type = $accounts[0]['account_type'];
           $name = $merchant['name'];
         }
          else {
           $name = $element->name;
+          $type = $element->account_type;
         }
       }
       $column = $this->con[0]['column'];
@@ -326,7 +332,7 @@ class CustomerController extends APIController
             $results[$i]['name'] = $name;
             $results[$i]['code'] = $element->code;
             $results[$i]['status'] = $element->status;
-            $results[$i]['type'] = $element->account_type;
+            $results[$i]['type'] = $type;
             $results[$i]['merchant'] = $element->merchant;
             $results[$i]['merchant_id'] = $element->merchant_id;
             $results[$i]['id'] = $element->id;
@@ -337,7 +343,7 @@ class CustomerController extends APIController
             $results[$i]['name'] = $name;
             $results[$i]['code'] = $element->code;
             $results[$i]['status'] = $element->status;
-            $results[$i]['type'] = $element->account_type;
+            $results[$i]['type'] = $type;
             $results[$i]['merchant'] = $element->merchant;
             $results[$i]['merchant_id'] = $element->merchant_id;
             $results[$i]['id'] = $element->id;
@@ -348,7 +354,7 @@ class CustomerController extends APIController
       $results[$i]['name'] = $name;
       $results[$i]['code'] = $element->code;
       $results[$i]['status'] = $element->status;
-      $results[$i]['type'] = $element->account_type;
+      $results[$i]['type'] = $type;
       $results[$i]['merchant'] = $element->merchant;
       $results[$i]['merchant_id'] = $element->merchant_id;
       $results[$i]['id'] = $element->id;
