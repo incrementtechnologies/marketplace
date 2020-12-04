@@ -310,9 +310,14 @@ class CustomerController extends APIController
       $merchant = null;
       if($element->email != null){
         $name = $element->email;
-      }
-       else {
-        $name = $element->name;
+      }else{
+        if(intVal($element->merchant) != intVal($data['merchant_id'])){
+          $merchant = app($this->merchantClass)->getByParamsWithAccount('id', $element->merchant);
+          $name = $merchant['name'];
+        }
+         else {
+          $name = $element->name;
+        }
       }
       $column = $this->con[0]['column'];
       if($this->con[0]['value'] != '%%') {
