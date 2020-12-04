@@ -312,7 +312,7 @@ class CustomerController extends APIController
       $type = null;
       if($element->email != null && $element->merchant_id == null){
         $name = $element->email;
-        $accounts = app($this->accountClass)->retrieveByEmail(substr($name, 3));
+        $accounts = app($this->accountClass)->retrieveByEmail($name);
         $type = $accounts['account_type'];
       }else{
         if(intVal($element->merchant) != intVal($data['merchant_id'])){
@@ -362,7 +362,6 @@ class CustomerController extends APIController
       $i++;
       }
     }
-    
     $this->response['data'] = $results;
     
     return $this->response();
