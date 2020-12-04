@@ -312,8 +312,8 @@ class CustomerController extends APIController
       $type = null;
       if($element->email != null && $element->merchant_id == null){
         $name = $element->email;
-        $accounts = app($this->accountClass)->retrieveById($element->id);
-        $type = $accounts[0]['account_type'];
+        $accounts = app($this->accountClass)->retrieveByEmail(substr($name, 3));
+        $type = $accounts['account_type'];
       }else{
         if(intVal($element->merchant) != intVal($data['merchant_id'])){
           $merchant = app($this->merchantClass)->getByParamsWithAccount('id', $element->merchant);
