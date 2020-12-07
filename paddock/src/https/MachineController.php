@@ -31,4 +31,17 @@ class MachineController extends APIController
         }
         return $this->response();
     }
+
+    public function create(Request $request){
+        $data = $request->all();
+        $this->model = new Machine();
+        $uniqueVerif = Machine::select()->where('merchant_id', '=', $data['merchant_id'])->get();
+        if (count($uniqueVerif) > 0){
+            $this->response['error'] = 'Duplicate machine name for merchant_id';
+            return $this->response();
+        }else{
+            $this->insertDB($data);
+            return $this->response();
+        }
+    }
 }
