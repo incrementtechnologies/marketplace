@@ -83,6 +83,7 @@ $controller = 'Increment\Marketplace\Http\ProductInventoryController@';
 Route::post($route.'create', $controller."create");
 Route::post($route.'retrieve', $controller."retrieve");
 Route::post($route.'update', $controller."update");
+Route::post($route.'retrieve_product_inventory', $controller."getProductInvetory");
 Route::post($route.'delete', $controller."delete");
 Route::get($route.'test', $controller."test");
 
