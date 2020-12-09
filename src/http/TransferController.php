@@ -14,6 +14,7 @@ class TransferController extends APIController
     public $transferredProductsClass = 'Increment\Marketplace\Http\TransferredProductController';
     public $merchantClass = 'Increment\Marketplace\Http\MerchantController';
     public $productClass = 'Increment\Marketplace\Http\ProductController';
+    public $productAttrClass = 'Increment\Marketplace\Http\ProductAttributeController';
     public $productTraceClass = 'Increment\Marketplace\Http\ProductTraceController';
     public $bundledProductController = 'Increment\Marketplace\Http\BundledProductController';
     public $landBlockProductClass = 'App\Http\Controllers\LandBlockProductController';
@@ -562,10 +563,12 @@ class TransferController extends APIController
     $testArray = array();
     // $this->response['data'] = $result;
     // return $this->response();
-    if(sizeof($result) > 0){  
+    if(sizeof($result) > 0){ 
       foreach($result as $key => $value){
+        // dd($value[0]->payload);
         $item = array(
-          'title' => app($this->productClass)->getProductColumnByParams('id', $key, 'title'),
+          'product' => app($this->productClass)->getProductTitleWithTags('id', $key)[0],
+          'unit' => app($this->productAttrClass)->getProductUnit($key),
           'id' => $key
         );
         $testArray[] = $item;

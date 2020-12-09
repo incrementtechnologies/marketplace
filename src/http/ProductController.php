@@ -163,6 +163,11 @@ class ProductController extends APIController
       return sizeof($result) > 0 ? $result[0][$productColumn] : null;
     }
 
+    public function getProductTitleWithTags($column, $value){
+      $result = Product::where($column, '=', $value)->select('title', 'tags')->get();
+      return sizeof($result) > 0 ? $result : null;
+    }
+
     public function getProductByParams($column, $value){
       $result = Product::where($column, '=', $value)->get();
       if(sizeof($result) > 0){
