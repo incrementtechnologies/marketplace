@@ -122,6 +122,11 @@ class MerchantController extends APIController
     return sizeof($result) > 0 ? $result[0] : null;
   }
 
+  public function getByParamsProduct($column, $value){
+    $result = Merchant::where($column, '=', $value)->get(['name']);
+    return sizeof($result) > 0 ? $result[0] : null;
+  }
+
   public function getColumnValueByParams($column, $value, $params){
     $result = Merchant::where($column, '=', $value)->get();
     return sizeof($result) > 0 ? $result[0][$params] : null;
