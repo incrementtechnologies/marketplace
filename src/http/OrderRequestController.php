@@ -174,12 +174,10 @@ class OrderRequestController extends APIController
             ->join('products as T2', 'T1.product_id', '=', 'T2.id')
             ->join('order_requests as T3', 'T3.id', '=', 'T1.order_request_id')
             ->join('merchants as T4', 'T4.id', '=', 'T2.merchant_id')
-            ->where('T1.order_request_id', '=', $data['order_id'])
-            ->where('T3.status', '=', $data['status'])
+            ->where('T3.order_number', '=', $data['order_number'])
             ->where('T3.merchant_id', '=', $data['merchant_id'])
             ->select('T3.*', 'T2.title', 'T2.id as productId', 'T4.name')
             ->get();
-    dd($result);
     if(sizeof($result) > 0){ 
       $i = 0;
       foreach ($result as $key) {
@@ -193,9 +191,6 @@ class OrderRequestController extends APIController
     }
     return $this->response();
   }
-
-
-
 
 
 

@@ -42,6 +42,7 @@ class ProductInventoryController extends APIController
         $result = DB::table('products')
                 ->where('tags', 'like', '%'.$data['tags'].'%')
                 ->where('merchant_id', '=', $data['merchant_id'])
+                ->where('products.title', 'like', '%'.$data['searchValue'].'%')
                 ->select('*')
                 ->get();
         if(sizeof($result) > 0){
