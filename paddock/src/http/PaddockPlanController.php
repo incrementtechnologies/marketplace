@@ -23,7 +23,7 @@ class PaddockPlanController extends APIController
         for ($i=0; $i<count($this->response['data']); $i++){
             $crop = $this->response['data'][$i]['crop_id'];
             $crop_data = Crop::select()->where('id', '=', $crop)->get();
-            if (count($crop) > 0){
+            if (count($crop_data) > 0){
                 $this->response['data'][$i]['crop_name'] = $crop_data[0]['name'];
             }
         }
