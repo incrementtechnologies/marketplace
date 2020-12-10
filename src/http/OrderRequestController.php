@@ -174,20 +174,22 @@ class OrderRequestController extends APIController
             ->join('products as T2', 'T1.product_id', '=', 'T2.id')
             ->join('order_requests as T3', 'T3.id', '=', 'T1.order_request_id')
             ->join('merchants as T4', 'T4.id', '=', 'T2.merchant_id')
-            ->where('T3.order_number', '=', $data['order_number'])
+            ->where('T1.order_request_id', '=', $data['order_id'])
             ->where('T3.merchant_id', '=', $data['merchant_id'])
+            ->Where('T2.status', '=', $data['status'])
             ->select('T3.*', 'T2.title', 'T2.id as productId', 'T4.name')
             ->get();
+
     if(sizeof($result) > 0){ 
       $i = 0;
       foreach ($result as $key) {
         $tempRes[$i]['order_number'] = $key->order_number;
         $tempRes[$i]['delivered_by'] = $key->delivered_by ? $this->retrieveName($key->delivered_by) : null;
         $tempRes[$i]['date_delivered'] = $key->date_delivered ? Carbon::createFromFormat('Y-m-d H:i:s', $key->date_delivered)->copy()->tz($this->response['timezone'])->format('F j, Y H:i:s') : null;
-        $tempRes[$i]['delivery_date'] = Carbon::createFromFormat('Y-m-d H:i:s', $key->date_of_delivery)->copy()->tz($this->response['timezone'])->format('F j, Y');
-        $tempRes[$i]['products'] = app($this->productController) -> getProductByParamsOrderDetails('id', $key->productId);
+        $tempRes[$i]['delivery_date'] = $key->date_of_delivery ? Carbon::createFromFormat('Y-m-d H:i:s', $key->date_of_delivery)->copy()->tz($this->response['timezone'])->format('F j, Y') : null;
+        $tempRes[$i]['products'] = app($this->productController)->getProductByParamsOrderDetails('id', $key->productId); 
       }
-      $this->response['data'] = $tempRes;;
+      $this->response['data'] = $tempRes;
     }
     return $this->response();
   }
