@@ -178,12 +178,12 @@ class OrderRequestController extends APIController
             ->join('order_requests as T3', 'T3.id', '=', 'T1.order_request_id')
             ->join('merchants as T4', 'T4.id', '=', 'T2.merchant_id')
             ->where('T1.order_request_id', '=', $data['order_id'])
-            ->where('T3.merchant_id', '=', $data['merchant_id'])
-            ->Where('T2.status', '=', $data['status'])
+            // ->where('T3.merchant_id', '=', $data['merchant_id'])
+            ->where('T3.status', '=', $data['status'])
             ->select('T3.*', 'T2.title', 'T2.id as productId', 'T4.name')
             ->get();
 
-    echo json_encode($result);
+    // echo json_encode($result);
 
     if(sizeof($result) > 0){ 
       $i = 0;
