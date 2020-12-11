@@ -163,7 +163,7 @@ class OrderRequestController extends APIController
 
       $this->model = new OrderRequest();
       $this->retrieveDB($data);
-      if(sizeof($result) > 0){
+      if(sizeof($this->response['data']) > 0){
         $this->response['data'] =  $this->manageLevelResult($result);
       }
       // $this->response['size'] = OrderRequest::where($data['condition'][0]['column'], '=', $data['condition'][0]['value'])->count();
