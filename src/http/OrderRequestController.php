@@ -174,7 +174,7 @@ class OrderRequestController extends APIController
     $data = $request->all();
     $tempRes = array();
     $result = DB::table('order_request_items as T1')
-            ->join('products as T2', 'T1.product_id', '=', 'T2.id')
+            ->join('products as T2', 'T2.id', '=', 'T1.product_id')
             ->join('order_requests as T3', 'T3.id', '=', 'T1.order_request_id')
             ->join('merchants as T4', 'T4.id', '=', 'T2.merchant_id')
             ->where('T1.order_request_id', '=', $data['order_id'])
