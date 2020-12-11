@@ -183,6 +183,8 @@ class OrderRequestController extends APIController
             ->select('T3.*', 'T2.title', 'T2.id as productId', 'T4.name')
             ->get();
 
+    echo json_decode($result);
+
     if(sizeof($result) > 0){ 
       $i = 0;
       foreach ($result as $key) {
