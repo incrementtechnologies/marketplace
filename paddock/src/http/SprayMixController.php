@@ -10,6 +10,7 @@ use Carbon\Carbon;
 
 class SprayMixController extends APIController
 {
+    public $cropClass = 'Increment\Marketplace\Paddock\Http\CropController';
     //
     function __construct(){
         $this->model = new SprayMix();
@@ -39,4 +40,40 @@ class SprayMixController extends APIController
         };
         return $this->response();
     }
+
+    public function retrieve(Request $request){
+        $data = $request->all();
+        $con = $data['condition'];
+        $sortKey = null;
+        $sortValue = null;
+        foreach ($data['sort'] as $key) {
+            $sortKey = array_keys($data['sort'])[0];
+            $sortValue = $key;
+        }
+        $tempData = SprayMix::where($con[1]['column'], $con[1]['clause'], $con[1]['value'])
+                            ->where($con[0]['column'], $con[0]['clause'], $con[0]['value'])
+                            ->orderBy($sortKey, $sortValue)
+                            ->skip($data['offset'])
+                            ->take($data['limit'])
+                            ->get();
+
+        $res = array();
+        if(sizeof($tempData) > 0){
+            $i = 0;
+            $getCropName = null;
+            foreach ($tempData as $key) {
+                $getCropName = app($this->cropClass)->retrieveCrops($key->crop_id);
+                $res[$i]['type'] = $getCropName;
+                $res[$i]['name'] = $key['name'];
+                $res[$i]['id'] = $key['id'];
+                $res[$i]['status'] = $key['status'];
+
+            }
+            $this->response['data'] = $res;
+        }
+        return $this->response();
+
+    }
+
+
 }
