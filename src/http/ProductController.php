@@ -8,6 +8,7 @@ use Increment\Marketplace\Models\Product;
 use Illuminate\Support\Facades\Storage;
 use Increment\Common\Image\Models\Image;
 use Increment\Common\Payload\Models\Payload;
+use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 class ProductController extends APIController
 {
@@ -204,15 +205,13 @@ class ProductController extends APIController
       if(sizeof($result) > 0){
         $i= 0;
         foreach ($result as $key) {
-          // dd($key);
           $result[$i]['merchant'] = app($this->merchantController)->getByParamsProduct('id', $result[$i]['merchant_id']);
           $result[$i]['variation'] = app($this->productAttrController)->getByParams('product_id', $result[$i]['id']);
           $result[$i]['qty'] = app($this->transferClasss)->getQtyTransferred($result[$i]['merchant_id'], $result[$i]['id']);
          } 
       }
-      return sizeof($result) > 0 ? $result[0] : null;      
+      return sizeof($result) > 0 ? $result : null;      
     }
-
 
 
     public function getProductByVariations($column, $value){
