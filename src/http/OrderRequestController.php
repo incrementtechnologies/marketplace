@@ -153,17 +153,20 @@ class OrderRequestController extends APIController
   public function retrieveAllOrders(Request $request){
       $data = $request->all();
       $con = $data['condition'];
-      $result = DB::table('order_requests as T1')
-        ->join('merchants as T2','T1.merchant_to','=','T2.id')
-        // ->leftJoin('accounts as T3', 'T1.delivered_by', '=', 'T3.id')
-        ->Where('T1'.$con[0]['column'], $con[0]['clause'], $con[0]['value'])
-        ->Where('T1.status', '=', $data['status'])
-        ->select('T1.*', 'T2.name')
-        ->get();
+      // $result = DB::table('order_requests as T1')
+      //   ->join('merchants as T2','T1.merchant_to','=','T2.id')
+      //   // ->leftJoin('accounts as T3', 'T1.delivered_by', '=', 'T3.id')
+      //   ->Where('T1'.$con[0]['column'], $con[0]['clause'], $con[0]['value'])
+      //   ->Where('T1.status', '=', $data['status'])
+      //   ->select('T1.*', 'T2.name')
+      //   ->get();
+
+      $this->model = new OrderRequest();
+      $this->retrieveDB($data);
       if(sizeof($result) > 0){
         $this->response['data'] =  $this->manageLevelResult($result);
       }
-      $this->response['size'] = OrderRequest::where($data['condition'][0]['column'], '=', $data['condition'][0]['value'])->count();
+      // $this->response['size'] = OrderRequest::where($data['condition'][0]['column'], '=', $data['condition'][0]['value'])->count();
       return $this->response();
   }
 
