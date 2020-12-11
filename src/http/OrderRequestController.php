@@ -156,7 +156,7 @@ class OrderRequestController extends APIController
       $result = DB::table('order_requests as T1')
         ->join('merchants as T2','T1.merchant_to','=','T2.id')
         // ->leftJoin('accounts as T3', 'T1.delivered_by', '=', 'T3.id')
-        ->Where($con[0]['column'], $con[0]['clause'], $con[0]['value'])
+        ->Where('T1'.$con[0]['column'], $con[0]['clause'], $con[0]['value'])
         ->Where('T1.status', '=', $data['status'])
         ->select('T1.*', 'T2.name')
         ->get();
