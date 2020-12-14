@@ -18,13 +18,17 @@ class CropController extends APIController
     
     public function retrieveCrops($id){
         $tempCrop = explode(",", $id);
+        // dd($id);
         $object = [];
 
         foreach ($tempCrop as $key) {
             $temp = [];
-            $result = Crop::where('id', '=', $key)->select('name', 'id')->get();
-            $temp['id'] = $result[0]['id'];
-            $temp['name'] = $result[0]['name'];
+            $tempResult = Crop::where('id', '=', (int)$key)->select('name', 'id')->get();
+            // dd($tempResult);
+            $result = $tempResult != null ? $tempResult : null;
+            // dd($result->isEmpty());
+            $temp['id'] = $result->isEmpty() ? null : $result[0]['id'];
+            $temp['name'] = $result->isEmpty() ? null : $result[0]['name'];
             array_push($object, json_encode($temp));
         }
         // dd($object);

@@ -72,24 +72,23 @@ class SprayMixController extends APIController
                             ->skip($data['offset'])
                             ->take($data['limit'])
                             ->get();
-
+        
         $res = array();
         if(sizeof($tempData) > 0){
             $i = 0;
             $getCropName = null;
             foreach ($tempData as $key) {
-                $getCropName = app($this->cropClass)->retrieveCrops($key->crop_id) != null ? app($this->cropClass)->retrieveCrops($key->crop_id) : null;
+                $getCropName = app($this->cropClass)->retrieveCrops($key->crops);
                 $res[$i]['type'] = $getCropName;
                 $res[$i]['name'] = $key['name'];
                 $res[$i]['id'] = $key['id'];
                 $res[$i]['status'] = $key['status'];
-            
                 $i++;
+
             }
             $this->response['data'] = $res;
         }
         return $this->response();
-
     }
 
 
