@@ -144,5 +144,4 @@ class TransferredProductController extends APIController
       ));
       return true;
     }
-
 }
