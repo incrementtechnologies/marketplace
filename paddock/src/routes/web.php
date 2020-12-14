@@ -96,9 +96,9 @@ Route::post($route.'delete', $controller."delete");
 Route::get($route.'test', $controller."test");
 
 //Dashboard
-$route = env('PACKAGE_ROUTE','').'/dashboard/';
+$route = env('PACKAGE_ROUTE','').'/paddocks/';
 $controller = 'Increment\Marketplace\Paddock\Http\DashboardController@';
-Route::post($route.'retrieve', $controller."retrieveDashboard");
+Route::post($route.'dashboard', $controller."retrieveDashboard");
 
 
 

@@ -21,6 +21,7 @@ class DashboardController extends APIController
         ->leftJoin('spray_mixes AS T4', 'T1.spray_mix_id', '=', 'T4.id')
         ->offset($data['offset'])
         ->limit($data['limit'])
+        ->where('T3.merchant_id', '=', $data['merchant_id'])
         ->distinct("T1.id")
         ->get();
         $this->response['data'] = $res;
