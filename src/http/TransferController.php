@@ -403,7 +403,18 @@ class TransferController extends APIController
     $con = $data['condition'];
     // dd('first');
     $productType = $data['productType'];
-    if($productType == 'all'){
+    if (isset($data['category'])){
+      $data['offset'] = isset($data['offset']) ? $data['offset'] : 0;
+      $data['limit'] = isset($data['offset']) ? $data['limit'] : 5;
+      $result = DB::table('transferred_products as T1')
+      ->join('products as T2', 'T2.id', '=', 'T1.product_id')
+      ->where('T1.merchant_id', '=', $data['merchant_id'])
+      ->where('T1.status', '=', 'active')
+      ->where('T2.tags', 'like', '%', $data['category'], '%')
+      ->where($con['column'], 'like', $con['value'])
+      ->orderBy($con['column'], $data['sort'][$con['column']])
+      ->get(['T1.*', 'T2.title']);
+    }else if($productType == 'all'){
       // dd($data['sort'][$con['column']]);
       $data['offset'] = isset($data['offset']) ? $data['offset'] : 0;
       $data['limit'] = isset($data['offset']) ? $data['limit'] : 5;
