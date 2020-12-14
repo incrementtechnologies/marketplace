@@ -8,6 +8,7 @@ use Increment\Marketplace\Models\Product;
 use Illuminate\Support\Facades\Storage;
 use Increment\Common\Image\Models\Image;
 use Increment\Common\Payload\Models\Payload;
+use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 class ProductController extends APIController
 {
@@ -22,6 +23,7 @@ class ProductController extends APIController
     public $merchantController = 'Increment\Marketplace\Http\MerchantController';
     public $bundledProductController = 'Increment\Marketplace\Http\BundledProductController';
     public $bundledSettingController = 'Increment\Marketplace\Http\BundledSettingController';
+    public $transferClasss = 'Increment\Marketplace\Http\TransferController';
     function __construct(){
     	$this->model = new Product();
       $this->notRequired = array(
@@ -163,6 +165,11 @@ class ProductController extends APIController
       return sizeof($result) > 0 ? $result[0][$productColumn] : null;
     }
 
+    public function getProductTitleWithTags($column, $value){
+      $result = Product::where($column, '=', $value)->select('title', 'tags')->get();
+      return sizeof($result) > 0 ? $result : null;
+    }
+
     public function getProductByParams($column, $value){
       $result = Product::where($column, '=', $value)->get();
       if(sizeof($result) > 0){
@@ -190,6 +197,20 @@ class ProductController extends APIController
          } 
       }
       return sizeof($result) > 0 ? $result[0] : null;      
+    }
+
+
+    public function getProductByParamsOrderDetails($column, $value){
+      $result = Product::where($column, '=', $value)->get(['id', 'code', 'type', 'title', 'merchant_id']);
+      if(sizeof($result) > 0){
+        $i= 0;
+        foreach ($result as $key) {
+          $result[$i]['merchant'] = app($this->merchantController)->getByParamsProduct('id', $result[$i]['merchant_id']);
+          $result[$i]['variation'] = app($this->productAttrController)->getByParams('product_id', $result[$i]['id']);
+          $result[$i]['qty'] = app($this->transferClasss)->getQtyTransferred($result[$i]['merchant_id'], $result[$i]['id']);
+         } 
+      }
+      return sizeof($result) > 0 ? $result : null;      
     }
 
 

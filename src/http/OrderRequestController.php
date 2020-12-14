@@ -13,6 +13,9 @@ class OrderRequestController extends APIController
 
   public $merchantClass = 'Increment\Marketplace\Http\MerchantController';
   public $dailyLoadingListClass = 'Increment\Marketplace\Http\DailyLoadingListController';
+  // public $transferClasss = 'Increment\Marketplace\Http\TransferController';
+  // public $productAttrController = 'Increment\Marketplace\Http\ProductAttributeController';
+  public $productController = 'Increment\Marketplace\Http\ProductController';
   function __construct(){
     $this->model = new OrderRequest();
     $this->notRequired = array('date_delivered', 'delivered_by');
@@ -146,6 +149,57 @@ class OrderRequestController extends APIController
     }
     return $array;
   }
+
+  public function retrieveAllOrders(Request $request){
+      $data = $request->all();
+      $con = $data['condition'];
+      // $result = DB::table('order_requests as T1')
+      //   ->join('merchants as T2','T1.merchant_to','=','T2.id')
+      //   // ->leftJoin('accounts as T3', 'T1.delivered_by', '=', 'T3.id')
+      //   ->Where('T1'.$con[0]['column'], $con[0]['clause'], $con[0]['value'])
+      //   ->Where('T1.status', '=', $data['status'])
+      //   ->select('T1.*', 'T2.name')
+      //   ->get();
+
+      $this->model = new OrderRequest();
+      $this->retrieveDB($data);
+      if(sizeof($this->response['data']) > 0){
+        $this->response['data'] =  $this->manageLevelResult($this->response['data']);
+      }
+      // $this->response['size'] = OrderRequest::where($data['condition'][0]['column'], '=', $data['condition'][0]['value'])->count();
+      return $this->response();
+  }
+
+  public function retreiveOrderDetails(Request $request){
+    $data = $request->all();
+    $tempRes = array();
+    $result = DB::table('order_request_items as T1')
+            ->join('products as T2', 'T2.id', '=', 'T1.product_id')
+            ->join('order_requests as T3', 'T3.id', '=', 'T1.order_request_id')
+            ->join('merchants as T4', 'T4.id', '=', 'T2.merchant_id')
+            ->where('T1.order_request_id', '=', $data['order_id'])
+            // ->where('T3.merchant_id', '=', $data['merchant_id'])
+            ->where('T3.status', '=', $data['status'])
+            ->select('T3.*', 'T2.title', 'T2.id as productId', 'T4.name')
+            ->get();
+
+    // echo json_encode($result);
+
+    if(sizeof($result) > 0){ 
+      $i = 0;
+      foreach ($result as $key) {
+        $tempRes[$i]['order_number'] = $key->order_number;
+        $tempRes[$i]['delivered_by'] = $key->delivered_by ? $this->retrieveName($key->delivered_by) : null;
+        $tempRes[$i]['date_delivered'] = $key->date_delivered ? Carbon::createFromFormat('Y-m-d H:i:s', $key->date_delivered)->copy()->tz($this->response['timezone'])->format('F j, Y H:i:s') : null;
+        $tempRes[$i]['delivery_date'] = $key->date_of_delivery ? Carbon::createFromFormat('Y-m-d H:i:s', $key->date_of_delivery)->copy()->tz($this->response['timezone'])->format('F j, Y') : null;
+        $tempRes[$i]['products'] = app($this->productController)->getProductByParamsOrderDetails('id', $key->productId); 
+      }
+      $this->response['data'] = $tempRes;
+    }
+    return $this->response();
+  }
+
+
 
   public function retreiveDeliveredBy($id){
     if($id != null){

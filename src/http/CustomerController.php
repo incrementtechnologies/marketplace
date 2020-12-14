@@ -267,7 +267,6 @@ class CustomerController extends APIController
         ->orderBy($this->con[0]['column'], $data['sort'][$this->con[0]['column']])
         ->orderBy('name', $data['sort'][$this->con[0]['column']])
         ->get();
-       
         $this->response['size'] = sizeof($name);
         // DB::table('customers as T1')
         //   ->leftJoin('merchants as T2', 'T1.merchant_id', '=', 'T2.id')
@@ -301,7 +300,6 @@ class CustomerController extends APIController
         ->orderBy($this->con[0]['column'], $data['sort'][$this->con[0]['column']])
         ->orderBy('name', $data['sort'][$this->con[0]['column']])
         ->get();
-        // dd(sizeOf($name);
         $this->response['size'] = sizeof($name);
 
     }
@@ -314,10 +312,10 @@ class CustomerController extends APIController
         $name = $element->email;
         $accounts = app($this->accountClass)->retrieveByEmail($name);
         $type = $accounts['account_type'];
-      }else{
+     }else{
         if(intVal($element->merchant) != intVal($data['merchant_id'])){
           $merchant = app($this->merchantClass)->getByParamsWithAccount('id', $element->merchant);
-          $accounts = app($this->accountClass)->retrieveById($element->merchant);
+          $accounts = app($this->accountClass)->retrieveById($merchant->account_id);
           $type = $accounts[0]['account_type'];
           $name = $merchant['name'];
         }
