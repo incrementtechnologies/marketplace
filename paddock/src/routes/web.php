@@ -42,7 +42,11 @@ $route = env('PACKAGE_ROUTE', '').'/spray_mixes/';
 $controller = 'Increment\Marketplace\Paddock\Http\SprayMixController@';
 Route::post($route.'create', $controller."create");
 Route::post($route.'retrieve', $controller."retrieve");
+<<<<<<< HEAD
+Route::post($route.'retrieve_details', $controller."retrieveDetails");
+=======
 Route::post($route.'retrieve_rescent', $controller."retrieveRescent");
+>>>>>>> 03d60f8435668d566ae1861848f4dcf21e8ceb8f
 Route::post($route.'update', $controller."update");
 Route::post($route.'delete', $controller."delete");
 Route::get($route.'test', $controller."test");
@@ -97,9 +101,9 @@ Route::post($route.'delete', $controller."delete");
 Route::get($route.'test', $controller."test");
 
 //Dashboard
-$route = env('PACKAGE_ROUTE','').'/dashboard/';
+$route = env('PACKAGE_ROUTE','').'/paddocks/';
 $controller = 'Increment\Marketplace\Paddock\Http\DashboardController@';
-Route::post($route.'retrieve', $controller."retrieveDashboard");
+Route::post($route.'dashboard', $controller."retrieveDashboard");
 
 
 
