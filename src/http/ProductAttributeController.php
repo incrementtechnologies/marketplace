@@ -22,7 +22,7 @@ class ProductAttributeController extends APIController
     }
 
     public function getByParams($column, $value){
-      $result = ProductAttribute::where($column, '=', $value)->orderBy('created_at', 'desc')->get();
+      $result = ProductAttribute::where($column, '=', $value)->orderBy('created_at', 'desc')->select(['payload', 'payload_value'])->get();
       return (sizeof($result) > 0) ? $result : null;
     }
 }

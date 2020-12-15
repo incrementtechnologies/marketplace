@@ -11,6 +11,7 @@ class OrderRequestItemController extends APIController
 
   public $productClass = 'Increment\Marketplace\Http\ProductController';
   public $merchantClass = 'Increment\Marketplace\Http\MerchantController';
+  public $productAttrController = 'Increment\Marketplace\Http\ProductAttributeController';
 
   function __construct(){
     $this->model = new OrderRequestItem();
@@ -40,8 +41,9 @@ class OrderRequestItemController extends APIController
           'title'   => $product ? $product['title'] : null,
           'id'      => $key['id'],
           'qty'     => $key['qty'],
+          'variation' => app($this->productAttrController)->getByParams('product_id', $product['id']),
           'counter' => 0,
-          'product_id'     => $key['product_id'],
+          'product_id' => $key['product_id'],
           'type'    => $product['type'],
           'order_request_id'     => $key['order_request_id'],
           'merchant'     => $product ? app($this->merchantClass)->getColumnValueByParams('id', $product['merchant_id'], 'name') : null
