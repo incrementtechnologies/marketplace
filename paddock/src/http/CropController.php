@@ -24,9 +24,7 @@ class CropController extends APIController
         foreach ($tempCrop as $key) {
             $temp = [];
             $tempResult = Crop::where('id', '=', (int)$key)->select('name', 'id')->get();
-            // dd($tempResult);
             $result = $tempResult != null ? $tempResult : null;
-            // dd($result->isEmpty());
             $temp['id'] = $result->isEmpty() ? null : $result[0]['id'];
             $temp['name'] = $result->isEmpty() ? null : $result[0]['name'];
             array_push($object, json_encode($temp));
