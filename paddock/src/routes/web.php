@@ -101,6 +101,7 @@ Route::get($route.'test', $controller."test");
 $route = env('PACKAGE_ROUTE','').'/paddocks/';
 $controller = 'Increment\Marketplace\Paddock\Http\DashboardController@';
 Route::post($route.'dashboard', $controller."retrieveDashboard");
+Route::post($route.'dashboard_batches', $controller."retrieveDashboardBatches");
 
 
 
