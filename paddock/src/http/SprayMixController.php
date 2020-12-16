@@ -92,6 +92,7 @@ class SprayMixController extends APIController
                 $res[$i]['status'] = $key['status'];
                 $res[$i]['max_rate'] = $key['maximum_rate'];
                 $res[$i]['min_rate'] = $key['minimum_rate'];
+                $res[$i]['application_rate'] = $key['application_rate'];
                 $res[$i]['short_description'] = $key['short_description'];
                 $i++;
 
