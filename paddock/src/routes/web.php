@@ -81,7 +81,7 @@ Route::get($route.'test', $controller."test");
 
 //Batch Products
 $route = env('PACKAGE_ROUTE', '').'/batch_products/';
-$controller = 'Increment\Marketplace\Paddock\Http\BatchProductsController@';
+$controller = 'Increment\Marketplace\Paddock\Http\BatchProductController@';
 Route::post($route.'create', $controller."create");
 Route::post($route.'retrieve', $controller."retrieve");
 Route::post($route.'update', $controller."update");

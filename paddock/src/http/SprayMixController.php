@@ -79,7 +79,6 @@ class SprayMixController extends APIController
                             ->skip($data['offset'])
                             ->take($data['limit'])
                             ->get();
-        dd($tempData);
         $res = array();
         if(sizeof($tempData) > 0){
             $i = 0;
@@ -101,6 +100,5 @@ class SprayMixController extends APIController
         }
         return $this->response();
     }
-
 
 }
