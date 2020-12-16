@@ -48,7 +48,7 @@ class SprayMixController extends APIController
                 ->select('T2.name', 'T2.id', 'T3.name', 'T3.id')
                 ->get();
 
-        if(sizeof(result) > 0){
+        if(sizeof($result) > 0){
             $this->response['data'] = $result;
         }
         else{
@@ -72,7 +72,6 @@ class SprayMixController extends APIController
                             ->skip($data['offset'])
                             ->take($data['limit'])
                             ->get();
-        dd($tempData);
         $res = array();
         if(sizeof($tempData) > 0){
             $i = 0;
