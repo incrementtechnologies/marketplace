@@ -41,6 +41,7 @@ class DashboardController extends APIController
         ->leftJoin("merchants AS T6", "T1.merchant_id", "=", "T6.id")
         ->leftJoin("paddock_plans_tasks AS T7", "T2.paddock_plan_task_id", "=", "T7.id")
         ->leftJoin("paddocks AS T8", "T7.paddock_id","=","T8.id") 
+        ->where("T1.merchant_id", "=", $data['merchant_id'])
         ->take(3)  
         ->get();
         $res['recent'] = DB::table('batches AS T1')
