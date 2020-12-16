@@ -578,7 +578,8 @@ class TransferController extends APIController
       foreach($result as $key => $value){
         // dd($value[0]->payload);
         $item = array(
-          'product' => app($this->productClass)->getProductTitleWithTags('id', $key)[0],
+          'title' => app($this->productClass)->getProductTitleWithTags('id', $key)[0]['title'],
+          'tags' => app($this->productClass)->getProductTitleWithTags('id', $key)[0]['tags'],
           'unit' => app($this->productAttrClass)->getProductUnit($key),
           'id' => $key
         );
