@@ -25,6 +25,10 @@ class PaddockController extends APIController
             $result = Paddock::where("id", "=", $data['id'])
                     ->where("status", "=", $data['status'])
                     ->get();
+            $result['paddock_data'] = PaddockPlan::select()->where("paddock_id", "=", $data['id'])->orderBy('start_date','desc')->limit(2)->get();
+            for($i=0; $i<count($result['paddock_data']); $i++){
+                $result['paddock_data'][$i]['crop_name'] =  Crop::select("name")->where("id", "=", $result['paddock_data'][$i]['crop_id'])->get();
+            }
             $this->response['data'] = $result;
         }else{
             $data = $request->all();
