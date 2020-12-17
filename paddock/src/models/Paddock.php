@@ -7,4 +7,8 @@ class Paddock extends APIModel
 {
     protected $table = 'paddocks';
     protected $fillable = ['merchant_id', 'name', 'area', 'account_id', 'short_description', 'note', 'status', 'arable_area', 'spray_area'];
+    protected $casts = [
+        'created_at' => 'date:d/m/Y',
+        'updated_at' => 'date:d/m/Y'
+    ];
 }
