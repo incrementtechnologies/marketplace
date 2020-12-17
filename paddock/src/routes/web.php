@@ -7,6 +7,7 @@ Route::post($route.'create', $controller."create");
 Route::post($route.'retrieve', $controller."retrieve");
 Route::post($route.'update', $controller."update");
 Route::post($route.'delete', $controller."delete");
+Route::post($route.'retrieve_batches_and_paddocks', $controller."retrievePaddocksAndBatchesByStatus");
 Route::get($route.'test', $controller."test");
 
 // Paddock Plans
