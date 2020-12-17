@@ -22,7 +22,9 @@ class PaddockController extends APIController
     public function retrieve(Request $request){
         $data = $request->all();
         if (isset($data['id'])) {
-            $result = Paddock::where("id", "=", $data['id'])->get();
+            $result = Paddock::where("id", "=", $data['id'])
+                    ->where("status", "=", $data['status'])
+                    ->get();
             $this->response['data'] = $result;
         }else{
             $data = $request->all();
