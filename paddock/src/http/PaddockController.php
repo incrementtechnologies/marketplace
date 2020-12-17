@@ -42,7 +42,7 @@ class PaddockController extends APIController
                 }
                 $this->response['data'][$i]['paddock_data'] = $paddock_data;
             }
-            return $this->response();
         }
+        return $this->response();
     }
 }
