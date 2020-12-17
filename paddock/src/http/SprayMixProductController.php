@@ -16,7 +16,7 @@ class SprayMixProductController extends APIController
         $this->notRequired = array();
     }
 
-    public function retrieveBasedOnStatus(Request $request){
+    public function retrieveDetails(Request $request){
         $data = $request->all();
         $result = DB::table("spray_mix_products AS T1")
                     ->select("T1.rate","T1.status","T1.created_at AS spray_mix_prod_created", "T2.title AS product_name", "T3.application_rate", "T3.minimum_rate", "T3.maximum_rate", "T3.name AS spray_mix_name")
