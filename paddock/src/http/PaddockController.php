@@ -67,8 +67,8 @@ class PaddockController extends APIController
                 $res['paddocks'][$i]['paddock_plans'] = PaddockPlan::where("paddock_id","=",$res['paddocks'][$i]['id'])
                                                         ->where("deleted_at", "=", NULL)
                                                         ->get();
-                for($x=0; $x<count($res['paddocks'][$i]['paddock_data']); $x++){
-                    $res['paddock_data'][$i]['paddock_plans'][$x]['crop_name'] =  Crop::select("name")->where("id", "=", $result['paddock_data'][$i]["paddock_plans"][$x]['crop_id'])->get();
+                for($x=0; $x<count($res['paddocks'][$i]['paddock_plans']); $x++){
+                    $res['paddocks'][$i]['paddock_plans'][$x]['crop_name'] =  Crop::select("name")->where("id", "=", $res['paddocks'][$i]["paddock_plans"][$x]['crop_id'])->get();
                 }
             }
         $res['batches'] = DB::table("batches AS T1")
