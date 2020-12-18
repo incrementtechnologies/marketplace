@@ -7,6 +7,7 @@ use App\Http\Controllers\APIController;
 use Increment\Marketplace\Paddock\Models\Paddock;
 use Increment\Marketplace\Paddock\Models\Batch;
 use Increment\Marketplace\Paddock\Models\PaddockPlan;
+use Increment\Marketplace\Paddock\Models\PaddockPlanTask;
 use Increment\Marketplace\Paddock\Models\Crop;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
@@ -29,6 +30,8 @@ class PaddockController extends APIController
                     ->where("status", "=", $data['status'])
                     ->get();
             $result['paddock_data'] = PaddockPlan::select()->where("paddock_id", "=", $data['id'])->orderBy('start_date','desc')->limit(2)->get();
+            $paddock_plan_tasks = PaddockPlanTask::select()->where("paddock_plan_id", "=", $result['paddock_data'][0]['id'])->get();
+            $result['paddock_data'][0]['paddock_tasks_data'] = $paddock_plan_tasks;
             for($i=0; $i<count($result['paddock_data']); $i++){
                 $result['paddock_data'][$i]['crop_name'] =  Crop::select("name")->where("id", "=", $result['paddock_data'][$i]['crop_id'])->get();
             }
@@ -42,6 +45,10 @@ class PaddockController extends APIController
                 $paddock_id = $this->response['data'][$i]['id'];
                 $paddock_data = PaddockPlan::select()->where('paddock_id', '=', $paddock_id)->orderBy('start_date','desc')->limit(2)->get();
                 for ($x = 0; $x < count($paddock_data); $x++){
+                    $paddock_plan_tasks = PaddockPlanTask::select()->where("paddock_plan_id", "=", $paddock_data[$x]['id'])->get();
+                    if (count($paddock_plan_tasks) > 0){
+                        $paddock_data[$x]['paddock_tasks_data'] = $paddock_plan_tasks;
+                    }
                     $crop_name = Crop::select('name')->where('id', '=', $paddock_data[$x]['crop_id'])->get();
                     if (count($crop_name)>0){
                         $paddock_data[$x]['crop_name'] = $crop_name[0]['name'];
