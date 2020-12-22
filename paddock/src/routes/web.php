@@ -7,6 +7,7 @@ Route::post($route.'create', $controller."create");
 Route::post($route.'retrieve', $controller."retrieve");
 Route::post($route.'update', $controller."update");
 Route::post($route.'delete', $controller."delete");
+Route::post($route.'retrieve_batches_and_paddocks', $controller."retrievePaddocksAndBatchesByStatus");
 Route::get($route.'test', $controller."test");
 
 // Paddock Plans
@@ -56,8 +57,8 @@ Route::post($route.'create', $controller."create");
 Route::post($route.'retrieve', $controller."retrieve");
 Route::post($route.'update', $controller."update");
 Route::post($route.'delete', $controller."delete");
+Route::post($route.'retrieve_details', $controller."retrieveDetails");
 Route::get($route.'test', $controller."test");
-
 
 //Batches
 $route = env('PACKAGE_ROUTE', '').'/batches/';
@@ -81,7 +82,7 @@ Route::get($route.'test', $controller."test");
 
 //Batch Products
 $route = env('PACKAGE_ROUTE', '').'/batch_products/';
-$controller = 'Increment\Marketplace\Paddock\Http\BatchProductsController@';
+$controller = 'Increment\Marketplace\Paddock\Http\BatchProductController@';
 Route::post($route.'create', $controller."create");
 Route::post($route.'retrieve', $controller."retrieve");
 Route::post($route.'update', $controller."update");
@@ -101,6 +102,7 @@ Route::get($route.'test', $controller."test");
 $route = env('PACKAGE_ROUTE','').'/paddocks/';
 $controller = 'Increment\Marketplace\Paddock\Http\DashboardController@';
 Route::post($route.'dashboard', $controller."retrieveDashboard");
+Route::post($route.'dashboard_batches', $controller."retrieveDashboardBatches");
 
 
 
