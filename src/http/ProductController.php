@@ -202,6 +202,7 @@ class ProductController extends APIController
 
     public function getProductByParamsOrderDetails($column, $value){
       $result = Product::where($column, '=', $value)->get(['id', 'code', 'type', 'title', 'merchant_id']);
+      dd($value);
       if(sizeof($result) > 0){
         $i= 0;
         foreach ($result as $key) {

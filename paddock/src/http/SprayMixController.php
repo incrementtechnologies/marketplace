@@ -73,12 +73,19 @@ class SprayMixController extends APIController
             $sortKey = array_keys($data['sort'])[0];
             $sortValue = $key;
         }
-        $tempData = SprayMix::where($con[1]['column'], $con[1]['clause'], $con[1]['value'])
+        if($data['limit'] > 0){
+            $tempData = SprayMix::where($con[1]['column'], $con[1]['clause'], $con[1]['value'])
                             ->where($con[0]['column'], $con[0]['clause'], $con[0]['value'])
                             ->orderBy($sortKey, $sortValue)
                             ->skip($data['offset'])
                             ->take($data['limit'])
                             ->get();
+        }else{
+            $tempData = SprayMix::where($con[1]['column'], $con[1]['clause'], $con[1]['value'])
+                            ->where($con[0]['column'], $con[0]['clause'], $con[0]['value'])
+                            ->orderBy($sortKey, $sortValue)
+                            ->get();
+        }
         $res = array();
         if(sizeof($tempData) > 0){
             $i = 0;
