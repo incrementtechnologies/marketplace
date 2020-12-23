@@ -96,10 +96,10 @@ class OrderRequestController extends APIController
 
   public function manageResultsMobile($result){
     $array = array();
-    foreach ($result as $key) {
-      // dd($key['merchant_id']);
+    foreach ($result as $key) { 
       $item = array(
-        'merchant' => app($this->merchantClass)->getColumnByParams('id', $key['merchant_id'], ['name', 'address', 'id']),
+        'merchant' => app($this->merchantClass)->getColumnByParams('id', $key['merchant_to'], ['name', 'address', 'id']),
+        'merchant_from' => app($this->merchantClass)->getColumnByParams('id', $key['merchant_id'], ['name', 'address', 'id']),
         'date_of_delivery'  => Carbon::createFromFormat('Y-m-d H:i:s', $key['date_of_delivery'])->copy()->tz($this->response['timezone'])->format('F j, Y'),
         'status'        => $key['status'],
         'delivered_by'  => $key['delivered_by'] ? $this->retrieveName($key['delivered_by']) : null,
