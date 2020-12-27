@@ -60,6 +60,27 @@ class PaddockController extends APIController
         return $this->response();
     }
 
+    public function retrieveWithSprayMix(Request $request){
+      $data = $request->all();
+      $this->model = new Paddock();
+      $this->retrieveDB($data);
+      
+      for ($i = 0; $i < count($this->response['data']); $i++){
+        $item = $this->response['data'][$i];
+        $paddockPlan = PaddockPlan::select()->where("paddock_id", "=", $item['id'])->orderBy('start_date','desc')->limit(1)->get();
+        $crop = Crop::where("id", "=", $item['crop_id'])->get();
+        if($paddockPlan){
+          $this->response['data'][$i]['start_date'] = $paddockPlan[0]['start_date'];
+          $this->response['data'][$i]['end_date'] = $paddockPlan[0]['end_date'];
+        }
+        $this->response['data'][$i]['crop_name'] = $crop ? $crop[0]['name'] : null;
+        $this->response['data'][$i]['machine'] = null; // get the used machine
+        $this->response['data'][$i]['operator'] = $this->retrieveName($item['account_id']); // needs to be verified
+      }
+
+      return $this->response();
+    }
+
     public function retrievePaddocksAndBatchesByStatus(Request $request){
         $data = $request->all();
         $res = array();

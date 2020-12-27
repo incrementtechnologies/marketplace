@@ -5,6 +5,7 @@ $route = env('PACKAGE_ROUTE', '').'/paddocks/';
 $controller = 'Increment\Marketplace\Paddock\Http\PaddockController@';
 Route::post($route.'create', $controller."create");
 Route::post($route.'retrieve', $controller."retrieve");
+Route::post($route.'retrieve_with_spray_mix', $controller."retrieveWithSprayMix");
 Route::post($route.'update', $controller."update");
 Route::post($route.'delete', $controller."delete");
 Route::post($route.'retrieve_batches_and_paddocks', $controller."retrievePaddocksAndBatchesByStatus");
