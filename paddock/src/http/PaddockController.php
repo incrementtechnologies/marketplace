@@ -70,7 +70,9 @@ class PaddockController extends APIController
         $paddockPlan = PaddockPlan::select()->where("paddock_id", "=", $item['id'])->orderBy('start_date','desc')->limit(1)->get();
         if($paddockPlan){
           $this->response['data'][$i]['start_date'] = $paddockPlan[0]['start_date'];
+          // Carbon::createFromFormat('Y-m-d H:i:s', $result[$i]['created_at'])->copy()->tz($this->response['timezone'])->format('F j, Y h:i A');$paddockPlan[0]['start_date'];
           $this->response['data'][$i]['end_date'] = $paddockPlan[0]['end_date'];
+          $this->response['data'][$i]['started'] = $paddockPlan[0]['start_date'];
           $crop = Crop::where("id", "=", $paddockPlan[0]['crop_id'])->get();
           $this->response['data'][$i]['crop_name'] = $crop ? $crop[0]['name'] : null;
         }
