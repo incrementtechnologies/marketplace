@@ -77,6 +77,7 @@ class PaddockController extends APIController
           $this->response['data'][$i]['crop_name'] = $crop ? $crop[0]['name'] : null;
         }
         
+        $this->response['data'][$i]['due_date'] = '2020-12-07';
         $this->response['data'][$i]['machine'] = null; // get the used machine
         $this->response['data'][$i]['operator'] = $this->retrieveName($item['account_id']); // needs to be verified
         $this->response['data'][$i]['creator'] = $this->retrieveName($item['account_id']); // needs to be verified
