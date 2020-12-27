@@ -79,6 +79,7 @@ class PaddockController extends APIController
         
         $this->response['data'][$i]['machine'] = null; // get the used machine
         $this->response['data'][$i]['operator'] = $this->retrieveName($item['account_id']); // needs to be verified
+        $this->response['data'][$i]['creator'] = $this->retrieveName($item['account_id']); // needs to be verified
       }
 
       return $this->response();
