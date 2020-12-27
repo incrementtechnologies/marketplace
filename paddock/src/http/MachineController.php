@@ -49,7 +49,7 @@ class MachineController extends APIController
     }
     
     public function getByMerchantId($merchantId){
-      $result = SprayMix::where('merchant_id', '=', $merchantId)->orderBy('name', 'asc')->get(['name', 'id']);
+      $result = Machine::where('merchant_id', '=', $merchantId)->orderBy('name', 'asc')->get(['name', 'id']);
       return $result;
     }
 }
