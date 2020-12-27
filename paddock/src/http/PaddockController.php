@@ -68,12 +68,13 @@ class PaddockController extends APIController
       for ($i = 0; $i < count($this->response['data']); $i++){
         $item = $this->response['data'][$i];
         $paddockPlan = PaddockPlan::select()->where("paddock_id", "=", $item['id'])->orderBy('start_date','desc')->limit(1)->get();
-        $crop = Crop::where("id", "=", $item['crop_id'])->get();
         if($paddockPlan){
           $this->response['data'][$i]['start_date'] = $paddockPlan[0]['start_date'];
           $this->response['data'][$i]['end_date'] = $paddockPlan[0]['end_date'];
+          $crop = Crop::where("id", "=", $paddockPlan[0]['crop_id'])->get();
+          $this->response['data'][$i]['crop_name'] = $crop ? $crop[0]['name'] : null;
         }
-        $this->response['data'][$i]['crop_name'] = $crop ? $crop[0]['name'] : null;
+        
         $this->response['data'][$i]['machine'] = null; // get the used machine
         $this->response['data'][$i]['operator'] = $this->retrieveName($item['account_id']); // needs to be verified
       }
