@@ -98,8 +98,8 @@ class OrderRequestController extends APIController
     $data = $request->all();
     $this->model = new OrderRequest();
     $this->retrieveDB($data);
-    if(sizeof($result) > 0){
-      $this->response['data'] = $this->manageResultsMobile($result);
+    if(sizeof($this->response['data']) > 0){
+      $this->response['data'] = $this->manageResultsMobile($this->response['data']);
     }
     return $this->response();
   }
