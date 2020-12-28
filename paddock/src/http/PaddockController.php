@@ -73,19 +73,18 @@ class PaddockController extends APIController
         $this->response['data'][$i]['spray_mixes'] = null;
         $this->response['data'][$i]['due_date'] = null;
         $this->response['data'][$i]['machine'] = null; // get the used machine
-        
+        $paddockPlan = PaddockPlan::select()->where("paddock_id", "=", $item['id'])->orderBy('start_date','desc')->limit(1)->get();  
+
         if($paddockPlan){
             $this->response['data'][$i]['start_date'] = $temp !== null ? Carbon::createFromFormat('Y-m-d H:i:s', $temp[0]['created_at'])->copy()->tz($this->response['timezone'])->format('F j, Y H:i A') : null;
             // Carbon::createFromFormat('Y-m-d H:i:s', $result[$i]['created_at'])->copy()->tz($this->response['timezone'])->format('F j, Y h:i A');$paddockPlan[0]['start_date'];
             $this->response['data'][$i]['end_date'] = $temp !== null ? Carbon::createFromFormat('Y-m-d H:i:s', $temp[0]['updated_at'])->copy()->tz($this->response['timezone'])->format('F j, Y H:i A') : null;
             $this->response['data'][$i]['started'] = $paddockPlan[0]['start_date'];
+
             $crop = Crop::where("id", "=", $paddockPlan[0]['crop_id'])->get();
             $this->response['data'][$i]['crop_name'] = $crop ? $crop[0]['name'] : null;
-
-            $paddockPlan = PaddockPlan::select()->where("paddock_id", "=", $item['id'])->orderBy('start_date','desc')->limit(1)->get();
-
+            $paddockPlanTask = PaddockPlanTask::where("paddock_plan_id", "=", $paddockPlan[0]['paddock_id'])->select(['spray_mix_id', 'id', 'paddock_plan_id', 'due_date'])->get();
             if($paddockPlanTask){
-              $paddockPlanTask = PaddockPlanTask::where("paddock_plan_id", "=", $paddockPlan[0]['paddock_id'])->select(['spray_mix_id', 'id', 'paddock_plan_id', 'due_date'])->get();
               $temp = app($this->batchPaddockTaskClass)->retrieveBatchByPaddockPlanTask($paddockPlanTask[0]['id']);
               $this->response['data'][$i]['spray_mixes'] = SprayMix::where('id', '=', $paddockPlanTask[0]['spray_mix_id'])->get(['name', 'id']);
               $this->response['data'][$i]['due_date'] = $paddockPlanTask[0]['due_date'];
