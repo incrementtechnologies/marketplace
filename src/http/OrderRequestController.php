@@ -94,6 +94,16 @@ class OrderRequestController extends APIController
     return $this->response();
   }
 
+  public function retrieveMobileByParams(Request $request){
+    $data = $request->all();
+    $this->model = new OrderRequest();
+    $this->retrieveDB($data);
+    if(sizeof($result) > 0){
+      $this->response['data'] = $this->manageResultsMobile($result);
+    }
+    return $this->response();
+  }
+
   public function manageResultsMobile($result){
     $array = array();
     foreach ($result as $key) { 
