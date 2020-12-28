@@ -8,12 +8,14 @@ use Increment\Marketplace\Paddock\Models\Paddock;
 use Increment\Marketplace\Paddock\Models\Batch;
 use Increment\Marketplace\Paddock\Models\PaddockPlan;
 use Increment\Marketplace\Paddock\Models\PaddockPlanTask;
+use Increment\Marketplace\Paddock\Models\SprayMix;
 use Increment\Marketplace\Paddock\Models\Crop;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
 class PaddockController extends APIController
 {
+    public $batchPaddockTaskClass = 'Increment\Marketplace\Paddock\Http\BatchPaddockTaskController';
     //
     function __construct(){
         $this->model = new Paddock();
@@ -64,20 +66,22 @@ class PaddockController extends APIController
       $data = $request->all();
       $this->model = new Paddock();
       $this->retrieveDB($data);
-      
       for ($i = 0; $i < count($this->response['data']); $i++){
         $item = $this->response['data'][$i];
         $paddockPlan = PaddockPlan::select()->where("paddock_id", "=", $item['id'])->orderBy('start_date','desc')->limit(1)->get();
+        $paddock_plan_tasks = PaddockPlanTask::select()->where("paddock_plan_id", "=", $paddockPlan[0]['paddock_id'])->select('spray_mix_id', 'id', 'paddock_plan_id', 'due_date')->get();
+        $temp = app($this->batchPaddockTaskClass)->retrieveBatchByPaddockPlanTask($paddock_plan_tasks[0]['id']);
         if($paddockPlan){
-          $this->response['data'][$i]['start_date'] = $paddockPlan[0]['start_date'];
-          // Carbon::createFromFormat('Y-m-d H:i:s', $result[$i]['created_at'])->copy()->tz($this->response['timezone'])->format('F j, Y h:i A');$paddockPlan[0]['start_date'];
-          $this->response['data'][$i]['end_date'] = $paddockPlan[0]['end_date'];
-          $this->response['data'][$i]['started'] = $paddockPlan[0]['start_date'];
-          $crop = Crop::where("id", "=", $paddockPlan[0]['crop_id'])->get();
-          $this->response['data'][$i]['crop_name'] = $crop ? $crop[0]['name'] : null;
+            $this->response['data'][$i]['start_date'] = $temp !== null ? Carbon::createFromFormat('Y-m-d H:i:s', $temp[0]['created_at'])->copy()->tz($this->response['timezone'])->format('F j, Y H:i A') : null;
+            // Carbon::createFromFormat('Y-m-d H:i:s', $result[$i]['created_at'])->copy()->tz($this->response['timezone'])->format('F j, Y h:i A');$paddockPlan[0]['start_date'];
+            $this->response['data'][$i]['end_date'] = $temp !== null ? Carbon::createFromFormat('Y-m-d H:i:s', $temp[0]['updated_at'])->copy()->tz($this->response['timezone'])->format('F j, Y H:i A') : null;
+            $this->response['data'][$i]['started'] = $paddockPlan[0]['start_date'];
+            $crop = Crop::where("id", "=", $paddockPlan[0]['crop_id'])->get();
+            $this->response['data'][$i]['crop_name'] = $crop ? $crop[0]['name'] : null;
         }
-        
-        $this->response['data'][$i]['due_date'] = '2020-12-07';
+        // dd($paddock_plan_tasks);
+        $this->response['data'][$i]['spray_mixes'] = SprayMix::where('id', '=', $paddock_plan_tasks[0]['spray_mix_id'])->get(['name', 'id']);
+        $this->response['data'][$i]['due_date'] = $paddock_plan_tasks[0]['due_date'];
         $this->response['data'][$i]['machine'] = null; // get the used machine
         $this->response['data'][$i]['operator'] = $this->retrieveName($item['account_id']); // needs to be verified
         $this->response['data'][$i]['creator'] = $this->retrieveName($item['account_id']); // needs to be verified
