@@ -28,4 +28,13 @@ class PaddockPlanTaskController extends APIController
         }
         return $this->response();
     }
+
+    public function retrieveTaskByPaddock($paddockPlanId){
+        $result = PaddockPlanTask::where('paddock_plan_id', '=', $paddockPlanId)->get(['spray_mix_id', 'id', 'paddock_plan_id', 'due_date']);
+        if(sizeof($result) > 0){
+            return $result;
+        }else{
+            return null;
+        }
+    }
 }

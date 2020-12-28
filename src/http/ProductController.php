@@ -202,11 +202,22 @@ class ProductController extends APIController
 
     public function getProductByParamsOrderDetails($column, $value){
       $result = Product::where($column, '=', $value)->get(['id', 'code', 'type', 'title', 'merchant_id']);
-      dd($value);
       if(sizeof($result) > 0){
         $i= 0;
         foreach ($result as $key) {
           $result[$i]['merchant'] = app($this->merchantController)->getByParamsProduct('id', $result[$i]['merchant_id']);
+          $result[$i]['variation'] = app($this->productAttrController)->getByParams('product_id', $result[$i]['id']);
+          $result[$i]['qty'] = app($this->transferClasss)->getQtyTransferred($result[$i]['merchant_id'], $result[$i]['id']);
+         } 
+      }
+      return sizeof($result) > 0 ? $result : null;      
+    }
+
+    public function getProductName($column, $value){
+      $result = Product::where($column, '=', $value)->get(['id', 'code', 'type', 'title', 'merchant_id']);
+      if(sizeof($result) > 0){
+        $i= 0;
+        foreach ($result as $key) {
           $result[$i]['variation'] = app($this->productAttrController)->getByParams('product_id', $result[$i]['id']);
           $result[$i]['qty'] = app($this->transferClasss)->getQtyTransferred($result[$i]['merchant_id'], $result[$i]['id']);
          } 
