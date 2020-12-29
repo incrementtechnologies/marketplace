@@ -65,7 +65,7 @@ class SprayMixController extends APIController
   }
 
   public function getByMerchantId($merchantId){
-    $result = SprayMix::where('merchant_id', '=', $merchantId)->orderBy('name', 'asc')->get(['name', 'id']);
+    $result = SprayMix::where('merchant_id', '=', $merchantId)->orderBy('name', 'asc')->get();
     return $result;
   }
   
