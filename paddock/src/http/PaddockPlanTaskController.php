@@ -11,8 +11,8 @@ use Carbon\Carbon;
 class PaddockPlanTaskController extends APIController
 {
   
-  $paddockClass = 'Increment\Marketplace\Paddock\Http\PaddockController';
-  $sprayMixClass = 'Increment\Marketplace\Paddock\Http\SprayMixController';
+  public $paddockClass = 'Increment\Marketplace\Paddock\Http\PaddockController';
+  public $sprayMixClass = 'Increment\Marketplace\Paddock\Http\SprayMixController';
 
   function __construct(){
     $this->model = new PaddockPlanTask();
