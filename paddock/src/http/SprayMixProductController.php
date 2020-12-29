@@ -54,7 +54,7 @@ class SprayMixProductController extends APIController
     $this->retrieveDB($data);
     for ($i=0; $i < count($this->response['data']); $i++){
       $item = $this->response['data'][$i];
-      $this->response['data'][$i]['product'] = app($this->productClass)->getProductName('id', $sprayMixProduct[$k]['product_id']);
+      $this->response['data'][$i]['product'] = app($this->productClass)->getProductName('id', $item['product_id']);
     }
     return $this->response();
   }
