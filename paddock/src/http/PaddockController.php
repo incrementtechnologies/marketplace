@@ -139,7 +139,7 @@ class PaddockController extends APIController
 
   public function getByParams($column, $value, $columns){
     $result = Paddock::where($column, '=', $value)->get($columns);
-    return sizeof($result) > ? $result[0] : null;
+    return sizeof($result) > 0 ? $result[0] : null;
   }
 
 }
