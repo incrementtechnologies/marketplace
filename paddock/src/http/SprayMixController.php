@@ -112,9 +112,9 @@ class SprayMixController extends APIController
     }
     return $this->response();
   }
-  
+
   public function getByParams($column, $value, $columns){
     $result = SprayMix::where($column, '=', $value)->get($columns);
-    return sizeof($result) > ? $result[0] : null;
+    return sizeof($result) > 0 ? $result[0] : null;
   }
 }
