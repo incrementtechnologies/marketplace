@@ -60,6 +60,7 @@ Route::post($route.'retrieve', $controller."retrieve");
 Route::post($route.'update', $controller."update");
 Route::post($route.'delete', $controller."delete");
 Route::post($route.'retrieve_mix_products', $controller."retrieveSprayMixProducts");
+Route::post($route.'retrieve_by_params', $controller."retrieveByParams");
 Route::post($route.'retrieve_details', $controller."retrieveDetails");
 Route::get($route.'test', $controller."test");
 
