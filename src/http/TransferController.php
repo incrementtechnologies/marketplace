@@ -415,16 +415,40 @@ class TransferController extends APIController
       ->orderBy($con['column'], $data['sort'][$con['column']])
       ->get(['T1.*', 'T2.title']);
     }else if($productType == 'all'){
-      // dd($data['sort'][$con['column']]);
-      $data['offset'] = isset($data['offset']) ? $data['offset'] : 0;
-      $data['limit'] = isset($data['offset']) ? $data['limit'] : 5;
-      $result = DB::table('transferred_products as T1')
-      ->join('products as T2', 'T2.id', '=', 'T1.product_id')
-      ->where('T1.merchant_id', '=', $data['merchant_id'])
-      ->where('T1.status', '=', 'active')
-      ->where($con['column'], 'like', $con['value'])
-      ->orderBy($con['column'], $data['sort'][$con['column']])
-      ->get(['T1.*', 'T2.title']);
+      if(isset($data['tags'])){
+        if($data['tags'] == 'other'){
+          dd('tags');
+          $result = DB::table('transferred_products as T1')
+          ->join('products as T2', 'T2.id', '=', 'T1.product_id')
+          ->where('T1.merchant_id', '=', $data['merchant_id'])
+          ->where('T1.status', '=', 'active')
+          ->where('T2.tags', 'not like', 'herbicide')
+          ->orWhere('T2.tags', 'not like', 'fungicide')
+          ->orWhere('T2.tags', 'not like', 'insecticide')
+          ->where($con['column'], 'like', $con['value'])
+          ->orderBy($con['column'], $data['sort'][$con['column']])
+          ->get(['T1.*', 'T2.title']);
+        }else{
+          $result = DB::table('transferred_products as T1')
+          ->join('products as T2', 'T2.id', '=', 'T1.product_id')
+          ->where('T1.merchant_id', '=', $data['merchant_id'])
+          ->where('T1.status', '=', 'active')
+          ->where('T2.tags', 'like', $data['tags'])
+          ->where($con['column'], 'like', $con['value'])
+          ->orderBy($con['column'], $data['sort'][$con['column']])
+          ->get(['T1.*', 'T2.title']);
+        }
+      }else{
+        $data['offset'] = isset($data['offset']) ? $data['offset'] : 0;
+        $data['limit'] = isset($data['offset']) ? $data['limit'] : 5;
+        $result = DB::table('transferred_products as T1')
+        ->join('products as T2', 'T2.id', '=', 'T1.product_id')
+        ->where('T1.merchant_id', '=', $data['merchant_id'])
+        ->where('T1.status', '=', 'active')
+        ->where($con['column'], 'like', $con['value'])
+        ->orderBy($con['column'], $data['sort'][$con['column']])
+        ->get(['T1.*', 'T2.title']);
+      }
     }else{
        // dd($data['sort'][$con['column']]);
        $data['offset'] = isset($data['offset']) ? $data['offset'] : 0;
