@@ -104,7 +104,7 @@ class SprayMixController extends APIController
                 $res[$i]['min_rate'] = $key['minimum_rate'];
                 $res[$i]['application_rate'] = $key['application_rate'];
                 $res[$i]['short_description'] = $key['short_description'];
-                $res[$i]['types'] = $getCropName;
+                $res[$i]['type'] = $getCropName;
                 $i++;
 
             }
