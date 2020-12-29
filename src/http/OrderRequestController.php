@@ -82,6 +82,50 @@ class OrderRequestController extends APIController
     return $array;
   }
 
+
+  public function retrieveMobile(Request $request){
+    $data = $request->all();
+    $con = $data['condition'];
+    $result = OrderRequest::where($con[0]['column'], $con[0]['clause'], $con[0]['value'])->get();
+    if(sizeof($result) > 0){
+      $this->response['data'] = $this->manageResultsMobile($result);
+    }
+    $this->response['size'] = OrderRequest::where($data['condition'][0]['column'], '=', $data['condition'][0]['value'])->count();
+    return $this->response();
+  }
+
+  public function retrieveMobileByParams(Request $request){
+    $data = $request->all();
+    $this->model = new OrderRequest();
+    $this->retrieveDB($data);
+    if(sizeof($this->response['data']) > 0){
+      $this->response['data'] = $this->manageResultsMobile($this->response['data']);
+    }
+    return $this->response();
+  }
+
+  public function manageResultsMobile($result){
+    $array = array();
+    foreach ($result as $key) { 
+      $item = array(
+        'merchant' => app($this->merchantClass)->getColumnByParams('id', $key['merchant_to'], ['name', 'address', 'id']),
+        'merchant_from' => app($this->merchantClass)->getColumnByParams('id', $key['merchant_id'], ['name', 'address', 'id']),
+        'date_of_delivery'  => Carbon::createFromFormat('Y-m-d H:i:s', $key['date_of_delivery'])->copy()->tz($this->response['timezone'])->format('F j, Y'),
+        'status'        => $key['status'],
+        'delivered_by'  => $key['delivered_by'] ? $this->retrieveName($key['delivered_by']) : null,
+        'delivered_date'=> $key['date_delivered'] ? Carbon::createFromFormat('Y-m-d H:i:s', $key['date_delivered'])->copy()->tz($this->response['timezone'])->format('F j, Y H:i:s') : null,
+        'code'          => $key['code'],
+        'added_by'      => $key['code'],
+        'id'      => $key['id'],
+        'order_number'      => $key['order_number'],
+        'daily_loading_list' => app($this->dailyLoadingListClass)->checkIfExist('order_request_id', $key['id']),
+        'daily_loading_list_id' => isset($key['daily_loading_list_id']) ? $key['daily_loading_list_id'] : null
+      );
+      $array[] = $item;
+    }
+    return $array;
+  }
+
   public function retrieveSecondLevel(Request $request){
     $data = $request->all();
     $con = $data['condition'];
