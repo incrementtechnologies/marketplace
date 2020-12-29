@@ -36,7 +36,6 @@ class SprayMixController extends APIController
 
     public function retrieveRescent(Request $request){
         $data = $request->all();
-
         // $result = DB::table('batches as T1')
         //         ->leftJoin('machines as T2', 'T2.id', '=', 'T1.machine_id')
         //         ->leftJoin('spray_mixes as T3', 'T3.id', '=', 'T1.spray_mix_id')
@@ -100,5 +99,11 @@ class SprayMixController extends APIController
         }
         return $this->response();
     }
-
+    public function retrieveOne(Request $request){
+        $data = $request->all();
+        $res = SprayMix::where('id', '=', $data['id'])->get();
+        $getCropName = app($this->cropClass)->retrieveCrops($res[0]['crops']);
+        $res[0]['type'] = $getCropName;
+        return response()->json(compact('res'));
+    }
 }

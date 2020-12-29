@@ -43,6 +43,7 @@ $route = env('PACKAGE_ROUTE', '').'/spray_mixes/';
 $controller = 'Increment\Marketplace\Paddock\Http\SprayMixController@';
 Route::post($route.'create', $controller."create");
 Route::post($route.'retrieve', $controller."retrieve");
+Route::post($route.'retrieve_one', $controller."retrieveOne");
 Route::post($route.'retrieve_details', $controller."retrieveDetails");
 Route::post($route.'retrieve_rescent', $controller."retrieveRescent");
 Route::post($route.'update', $controller."update");
@@ -58,6 +59,7 @@ Route::post($route.'retrieve', $controller."retrieve");
 Route::post($route.'update', $controller."update");
 Route::post($route.'delete', $controller."delete");
 Route::post($route.'retrieve_details', $controller."retrieveDetails");
+Route::post($route.'retrieve_one_details', $controller."retrieveOneDetails");
 Route::get($route.'test', $controller."test");
 
 //Batches
