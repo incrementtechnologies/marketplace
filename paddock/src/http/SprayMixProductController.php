@@ -38,8 +38,9 @@ class SprayMixProductController extends APIController
                     ->leftJoin("spray_mixes AS T3", "T1.spray_mix_id", "=", "T3.id")
                     ->where("T3.id", "=", $data['id'])
                     ->get();
+        return response()->json(compact('result'));
     }
-    
+
     public function retrieveSprayMixProducts(Request $request){
         $data = $request->all();
         $sprayMix = SprayMix::where('id', '=', $data['mix_id'])->get();

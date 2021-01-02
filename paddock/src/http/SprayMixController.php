@@ -95,8 +95,8 @@ class SprayMixController extends APIController
             $i = 0;
             $getCropName = null;
             foreach ($tempData as $key) {
+                // dd($key->crops);
                 $getCropName = app($this->cropClass)->retrieveCrops($key->crops);
-                $res[$i]['type'] = $getCropName;
                 $res[$i]['name'] = $key['name'];
                 $res[$i]['id'] = $key['id'];
                 $res[$i]['status'] = $key['status'];
@@ -104,11 +104,13 @@ class SprayMixController extends APIController
                 $res[$i]['min_rate'] = $key['minimum_rate'];
                 $res[$i]['application_rate'] = $key['application_rate'];
                 $res[$i]['short_description'] = $key['short_description'];
+                $res[$i]['types'] = $getCropName;
                 $i++;
 
             }
             $this->response['data'] = $res;
         }
+        // dd($this->response);
         return $this->response();
     }
     public function retrieveOne(Request $request){
