@@ -29,4 +29,13 @@ class PaddockPlanController extends APIController
         }
         return $this->response();
     }
+
+    public function retrievePaddockPlanById($paddockPlanId){
+        $result = PaddockPlan::where('id', '=', $paddockPlanId)->get();
+        if(sizeof($result) > 0){
+            return $result;
+        }else{
+            return null;
+        }
+    }
 }

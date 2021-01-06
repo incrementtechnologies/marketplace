@@ -25,6 +25,7 @@ $route = env('PACKAGE_ROUTE', '').'/paddock_plan_tasks/';
 $controller = 'Increment\Marketplace\Paddock\Http\PaddockPlanTaskController@';
 Route::post($route.'create', $controller."create");
 Route::post($route.'retrieve', $controller."retrieve");
+Route::post($route.'retrieve_available_paddocks', $controller."retrieveAvailablePaddocks");
 Route::post($route.'update', $controller."update");
 Route::post($route.'delete', $controller."delete");
 Route::get($route.'test', $controller."test");
