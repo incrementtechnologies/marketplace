@@ -34,4 +34,14 @@ class CropController extends APIController
 
         return $tempResult;
     }
+
+    public function retrieveCropById($id){
+        $result = Crop::where('id', '=', $id)->get();
+
+        if($result > 0){
+            return $result;
+        }else{
+            return null;
+        }
+    }
 }
