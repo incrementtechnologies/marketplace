@@ -14,20 +14,31 @@ class SprayMixProductController extends APIController
     public $productClass = 'Increment\Marketplace\Http\ProductController';
     //
     function __construct(){
-        $this->model = new SprayMixProduct();
-        $this->notRequired = array();
+      $this->model = new SprayMixProduct();
+      $this->notRequired = array();
     }
 
     public function retrieveDetails(Request $request){
+      $data = $request->all();
+      $result = DB::table("spray_mix_products AS T1")
+                ->select("T1.rate","T1.status","T1.created_at AS spray_mix_prod_created", "T2.title AS product_name", "T3.application_rate", "T3.minimum_rate", "T3.maximum_rate", "T3.name AS spray_mix_name")
+                ->leftJoin("products AS T2", "T1.product_id", "=", "T2.id")
+                ->leftJoin("spray_mixes AS T3", "T1.spray_mix_id", "=", "T3.id")
+                ->where("T1.id", "=", $data['id'])
+                ->get();
+      $this->response['data'] = $result;
+      return $this->response();
+    }
+
+    public function retrieveOneDetails(Request $request){
         $data = $request->all();
         $result = DB::table("spray_mix_products AS T1")
-                    ->select("T1.rate","T1.status","T1.created_at AS spray_mix_prod_created", "T2.title AS product_name", "T3.application_rate", "T3.minimum_rate", "T3.maximum_rate", "T3.name AS spray_mix_name")
+                    ->select("T1.rate","T1.status","T1.created_at AS spray_mix_prod_created", "T2.title AS product_name", "T2.tags", "T3.application_rate", "T3.minimum_rate", "T3.maximum_rate", "T3.name AS spray_mix_name")
                     ->leftJoin("products AS T2", "T1.product_id", "=", "T2.id")
                     ->leftJoin("spray_mixes AS T3", "T1.spray_mix_id", "=", "T3.id")
-                    ->where("T1.id", "=", $data['id'])
+                    ->where("T3.id", "=", $data['id'])
                     ->get();
-        $this->response['data'] = $result;
-        return $this->response();
+        return response()->json(compact('result'));
     }
 
     public function retrieveSprayMixProducts(Request $request){
@@ -46,5 +57,20 @@ class SprayMixProductController extends APIController
         }
         $this->response['data'] = $result;
         return $this->response();
+    // }
+    // $this->response['data'] = $result;
+    // return $this->response();
+  }
+
+  public function retrieveByParams(Request $request){
+    $data = $request->all();
+    $this->model = new SprayMixProduct();
+    $this->retrieveDB($data);
+    for ($i=0; $i < count($this->response['data']); $i++){
+      $item = $this->response['data'][$i];
+      $product = app($this->productClass)->getProductName('id', $item['product_id']);
+      $this->response['data'][$i]['product'] = sizeof($product) > 0 ? $product[0] : null;
     }
+    return $this->response();
+  }
 }

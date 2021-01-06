@@ -201,6 +201,7 @@ Route::post($route.'retrieve_by_level', $controller."retrieveSecondLevel");
 Route::post($route.'retrieve_all', $controller."retrieveAllOrders");
 Route::post($route.'retrieve_order_details', $controller."retreiveOrderDetails");
 Route::post($route.'retrieve_orders', $controller."retrieveMobile");
+Route::post($route.'retrieve_orders_by_params', $controller."retrieveMobileByParams");
 Route::post($route.'new_update', $controller."newUpdate");
 Route::post($route.'update', $controller."update");
 Route::post($route.'delete', $controller."delete");
