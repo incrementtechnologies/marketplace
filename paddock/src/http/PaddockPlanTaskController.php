@@ -71,7 +71,7 @@ class PaddockPlanTaskController extends APIController
                 ->leftJoin('paddocks as T2', 'T1.paddock_id', '=', 'T2.id')
                 ->leftJoin('paddock_plans as T3', 'T3.id', '=', 'T1.paddock_plan_id')
                 ->leftJoin('crops as T4', 'T4.id', '=', 'T3.crop_id')
-                ->where('T1.spray_mix_id', '=', $data['spraymix_id'])
+                ->where('T1.spray_mix_id', '=', $data['spray_mix_id'])
                 ->where('T2.merchant_id', $data['merchant_id'])
                 ->get();
         dd($result);
