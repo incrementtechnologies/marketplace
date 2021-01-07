@@ -66,15 +66,26 @@ class PaddockPlanTaskController extends APIController
 
     public function retrieveAvailablePaddocks(Request $request){
         $data = $request->all();
+        $returnResult = array();
         $result = DB::table('paddock_plans_tasks as T1')
                 ->leftJoin('paddocks as T2', 'T1.paddock_id', '=', 'T2.id')
                 ->leftJoin('paddock_plans as T3', 'T3.id', '=', 'T1.paddock_plan_id')
                 ->leftJoin('crops as T4', 'T4.id', '=', 'T3.crop_id')
-                ->where('T1.spray_mix_id', '=', $data['spraymix_id'])
+                ->where('T1.spray_mix_id', '=', $data['spray_mix_id'])
                 ->where('T2.merchant_id', $data['merchant_id'])
                 ->get();
+        dd($result);
         if(sizeof($result) > 0){
-            $this->response['data'] = $result;
+            $tempRes = json_decode(json_encode($result), true);
+            $i = 0;
+            foreach ($tempRes as $key) {
+                $tempRes[$i]['remaining_area'] = $tempRes[$i]['area'];
+                $tempRes[$i]['partial'] = false;
+                $tempRes[$i]['partial_flag'] = false;
+
+                $i++;
+            }
+            $this->response['data'] = $tempRes;
         }else{
             return $this->response['data'] = [];
         }
