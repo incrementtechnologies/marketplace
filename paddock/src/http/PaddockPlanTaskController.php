@@ -74,7 +74,6 @@ class PaddockPlanTaskController extends APIController
                 ->where('T1.spray_mix_id', '=', $data['spray_mix_id'])
                 ->where('T2.merchant_id', $data['merchant_id'])
                 ->get();
-        dd($result);
         if(sizeof($result) > 0){
             $tempRes = json_decode(json_encode($result), true);
             $i = 0;
