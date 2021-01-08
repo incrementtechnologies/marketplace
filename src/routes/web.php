@@ -53,6 +53,7 @@ Route::post($route.'create', $controller."create");
 Route::post($route.'retrieve', $controller."retrieve");
 Route::post($route.'retrieve_basic', $controller."retrieveBasic");
 Route::post($route.'retrieve_mobile', $controller."retrieveMobile");
+Route::post($route.'retrieve_with_order_number', $controller."retrieveWithOrderNumber");
 Route::post($route.'update', $controller."update");
 Route::post($route.'delete', $controller."delete");
 Route::post($route.'file_upload', $controller."fileUpload");

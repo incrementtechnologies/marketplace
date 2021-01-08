@@ -93,6 +93,22 @@ class ProductController extends APIController
       return $this->response();
     }
 
+     public function retrieveWithOrderNumber(Request $request){
+      $data = $request->all();
+      $inventoryType = $data['inventory_type'];
+      $accountId = $data['account_id'];
+      $this->model = new Product();
+      $this->retrieveDB($data);
+      $this->response['data'] = $this->manageResultBasic($this->response['data'], null, $inventoryType);
+      $result = $this->response['data'];
+
+      if(sizeof($result) > 0){
+        $this->response['data'][0]['product_trace'] = app($this->transferClasss)->getProductTraceByOrderId($data['order_request_id'], $result[0]['id']);
+      }
+      
+      return $this->response();
+    }
+
     public function getRemainingQty($id){
       $issued = intval(app($this->checkoutItemController)->getQty('product', $id));
       $total = intval(app($this->inventoryController)->getQty($id));

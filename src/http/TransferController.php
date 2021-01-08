@@ -697,4 +697,18 @@ class TransferController extends APIController
       $this->retrieveDB($data);
       return $this->response();
     }
+
+    public function getProductTraceByOrderId($orderRequestId, $productId){
+      $result = DB::table('transfers as T1')
+      ->join('transferred_products as T2', 'T2.transfer_id', '=', 'T1.id')
+      ->where('T1.order_request_id', '=', $orderRequestId)
+      ->where('T2.product_id', '=', $productId)
+      ->limit(1)
+      ->get(['T2.payload_value']);
+      if($result){
+        return app($this->productTraceClass)->getByParams('id', $result[0]->payload_value)
+      }else{
+        return null;
+      }
+    }
 }
