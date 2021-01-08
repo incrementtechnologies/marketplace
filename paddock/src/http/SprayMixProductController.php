@@ -74,9 +74,7 @@ class SprayMixProductController extends APIController
       $this->response['data'][$i]['product'] = sizeof($product) > 0 ? $product[0] : null;
     }
     if(isset($data['condition']) && $data['condition'][0]['column'] == 'spray_mix_id'){
-      echo json_encode($data['condition'][0]['value']);
-      $result = app($this->sprayMixClass)->getByParams('id', intval($data['condition'][0]['value']), ['id', 'merchant_id', 'name', 'short_description', 'application_rate', 'minimum_rate', 'maximum_rate', 'status', 'created_at']);
-      echo json_encode($result);
+      $result = app($this->sprayMixClass)->getByParamsDefault('id', intval($data['condition'][0]['value']);
       $this->response['spray_mix'] = $result;
     }
     return $this->response();
