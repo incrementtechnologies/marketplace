@@ -70,19 +70,13 @@ class SprayMixProductController extends APIController
     $this->response['spray_mix'] = null;
     for ($i=0; $i < count($this->response['data']); $i++){
       $item = $this->response['data'][$i];
-      
-      if($i == 0){
-        echo $item['spray_mix_id'];
-        $sprayMix = SprayMix::where('id', '=', intval($item['spray_mix_id']))->get();
-        $this->response['data'][$i]['spray_mix'] = sizeof($sprayMix) > 0 ? $sprayMix[0] : null;
-      }
       $product = app($this->productClass)->getProductName('id', $item['product_id']);
       $this->response['data'][$i]['product'] = sizeof($product) > 0 ? $product[0] : null;
     }
-    // if(isset($data['condition']) && $data['condition'][0]['column'] == 'spray_mix_id'){
-    //   $result = app($this->sprayMixClass)->getByParamsDefault('id', intval($data['condition'][0]['value']));
-    //   $this->response['spray_mix'] = $result;
-    // }
+    if(isset($data['condition']) && $data['condition'][0]['column'] == 'spray_mix_id'){
+      $result = app($this->sprayMixClass)->getByParamsDefault('id', intval($data['condition'][0]['value']));
+      $this->response['spray_mix'] = $result;
+    }
     return $this->response();
   }
 }
