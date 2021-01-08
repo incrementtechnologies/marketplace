@@ -102,7 +102,7 @@ class ProductController extends APIController
       $this->response['data'] = $this->manageResultBasic($this->response['data'], null, $inventoryType);
       $result = $this->response['data'];
 
-      if(sizeof($result) > 0){
+      if(sizeof($result) > 0 && $data['order_request_id'] != null){
         $this->response['data'][0]['product_trace'] = app($this->transferClasss)->getProductTraceByOrderId($data['order_request_id'], $result[0]['id']);
       }
       
