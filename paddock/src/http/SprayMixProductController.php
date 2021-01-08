@@ -12,7 +12,7 @@ use Carbon\Carbon;
 class SprayMixProductController extends APIController
 {
     public $productClass = 'Increment\Marketplace\Http\ProductController';
-    public $sprayMixClass = 'Increment\Marketplace\Http\SprayMixController';
+    public $sprayMixClass = 'Increment\Marketplace\Paddock\Http\SprayMixController';
     //
     function __construct(){
       $this->model = new SprayMixProduct();
