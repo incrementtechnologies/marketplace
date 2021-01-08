@@ -83,7 +83,7 @@ class PaddockController extends APIController
           $this->response['data'][$i]['started'] = $paddockPlan[0]['start_date'];
           $crop = Crop::where("id", "=", $paddockPlan[0]['crop_id'])->get();
           $this->response['data'][$i]['crop_name'] = sizeof($crop) > 0 ? $crop[0]['name'] : null;
-          $paddockPlanTask = PaddockPlanTask::where("paddock_plan_id", "=", $paddockPlan[0]['paddock_id'])->get(['spray_mix_id', 'id', 'paddock_plan_id', 'due_date']);
+          $paddockPlanTask = PaddockPlanTask::where("paddock_plan_id", "=", $paddockPlan[0]['id'])->get();
           if($paddockPlanTask && sizeof($paddockPlanTask) > 0){
             $temp = app($this->batchPaddockTaskClass)->retrieveBatchByPaddockPlanTask($paddockPlanTask[0]['id']);
             $this->response['data'][$i]['spray_mix'] = app($this->sprayMixClass)->getByParamsDefault('id', '=', $paddockPlanTask[0]['spray_mix_id']);
