@@ -12,6 +12,7 @@ use Carbon\Carbon;
 class SprayMixProductController extends APIController
 {
     public $productClass = 'Increment\Marketplace\Http\ProductController';
+    public $sprayMixClass = 'Increment\Marketplace\Http\SprayMixController';
     //
     function __construct(){
       $this->model = new SprayMixProduct();
@@ -66,10 +67,14 @@ class SprayMixProductController extends APIController
     $data = $request->all();
     $this->model = new SprayMixProduct();
     $this->retrieveDB($data);
+    $this->response['spray_mix'] = null;
     for ($i=0; $i < count($this->response['data']); $i++){
       $item = $this->response['data'][$i];
       $product = app($this->productClass)->getProductName('id', $item['product_id']);
       $this->response['data'][$i]['product'] = sizeof($product) > 0 ? $product[0] : null;
+    }
+    if(isset($data['condition']) && $data['condition'][0]['column'] == 'spray_mix_id'){
+      $this->response['spray_mix'] = app($this->sprayMixClass)->getByParams('id', $data['condition'][0]['value']);
     }
     return $this->response();
   }
