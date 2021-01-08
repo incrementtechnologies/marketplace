@@ -706,7 +706,7 @@ class TransferController extends APIController
       ->limit(1)
       ->get(['T2.payload_value']);
       if($result){
-        return app($this->productTraceClass)->getByParams('id', $result[0]->payload_value)
+        return app($this->productTraceClass)->getByParamsWithoutLimit('id', $result[0]->payload_value)
       }else{
         return null;
       }
