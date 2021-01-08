@@ -74,7 +74,7 @@ class SprayMixProductController extends APIController
       if($i == 0){
         echo $item['spray_mix_id'];
         $sprayMix = SprayMix::where('id', '=', intval($item['spray_mix_id']))->get();
-        $this->response['spray_mix'] = sizeof($sprayMix) > 0 ? $sprayMix[0] : null;
+        $this->response['data'][$i]['spray_mix'] = sizeof($sprayMix) > 0 ? $sprayMix[0] : null;
       }
       $product = app($this->productClass)->getProductName('id', $item['product_id']);
       $this->response['data'][$i]['product'] = sizeof($product) > 0 ? $product[0] : null;
