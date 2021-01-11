@@ -40,7 +40,19 @@ class SprayMixProductController extends APIController
                     ->where("T3.id", "=", $data['id'])
                     ->whereNull('T1.deleted_at')
                     ->get();
-        return response()->json(compact('result'));
+        $tempRes = json_decode(json_encode($result), true);
+        if(sizeof($tempRes) > 0){
+          $i = 0;
+          foreach ($tempRes as $key) {
+            $tempRes[$i]['application_rate'] = $tempRes[$i]['application_rate'].' '.'L/ha';
+            $tempRes[$i]['minimum_rate'] = $tempRes[$i]['minimum_rate'].' '.'L/ha';
+            $tempRes[$i]['maximum_rate'] = $tempRes[$i]['maximum_rate'].' '.'L/ha';
+
+            $i++;
+          }
+          $this->response['data'] = $tempRes;
+        }
+        return $this->response();
     }
 
     public function retrieveSprayMixProducts(Request $request){
