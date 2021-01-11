@@ -133,6 +133,9 @@ class SprayMixController extends APIController
 
   public function getByParamsDefault($column, $value){
     $result = SprayMix::where($column, '=', $value)->get();
+    $result[0]['application_rate'] = $result[0]['application_rate'].' '.'L/ha';
+    $result[0]['minimum_rate'] = $result[0]['minimum_rate'].' '.'L/ha';
+    $result[0]['maximum_rate'] = $result[0]['maximum_rate'].' '.'L/ha';
     return sizeof($result) > 0 ? $result[0] : null;
   }
 }

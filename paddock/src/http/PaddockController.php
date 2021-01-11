@@ -83,6 +83,8 @@ class PaddockController extends APIController
       $paddockPlan = PaddockPlan::select()->where("paddock_id", "=", $item['id'])->orderBy('start_date','desc')->limit(1)->get();  
 
       if($paddockPlan){
+        $this->response['data'][$i]['arable_area'] = $this->response['data'][$i]['arable_area'].' '.'Ha';
+        $this->response['data'][$i]['spray_area'] = $this->response['data'][$i]['spray_area'].' '.'Ha';
         $this->response['data'][$i]['started'] = $paddockPlan[0]['start_date'];
         $crop = Crop::where("id", "=", $paddockPlan[0]['crop_id'])->get();
         $this->response['data'][$i]['crop_name'] = sizeof($crop) > 0 ? $crop[0]['name'] : null;
