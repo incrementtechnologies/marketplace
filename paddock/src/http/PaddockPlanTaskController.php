@@ -78,7 +78,7 @@ class PaddockPlanTaskController extends APIController
             $tempRes = json_decode(json_encode($result), true);
             $i = 0;
             foreach ($tempRes as $key) {
-                $tempRes[$i]['remaining_area'] = $tempRes[$i]['area'];
+                $tempRes[$i]['remaining_area'] = $tempRes[$i]['area'].' '.'Ha';
                 $tempRes[$i]['partial'] = false;
                 $tempRes[$i]['partial_flag'] = false;
 
