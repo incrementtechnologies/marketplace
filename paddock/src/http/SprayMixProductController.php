@@ -38,6 +38,7 @@ class SprayMixProductController extends APIController
                     ->leftJoin("products AS T2", "T1.product_id", "=", "T2.id")
                     ->leftJoin("spray_mixes AS T3", "T1.spray_mix_id", "=", "T3.id")
                     ->where("T3.id", "=", $data['id'])
+                    ->whereNull('T1.deleted_at')
                     ->get();
         return response()->json(compact('result'));
     }
