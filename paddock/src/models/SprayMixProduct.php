@@ -6,5 +6,5 @@ use App\APIModel;
 class SprayMixProduct extends APIModel
 {
     protected $table = 'spray_mix_products';
-    protected $fillable = ['spray_mix_id', 'product_id', 'rate', 'status'];
+    protected $fillable = ['spray_mix_id', 'product_id', 'rate', 'status', 'units'];
 }

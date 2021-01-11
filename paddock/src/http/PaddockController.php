@@ -27,11 +27,13 @@ class PaddockController extends APIController
 
   public function retrieve(Request $request){
     $data = $request->all();
+    // dd($data);
     if (isset($data['id'])) {
         $result = Paddock::where("id", "=", $data['id'])
                 ->where("merchant_id", "=", $data['merchant_id'])
                 ->where("status", "=", $data['status'])
                 ->get();
+        $result['area'] = $result['area'].' '.'Ha';
         $result['paddock_data'] = PaddockPlan::select()->where("paddock_id", "=", $data['id'])->orderBy('start_date','desc')->limit(2)->get();
         $paddock_plan_tasks = PaddockPlanTask::select()->where("paddock_plan_id", "=", $result['paddock_data'][0]['id'])->get();
         $result['paddock_data'][0]['paddock_tasks_data'] = $paddock_plan_tasks;
@@ -48,7 +50,8 @@ class PaddockController extends APIController
             $paddock_id = $this->response['data'][$i]['id'];
             $paddock_data = PaddockPlan::select()->where('paddock_id', '=', $paddock_id)->orderBy('start_date','desc')->limit(2)->get();
             for ($x = 0; $x < count($paddock_data); $x++){
-                $paddock_plan_tasks = PaddockPlanTask::select()->where("paddock_plan_id", "=", $paddock_data[$x]['id'])->get();
+              $paddock_plan_tasks = PaddockPlanTask::select()->where("paddock_plan_id", "=", $paddock_data[$x]['id'])->get();
+                $this->response['data'][$x]['area'] = $this->response['data'][$x]['area'].' '.'Ha';
                 if (count($paddock_plan_tasks) > 0){
                     $paddock_data[$x]['paddock_tasks_data'] = $paddock_plan_tasks;
                 }
