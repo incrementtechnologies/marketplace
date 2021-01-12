@@ -123,6 +123,9 @@ class SprayMixController extends APIController
     $res = SprayMix::where('id', '=', $data['id'])->get();
     $getCropName = app($this->cropClass)->retrieveCrops($res[0]['crops']);
     $res[0]['type'] = $getCropName;
+    $res[0]['minimum_rate'] = $res[0]['minimum_rate'].' '.'L/ha';
+    $res[0]['application_rate'] = $res[0]['application_rate'].' '.'L/ha';
+    $res[0]['maximum_rate'] = $res[0]['maximum_rate'].' '.'L/ha';
     return response()->json(compact('res'));
   }
 
