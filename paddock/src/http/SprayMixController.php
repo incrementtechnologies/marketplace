@@ -128,7 +128,7 @@ class SprayMixController extends APIController
     $res[0]['application_rate'] = (int)$res[0]['application_rate'];
     $res[0]['maximum_rate'] = (int)$res[0]['maximum_rate'];
     $res[0]['units'] = 'L/ha';
-    return $this->response();
+    return response()->json(compact('res'));
   }
 
   public function getByParams($column, $value, $columns){
