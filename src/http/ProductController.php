@@ -182,7 +182,7 @@ class ProductController extends APIController
     }
 
     public function getProductTitleWithTags($column, $value){
-      $result = Product::where($column, '=', $value)->select('title', 'tags')->get();
+      $result = Product::where($column, '=', $value)->select('title', 'tags', 'merchant_id', 'description')->get();
       return sizeof($result) > 0 ? $result : null;
     }
 
