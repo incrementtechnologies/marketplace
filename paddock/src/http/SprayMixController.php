@@ -105,10 +105,11 @@ class SprayMixController extends APIController
           $res[$i]['name'] = $key['name'];
           $res[$i]['id'] = $key['id'];
           $res[$i]['status'] = $key['status'];
-          $res[$i]['max_rate'] = $key['maximum_rate'].' '.'L/ha';
-          $res[$i]['min_rate'] = $key['minimum_rate'].' '.'L/ha';
-          $res[$i]['application_rate'] = $key['application_rate'].' '.'L/ha';
+          $res[$i]['max_rate'] = (int)$key['maximum_rate'];
+          $res[$i]['min_rate'] = (int)$key['minimum_rate'];
+          $res[$i]['application_rate'] = (int)$key['application_rate'];
           $res[$i]['short_description'] = $key['short_description'];
+          $res[$i]['units'] = 'L/ha';
           $res[$i]['types'] = $getCropName;
           $i++;
 
@@ -123,10 +124,11 @@ class SprayMixController extends APIController
     $res = SprayMix::where('id', '=', $data['id'])->get();
     $getCropName = app($this->cropClass)->retrieveCrops($res[0]['crops']);
     $res[0]['type'] = $getCropName;
-    $res[0]['minimum_rate'] = $res[0]['minimum_rate'].' '.'L/ha';
-    $res[0]['application_rate'] = $res[0]['application_rate'].' '.'L/ha';
-    $res[0]['maximum_rate'] = $res[0]['maximum_rate'].' '.'L/ha';
-    return response()->json(compact('res'));
+    $res[0]['minimum_rate'] = (int)$res[0]['minimum_rate'];
+    $res[0]['application_rate'] = (int)$res[0]['application_rate'];
+    $res[0]['maximum_rate'] = (int)$res[0]['maximum_rate'];
+    $res[0]['units'] = 'L/ha';
+    return $this->response();
   }
 
   public function getByParams($column, $value, $columns){
@@ -136,9 +138,10 @@ class SprayMixController extends APIController
 
   public function getByParamsDefault($column, $value){
     $result = SprayMix::where($column, '=', $value)->get();
-    $result[0]['application_rate'] = $result[0]['application_rate'].' '.'L/ha';
-    $result[0]['minimum_rate'] = $result[0]['minimum_rate'].' '.'L/ha';
-    $result[0]['maximum_rate'] = $result[0]['maximum_rate'].' '.'L/ha';
+    $result[0]['application_rate'] = (int)$result[0]['application_rate'];
+    $result[0]['minimum_rate'] = (int)$result[0]['minimum_rate'];
+    $result[0]['maximum_rate'] = (int)$result[0]['maximum_rate'];
+    $result[0]['units'] ='L/ha';
     return sizeof($result) > 0 ? $result[0] : null;
   }
 }
