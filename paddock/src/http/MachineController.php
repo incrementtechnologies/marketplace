@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\APIController;
 use Increment\Marketplace\Paddock\Models\Machine;
 use Increment\Marketplace\Paddock\Models\Batch;
+use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
 class MachineController extends APIController
@@ -18,8 +19,19 @@ class MachineController extends APIController
 
     public function retrieve(Request $request){
         $data = $request->all();
-        $this->model = new Machine();
-        $this->retrieveDB($data);
+        $con = $data['condition'];
+        // dd($con[1]['column'], $con[1]['clause'], $con[1]['value']);
+        // $this->model = new Machine();
+        // $this->retrieveDB($data);
+        $result = DB::table('machines')
+            ->Where($con[0]['column'], $con[0]['clause'], $con[0]['value'])
+            ->Where($con[1]['column'], $con[1]['clause'], $con[1]['value'])
+            ->whereNull('deleted_at')
+            ->skip($data['offset'])->take($data['limit'])
+            ->orderBy(array_keys($data['sort'])[0], array_values($data['sort'])[0])
+            ->get();
+        $temp = json_decode(json_encode($result), true);
+        $this->response['data'] = $temp;
         for ($i = 0; $i < count($this->response['data']); $i++){
             $machine_id = $this->response['data'][$i]['id'];
             $paddock_data = Batch::select()->where('machine_id', '=', $machine_id)->get();
