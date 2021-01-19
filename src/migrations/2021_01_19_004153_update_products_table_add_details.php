@@ -13,8 +13,11 @@ class UpdateProductsTableAddDetails extends Migration
      */
     public function up()
     {
+
         Schema::table('products', function (Blueprint $table) {
-            $table->string('details')->after('status')->default(json_encode(["{solvent: '', safety: '', formulation: '', group: '', active: [''], safety_equipment: [''], mixing_order: [''], files: [{url: '', title: ''}, {url: '', title: ''}]}"]));
+            $table->string('details')->after('status')->default(json_encode(array("solvent" => "", "safety" => "", "formulation" => "", "group"=> '', "active"=> array(), "safety_equipment" => array(), "mixing_order"=> array(), "files"=> array("url"=> '', "title"=> ''))));
+
+
         });
     }
 
