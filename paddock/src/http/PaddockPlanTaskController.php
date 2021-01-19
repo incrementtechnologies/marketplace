@@ -73,7 +73,7 @@ class PaddockPlanTaskController extends APIController
                 ->leftJoin('crops as T4', 'T4.id', '=', 'T3.crop_id')
                 ->where('T1.spray_mix_id', '=', $data['spray_mix_id'])
                 ->where('T2.merchant_id', $data['merchant_id'])
-                ->get();
+                ->get(['T1.*', 'T2.*', 'T3.*', 'T4.name as crop_name']);
         if(sizeof($result) > 0){
             $tempRes = json_decode(json_encode($result), true);
             $i = 0;
