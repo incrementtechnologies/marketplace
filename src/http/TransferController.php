@@ -408,6 +408,7 @@ class TransferController extends APIController
       $data['limit'] = isset($data['offset']) ? $data['limit'] : 5;
       $result = DB::table('transferred_products as T1')
       ->join('products as T2', 'T2.id', '=', 'T1.product_id')
+      ->leftJoin('product_traces as T3', 'T3.product_id', '=', 'T2.id')
       ->where('T1.merchant_id', '=', $data['merchant_id'])
       ->where('T1.status', '=', 'active')
       ->where('T2.tags', 'like', '%', $data['category'], '%')
@@ -417,9 +418,9 @@ class TransferController extends APIController
     }else if($productType == 'all'){
       if(isset($data['tags'])){
         if($data['tags'] == 'other'){
-          dd('tags');
           $result = DB::table('transferred_products as T1')
           ->join('products as T2', 'T2.id', '=', 'T1.product_id')
+          ->leftJoin('product_traces as T3', 'T3.product_id', '=', 'T2.id')
           ->where('T1.merchant_id', '=', $data['merchant_id'])
           ->where('T1.status', '=', 'active')
           ->where('T2.tags', 'not like', 'herbicide')
@@ -431,18 +432,20 @@ class TransferController extends APIController
         }else{
           $result = DB::table('transferred_products as T1')
           ->join('products as T2', 'T2.id', '=', 'T1.product_id')
+          ->leftJoin('product_traces as T3', 'T3.product_id', '=', 'T2.id')
           ->where('T1.merchant_id', '=', $data['merchant_id'])
           ->where('T1.status', '=', 'active')
           ->where('T2.tags', 'like', $data['tags'])
           ->where($con['column'], 'like', $con['value'])
           ->orderBy($con['column'], $data['sort'][$con['column']])
-          ->get(['T1.*', 'T2.title']);
+          ->get(['T1.*', 'T2.title', 'T2.details', 'T3.batch_number', 'T3.manufacturing_date']);
         }
       }else{
         $data['offset'] = isset($data['offset']) ? $data['offset'] : 0;
         $data['limit'] = isset($data['offset']) ? $data['limit'] : 5;
         $result = DB::table('transferred_products as T1')
         ->join('products as T2', 'T2.id', '=', 'T1.product_id')
+        ->leftJoin('product_traces as T3', 'T3.product_id', '=', 'T2.id')
         ->where('T1.merchant_id', '=', $data['merchant_id'])
         ->where('T1.status', '=', 'active')
         ->where($con['column'], 'like', $con['value'])
@@ -450,11 +453,11 @@ class TransferController extends APIController
         ->get(['T1.*', 'T2.title']);
       }
     }else{
-       // dd($data['sort'][$con['column']]);
        $data['offset'] = isset($data['offset']) ? $data['offset'] : 0;
        $data['limit'] = isset($data['offset']) ? $data['limit'] : 5;
        $result = DB::table('transferred_products as T1')
        ->join('products as T2', 'T2.id', '=', 'T1.product_id')
+       ->leftJoin('product_traces as T3', 'T3.product_id', '=', 'T2.id')
        ->where('T1.merchant_id', '=', $data['merchant_id'])
        ->where('T1.status', '=', 'active')
        ->where($con['column'], 'like', $con['value'])
@@ -477,7 +480,9 @@ class TransferController extends APIController
           'qty'     => sizeof($value),
           'qty_in_bundled' => $this->getBundledProducts($data['merchant_id'], $key),
           'type'    => $product ? $product['type'] : null,
-          'details' => json_decode($key->details, true)
+          'details' => json_decode($key->details, true),
+          'batch_number' => $key->batch_number ? $key->batch_number : null,
+          'manufacturing_date' => $key->manufacturing_date ? $key->manufacturing_date : null
         );
         $testArray[] = $item;
       }
