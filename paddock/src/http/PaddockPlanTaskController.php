@@ -71,9 +71,10 @@ class PaddockPlanTaskController extends APIController
                 ->leftJoin('paddocks as T2', 'T1.paddock_id', '=', 'T2.id')
                 ->leftJoin('paddock_plans as T3', 'T3.id', '=', 'T1.paddock_plan_id')
                 ->leftJoin('crops as T4', 'T4.id', '=', 'T3.crop_id')
+                ->leftJoin('spray_mixes as T5', 'T5.id', '=', 'T1.spray_mix_id')
                 ->where('T1.spray_mix_id', '=', $data['spray_mix_id'])
                 ->where('T2.merchant_id', $data['merchant_id'])
-                ->get(['T1.*', 'T2.*', 'T3.*', 'T4.name as crop_name']);
+                ->get(['T1.*', 'T2.*', 'T3.*', 'T4.name as crop_name', 'T5.name as mix_name']);
         if(sizeof($result) > 0){
             $tempRes = json_decode(json_encode($result), true);
             $i = 0;
@@ -81,6 +82,7 @@ class PaddockPlanTaskController extends APIController
                 $tempRes[$i]['area'] = (int)$tempRes[$i]['area'];
                 $tempRes[$i]['remaining_area'] = (int)$tempRes[$i]['area'];
                 $tempRes[$i]['units'] = "Ha";
+                $tempRes[$i]['spray_mix_units'] = "L/Ha";
                 $tempRes[$i]['partial'] = false;
                 $tempRes[$i]['partial_flag'] = false;
 
