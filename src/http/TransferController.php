@@ -476,7 +476,8 @@ class TransferController extends APIController
           ),
           'qty'     => sizeof($value),
           'qty_in_bundled' => $this->getBundledProducts($data['merchant_id'], $key),
-          'type'    => $product ? $product['type'] : null
+          'type'    => $product ? $product['type'] : null,
+          'details' => json_decode($key->details, true)
         );
         $testArray[] = $item;
       }
