@@ -21,6 +21,13 @@ class BatchController extends APIController
         );
     }
 
+    public function create(Request $request){
+      $data = $request->all();
+      $this->model = new Batch();
+      $this->insertDBWithData($data);
+      return $this->response();
+    }
+
     public function retrieveApplyTasksRecents(Request $request){
       $data = $request->all();
 
