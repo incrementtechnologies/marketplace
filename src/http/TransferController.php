@@ -471,14 +471,14 @@ class TransferController extends APIController
     if(sizeof($result) > 0){
       $i = 0;
       foreach($temp as $key){
-        $product = app($this->productClass)->getByParams('id', $key['id']);
+        $product = app($this->productClass)->getByParams('id', $key);
         $temp[$i]['title'] = $product ? $product['title'] : null;
-        $temp[$i]['id'] = $key['id'];
+        $temp[$i]['id'] = $key;
         $temp[$i]['merchant']  = array(
           'name'    => $product ? app($this->merchantClass)->getColumnValueByParams('id', $product['merchant_id'], 'name') : null
         );
         $temp[$i]['qty']  = sizeof($key);
-        $temp[$i]['qty_in_bundled'] = $this->getBundledProducts($data['merchant_id'], $key['id']);
+        $temp[$i]['qty_in_bundled'] = $this->getBundledProducts($data['merchant_id'], $key);
         $temp[$i]['type'] = $product ? $product['type'] : null;
         $temp[$i]['details'] = json_decode($key['details'], true);
         $temp[$i]['batch_number'] = $key['batch_number'] ? $key['batch_number'] : null;
