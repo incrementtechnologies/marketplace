@@ -32,7 +32,7 @@ class DashboardController extends APIController
     public function retrieveDashboardBatches(Request $request){
         $data = $request->all();
         $res = array();
-        $res['infocus'] = DB::table("batches AS T1")
+        $temp = DB::table("batches AS T1")
         ->select("T1.id AS batch_id", "T1.account_id", "T1.notes", "T1.created_at AS created_at_human", "T6.name",  "T7.due_date", "T8.name AS paddock_name")
         ->leftJoin("batch_paddock_tasks AS T2", "T1.id", "=", "T2.batch_id")
         ->leftJoin("batch_products AS T3", "T1.id", "=", "T3.batch_id")
@@ -44,14 +44,33 @@ class DashboardController extends APIController
         ->where("T1.merchant_id", "=", $data['merchant_id'])
         ->take(3)  
         ->get();
-        $res['recent'] = DB::table('batches AS T1')
-        ->select("T1.merchant_id", "T1.spray_mix_id", "T1.machine_id", "T2.id", "T4.name AS merchant_name")
+
+        
+        if(sizeof($temp) > 0){
+            $temp2 = json_decode(json_encode($temp), true);
+            $i = 0;
+            foreach ($temp2 as $key) {
+                $temp2[$i]['created_at_human'] = Carbon::createFromFormat('Y-m-d H:i:s', $key['created_at_human'])->copy()->tz($this->response['timezone'])->format('D MMMM');
+            }
+            $res['infocus'] = $temp2;
+        }
+        $recent = DB::table('batches AS T1')
+        ->select("T1.merchant_id", "T1.spray_mix_id", "T1.machine_id", "T2.id", 'T3.name as mix_name', 'T2.name as machine_name', "T4.name AS merchant_name")
         ->leftJoin("machines AS T2", "T2.id", "=", "T1.machine_id")
         ->leftJoin('spray_mixes AS T3', "T3.id", "=", "T1.spray_mix_id")
         ->leftJoin('merchants AS T4', "T4.id", "=", "T1.merchant_id")
         ->where("T1.merchant_id", "=", $data['merchant_id'])
         ->take(4)
         ->get();
+        if(sizeof($recent) > 0){
+            $temp2 = json_decode(json_encode($recent), true);
+            $i = 0;
+            foreach ($temp2 as $key) {
+                $temp2[$i]['created_at_human'] = Carbon::createFromFormat('Y-m-d H:i:s', $key['created_at_human'])->copy()->tz($this->response['timezone'])->format('D MMMM');
+            }
+            $res['recent'] = $temp2;
+        }
+
         if(sizeof($res['infocus']) > 0){
             $this->response['data'] = $res;
         }

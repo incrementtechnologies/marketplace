@@ -414,7 +414,7 @@ class TransferController extends APIController
       ->where('T2.tags', 'like', '%', $data['category'], '%')
       ->where($con['column'], 'like', $con['value'])
       ->orderBy($con['column'], $data['sort'][$con['column']])
-      ->get(['T1.*', 'T2.title']);
+      ->get(['T1.*', 'T2.title', 'T2.details']);
     }else if($productType == 'all'){
       if(isset($data['tags'])){
         if($data['tags'] == 'other'){
@@ -428,7 +428,7 @@ class TransferController extends APIController
           ->orWhere('T2.tags', 'not like', 'insecticide')
           ->where($con['column'], 'like', $con['value'])
           ->orderBy($con['column'], $data['sort'][$con['column']])
-          ->get(['T1.*', 'T2.title']);
+          ->get(['T1.*', 'T2.title', 'T2.details']);
         }else{
           $result = DB::table('transferred_products as T1')
           ->join('products as T2', 'T2.id', '=', 'T1.product_id')
@@ -450,7 +450,7 @@ class TransferController extends APIController
         ->where('T1.status', '=', 'active')
         ->where($con['column'], 'like', $con['value'])
         ->orderBy($con['column'], $data['sort'][$con['column']])
-        ->get(['T1.*', 'T2.title']);
+        ->get(['T1.*', 'T2.title', 'T2.details']);
       }
     }else{
        $data['offset'] = isset($data['offset']) ? $data['offset'] : 0;
@@ -463,13 +463,13 @@ class TransferController extends APIController
        ->where($con['column'], 'like', $con['value'])
        ->where('T2.type', '=', $productType)
        ->orderBy($con['column'], $data['sort'][$con['column']])
-       ->get(['T1.*', 'T2.title']);
+       ->get(['T1.*', 'T2.title', 'T2.details']);
     }
     $result = $result->groupBy('product_id');
     $size = $result->count();
     $testArray = array();
     if(sizeof($result) > 0){  
-      foreach($result as $key => $value){
+      foreach($result as $key){
         $product = app($this->productClass)->getByParams('id', $key);
         $item = array(
           'title'     => $product ? $product['title'] : null,
