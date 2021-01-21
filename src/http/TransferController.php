@@ -467,27 +467,25 @@ class TransferController extends APIController
     }
     $result = $result->groupBy('product_id');
     $size = $result->count();
-    $testArray = array();
-    if(sizeof($result) > 0){  
-      foreach($result as $key){
-        $product = app($this->productClass)->getByParams('id', $key);
-        $item = array(
-          'title'     => $product ? $product['title'] : null,
-          'id'        => $key,
-          'merchant'  => array(
-            'name'    => $product ? app($this->merchantClass)->getColumnValueByParams('id', $product['merchant_id'], 'name') : null
-          ),
-          'qty'     => sizeof($value),
-          'qty_in_bundled' => $this->getBundledProducts($data['merchant_id'], $key),
-          'type'    => $product ? $product['type'] : null,
-          'details' => json_decode($key->details, true),
-          'batch_number' => $key->batch_number ? $key->batch_number : null,
-          'manufacturing_date' => $key->manufacturing_date ? $key->manufacturing_date : null
+    $temp = json_decode(json_encode($result), true);
+    if(sizeof($result) > 0){
+      $i = 0;
+      foreach($temp as $key){
+        $product = app($this->productClass)->getByParams('id', $key['id']);
+        $temp[$i]['title'] = $product ? $product['title'] : null;
+        $temp[$i]['id'] = $key['id'];
+        $temp[$i]['merchant']  = array(
+          'name'    => $product ? app($this->merchantClass)->getColumnValueByParams('id', $product['merchant_id'], 'name') : null
         );
-        $testArray[] = $item;
+        $temp[$i]['qty']  = sizeof($key);
+        $temp[$i]['qty_in_bundled'] = $this->getBundledProducts($data['merchant_id'], $key['id']);
+        $temp[$i]['type'] = $product ? $product['type'] : null;
+        $temp[$i]['details'] = json_decode($key['details'], true);
+        $temp[$i]['batch_number'] = $key['batch_number'] ? $key['batch_number'] : null;
+        $temp[$i]['manufacturing_date'] = $key['manufacturing_date'] ? $key['manufacturing_date'] : null;
       }
     }
-    $this->response['data'] = $testArray;
+    $this->response['data'] = $temp ;
     $this->response['size'] = $size;
     return $this->response();
   }
