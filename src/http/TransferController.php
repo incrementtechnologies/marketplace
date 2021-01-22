@@ -461,8 +461,8 @@ class TransferController extends APIController
     }
     $result = $result->groupBy('product_id');
     $size = $result->count();
-    if(sizeof($result) > 0){ 
-      $temp = json_decode(json_encode($result[1]), true);
+    if(!empty($result[1])){
+      $temp = json_decode(json_encode(!empty($result[1]) ? $result[1] : $result), true);
       $i=0; 
       foreach($temp as $key){
         $product = app($this->productClass)->getByParams('id', $key['product_id']);
@@ -481,7 +481,7 @@ class TransferController extends APIController
       }
       $this->response['data'] = $temp;
       $this->response['size'] = $size;
-      return $this->response();
+      return $this->response();    
     }else{
       $this->response['data'] = [];
       $this->response['size'] = $size;
