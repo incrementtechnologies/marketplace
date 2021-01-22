@@ -401,21 +401,11 @@ class TransferController extends APIController
   public function retrieveProductsFirstLevel(Request $request){
     $data = $request->all();
     $con = $data['condition'];
-    // dd('first');
+    $result = null;
     $productType = $data['productType'];
-    if (isset($data['category'])){
-      $data['offset'] = isset($data['offset']) ? $data['offset'] : 0;
-      $data['limit'] = isset($data['offset']) ? $data['limit'] : 5;
-      $result = DB::table('transferred_products as T1')
-      ->join('products as T2', 'T2.id', '=', 'T1.product_id')
-      ->leftJoin('product_traces as T3', 'T3.product_id', '=', 'T2.id')
-      ->where('T1.merchant_id', '=', $data['merchant_id'])
-      ->where('T1.status', '=', 'active')
-      ->where('T2.tags', 'like', '%', $data['category'], '%')
-      ->where($con['column'], 'like', $con['value'])
-      ->orderBy($con['column'], $data['sort'][$con['column']])
-      ->get(['T1.*', 'T2.title']);
-    }else if($productType == 'all'){
+    $data['offset'] = isset($data['offset']) ? $data['offset'] : 0;
+    $data['limit'] = isset($data['offset']) ? $data['limit'] : 5;
+    if($productType == 'all'){
       if(isset($data['tags'])){
         if($data['tags'] == 'other'){
           $result = DB::table('transferred_products as T1')
@@ -423,12 +413,13 @@ class TransferController extends APIController
           ->leftJoin('product_traces as T3', 'T3.product_id', '=', 'T2.id')
           ->where('T1.merchant_id', '=', $data['merchant_id'])
           ->where('T1.status', '=', 'active')
+          ->where($con['column'], 'like', $con['value'])
           ->where('T2.tags', 'not like', 'herbicide')
           ->orWhere('T2.tags', 'not like', 'fungicide')
           ->orWhere('T2.tags', 'not like', 'insecticide')
-          ->where($con['column'], 'like', $con['value'])
+          ->select('T1.*', 'T2.title', 'T2.details', 'T3.batch_number', 'T3.manufacturing_date')
           ->orderBy($con['column'], $data['sort'][$con['column']])
-          ->get(['T1.*', 'T2.title']);
+          ->get();
         }else{
           $result = DB::table('transferred_products as T1')
           ->join('products as T2', 'T2.id', '=', 'T1.product_id')
@@ -437,24 +428,25 @@ class TransferController extends APIController
           ->where('T1.status', '=', 'active')
           ->where('T2.tags', 'like', $data['tags'])
           ->where($con['column'], 'like', $con['value'])
+          ->select('T1.*', 'T2.title', 'T2.details', 'T3.batch_number', 'T3.manufacturing_date')
           ->orderBy($con['column'], $data['sort'][$con['column']])
-          ->get(['T1.*', 'T2.title', 'T2.details', 'T3.batch_number', 'T3.manufacturing_date']);
+          ->get();
         }
-      }else{
-        $data['offset'] = isset($data['offset']) ? $data['offset'] : 0;
-        $data['limit'] = isset($data['offset']) ? $data['limit'] : 5;
+      }
+      else{
         $result = DB::table('transferred_products as T1')
         ->join('products as T2', 'T2.id', '=', 'T1.product_id')
         ->leftJoin('product_traces as T3', 'T3.product_id', '=', 'T2.id')
         ->where('T1.merchant_id', '=', $data['merchant_id'])
         ->where('T1.status', '=', 'active')
         ->where($con['column'], 'like', $con['value'])
+        ->select('T1.*', 'T2.title', 'T2.details')
+        ->skip($data['offset'])->take($data['limit'])
         ->orderBy($con['column'], $data['sort'][$con['column']])
-        ->get(['T1.*', 'T2.title']);
+        ->get();
       }
-    }else{
-       $data['offset'] = isset($data['offset']) ? $data['offset'] : 0;
-       $data['limit'] = isset($data['offset']) ? $data['limit'] : 5;
+    }
+    else{
        $result = DB::table('transferred_products as T1')
        ->join('products as T2', 'T2.id', '=', 'T1.product_id')
        ->leftJoin('product_traces as T3', 'T3.product_id', '=', 'T2.id')
@@ -462,34 +454,39 @@ class TransferController extends APIController
        ->where('T1.status', '=', 'active')
        ->where($con['column'], 'like', $con['value'])
        ->where('T2.type', '=', $productType)
+       ->select('T1.*', 'T2.title', 'T2.details')
+       ->skip($data['offset'])->take($data['limit'])
        ->orderBy($con['column'], $data['sort'][$con['column']])
-       ->get(['T1.*', 'T2.title']);
+       ->get();
     }
     $result = $result->groupBy('product_id');
     $size = $result->count();
-    $testArray = array();
-    if(sizeof($result) > 0){  
-      foreach($result as $key => $value){
-        $product = app($this->productClass)->getByParams('id', $key);
-        $item = array(
-          'title'     => $product ? $product['title'] : null,
-          'id'        => $key,
-          'merchant'  => array(
-            'name'    => $product ? app($this->merchantClass)->getColumnValueByParams('id', $product['merchant_id'], 'name') : null
-          ),
-          'qty'     => sizeof($value),
-          'qty_in_bundled' => $this->getBundledProducts($data['merchant_id'], $key),
-          'type'    => $product ? $product['type'] : null,
-          // 'details' => json_decode($key->details, true),
-          'batch_number' => $key->batch_number ? $key->batch_number : null,
-          'manufacturing_date' => $key->manufacturing_date ? $key->manufacturing_date : null
-        );
-        $testArray[] = $item;
+    if(sizeof($result) > 0){ 
+      $temp = json_decode(json_encode($result[1]), true);
+      $i=0; 
+      foreach($temp as $key){
+        $product = app($this->productClass)->getByParams('id', $key['product_id']);
+        $merchant = $product ? app($this->merchantClass)->getColumnValueByParams('id', $product['merchant_id'], 'name') : null;
+          $temp[$i]['title']     = $product ? $product['title'] : null;
+          $temp[$i]['id']        = $key['id'];
+          $temp[$i]['merchant']  = array(
+            'name' => $merchant);
+          $temp[$i]['qty']     = sizeof($temp);
+          $temp[$i]['qty_in_bundled'] = $this->getBundledProducts($data['merchant_id'], $key['id']);
+          $temp[$i]['type']    = $product['type'];
+          $temp[$i]['details'] = json_decode($key['details'], true, true);
+          $temp[$i]['batch_number'] = isset($key['batch_number']) ? $key['batch_number'] : null;
+          $temp[$i]['manufacturing_date'] = isset($key['manufacturing_date']) ? $key['manufacturing_date'] : null;
+        $i++;
       }
+      $this->response['data'] = $temp;
+      $this->response['size'] = $size;
+      return $this->response();
+    }else{
+      $this->response['data'] = [];
+      $this->response['size'] = $size;
+      return $this->response();
     }
-    $this->response['data'] = $testArray;
-    $this->response['size'] = $size;
-    return $this->response();
   }
 
   public function retrieveProductsSecondLevel(Request $request){
