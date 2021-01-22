@@ -44,13 +44,13 @@ class DashboardController extends APIController
         ->where("T1.merchant_id", "=", $data['merchant_id'])
         ->take(3)  
         ->get();
-
+        
         
         if(sizeof($temp) > 0){
             $temp2 = json_decode(json_encode($temp), true);
             $i = 0;
             foreach ($temp2 as $key) {
-                $temp2[$i]['created_at_human'] = Carbon::createFromFormat('Y-m-d H:i:s', $key['created_at_human'])->copy()->tz($this->response['timezone'])->format('D MMMM');
+                $temp2[$i]['created_at_human'] = Carbon::createFromFormat('Y-m-d H:i:s', $key['date_of_delivery'])->copy()->tz($this->response['timezone'])->format('D MMMM');
             }
             $res['infocus'] = $temp2;
         }
@@ -62,6 +62,9 @@ class DashboardController extends APIController
         ->where("T1.merchant_id", "=", $data['merchant_id'])
         ->take(4)
         ->get();
+        
+        // dd($recent);
+
         if(sizeof($recent) > 0){
             $temp2 = json_decode(json_encode($recent), true);
             $i = 0;
