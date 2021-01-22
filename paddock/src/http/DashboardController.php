@@ -50,7 +50,7 @@ class DashboardController extends APIController
             $temp2 = json_decode(json_encode($temp), true);
             $i = 0;
             foreach ($temp2 as $key) {
-                $temp2[$i]['created_at_human'] = Carbon::createFromFormat('Y-m-d H:i:s', $key['created_at_human'])->copy()->tz($this->response['timezone'])->format('D MMMM');
+                $temp2[$i]['created_at_human'] = Carbon::createFromFormat('Y-m-d H:i:s', $key['created_at_human'])->copy()->tz($this->response['timezone'])->format('d M');
             }
             $res['infocus'] = $temp2;
         }
@@ -73,7 +73,7 @@ class DashboardController extends APIController
             $temp2 = json_decode(json_encode($recent), true);
             $i = 0;
             foreach ($temp2 as $key) {
-                $temp2[$i]['created_at_human'] = Carbon::createFromFormat('Y-m-d H:i:s', $key['created_at_human'])->copy()->tz($this->response['timezone'])->format('D MMMM');
+                $temp2[$i]['created_at_human'] = Carbon::createFromFormat('Y-m-d H:i:s', $key['created_at_human'])->copy()->tz($this->response['timezone'])->format('d M');
             }
             $res['recent'] = $temp2;
         }
