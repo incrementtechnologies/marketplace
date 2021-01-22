@@ -414,7 +414,7 @@ class TransferController extends APIController
       ->where('T2.tags', 'like', '%', $data['category'], '%')
       ->where($con['column'], 'like', $con['value'])
       ->orderBy($con['column'], $data['sort'][$con['column']])
-      ->get(['T1.*', 'T2.title', 'T2.details']);
+      ->get(['T1.*', 'T2.title']);
     }else if($productType == 'all'){
       if(isset($data['tags'])){
         if($data['tags'] == 'other'){
@@ -428,7 +428,7 @@ class TransferController extends APIController
           ->orWhere('T2.tags', 'not like', 'insecticide')
           ->where($con['column'], 'like', $con['value'])
           ->orderBy($con['column'], $data['sort'][$con['column']])
-          ->get(['T1.*', 'T2.title', 'T2.details']);
+          ->get(['T1.*', 'T2.title']);
         }else{
           $result = DB::table('transferred_products as T1')
           ->join('products as T2', 'T2.id', '=', 'T1.product_id')
@@ -450,7 +450,7 @@ class TransferController extends APIController
         ->where('T1.status', '=', 'active')
         ->where($con['column'], 'like', $con['value'])
         ->orderBy($con['column'], $data['sort'][$con['column']])
-        ->get(['T1.*', 'T2.title', 'T2.details']);
+        ->get(['T1.*', 'T2.title']);
       }
     }else{
        $data['offset'] = isset($data['offset']) ? $data['offset'] : 0;
@@ -463,29 +463,31 @@ class TransferController extends APIController
        ->where($con['column'], 'like', $con['value'])
        ->where('T2.type', '=', $productType)
        ->orderBy($con['column'], $data['sort'][$con['column']])
-       ->get(['T1.*', 'T2.title', 'T2.details']);
+       ->get(['T1.*', 'T2.title']);
     }
     $result = $result->groupBy('product_id');
     $size = $result->count();
-    $temp = json_decode(json_encode($result), true);
-    if(sizeof($result) > 0){
-      $i = 0;
-      foreach($temp as $key){
+    $testArray = array();
+    if(sizeof($result) > 0){  
+      foreach($result as $key => $value){
         $product = app($this->productClass)->getByParams('id', $key);
-        $temp[$i]['title'] = $product ? $product['title'] : null;
-        $temp[$i]['id'] = $key;
-        $temp[$i]['merchant']  = array(
-          'name'    => $product ? app($this->merchantClass)->getColumnValueByParams('id', $product['merchant_id'], 'name') : null
+        $item = array(
+          'title'     => $product ? $product['title'] : null,
+          'id'        => $key,
+          'merchant'  => array(
+            'name'    => $product ? app($this->merchantClass)->getColumnValueByParams('id', $product['merchant_id'], 'name') : null
+          ),
+          'qty'     => sizeof($value),
+          'qty_in_bundled' => $this->getBundledProducts($data['merchant_id'], $key),
+          'type'    => $product ? $product['type'] : null,
+          // 'details' => json_decode($key->details, true),
+          'batch_number' => $key->batch_number ? $key->batch_number : null,
+          'manufacturing_date' => $key->manufacturing_date ? $key->manufacturing_date : null
         );
-        $temp[$i]['qty']  = sizeof($key);
-        $temp[$i]['qty_in_bundled'] = $this->getBundledProducts($data['merchant_id'], $key);
-        $temp[$i]['type'] = $product ? $product['type'] : null;
-        $temp[$i]['details'] = json_decode($key['details'], true);
-        $temp[$i]['batch_number'] = $key['batch_number'] ? $key['batch_number'] : null;
-        $temp[$i]['manufacturing_date'] = $key['manufacturing_date'] ? $key['manufacturing_date'] : null;
+        $testArray[] = $item;
       }
     }
-    $this->response['data'] = $temp ;
+    $this->response['data'] = $testArray;
     $this->response['size'] = $size;
     return $this->response();
   }
