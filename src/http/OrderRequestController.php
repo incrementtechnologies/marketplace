@@ -15,6 +15,11 @@ class OrderRequestController extends APIController
   public $dailyLoadingListClass = 'Increment\Marketplace\Http\DailyLoadingListController';
   // public $transferClasss = 'Increment\Marketplace\Http\TransferController';
   // public $productAttrController = 'Increment\Marketplace\Http\ProductAttributeController';
+  public $paddockClass = 'Increment\Marketplace\Paddock\Http\PaddockController';
+  public $sprayMixClass = 'Increment\Marketplace\Paddock\Http\SprayMixController';
+
+  public $paddockPlanTaskClass = 'Increment\Marketplace\Paddock\Http\PaddockPlanTaskController';
+
   public $productController = 'Increment\Marketplace\Http\ProductController';
   function __construct(){
     $this->model = new OrderRequest();
@@ -131,6 +136,7 @@ class OrderRequestController extends APIController
             $i = 0;
             foreach ($temp2 as $key) {
                 $temp2[$i]['created_at_human'] = Carbon::createFromFormat('Y-m-d H:i:s', $key['created_at_human'])->copy()->tz($this->response['timezone'])->format('d M');
+                $temp2[$i]['task'] = app($this->paddockPlanTaskClass)->retrievePaddockPlanTaskByParams($merchant_id['column'], $merchant_id['value']);
             }
             $infocusData = $temp2;
       }
@@ -155,6 +161,7 @@ class OrderRequestController extends APIController
           $i = 0;
           foreach ($temp2 as $key) {
               $temp2[$i]['created_at_human'] = Carbon::createFromFormat('Y-m-d H:i:s', $key['created_at_human'])->copy()->tz($this->response['timezone'])->format('d M');
+              $temp2[$i]['task'] = app($this->paddockPlanTaskClass)->retrievePaddockPlanTaskByParams($merchant_id['column'], $merchant_id['value']);
           }
           $recentData = $temp2;
       }
@@ -163,7 +170,10 @@ class OrderRequestController extends APIController
       $temp = array(
         'orders' => $this->manageResultsMobile($this->response['data']),
         'infocus' => $infocusData,
-        'recent' => $recentData
+        'recent' => $recentData,
+        'totalOrders' => sizeof($this->manageResultsMobile($this->response['data'])),
+        'totalRecent' => sizeof($recent),
+        'totalInfocus' => sizeof($infocus)
       );
       $this->response['data'] = $temp;
     }

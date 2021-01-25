@@ -43,17 +43,26 @@ class PaddockPlanTaskController extends APIController
       }
   }
 
-  public function retrieveMobileByParams(Request $request){
-    $data = $request->all();
-    $this->model = new PaddockPlanTask();
-    $this->retrieveDB($data);
-    for ($i=0; $i < count($this->response['data']); $i++){
-      $item = $this->response['data'][$i];
-      $this->response['data'][$i]['paddock'] = app($this->paddockClass)->getByParams('id', $item['paddock_id'], ['id', 'name']);
-      $this->response['data'][$i]['spray_mix'] = app($this->sprayMixClass)->getByParams('id', $item['paddock_id'], ['id', 'name']);
+    public function retrieveMobileByParams(Request $request){
+        $data = $request->all();
+        $this->model = new PaddockPlanTask();
+        $this->retrieveDB($data);
+        for ($i=0; $i < count($this->response['data']); $i++){
+        $item = $this->response['data'][$i];
+        $this->response['data'][$i]['paddock'] = app($this->paddockClass)->getByParams('id', $item['paddock_id'], ['id', 'name']);
+        $this->response['data'][$i]['spray_mix'] = app($this->sprayMixClass)->getByParams('id', $item['paddock_id'], ['id', 'name']);
+        }
+        return $this->response();
     }
-    return $this->response();
-  }
+
+    public function retrievePaddockPlanTaskByParams($column, $value){
+        $result = PaddockPlanTask::where($column, '=', $value)->get();
+        for ($i=0; $i < count($result); $i++){
+            $result[$i]['paddock'] = app($this->paddockClass)->getByParams('id', $result[$i]['paddock_id'], ['id', 'name']);
+            $result['spray_mix'] = app($this->sprayMixClass)->getByParams('id', $result[$i]['paddock_id'], ['id', 'name']);
+        }
+        return $result;
+    }
 
     public function retrievePaddockTaskByPaddock($paddockId){
         $result = Paddock::where('id', '=', $paddockId)->get();
