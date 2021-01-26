@@ -27,7 +27,7 @@ class ProductController extends APIController
     function __construct(){
     	$this->model = new Product();
       $this->notRequired = array(
-        'tags', 'sku', 'rf'
+        'tags', 'sku', 'rf', 'details'
       );
       $this->localization();
     }
