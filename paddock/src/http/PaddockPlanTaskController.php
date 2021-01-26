@@ -57,9 +57,14 @@ class PaddockPlanTaskController extends APIController
 
     public function retrievePaddockPlanTaskByParams($column, $value){
         $result = PaddockPlanTask::where($column, '=', $value)->get();
-        for ($i=0; $i < count($result); $i++){
-            $result[$i]['paddock'] = app($this->paddockClass)->getByParams('id', $result[$i]['paddock_id'], ['id', 'name']);
-            $result['spray_mix'] = app($this->sprayMixClass)->getByParams('id', $result[$i]['paddock_id'], ['id', 'name']);
+        if(sizeof($result) > 0){
+            $i = 0;
+            foreach ($result as $key) {
+                $result[$i]['paddock'] = app($this->paddockClass)->getByParams('id', $result[$i]['paddock_id'], ['id', 'name']);
+                $result[$i]['spray_mix'] = app($this->sprayMixClass)->getByParams('id', $result[$i]['paddock_id'], ['id', 'name']);
+
+                $i++;
+            }
         }
         return $result;
     }
