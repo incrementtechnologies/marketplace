@@ -60,6 +60,7 @@ class PaddockPlanTaskController extends APIController
         if(sizeof($result) > 0){
             $i = 0;
             foreach ($result as $key) {
+                $result[$i]['due_date'] = Carbon::createFromFormat('Y-m-d', $key['due_date'])->copy()->tz($this->response['timezone'])->format('d M');
                 $result[$i]['paddock'] = app($this->paddockClass)->getByParams('id', $result[$i]['paddock_id'], ['id', 'name']);
                 $result[$i]['spray_mix'] = app($this->sprayMixClass)->getByParams('id', $result[$i]['paddock_id'], ['id', 'name']);
 
