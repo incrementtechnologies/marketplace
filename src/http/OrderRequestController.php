@@ -117,56 +117,11 @@ class OrderRequestController extends APIController
     // $infocusData = null;
     // $recentData = null;
     $merchant_id = $data['condition'][0];
-    // $infocus = DB::table("batches AS T1")
-    //     ->select("T1.id AS batch_id", "T1.account_id", "T1.notes", "T1.created_at AS created_at_human", "T6.name",  "T7.due_date", "T8.name AS paddock_name")
-    //     ->leftJoin("batch_paddock_tasks AS T2", "T1.id", "=", "T2.batch_id")
-    //     ->leftJoin("batch_products AS T3", "T1.id", "=", "T3.batch_id")
-    //     ->leftJoin("spray_mixes AS T4", "T1.spray_mix_id", "=", "T4.id")
-    //     ->leftJoin("machines AS T5", "T1.machine_id", "=", "T5.id")
-    //     ->leftJoin("merchants AS T6", "T1.merchant_id", "=", "T6.id")
-    //     ->leftJoin("paddock_plans_tasks AS T7", "T2.paddock_plan_task_id", "=", "T7.id")
-    //     ->leftJoin("paddocks AS T8", "T7.paddock_id","=","T8.id") 
-    //     ->where("T1.merchant_id", "=", $merchant_id['value'])
-    //     ->take(3)  
-    //     ->get();
-        
-        
-    //     if(sizeof($infocus) > 0){
-    //         $temp2 = json_decode(json_encode($infocus), true);
-    //         $i = 0;
-    //         foreach ($temp2 as $key) {
-    //             $temp2[$i]['created_at_human'] = Carbon::createFromFormat('Y-m-d H:i:s', $key['created_at_human'])->copy()->tz($this->response['timezone'])->format('d M');
-    //             $temp2[$i]['task'] = app($this->paddockPlanTaskClass)->retrievePaddockPlanTaskByParams($merchant_id['column'], $merchant_id['value']);
-    //         }
-    //         $infocusData = $temp2;
-    //   }
-
-    // $recent = DB::table('batches AS T1')
-    //   ->select("T1.id AS batch_id", "T1.account_id", "T1.notes", "T1.created_at AS created_at_human", "T6.name",  "T7.due_date", "T8.name AS paddock_name")
-    //   ->leftJoin("batch_paddock_tasks AS T2", "T1.id", "=", "T2.batch_id")
-    //   ->leftJoin("batch_products AS T3", "T1.id", "=", "T3.batch_id")
-    //   ->leftJoin("spray_mixes AS T4", "T1.spray_mix_id", "=", "T4.id")
-    //   ->leftJoin("machines AS T5", "T1.machine_id", "=", "T5.id")
-    //   ->leftJoin("merchants AS T6", "T1.merchant_id", "=", "T6.id")
-    //   ->leftJoin("paddock_plans_tasks AS T7", "T2.paddock_plan_task_id", "=", "T7.id")
-    //   ->leftJoin("paddocks AS T8", "T7.paddock_id","=","T8.id") 
-    //   ->where("T1.merchant_id", "=", $merchant_id['value'])
-    //   ->take(4)
-    //   ->get();
-
-    //   if(sizeof($recent) > 0){
-    //       $temp2 = json_decode(json_encode($recent), true);
-    //       $i = 0;
-    //       foreach ($temp2 as $key) {
-    //           $temp2[$i]['created_at_human'] = Carbon::createFromFormat('Y-m-d H:i:s', $key['created_at_human'])->copy()->tz($this->response['timezone'])->format('d M');
-    //           $temp2[$i]['task'] = app($this->paddockPlanTaskClass)->retrievePaddockPlanTaskByParams($merchant_id['column'], $merchant_id['value']);
-    //       }
-    //       $recentData = $temp2;
-    //   }
+   
     $totalOrder = sizeof($this->manageResultsMobile($this->response['data']));
     $totalRecent = sizeof(app($this->paddockPlanTaskClass)->retrievePaddockPlanTaskByParams($merchant_id['column'], $merchant_id['value']));
     $totalInfocus = sizeof(app($this->paddockPlanTaskClass)->retrievePaddockPlanTaskByParams($merchant_id['column'], $merchant_id['value']));
-    if(sizeof($this->response['data']) > 0){
+    if(sizeof($this->response['data']) > 0 || $totalRecent > 0){
       $temp = array(
         'orders' => $this->manageResultsMobile($this->response['data']),
         'infocus' => app($this->paddockPlanTaskClass)->retrievePaddockPlanTaskByParams($merchant_id['column'], $merchant_id['value']),
@@ -182,25 +137,29 @@ class OrderRequestController extends APIController
 
   public function manageResultsMobile($result){
     $array = array();
-    foreach ($result as $key) { 
-      $item = array(
-        'merchant' => app($this->merchantClass)->getColumnByParams('id', $key['merchant_to'], ['name', 'address', 'id']),
-        'merchant_from' => app($this->merchantClass)->getColumnByParams('id', $key['merchant_id'], ['name', 'address', 'id']),
-        'date_of_delivery'  => Carbon::createFromFormat('Y-m-d H:i:s', $key['date_of_delivery'])->copy()->tz($this->response['timezone'])->format('d M'),
-        'status'        => $key['status'],
-        'delivered_by'  => $key['delivered_by'] ? $this->retrieveName($key['delivered_by']) : null,
-        'delivered_date'=> $key['date_delivered'] ? Carbon::createFromFormat('Y-m-d H:i:s', $key['date_delivered'])->copy()->tz($this->response['timezone'])->format('d M') : null,
-        'code'          => $key['code'],
-        'added_by'      => $key['code'],  
-        'id'      => $key['id'],
-        'order_number'      => $key['order_number'],
-        'daily_loading_list' => app($this->dailyLoadingListClass)->checkIfExist('order_request_id', $key['id']),
-        'daily_loading_list_id' => isset($key['daily_loading_list_id']) ? $key['daily_loading_list_id'] : null,
-        'created_at_human' => Carbon::createFromFormat('Y-m-d H:i:s', $key['date_of_delivery'])->copy()->tz($this->response['timezone'])->format('d M'),
-      );
-      $array[] = $item;
+    if(sizeof($result) > 0){
+      foreach ($result as $key) { 
+        $item = array(
+          'merchant' => app($this->merchantClass)->getColumnByParams('id', $key['merchant_to'], ['name', 'address', 'id']),
+          'merchant_from' => app($this->merchantClass)->getColumnByParams('id', $key['merchant_id'], ['name', 'address', 'id']),
+          'date_of_delivery'  => Carbon::createFromFormat('Y-m-d H:i:s', $key['date_of_delivery'])->copy()->tz($this->response['timezone'])->format('d M'),
+          'status'        => $key['status'],
+          'delivered_by'  => $key['delivered_by'] ? $this->retrieveName($key['delivered_by']) : null,
+          'delivered_date'=> $key['date_delivered'] ? Carbon::createFromFormat('Y-m-d H:i:s', $key['date_delivered'])->copy()->tz($this->response['timezone'])->format('d M') : null,
+          'code'          => $key['code'],
+          'added_by'      => $key['code'],  
+          'id'      => $key['id'],
+          'order_number'      => $key['order_number'],
+          'daily_loading_list' => app($this->dailyLoadingListClass)->checkIfExist('order_request_id', $key['id']),
+          'daily_loading_list_id' => isset($key['daily_loading_list_id']) ? $key['daily_loading_list_id'] : null,
+          'created_at_human' => Carbon::createFromFormat('Y-m-d H:i:s', $key['date_of_delivery'])->copy()->tz($this->response['timezone'])->format('d M'),
+        );
+        $array[] = $item;
+      }
+      return $array;
+    }else{
+      return $array;
     }
-    return $array;
   }
 
   public function retrieveSecondLevel(Request $request){
