@@ -298,6 +298,7 @@ class OrderRequestController extends APIController
     $result = OrderRequest::where('id', '=',  $data['id'])->update(array(
       'delivered_by' => null,
       'date_delivered' => null,
+      'date_of_delivery' => $data['date_of_delivery'],
       'status' => $data['status']
     ));
 
