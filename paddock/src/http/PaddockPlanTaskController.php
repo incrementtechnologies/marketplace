@@ -46,6 +46,7 @@ class PaddockPlanTaskController extends APIController
     public function retrieveMobileByParams(Request $request){
         $data = $request->all();
         $this->model = new PaddockPlanTask();
+        $this->retrieveDB($data);
         $temp = $this->retrieveDB($data);
         if(sizeof($temp) > 0){
             $i = 0;
@@ -56,7 +57,6 @@ class PaddockPlanTaskController extends APIController
                 $i++;
             }
         }
-        $this->response['data'] = $temp;
         return $this->response();
     }
 
