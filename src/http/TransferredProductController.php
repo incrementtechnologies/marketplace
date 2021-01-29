@@ -111,6 +111,11 @@ class TransferredProductController extends APIController
       return sizeof($result) > 0 ? $result : null;
     }
 
+    public function getActivesByParams($column, $value, $offset, $limit){
+      $result = TransferredProduct::where($column, '=', $value)->where('status', '=', 'active')->skip($offset)->take($limit)->get();
+      return sizeof($result) > 0 ? $result : null;
+    }
+
     public function insert($data){
       TransferredProduct::insert($data);
       return true;

@@ -414,10 +414,12 @@ class TransferController extends APIController
           ->where('T1.merchant_id', '=', $data['merchant_id'])
           ->where('T1.status', '=', 'active')
           ->where($con['column'], 'like', $con['value'])
-          ->where('T2.tags', 'not like', 'herbicide')
-          ->orWhere('T2.tags', 'not like', 'fungicide')
-          ->orWhere('T2.tags', 'not like', 'insecticide')
-          ->select('T1.*', 'T2.title', 'T2.details', 'T3.batch_number', 'T3.manufacturing_date')
+          ->where(function($query){
+            return $query->where('T2.tags', 'not like', 'herbicide')
+                        ->orWhere('T2.tags', 'not like', 'fungicide')
+                        ->orWhere('T2.tags', 'not like', 'insecticide');
+          })
+          ->select('T1.*', 'T2.title', 'T2.type', 'T2.details', 'T3.batch_number', 'T3.manufacturing_date')
           ->orderBy($con['column'], $data['sort'][$con['column']])
           ->get();
         }else{
@@ -428,9 +430,10 @@ class TransferController extends APIController
           ->where('T1.status', '=', 'active')
           ->where('T2.tags', 'like', $data['tags'])
           ->where($con['column'], 'like', $con['value'])
-          ->select('T1.*', 'T2.title', 'T2.details', 'T3.batch_number', 'T3.manufacturing_date')
+          ->select('T1.*', 'T2.title', 'T2.type', 'T2.details', 'T3.batch_number', 'T3.manufacturing_date')
           ->orderBy($con['column'], $data['sort'][$con['column']])
           ->get();
+          dd($result);
         }
       }
       else{
@@ -440,7 +443,7 @@ class TransferController extends APIController
         ->where('T1.merchant_id', '=', $data['merchant_id'])
         ->where('T1.status', '=', 'active')
         ->where($con['column'], 'like', $con['value'])
-        ->select('T1.*', 'T2.title', 'T2.details')
+        ->select('T1.*', 'T2.title', 'T2.type', 'T2.details', 'T3.batch_number', 'T3.manufacturing_date')
         ->skip($data['offset'])->take($data['limit'])
         ->orderBy($con['column'], $data['sort'][$con['column']])
         ->get();
@@ -454,26 +457,24 @@ class TransferController extends APIController
        ->where('T1.status', '=', 'active')
        ->where($con['column'], 'like', $con['value'])
        ->where('T2.type', '=', $productType)
-       ->select('T1.*', 'T2.title', 'T2.details')
+       ->select('T1.*', 'T2.title', 'T2.type', 'T2.details', 'T3.batch_number', 'T3.manufacturing_date')
        ->skip($data['offset'])->take($data['limit'])
        ->orderBy($con['column'], $data['sort'][$con['column']])
        ->get();
     }
-    $result = $result->groupBy('product_id');
-    $size = $result->count();
-    if(!empty($result[1])){
-      $temp = json_decode(json_encode(!empty($result[1]) ? $result[1] : $result), true);
+    $size = sizeof($result);
+    if(sizeof($result)){
+      $temp = json_decode(json_encode($result), true);
       $i=0; 
       foreach($temp as $key){
-        $product = app($this->productClass)->getByParams('id', $key['product_id']);
-        $merchant = $product ? app($this->merchantClass)->getColumnValueByParams('id', $product['merchant_id'], 'name') : null;
-          $temp[$i]['title']     = $product ? $product['title'] : null;
+          $merchant =  app($this->merchantClass)->getColumnValueByParams('id', $key['merchant_id'], 'name');
+          $temp[$i]['title']     = $key['title'];
           $temp[$i]['id']        = $key['id'];
           $temp[$i]['merchant']  = array(
             'name' => $merchant);
           $temp[$i]['qty']     = sizeof($temp);
           $temp[$i]['qty_in_bundled'] = $this->getBundledProducts($data['merchant_id'], $key['id']);
-          $temp[$i]['type']    = $product['type'];
+          $temp[$i]['type']    = $key['type'];
           $temp[$i]['details'] = json_decode($key['details'], true, true);
           $temp[$i]['batch_number'] = isset($key['batch_number']) ? $key['batch_number'] : null;
           $temp[$i]['manufacturing_date'] = isset($key['manufacturing_date']) ? $key['manufacturing_date'] : null;

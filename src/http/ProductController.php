@@ -176,6 +176,16 @@ class ProductController extends APIController
       return sizeof($result) > 0 ? $result[0] : null;
     }
 
+    public function getByTypes($column, $value, $type){
+      if($type == 'all'){
+        $result = Product::where($column, '=', $value)->get();
+        return sizeof($result) > 0 ? $result[0] : null;
+      }else{
+        $result = Product::where($column, '=', $value)->where('type', '=', $type)->get();
+        return sizeof($result) > 0 ? $result[0] : null;
+      }
+    }
+
     public function getProductColumnByParams($column, $value, $productColumn){
       $result = Product::where($column, '=', $value)->get();
       return sizeof($result) > 0 ? $result[0][$productColumn] : null;
