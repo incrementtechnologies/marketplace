@@ -47,10 +47,15 @@ class PaddockPlanTaskController extends APIController
         $data = $request->all();
         $this->model = new PaddockPlanTask();
         $this->retrieveDB($data);
-        for ($i=0; $i < count($this->response['data']); $i++){
-        $item = $this->response['data'][$i];
-        $this->response['data'][$i]['paddock'] = app($this->paddockClass)->getByParams('id', $item['paddock_id'], ['id', 'name']);
-        $this->response['data'][$i]['spray_mix'] = app($this->sprayMixClass)->getByParams('id', $item['paddock_id'], ['id', 'name']);
+        $temp = $this->retrieveDB($data);
+        if(sizeof($temp) > 0){
+            $i = 0;
+            foreach ($temp as $key) {
+                $temp[$i]['paddock'] = app($this->paddockClass)->getByParams('id', $key['paddock_id'], ['id', 'name']);
+                $temp[$i]['spray_mix'] = app($this->sprayMixClass)->getByParams('id', $key['paddock_id'], ['id', 'name']);
+
+                $i++;
+            }
         }
         return $this->response();
     }
