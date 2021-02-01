@@ -405,9 +405,27 @@ class TransferController extends APIController
     $productType = $data['productType'];
     $data['offset'] = isset($data['offset']) ? $data['offset'] : 0;
     $data['limit'] = isset($data['offset']) ? $data['limit'] : 5;
+    $tags = null;
+    switch ($data['tags']) {
+      case 0:
+        $tags = '%herbicide%';
+        break;
+      
+      case 1:
+        $tags = '%fungicide%';
+        break;
+      
+      case 2:
+        $tags = '%insecticide%';
+        break;
+
+      case 3:
+        $tags = 'other';
+        break;
+    }
     if($productType == 'all'){
       if(isset($data['tags'])){
-        if($data['tags'] == 'other'){
+        if($tags == 'other'){
           $result = DB::table('transferred_products as T1')
           ->join('products as T2', 'T2.id', '=', 'T1.product_id')
           ->leftJoin('product_traces as T3', 'T3.product_id', '=', 'T2.id')
@@ -415,11 +433,11 @@ class TransferController extends APIController
           ->where('T1.status', '=', 'active')
           ->where($con['column'], 'like', $con['value'])
           ->where(function($query){
-            return $query->where('T2.tags', 'not like', 'herbicide')
-                        ->orWhere('T2.tags', 'not like', 'fungicide')
-                        ->orWhere('T2.tags', 'not like', 'insecticide');
+            return $query->where('T2.tags', 'not like', '%herbicide%')
+                        ->orWhere('T2.tags', 'not like', '%fungicide%')
+                        ->orWhere('T2.tags', 'not like', '%insecticide%');
           })
-          ->select('T1.*', 'T2.title', 'T2.type', 'T2.details', 'T3.batch_number', 'T3.manufacturing_date')
+          ->select('T1.*', 'T2.title', 'T2.type', 'T2.tags', 'T2.details', 'T3.batch_number', 'T3.manufacturing_date')
           ->orderBy($con['column'], $data['sort'][$con['column']])
           ->get();
         }else{
@@ -428,12 +446,11 @@ class TransferController extends APIController
           ->leftJoin('product_traces as T3', 'T3.product_id', '=', 'T2.id')
           ->where('T1.merchant_id', '=', $data['merchant_id'])
           ->where('T1.status', '=', 'active')
-          ->where('T2.tags', 'like', $data['tags'])
+          ->where('T2.tags', 'like', $tags)
           ->where($con['column'], 'like', $con['value'])
-          ->select('T1.*', 'T2.title', 'T2.type', 'T2.details', 'T3.batch_number', 'T3.manufacturing_date')
+          ->select('T1.*', 'T2.title', 'T2.type', 'T2.tags', 'T2.details', 'T3.batch_number', 'T3.manufacturing_date')
           ->orderBy($con['column'], $data['sort'][$con['column']])
           ->get();
-          dd($result);
         }
       }
       else{
