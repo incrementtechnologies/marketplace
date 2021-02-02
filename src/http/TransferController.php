@@ -407,7 +407,7 @@ class TransferController extends APIController
     $data['limit'] = isset($data['offset']) ? $data['limit'] : 5;
     if($productType == 'all'){
       if(isset($data['tags'])){
-        if($data['tags'] == 'other'){
+        if($data['tags'] == '%other%'){
           $result = DB::table('transferred_products as T1')
           ->join('products as T2', 'T2.id', '=', 'T1.product_id')
           ->leftJoin('product_traces as T3', 'T3.product_id', '=', 'T2.id')
