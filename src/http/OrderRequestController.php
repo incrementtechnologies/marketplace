@@ -119,13 +119,13 @@ class OrderRequestController extends APIController
     $merchant_id = $data['condition'][0];
    
     $totalOrder = sizeof($this->manageResultsMobile($this->response['data']));
-    $totalRecent = sizeof(app($this->paddockPlanTaskClass)->retrievePaddockPlanTaskByParams($merchant_id['column'], $merchant_id['value']));
-    $totalInfocus = sizeof(app($this->paddockPlanTaskClass)->retrievePaddockPlanTaskByParams($merchant_id['column'], $merchant_id['value']));
+    $totalRecent = sizeof(app($this->paddockPlanTaskClass)->retrievePaddockPlanTaskByParamsCompleted($merchant_id['column'], $merchant_id['value']));
+    $totalInfocus = sizeof(app($this->paddockPlanTaskClass)->retrievePaddockPlanTaskByParamsDue($merchant_id['column'], $merchant_id['value']));
     if(sizeof($this->response['data']) > 0 || $totalRecent > 0){
       $temp = array(
         'orders' => $this->manageResultsMobile($this->response['data']),
-        'infocus' => app($this->paddockPlanTaskClass)->retrievePaddockPlanTaskByParams($merchant_id['column'], $merchant_id['value']),
-        'recent' => app($this->paddockPlanTaskClass)->retrievePaddockPlanTaskByParams($merchant_id['column'], $merchant_id['value']),
+        'infocus' => app($this->paddockPlanTaskClass)->retrievePaddockPlanTaskByParamsDue($merchant_id['column'], $merchant_id['value']),
+        'recent' => app($this->paddockPlanTaskClass)->retrievePaddockPlanTaskByParamsCompleted($merchant_id['column'], $merchant_id['value']),
         'totalOrders' => sizeof($this->manageResultsMobile($this->response['data'])),
         'totalRecent' => $totalRecent,
         'totalInfocus' => $totalInfocus

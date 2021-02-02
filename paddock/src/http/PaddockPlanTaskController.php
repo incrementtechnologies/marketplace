@@ -60,8 +60,23 @@ class PaddockPlanTaskController extends APIController
         return $this->response();
     }
 
-    public function retrievePaddockPlanTaskByParams($column, $value){
-        $result = PaddockPlanTask::where($column, '=', $value)->get();
+    public function retrievePaddockPlanTaskByParamsCompleted($column, $value){
+        $result = PaddockPlanTask::where($column, '=', $value)->where('status', '=', 'completed')->get();
+        if(sizeof($result) > 0){
+            $i = 0;
+            foreach ($result as $key) {
+                $result[$i]['due_date'] = Carbon::createFromFormat('Y-m-d', $key['due_date'])->copy()->tz($this->response['timezone'])->format('d M');
+                $result[$i]['paddock'] = app($this->paddockClass)->getByParams('id', $result[$i]['paddock_id'], ['id', 'name']);
+                $result[$i]['spray_mix'] = app($this->sprayMixClass)->getByParams('id', $result[$i]['paddock_id'], ['id', 'name']);
+
+                $i++;
+            }
+        }
+        return $result;
+    }
+
+    public function retrievePaddockPlanTaskByParamsDue($column, $value){
+        $result = PaddockPlanTask::where($column, '=', $value)->where('status', '=', 'pending')->where('status', '=', 'in_progress')->orderBy('due_date', 'desc')->get();
         if(sizeof($result) > 0){
             $i = 0;
             foreach ($result as $key) {
