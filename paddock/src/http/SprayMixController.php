@@ -99,24 +99,23 @@ class SprayMixController extends APIController
       if(sizeof($tempData) > 0){
         $i = 0;
         $getCropName = null;
-        foreach ($tempData as $key) {
-          // dd($key->crops);
-          $getCropName = app($this->cropClass)->retrieveCrops($key->crops);
-          $res[$i]['name'] = $key['name'];
-          $res[$i]['id'] = $key['id'];
-          $res[$i]['status'] = $key['status'];
-          $res[$i]['max_rate'] = (int)$key['maximum_rate'];
-          $res[$i]['min_rate'] = (int)$key['minimum_rate'];
-          $res[$i]['application_rate'] = (int)$key['application_rate'];
-          $res[$i]['short_description'] = $key['short_description'];
-          $res[$i]['units'] = 'L/ha';
-          $res[$i]['types'] = $getCropName;
+        $temp = json_decode(json_encode($tempData), true);
+        foreach ($temp as $key) {
+          $getCropName = app($this->cropClass)->retrieveCrops($key['crops']);
+          $temp[$i]['name'] = $key['name'];
+          $temp[$i]['id'] = $key['id'];
+          $temp[$i]['status'] = $key['status'] == 'pending' ? 'draft' : 'approved';
+          $temp[$i]['max_rate'] = (int)$key['maximum_rate'];
+          $temp[$i]['min_rate'] = (int)$key['minimum_rate'];
+          $temp[$i]['application_rate'] = (int)$key['application_rate'];
+          $temp[$i]['short_description'] = $key['short_description'];
+          $temp[$i]['units'] = 'L/ha';
+          $temp[$i]['types'] = $getCropName;
           $i++;
 
         }
-        $this->response['data'] = $res;
+        $this->response['data'] = $temp;
       }
-      // dd($this->response);
       return $this->response();
   }
   public function retrieveOne(Request $request){
