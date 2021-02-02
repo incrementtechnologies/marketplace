@@ -103,7 +103,7 @@ class SprayMixController extends APIController
         foreach ($temp as $key) {
           $array = ['pending', 'draft'];
           $getCropName = app($this->cropClass)->retrieveCrops($key['crops']);
-          $temp[$i]['name'] = $key['nacdme'];
+          $temp[$i]['name'] = $key['name'];
           $temp[$i]['id'] = $key['id'];
           $temp[$i]['status'] = in_array($key['status'], $array) ? 'draft' : 'approved';
           $temp[$i]['max_rate'] = (int)$key['maximum_rate'];

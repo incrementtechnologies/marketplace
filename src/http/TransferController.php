@@ -437,7 +437,7 @@ class TransferController extends APIController
                         ->orWhere('T2.tags', 'not like', '%fungicide%')
                         ->orWhere('T2.tags', 'not like', '%insecticide%');
           })
-          ->select('T1.*', 'T2.title', 'T2.type', 'T2.tags', 'T2.code', 'T2.details', 'T3.batch_number', 'T3.manufacturing_date')
+          ->select('*')
           ->orderBy($con['column'], $data['sort'][$con['column']])
           ->get();
         }else{
@@ -448,7 +448,7 @@ class TransferController extends APIController
           ->where('T1.status', '=', 'active')
           ->where('T2.tags', 'like', $tags)
           ->where($con['column'], 'like', $con['value'])
-          ->select('T1.*', 'T2.title', 'T2.type', 'T2.tags', 'T2.code', 'T2.details', 'T3.batch_number', 'T3.manufacturing_date')
+          ->select('*')
           ->orderBy($con['column'], $data['sort'][$con['column']])
           ->get();
         }
@@ -460,7 +460,8 @@ class TransferController extends APIController
         ->where('T1.merchant_id', '=', $data['merchant_id'])
         ->where('T1.status', '=', 'active')
         ->where($con['column'], 'like', $con['value'])
-        ->select('T1.*', 'T2.title', 'T2.type', 'T2.details', 'T2.code', 'T3.batch_number', 'T3.manufacturing_date')
+        ->whereNull('T1.deleted_at')
+        ->select('*')
         ->skip($data['offset'])->take($data['limit'])
         ->orderBy($con['column'], $data['sort'][$con['column']])
         ->get();
@@ -474,16 +475,21 @@ class TransferController extends APIController
        ->where('T1.status', '=', 'active')
        ->where($con['column'], 'like', $con['value'])
        ->where('T2.type', '=', $productType)
-       ->select('T1.*', 'T2.title', 'T2.type', 'T2.details', 'T2.code', 'T3.batch_number', 'T3.manufacturing_date')
+       ->select('*')
        ->skip($data['offset'])->take($data['limit'])
        ->orderBy($con['column'], $data['sort'][$con['column']])
        ->get();
     }
     $size = sizeof($result);
     if(sizeof($result)){
-      $temp = json_decode(json_encode($result), true);
+      $temp =  json_decode(json_encode($result), true);
       $i=0; 
       foreach($temp as $key){
+          unset($temp[$i]['deleted_at']);
+          unset($temp[$i]['updated_at']);
+          unset($temp[$i]['created_at']);
+          unset($temp[$i]['payload']);
+          unset($temp[$i]['price_settings']);
           $merchant =  app($this->merchantClass)->getColumnValueByParams('id', $key['merchant_id'], 'name');
           $temp[$i]['title']     = $key['title'];
           $temp[$i]['id']        = $key['id'];
@@ -492,7 +498,7 @@ class TransferController extends APIController
           $temp[$i]['qty']     = sizeof($temp);
           $temp[$i]['qty_in_bundled'] = $this->getBundledProducts($data['merchant_id'], $key['id']);
           $temp[$i]['type']    = $key['type'];
-          $temp[$i]['details'] = json_decode($key['details'], true, true);
+          $temp[$i]['details'] = json_decode($key['details'], true);
           $temp[$i]['batch_number'] = isset($key['batch_number']) ? $key['batch_number'] : null;
           $temp[$i]['manufacturing_date'] = isset($key['manufacturing_date']) ? $key['manufacturing_date'] : null;
         $i++;
