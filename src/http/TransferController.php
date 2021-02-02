@@ -405,27 +405,9 @@ class TransferController extends APIController
     $productType = $data['productType'];
     $data['offset'] = isset($data['offset']) ? $data['offset'] : 0;
     $data['limit'] = isset($data['offset']) ? $data['limit'] : 5;
-    $tags = null;
     if($productType == 'all'){
       if(isset($data['tags'])){
-        switch ($data['tags']) {
-          case 0:
-            $tags = '%herbicide%';
-            break;
-          
-          case 1:
-            $tags = '%fungicide%';
-            break;
-          
-          case 2:
-            $tags = '%insecticide%';
-            break;
-    
-          case 3:
-            $tags = 'other';
-            break;
-        }
-        if($tags == 'other'){
+        if($data['tags'] == 'other'){
           $result = DB::table('transferred_products as T1')
           ->join('products as T2', 'T2.id', '=', 'T1.product_id')
           ->leftJoin('product_traces as T3', 'T3.product_id', '=', 'T2.id')
@@ -446,7 +428,7 @@ class TransferController extends APIController
           ->leftJoin('product_traces as T3', 'T3.product_id', '=', 'T2.id')
           ->where('T1.merchant_id', '=', $data['merchant_id'])
           ->where('T1.status', '=', 'active')
-          ->where('T2.tags', 'like', $tags)
+          ->where('T2.tags', 'like', $data['tags'])
           ->where($con['column'], 'like', $con['value'])
           ->select('*')
           ->orderBy($con['column'], $data['sort'][$con['column']])

@@ -121,7 +121,7 @@ class OrderRequestController extends APIController
     $totalOrder = sizeof($this->manageResultsMobile($this->response['data']));
     $totalRecent = sizeof(app($this->paddockPlanTaskClass)->retrievePaddockPlanTaskByParamsCompleted($merchant_id['column'], $merchant_id['value']));
     $totalInfocus = sizeof(app($this->paddockPlanTaskClass)->retrievePaddockPlanTaskByParamsDue($merchant_id['column'], $merchant_id['value']));
-    if(sizeof($this->response['data']) > 0 || $totalRecent > 0){
+    if(sizeof($this->response['data']) > 0 || $totalRecent > 0 || $totalInfocus > 0){
       $temp = array(
         'orders' => $this->manageResultsMobile($this->response['data']),
         'infocus' => app($this->paddockPlanTaskClass)->retrievePaddockPlanTaskByParamsDue($merchant_id['column'], $merchant_id['value']),
