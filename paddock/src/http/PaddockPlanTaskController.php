@@ -43,7 +43,7 @@ class PaddockPlanTaskController extends APIController
       }
   }
 
-    public function retrieveMobileByParams(Request $request){
+    public function retrieveMobileBymParams(Request $request){
         $data = $request->all();
         $this->model = new PaddockPlanTask();
         $this->retrieveDB($data);

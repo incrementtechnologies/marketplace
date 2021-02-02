@@ -406,25 +406,25 @@ class TransferController extends APIController
     $data['offset'] = isset($data['offset']) ? $data['offset'] : 0;
     $data['limit'] = isset($data['offset']) ? $data['limit'] : 5;
     $tags = null;
-    switch ($data['tags']) {
-      case 0:
-        $tags = '%herbicide%';
-        break;
-      
-      case 1:
-        $tags = '%fungicide%';
-        break;
-      
-      case 2:
-        $tags = '%insecticide%';
-        break;
-
-      case 3:
-        $tags = 'other';
-        break;
-    }
     if($productType == 'all'){
       if(isset($data['tags'])){
+        switch ($data['tags']) {
+          case 0:
+            $tags = '%herbicide%';
+            break;
+          
+          case 1:
+            $tags = '%fungicide%';
+            break;
+          
+          case 2:
+            $tags = '%insecticide%';
+            break;
+    
+          case 3:
+            $tags = 'other';
+            break;
+        }
         if($tags == 'other'){
           $result = DB::table('transferred_products as T1')
           ->join('products as T2', 'T2.id', '=', 'T1.product_id')
@@ -521,7 +521,7 @@ class TransferController extends APIController
       ->where('T1.status', '=', 'active')
       ->where('name', 'like', $con['value'])
       ->orderBy($con['column'], $data['sort'][$con['column']])
-      ->get(['T1.*', 'T2.title']);
+      ->get(['T1.*', 'T2.title', 'T2.code']);
     }else{
       $result = DB::table('transferred_products as T1')
       ->join('products as T2', 'T2.id', '=', 'T1.product_id')
@@ -531,7 +531,7 @@ class TransferController extends APIController
       ->where('name', 'like', $con['value'])
       ->where('T2.type', '=', $productType)
       ->orderBy($con['column'], $data['sort'][$con['column']])
-      ->get(['T1.*', 'T2.title']);
+      ->get(['T1.*', 'T2.title', 'T2.code']);
     }
     $result = $result->groupBy('product_id');
     $size = $result->count();
