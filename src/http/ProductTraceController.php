@@ -106,7 +106,8 @@ class ProductTraceController extends APIController
         }else{
           ProductTrace::where('id', '=', $item['id'])->update(array(
             'nfc' => $data['nfc'],
-            'updated_at' => Carbon::now()
+            'updated_at' => Carbon::now(),
+            'status' => 'active'
           ));
           $this->response['data'][$i]['nfc'] = $data['nfc'];
         }

@@ -72,7 +72,7 @@ class ProductController extends APIController
       return $this->response();
     }
 
-     public function retrieveBasic(Request $request){
+    public function retrieveBasic(Request $request){
       $data = $request->all();
       $inventoryType = $data['inventory_type'];
       $accountId = $data['account_id'];
@@ -88,8 +88,28 @@ class ProductController extends APIController
         $this->response['size'] = Product::where($data['condition'][0]['column'], $data['condition'][0]['clause'], $data['condition'][0]['value'])->where($data['condition'][1]['column'], $data['condition'][1]['clause'], $data['condition'][1]['value'])->count();
       }else if(sizeof($data['condition']) == 1){
         $this->response['size'] = Product::where($data['condition'][0]['column'], $data['condition'][0]['clause'], $data['condition'][0]['value'])->count();
-      }
-      
+      }  
+      return $this->response();
+    }
+
+    public function retrieveBasicMobile(Request $request){
+      $data = $request->all();
+      $inventoryType = $data['inventory_type'];
+      $accountId = $data['account_id'];
+      $result  = Product::where($data['condition'][0]['column'], $data['condition'][0]['clause'], $data['condition'][0]['value'])
+                ->where($data['condition'][1]['column'], $data['condition'][1]['clause'], $data['condition'][1]['value'])->get();
+      $this->retrieveDB($data);
+      $this->response['data'] = $this->manageResultBasic($result, null, $inventoryType);
+
+      if(sizeof($data['condition']) == 3){
+        $this->response['size'] = Product::where($data['condition'][0]['column'], $data['condition'][0]['clause'], $data['condition'][0]['value'])
+        ->where($data['condition'][1]['column'], $data['condition'][1]['clause'], $data['condition'][1]['value'])
+        ->where($data['condition'][2]['column'], $data['condition'][2]['clause'], $data['condition'][2]['value'])->count();
+      }else if(sizeof($data['condition']) == 2){
+        $this->response['size'] = Product::where($data['condition'][0]['column'], $data['condition'][0]['clause'], $data['condition'][0]['value'])->where($data['condition'][1]['column'], $data['condition'][1]['clause'], $data['condition'][1]['value'])->count();
+      }else if(sizeof($data['condition']) == 1){
+        $this->response['size'] = Product::where($data['condition'][0]['column'], $data['condition'][0]['clause'], $data['condition'][0]['value'])->count();
+      }  
       return $this->response();
     }
 
