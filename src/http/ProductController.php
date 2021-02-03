@@ -186,6 +186,11 @@ class ProductController extends APIController
       }
     }
 
+    public function getCount($column, $value){
+      $result = Product::where($column, '=', $value)->count();
+      return $result;
+    }
+
     public function getProductColumnByParams($column, $value, $productColumn){
       $result = Product::where($column, '=', $value)->get();
       return sizeof($result) > 0 ? $result[0][$productColumn] : null;

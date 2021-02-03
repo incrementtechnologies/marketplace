@@ -419,7 +419,7 @@ class TransferController extends APIController
                         ->orWhere('T2.tags', 'not like', '%fungicide%')
                         ->orWhere('T2.tags', 'not like', '%insecticide%');
           })
-          ->select('*')
+          ->select('*', 'T2.id as product_id')
           ->orderBy($con['column'], $data['sort'][$con['column']])
           ->get();
         }else{
@@ -477,7 +477,7 @@ class TransferController extends APIController
           $temp[$i]['id']        = $key['id'];
           $temp[$i]['merchant']  = array(
             'name' => $merchant);
-          $temp[$i]['qty']     = sizeof($temp);
+          $temp[$i]['qty']     = app($this->productClass)->getCount('id', $key['product_id']);
           $temp[$i]['qty_in_bundled'] = $this->getBundledProducts($data['merchant_id'], $key['id']);
           $temp[$i]['type']    = $key['type'];
           $temp[$i]['details'] = json_decode($key['details'], true);
