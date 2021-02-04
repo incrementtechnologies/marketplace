@@ -458,6 +458,7 @@ class TransferController extends APIController
           $temp[$i]['merchant']  = array(
             'name' => $merchant);
           $temp[$i]['qty']     = ($temp[$i]['count'] - $batches);
+          $temp[$i]['volume'] = app($this->productAttrClass)->getProductUnits($key['product_id']);
           $temp[$i]['qty_in_bundled'] = $this->getBundledProducts($data['merchant_id'], $key['id']);
           $temp[$i]['type']    = $key['type'];
           $temp[$i]['details'] = json_decode($key['details'], true);
@@ -492,7 +493,7 @@ class TransferController extends APIController
         ->whereNull('T1.deleted_at')
         ->skip($data['offset'])->take($data['limit'])
         ->orderBy($con['column'], $data['sort'][$con['column']])
-        ->select('*', DB::raw('Count(T2.id) as count'), 'T3.id as productTraceId', 'T2.code as product_code')
+        ->select('*', DB::raw('Sum(T2.id) as qty'), 'T3.id as productTraceId', 'T2.code as product_code')
         ->groupBy('T1.product_id')
         ->where('T1.merchant_id', '=', $data['merchant_id'])
         ->get();
@@ -509,7 +510,7 @@ class TransferController extends APIController
         ->skip($data['offset'])->take($data['limit'])
         ->orderBy($con['column'], $data['sort'][$con['column']])
         ->groupBy('T1.product_id')
-        ->select('*', DB::raw('Count(T2.id) as count'), 'T3.id as productTraceId', 'T2.code as product_code')
+        ->select('*', DB::raw('Sum(T2.id) as qty'), 'T3.id as productTraceId', 'T2.code as product_code')
         ->groupBy('T1.product_id')
         ->where('T1.merchant_id', '=', $data['merchant_id'])
         ->get();
@@ -531,6 +532,7 @@ class TransferController extends APIController
           $temp[$i]['merchant']  = array(
             'name' => $merchant);
           $temp[$i]['qty']     = $temp[$i]['count'];
+          $temp[$i]['volume'] = app($this->productAttrClass)->getProductUnits($key['product_id']);
           $temp[$i]['qty_in_bundled'] = $this->getBundledProducts($data['merchant_id'], $key['id']);
           $temp[$i]['type']    = $key['type'];
           $temp[$i]['details'] = json_decode($key['details'], true);
@@ -564,7 +566,7 @@ class TransferController extends APIController
       ->whereNull('T1.deleted_at')
       ->skip($data['offset'])->take($data['limit'])
       ->orderBy($con['column'], $data['sort'][$con['column']])
-      ->select('*', 'T2.title', 'T2.code', DB::raw('Count(T2.id) as count'))
+      ->select('*', 'T2.title', 'T2.code', DB::raw('Sum(T2.id) as qty'))
       ->groupBy('T1.product_id')
       ->get();
     }else{
@@ -578,7 +580,7 @@ class TransferController extends APIController
       ->whereNull('T1.deleted_at')
       ->skip($data['offset'])->take($data['limit'])
       ->orderBy($con['column'], $data['sort'][$con['column']])
-      ->select('*', 'T2.title', 'T2.code', DB::raw('Count(T2.id) as count'))
+      ->select('*', 'T2.title', 'T2.code', DB::raw('Sum(T2.id) as qty'))
       ->groupBy('T1.product_id')
       ->get();
     }
