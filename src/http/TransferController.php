@@ -492,7 +492,7 @@ class TransferController extends APIController
         ->whereNull('T1.deleted_at')
         ->skip($data['offset'])->take($data['limit'])
         ->orderBy($con['column'], $data['sort'][$con['column']])
-        ->select('*', DB::raw('Count(T2.id) as count'), 'T3.id as productTraceId')
+        ->select('*', DB::raw('Count(T2.id) as count'), 'T3.id as productTraceId', 'T2.code as product_code')
         ->groupBy('T1.product_id')
         ->where('T1.merchant_id', '=', $data['merchant_id'])
         ->get();
@@ -509,7 +509,7 @@ class TransferController extends APIController
         ->skip($data['offset'])->take($data['limit'])
         ->orderBy($con['column'], $data['sort'][$con['column']])
         ->groupBy('T1.product_id')
-        ->select('*', DB::raw('Count(T2.id) as count'), 'T3.id as productTraceId')
+        ->select('*', DB::raw('Count(T2.id) as count'), 'T3.id as productTraceId', 'T2.code as product_code')
         ->groupBy('T1.product_id')
         ->where('T1.merchant_id', '=', $data['merchant_id'])
         ->get();
@@ -562,6 +562,7 @@ class TransferController extends APIController
       ->where('T1.status', '=', 'active')
       ->where('name', 'like', $con['value'])
       ->whereNull('T1.deleted_at')
+      ->skip($data['offset'])->take($data['limit'])
       ->orderBy($con['column'], $data['sort'][$con['column']])
       ->select('T1.*', 'T2.title', 'T2.code', DB::raw('Count(T2.id) as count'))
       ->groupBy('T1.product_id')
@@ -575,6 +576,7 @@ class TransferController extends APIController
       ->where('name', 'like', $con['value'])
       ->where('T2.type', '=', $productType)
       ->whereNull('T1.deleted_at')
+      ->skip($data['offset'])->take($data['limit'])
       ->orderBy($con['column'], $data['sort'][$con['column']])
       ->select('T1.*', 'T2.title', 'T2.code', DB::raw('Count(T2.id) as count'))
       ->groupBy('T1.product_id')
