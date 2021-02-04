@@ -21,6 +21,17 @@ class ProductAttributeController extends APIController
       return (sizeof($result) > 0) ? $result : null;
     }
 
+    public function getProductUnits($id){
+      $result = ProductAttribute::where('product_id', '=', $id)->select('id', 'payload', 'payload_value')->get();
+      if(sizeof($result) > 0){
+        $i = 0;
+        foreach ($result as $key) {
+          $result[$i]['volume'] = $result[$i]['payload_value'].' '.$result[$i]['payload'];
+        }
+      }
+      return (sizeof($result) > 0) ? $result[0]->volume : null;
+    }
+
     public function getByParams($column, $value){
       $result = ProductAttribute::where($column, '=', $value)->orderBy('created_at', 'desc')->select(['payload', 'payload_value'])->get();
       return (sizeof($result) > 0) ? $result : null;
