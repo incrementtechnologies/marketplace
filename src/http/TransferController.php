@@ -416,7 +416,7 @@ class TransferController extends APIController
         ->whereNull('T1.deleted_at')
         ->skip($data['offset'])->take($data['limit'])
         ->orderBy($con['column'], $data['sort'][$con['column']])
-        ->select('*', DB::raw('Count(T2.id) as count'), 'T3.id as productTraceId')
+        ->select('*', DB::raw('Sum(T2.id) as qty'), 'T3.id as productTraceId')
         ->groupBy('T1.product_id')
         ->where('T1.merchant_id', '=', $data['merchant_id'])
         ->get();
@@ -435,7 +435,7 @@ class TransferController extends APIController
         ->whereNull('T1.deleted_at')
         ->skip($data['offset'])->take($data['limit'])
         ->orderBy($con['column'], $data['sort'][$con['column']])
-        ->select('*', DB::raw('Count(T2.id) as count'), 'T3.id as productTraceId')
+        ->select('*', DB::raw('Sum(T2.id) as qty'), 'T3.id as productTraceId')
         ->groupBy('T1.product_id')
         ->where('T1.merchant_id', '=', $data['merchant_id'])
         ->get();
@@ -457,7 +457,7 @@ class TransferController extends APIController
           $temp[$i]['id']        = $key['id'];
           $temp[$i]['merchant']  = array(
             'name' => $merchant);
-          $temp[$i]['qty']     = ($temp[$i]['count'] - $batches);
+          $temp[$i]['qty']     = ($temp[$i]['qty'] - $batches);
           $temp[$i]['volume'] = app($this->productAttrClass)->getProductUnits($key['product_id']);
           $temp[$i]['qty_in_bundled'] = $this->getBundledProducts($data['merchant_id'], $key['id']);
           $temp[$i]['type']    = $key['type'];
@@ -531,7 +531,7 @@ class TransferController extends APIController
           $temp[$i]['id']        = $key['id'];
           $temp[$i]['merchant']  = array(
             'name' => $merchant);
-          $temp[$i]['qty']     = $temp[$i]['count'];
+          $temp[$i]['qty']     = $temp[$i]['qty'];
           $temp[$i]['volume'] = app($this->productAttrClass)->getProductUnits($key['product_id']);
           $temp[$i]['qty_in_bundled'] = $this->getBundledProducts($data['merchant_id'], $key['id']);
           $temp[$i]['type']    = $key['type'];
@@ -600,7 +600,7 @@ class TransferController extends APIController
           $temp[$i]['id']        = $key['id'];
           $temp[$i]['merchant']  = array(
             'name' => $merchant);
-          $temp[$i]['qty']     = $temp[$i]['count'];
+          $temp[$i]['qty']     = $temp[$i]['qty'];
           $temp[$i]['qty_in_bundled'] = $this->getBundledProducts($data['merchant_id'], $key['id']);
           $temp[$i]['type']    = $key['type'];
           $temp[$i]['details'] = json_decode($key['details'], true);
