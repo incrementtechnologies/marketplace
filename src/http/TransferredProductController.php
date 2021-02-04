@@ -131,6 +131,11 @@ class TransferredProductController extends APIController
       return $result;
     }
 
+    public function getActiveProductQty($column, $value, $merchantId){
+      $result = TransferredProduct::where($column, '=', $value)->where('merchant_id', '=', $merchantId)->where('status', '=', 'active')->count();
+      return $result;
+    }
+
     public function getSizeLimit($column, $value, $date){
       $result = TransferredProduct::where($column, '=', $value)->where('created_at', '>', $date)->limit(1)->count();
       return $result;

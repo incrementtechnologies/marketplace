@@ -20,6 +20,7 @@ class TransferController extends APIController
     public $landBlockProductClass = 'App\Http\Controllers\LandBlockProductController';
     public $orderRequestClass = 'Increment\Marketplace\Http\OrderRequestController';
     public $dailyLoadingListClass = 'Increment\Marketplace\Http\DailyLoadingListController';
+    public $batcProductClass = 'Increment\Marketplace\Paddock\Http\BatchProductController';
     function __construct(){
       $this->model = new Transfer();
       $this->localization();
@@ -398,6 +399,82 @@ class TransferController extends APIController
     return $this->response();
   }
 
+  public function retrieveProductsFirstLevelEndUser(Request $request){
+    $data = $request->all();
+    $con = $data['condition'];
+    $result = null;
+    $productType = $data['productType'];
+    $data['offset'] = isset($data['offset']) ? $data['offset'] : 0;
+    $data['limit'] = isset($data['offset']) ? $data['limit'] : 5;
+    if($productType == 'all'){
+      $result = DB::table('transferred_products as T1')
+        ->leftJoin('products as T2', 'T2.id', '=', 'T1.product_id')
+        ->leftJoin('product_traces as T3', 'T3.product_id', '=', 'T2.id')
+        ->where('T1.merchant_id', '=', $data['merchant_id'])
+        ->where('T1.status', '=', 'active')
+        ->where($con['column'], 'like', $con['value'])
+        ->whereNull('T1.deleted_at')
+        ->skip($data['offset'])->take($data['limit'])
+        ->orderBy($con['column'], $data['sort'][$con['column']])
+        ->select('*', DB::raw('Count(T2.id) as count'), 'T3.id as productTraceId')
+        ->groupBy('T1.product_id')
+        ->where('T1.merchant_id', '=', $data['merchant_id'])
+        ->get();
+        // $result = $result->groupBy('product_id')
+
+        // dd($result);
+    }
+    else{
+       $result = DB::table('transferred_products as T1')
+        ->leftJoin('products as T2', 'T2.id', '=', 'T1.product_id')
+        ->leftJoin('product_traces as T3', 'T3.product_id', '=', 'T2.id')
+        ->where('T1.merchant_id', '=', $data['merchant_id'])
+        ->where('T1.status', '=', 'active')
+        ->where($con['column'], 'like', $con['value'])
+        ->where('T2.type', '=', $productType)
+        ->whereNull('T1.deleted_at')
+        ->skip($data['offset'])->take($data['limit'])
+        ->orderBy($con['column'], $data['sort'][$con['column']])
+        ->select('*', DB::raw('Count(T2.id) as count'), 'T3.id as productTraceId')
+        ->groupBy('T1.product_id')
+        ->where('T1.merchant_id', '=', $data['merchant_id'])
+        ->get();
+    }
+    // $result = $result->groupBy('productId');
+    $size = sizeof($result);
+    if(sizeof($result)){
+      $temp =  json_decode(json_encode($result), true);
+      $i=0; 
+      foreach($temp as $key){
+          unset($temp[$i]['deleted_at']);
+          unset($temp[$i]['updated_at']);
+          unset($temp[$i]['created_at']);
+          unset($temp[$i]['payload']);
+          unset($temp[$i]['price_settings']);
+          $batches = app($this->batcProductClass)->getProductQtyTrace($key['merchant_id'], 'product_trace_id', $temp[$i]['productTraceId']);
+          $merchant =  app($this->merchantClass)->getColumnValueByParams('id', $key['merchant_id'], 'name');
+          $temp[$i]['title']     = $key['title'];
+          $temp[$i]['id']        = $key['id'];
+          $temp[$i]['merchant']  = array(
+            'name' => $merchant);
+          $temp[$i]['qty']     = ($temp[$i]['count'] - $batches);
+          $temp[$i]['qty_in_bundled'] = $this->getBundledProducts($data['merchant_id'], $key['id']);
+          $temp[$i]['type']    = $key['type'];
+          $temp[$i]['details'] = json_decode($key['details'], true);
+          $temp[$i]['batch_number'] = isset($key['batch_number']) ? $key['batch_number'] : null;
+          $temp[$i]['manufacturing_date'] = isset($key['manufacturing_date']) ? $key['manufacturing_date'] : null;
+        $i++;
+      }
+      $this->response['data'] = $temp;
+      $this->response['size'] = $size;
+      return $this->response();    
+    }else{
+      $this->response['data'] = [];
+      $this->response['size'] = $size;
+      return $this->response();
+    }
+  }
+
   public function retrieveProductsFirstLevel(Request $request){
     $data = $request->all();
     $con = $data['condition'];
@@ -406,62 +483,38 @@ class TransferController extends APIController
     $data['offset'] = isset($data['offset']) ? $data['offset'] : 0;
     $data['limit'] = isset($data['offset']) ? $data['limit'] : 5;
     if($productType == 'all'){
-      if(isset($data['tags'])){
-        if($data['tags'] == '%other%'){
-          $result = DB::table('transferred_products as T1')
-          ->join('products as T2', 'T2.id', '=', 'T1.product_id')
-          ->leftJoin('product_traces as T3', 'T3.product_id', '=', 'T2.id')
-          ->where('T1.merchant_id', '=', $data['merchant_id'])
-          ->where('T1.status', '=', 'active')
-          ->where($con['column'], 'like', $con['value'])
-          ->where(function($query){
-            return $query->where('T2.tags', 'not like', '%herbicide%')
-                        ->orWhere('T2.tags', 'not like', '%fungicide%')
-                        ->orWhere('T2.tags', 'not like', '%insecticide%');
-          })
-          ->select('*', 'T2.id as product_id')
-          ->orderBy($con['column'], $data['sort'][$con['column']])
-          ->get();
-        }else{
-          $result = DB::table('transferred_products as T1')
-          ->join('products as T2', 'T2.id', '=', 'T1.product_id')
-          ->leftJoin('product_traces as T3', 'T3.product_id', '=', 'T2.id')
-          ->where('T1.merchant_id', '=', $data['merchant_id'])
-          ->where('T1.status', '=', 'active')
-          ->where('T2.tags', 'like', $data['tags'])
-          ->where($con['column'], 'like', $con['value'])
-          ->select('*')
-          ->orderBy($con['column'], $data['sort'][$con['column']])
-          ->get();
-        }
-      }
-      else{
         $result = DB::table('transferred_products as T1')
-        ->join('products as T2', 'T2.id', '=', 'T1.product_id')
+        ->leftJoin('products as T2', 'T2.id', '=', 'T1.product_id')
         ->leftJoin('product_traces as T3', 'T3.product_id', '=', 'T2.id')
         ->where('T1.merchant_id', '=', $data['merchant_id'])
         ->where('T1.status', '=', 'active')
         ->where($con['column'], 'like', $con['value'])
         ->whereNull('T1.deleted_at')
-        ->select('*')
         ->skip($data['offset'])->take($data['limit'])
         ->orderBy($con['column'], $data['sort'][$con['column']])
+        ->select('*', DB::raw('Count(T2.id) as count'), 'T3.id as productTraceId', 'T2.code as product_code')
+        ->groupBy('T1.product_id')
+        ->where('T1.merchant_id', '=', $data['merchant_id'])
         ->get();
-      }
     }
     else{
        $result = DB::table('transferred_products as T1')
-       ->join('products as T2', 'T2.id', '=', 'T1.product_id')
-       ->leftJoin('product_traces as T3', 'T3.product_id', '=', 'T2.id')
-       ->where('T1.merchant_id', '=', $data['merchant_id'])
-       ->where('T1.status', '=', 'active')
-       ->where($con['column'], 'like', $con['value'])
-       ->where('T2.type', '=', $productType)
-       ->select('*')
-       ->skip($data['offset'])->take($data['limit'])
-       ->orderBy($con['column'], $data['sort'][$con['column']])
-       ->get();
+        ->leftJoin('products as T2', 'T2.id', '=', 'T1.product_id')
+        ->leftJoin('product_traces as T3', 'T3.product_id', '=', 'T2.id')
+        ->where('T1.merchant_id', '=', $data['merchant_id'])
+        ->where('T1.status', '=', 'active')
+        ->where($con['column'], 'like', $con['value'])
+        ->where('T2.type', '=', $productType)
+        ->whereNull('T1.deleted_at')
+        ->skip($data['offset'])->take($data['limit'])
+        ->orderBy($con['column'], $data['sort'][$con['column']])
+        ->groupBy('T1.product_id')
+        ->select('*', DB::raw('Count(T2.id) as count'), 'T3.id as productTraceId', 'T2.code as product_code')
+        ->groupBy('T1.product_id')
+        ->where('T1.merchant_id', '=', $data['merchant_id'])
+        ->get();
     }
+    // $result = $result->groupBy('productId');
     $size = sizeof($result);
     if(sizeof($result)){
       $temp =  json_decode(json_encode($result), true);
@@ -477,7 +530,7 @@ class TransferController extends APIController
           $temp[$i]['id']        = $key['id'];
           $temp[$i]['merchant']  = array(
             'name' => $merchant);
-          $temp[$i]['qty']     = app($this->productClass)->getCount('id', $key['product_id']);
+          $temp[$i]['qty']     = $temp[$i]['count'];
           $temp[$i]['qty_in_bundled'] = $this->getBundledProducts($data['merchant_id'], $key['id']);
           $temp[$i]['type']    = $key['type'];
           $temp[$i]['details'] = json_decode($key['details'], true);
@@ -508,8 +561,12 @@ class TransferController extends APIController
       ->where('T1.merchant_id', '=', $data['merchant_id'])
       ->where('T1.status', '=', 'active')
       ->where('name', 'like', $con['value'])
+      ->whereNull('T1.deleted_at')
+      ->skip($data['offset'])->take($data['limit'])
       ->orderBy($con['column'], $data['sort'][$con['column']])
-      ->get(['T1.*', 'T2.title', 'T2.code']);
+      ->select('*', 'T2.title', 'T2.code', DB::raw('Count(T2.id) as count'))
+      ->groupBy('T1.product_id')
+      ->get();
     }else{
       $result = DB::table('transferred_products as T1')
       ->join('products as T2', 'T2.id', '=', 'T1.product_id')
@@ -518,32 +575,43 @@ class TransferController extends APIController
       ->where('T1.status', '=', 'active')
       ->where('name', 'like', $con['value'])
       ->where('T2.type', '=', $productType)
+      ->whereNull('T1.deleted_at')
+      ->skip($data['offset'])->take($data['limit'])
       ->orderBy($con['column'], $data['sort'][$con['column']])
-      ->get(['T1.*', 'T2.title', 'T2.code']);
+      ->select('*', 'T2.title', 'T2.code', DB::raw('Count(T2.id) as count'))
+      ->groupBy('T1.product_id')
+      ->get();
     }
-    $result = $result->groupBy('product_id');
     $size = $result->count();
     $testArray = array();
     if(sizeof($result) > 0){  
-      foreach($result as $key => $value){
-        $product = app($this->productClass)->getByParams('id', $key);
-        $item = array(
-          'title'     => $product ? $product['title'] : null,
-          'id'        => $key,
-          'code'      => $value[0]->code,
-          'merchant'  => array(
-            'name'    => $product ? app($this->merchantClass)->getColumnValueByParams('id', $product['merchant_id'], 'name') : null
-          ),
-          'qty'     => sizeof($value),
-          'qty_in_bundled' => $this->getBundledProducts($data['merchant_id'], $key),
-          'type'    => $product ? $product['type'] : null
-        );
-        $testArray[] = $item;
+      $temp =  json_decode(json_encode($result), true);
+      $i=0; 
+      foreach($temp as $key){
+          unset($temp[$i]['deleted_at']);
+          unset($temp[$i]['updated_at']);
+          unset($temp[$i]['created_at']);
+          unset($temp[$i]['payload']);
+          unset($temp[$i]['price_settings']);
+          $merchant =  app($this->merchantClass)->getColumnValueByParams('id', $key['merchant_id'], 'name');
+          $temp[$i]['title']     = $key['title'];
+          $temp[$i]['id']        = $key['id'];
+          $temp[$i]['merchant']  = array(
+            'name' => $merchant);
+          $temp[$i]['qty']     = $temp[$i]['count'];
+          $temp[$i]['qty_in_bundled'] = $this->getBundledProducts($data['merchant_id'], $key['id']);
+          $temp[$i]['type']    = $key['type'];
+          $temp[$i]['details'] = json_decode($key['details'], true);
+        $i++;
       }
+      $this->response['data'] = $temp;
+      $this->response['size'] = $size;
+      return $this->response();
+    }else{
+      $this->response['data'] = [];
+      $this->response['size'] = $size;
+      return $this->response();
     }
-    $this->response['data'] = $testArray;
-    $this->response['size'] = $size;
-    return $this->response();
   }
 
   public function getBundledProducts($merchantId, $productId){

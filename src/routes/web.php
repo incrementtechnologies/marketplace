@@ -52,6 +52,7 @@ $controller = 'Increment\Marketplace\Http\ProductController@';
 Route::post($route.'create', $controller."create");
 Route::post($route.'retrieve', $controller."retrieve");
 Route::post($route.'retrieve_basic', $controller."retrieveBasic");
+Route::post($route.'retrieve_basic_mobile', $controller."retrieveBasicMobile");
 Route::post($route.'retrieve_mobile', $controller."retrieveMobile");
 Route::post($route.'retrieve_with_order_number', $controller."retrieveWithOrderNumber");
 Route::post($route.'update', $controller."update");
@@ -141,6 +142,7 @@ Route::post($route.'retrieve_by_pagination', $controller."retrieveByPagination")
 Route::post($route.'retrieve_product_title', $controller."retrieveProductTitle");
 Route::post($route.'retrieve_by_consignment_pagination', $controller."retrieveByConsignmentsPagination");
 Route::post($route.'retrieve_products_first_level', $controller."retrieveProductsFirstLevel");
+Route::post($route.'retrieve_products_first_level_end_user', $controller."retrieveProductsFirstLevelEndUser");
 Route::post($route.'retrieve_products_second_level', $controller."retrieveProductsSecondLevel");
 Route::post($route.'retrieve_consignments', $controller."retrieveConsignments");
 Route::post($route.'retrieve_allowed_only', $controller."retrieveAllowedOnly");
