@@ -564,7 +564,7 @@ class TransferController extends APIController
       ->whereNull('T1.deleted_at')
       ->skip($data['offset'])->take($data['limit'])
       ->orderBy($con['column'], $data['sort'][$con['column']])
-      ->select('T1.*', 'T2.title', 'T2.code', DB::raw('Count(T2.id) as count'))
+      ->select('*', 'T2.title', 'T2.code', DB::raw('Count(T2.id) as count'))
       ->groupBy('T1.product_id')
       ->get();
     }else{
@@ -578,32 +578,40 @@ class TransferController extends APIController
       ->whereNull('T1.deleted_at')
       ->skip($data['offset'])->take($data['limit'])
       ->orderBy($con['column'], $data['sort'][$con['column']])
-      ->select('T1.*', 'T2.title', 'T2.code', DB::raw('Count(T2.id) as count'))
+      ->select('*', 'T2.title', 'T2.code', DB::raw('Count(T2.id) as count'))
       ->groupBy('T1.product_id')
       ->get();
     }
     $size = $result->count();
     $testArray = array();
     if(sizeof($result) > 0){  
-      foreach($result as $key => $value){
-        $product = app($this->productClass)->getByParams('id', $key);
-        $item = array(
-          'title'     => $product ? $product['title'] : null,
-          'id'        => $key,
-          'code'      => $value[$key]->code,
-          'merchant'  => array(
-            'name'    => $product ? app($this->merchantClass)->getColumnValueByParams('id', $product['merchant_id'], 'name') : null
-          ),
-          'qty'     => $value[$key]->count,
-          'qty_in_bundled' => $this->getBundledProducts($data['merchant_id'], $key),
-          'type'    => $product ? $product['type'] : null
-        );
-        $testArray[] = $item;
+      $temp =  json_decode(json_encode($result), true);
+      $i=0; 
+      foreach($temp as $key){
+          unset($temp[$i]['deleted_at']);
+          unset($temp[$i]['updated_at']);
+          unset($temp[$i]['created_at']);
+          unset($temp[$i]['payload']);
+          unset($temp[$i]['price_settings']);
+          $merchant =  app($this->merchantClass)->getColumnValueByParams('id', $key['merchant_id'], 'name');
+          $temp[$i]['title']     = $key['title'];
+          $temp[$i]['id']        = $key['id'];
+          $temp[$i]['merchant']  = array(
+            'name' => $merchant);
+          $temp[$i]['qty']     = $temp[$i]['count'];
+          $temp[$i]['qty_in_bundled'] = $this->getBundledProducts($data['merchant_id'], $key['id']);
+          $temp[$i]['type']    = $key['type'];
+          $temp[$i]['details'] = json_decode($key['details'], true);
+        $i++;
       }
+      $this->response['data'] = $temp;
+      $this->response['size'] = $size;
+      return $this->response();
+    }else{
+      $this->response['data'] = [];
+      $this->response['size'] = $size;
+      return $this->response();
     }
-    $this->response['data'] = $testArray;
-    $this->response['size'] = $size;
-    return $this->response();
   }
 
   public function getBundledProducts($merchantId, $productId){
