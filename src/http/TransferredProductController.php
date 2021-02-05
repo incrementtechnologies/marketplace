@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\APIController;
 use Increment\Marketplace\Models\TransferredProduct;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 class TransferredProductController extends APIController
 {
 
@@ -99,6 +100,19 @@ class TransferredProductController extends APIController
         }
       }
       return sizeof($result) > 0 ? $result : null;
+    }
+
+    public function getTransferredProduct($productId, $merchantId){
+      $result = DB::table('transferred_products as T1')
+      ->leftJoin('product_traces as T2', 'T1.payload_value', '=', 'T2.id')
+      ->where('T1.status', '=', 'active')
+      ->where('T1.product_id', '=', $productId)
+      ->where('T1.merchant_id', '=', $merchantId)
+      ->groupBy('T1.product_id')
+      ->select(DB::raw('Count(T1.product_id) as qty'), 'T2.manufacturing_date')
+      ->get();
+
+      return sizeof($result) > 0 ? $result[0] : null;
     }
 
     public function getByParamsOnly($column, $value){
