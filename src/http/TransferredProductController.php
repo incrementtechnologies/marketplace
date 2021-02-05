@@ -107,7 +107,6 @@ class TransferredProductController extends APIController
       ->leftJoin('product_traces as T2', 'T1.payload_value', '=', 'T2.id')
       ->where('T1.status', '=', 'active')
       ->where('T1.product_id', '=', $productId)
-      ->where('T1.merchant_id', '=', $merchantId)
       ->groupBy('T1.product_id')
       ->select(DB::raw('Count(T1.product_id) as qty'), 'T2.manufacturing_date')
       ->get();
