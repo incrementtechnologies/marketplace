@@ -504,4 +504,10 @@ class ProductTraceController extends APIController
     ));
     return true;
   }
+
+  public function retrieveBatchNumber($productId){
+    $result = ProductTrace::where('product_id', $productId)->select('batch_number')->groupBy('batch_number')->get();
+
+    return $result;
+  }
 }
