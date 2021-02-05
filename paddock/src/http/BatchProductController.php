@@ -31,7 +31,9 @@ class BatchProductController extends APIController
     }
 
     public function getBatchByParams($column, $value){
-        $result = BatchProduct::where($column, '=', $value)->select('batch_id')->get();
+        $result = DB::table('batch_products')
+                ->where($column, '=', $value)
+                ->select(DB::raw('Group By(batch_id) as batch_id'))->get();
 
         return sizeof($result) > 0 ? $result[0]->batch_id : null; 
     }
