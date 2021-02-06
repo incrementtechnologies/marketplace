@@ -272,7 +272,7 @@ class ProductController extends APIController
         foreach ($result as $key) {
           $result[$i]['variation'] = app($this->productAttrController)->getByParams('product_id', $result[$i]['id']);
           $result[$i]['qty'] = app($this->transferClasss)->getQtyTransferred($result[$i]['merchant_id'], $result[$i]['id']);
-          $result[$i]['batch_number'] = app($this->batchProductClass)->getBatchByParams('product_id', $result[$i]['id']);
+          $result[$i]['batch_number'] = app($this->productTraceController)->retrieveBatchNumber($result[$i]['id']);
          } 
       }
       return sizeof($result) > 0 ? $result : null;      

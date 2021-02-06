@@ -520,21 +520,25 @@ class TransferController extends APIController
       $i = 0;
       foreach ($products as $key) {
         $productQty = app($this->transferredProductsClass)->getTransferredProduct($products[$i]->id, $products[$i]->merchant_id);
-        $merchant =  app($this->merchantClass)->getColumnValueByParams('id', $products[$i]->merchant_id, 'name');
-        $array = array(
-          'product_qty' => $productQty != null ? $productQty->qty : 0,
-          'unit' => $products[$i]->payload,
-          'unit_value' => $products[$i]->payload_value,
-          'qty' => app($this->batcProductClass)->getProductQtyTrace($products[$i]->merchant_id, 'product_id', $products[$i]->id, $products[$i]->payload_value, $productQty != null ? $productQty->qty : 0), 
-        );
-        $this->response['data'][$i]['inventory'] = $array;
-        $this->response['data'][$i]['merchant'] = array(
-          'name' => $merchant);
-        $this->response['data'][$i]['manufacturing_date'] = $productQty != null ? $productQty->manufacturing_date : null;
-        $this->response['data'][$i]['title'] = $products[$i]->title;
-        $this->response['data'][$i]['code'] = $products[$i]->code;
-        $this->response['data'][$i]['details'] = json_decode($products[$i]->details, true);
-
+        if($productQty->qty > 0){
+          $merchant =  app($this->merchantClass)->getColumnValueByParams('id', $products[$i]->merchant_id, 'name');
+          $array = array(
+            'product_qty' => $productQty != null ? $productQty->qty : 0,
+            'unit' => $products[$i]->payload,
+            'unit_value' => $products[$i]->payload_value,
+            'qty' => app($this->batcProductClass)->getProductQtyTrace($products[$i]->merchant_id, 'product_id', $products[$i]->id, $products[$i]->payload_value, $productQty != null ? $productQty->qty : 0), 
+          );
+          $this->response['data'][$i]['inventory'] = $array;
+          $this->response['data'][$i]['merchant'] = array(
+            'name' => $merchant);
+          $this->response['data'][$i]['manufacturing_date'] = $productQty != null ? $productQty->manufacturing_date : null;
+          $this->response['data'][$i]['title'] = $products[$i]->title;
+          $this->response['data'][$i]['volume'] = app($this->productAttrClass)->getProductUnits($products[$i]->id);
+          $this->response['data'][$i]['product_id'] = $products[$i]->id;
+          $this->response['data'][$i]['code'] = $products[$i]->code;
+          $this->response['data'][$i]['type'] = $products[$i]->type;
+          $this->response['data'][$i]['details'] = json_decode($products[$i]->details, true);
+        }
         $i++;
       }
       $this->response['size'] = $size;
@@ -674,21 +678,23 @@ class TransferController extends APIController
       $i=0; 
       foreach($result as $key){
         $productQty = app($this->transferredProductsClass)->getTransferredProduct($result[$i]->id, $result[$i]->merchant_id);
-        $merchant =  app($this->merchantClass)->getColumnValueByParams('id', $result[$i]->merchant_id, 'name');
-        $array = array(
-          'product_qty' => $productQty != null ? $productQty->qty : 0,
-          'unit' => $result[$i]->payload,
-          'unit_value' => $result[$i]->payload_value,
-          'qty' => app($this->batcProductClass)->getProductQtyTrace($result[$i]->merchant_id, 'product_id', $result[$i]->id, $result[$i]->payload_value, $productQty != null ? $productQty->qty : 0), 
-        );
-        $this->response['data'][$i]['inventory'] = $array;
-        $this->response['data'][$i]['merchant'] = array(
-          'name' => $merchant);
-        $this->response['data'][$i]['manufacturing_date'] = $productQty != null ? $productQty->manufacturing_date : null;
-        $this->response['data'][$i]['title'] = $result[$i]->title;
-        $this->response['data'][$i]['code'] = $result[$i]->code;
-        $this->response['data'][$i]['details'] = json_decode($result[$i]->details, true);
-
+        if($productQty->qty > 0){
+          $merchant =  app($this->merchantClass)->getColumnValueByParams('id', $result[$i]->merchant_id, 'name');
+          $array = array(
+            'product_qty' => $productQty != null ? $productQty->qty : 0,
+            'unit' => $result[$i]->payload,
+            'unit_value' => $result[$i]->payload_value,
+            'qty' => app($this->batcProductClass)->getProductQtyTrace($result[$i]->merchant_id, 'product_id', $result[$i]->id, $result[$i]->payload_value, $productQty != null ? $productQty->qty : 0), 
+          );
+          $this->response['data'][$i]['inventory'] = $array;
+          $this->response['data'][$i]['merchant'] = array(
+            'name' => $merchant);
+          $this->response['data'][$i]['manufacturing_date'] = $productQty != null ? $productQty->manufacturing_date : null;
+          $this->response['data'][$i]['title'] = $result[$i]->title;
+          $this->response['data'][$i]['code'] = $result[$i]->code;
+          $this->response['data'][$i]['type'] = $result[$i]->type;
+          $this->response['data'][$i]['details'] = json_decode($result[$i]->details, true);
+        }
         $i++;
       }
       $this->response['size'] = $size;

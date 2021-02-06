@@ -29,12 +29,4 @@ class BatchProductController extends APIController
         $result[0]->total_remaining_product = ($productQty - $totalAppliedRateVolume);
         return $result;
     }
-
-    public function getBatchByParams($column, $value){
-        $result = DB::table('batch_products')
-                ->where($column, '=', $value)
-                ->select(DB::raw('Group By(batch_id) as batch_id'))->get();
-
-        return sizeof($result) > 0 ? $result[0]->batch_id : null; 
-    }
 }
