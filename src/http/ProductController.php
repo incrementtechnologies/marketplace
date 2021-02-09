@@ -218,7 +218,7 @@ class ProductController extends APIController
     }
 
     public function getProductTitleWithTags($column, $value){
-      $result = Product::where($column, '=', $value)->select('title', 'tags', 'merchant_id', 'description')->get();
+      $result = DB::table('products')->where($column, '=', $value)->select('title', 'tags', 'merchant_id', 'description')->get();
       return sizeof($result) > 0 ? $result : null;
     }
 
@@ -272,7 +272,7 @@ class ProductController extends APIController
         foreach ($result as $key) {
           $result[$i]['variation'] = app($this->productAttrController)->getByParams('product_id', $result[$i]['id']);
           $result[$i]['qty'] = app($this->transferClasss)->getQtyTransferred($result[$i]['merchant_id'], $result[$i]['id']);
-          $result[$i]['batch_number'] = app($this->productTraceController)->retrieveBatchNumber($result[$i]['id']);
+          $result[$i]['batch_number'] = array();
          } 
       }
       return sizeof($result) > 0 ? $result : null;      
@@ -302,6 +302,7 @@ class ProductController extends APIController
           $result[$i]['product_traces'] = null;
           $result[$i]['merchant'] = app($this->merchantController)->getByParams('id', $result[$i]['merchant_id']);
           $result[$i]['details'] = $this->retrieveProductByParams('id', $result[$i]['id']);
+          $result[$i]['volume'] =  app($this->productAttrController)->getProductUnits($result[$i]['id']);
           if($inventoryType == 'inventory'){
             $result[$i]['inventories'] = app($this->inventoryController)->getInventory($result[$i]['id']);
             $result[$i]['qty'] = $this->getRemainingQty($result[$i]['id']);
