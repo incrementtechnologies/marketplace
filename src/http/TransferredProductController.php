@@ -103,6 +103,7 @@ class TransferredProductController extends APIController
     }
 
     public function getTransferredProduct($productId, $merchantId){
+      // dd($productId);
       $result = DB::table('transferred_products as T1')
       ->leftJoin('product_traces as T2', 'T1.payload_value', '=', 'T2.id')
       ->where('T1.status', '=', 'active')

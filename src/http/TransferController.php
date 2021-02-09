@@ -519,7 +519,8 @@ class TransferController extends APIController
     if(sizeof($products) > 0){
       $i = 0;
       foreach ($products as $key) {
-        $productQty = app($this->transferredProductsClass)->getTransferredProduct($products[$i]->id, $products[$i]->merchant_id);
+        // dd($products);
+        $productQty = app($this->transferredProductsClass)->getTransferredProduct($products[$i]->product_id, $products[$i]->merchant_id);
         if($productQty->qty > 0){
           $merchant =  app($this->merchantClass)->getColumnValueByParams('id', $products[$i]->merchant_id, 'name');
           $array = array(
@@ -534,7 +535,7 @@ class TransferController extends APIController
           $this->response['data'][$i]['manufacturing_date'] = $productQty != null ? $productQty->manufacturing_date : null;
           $this->response['data'][$i]['title'] = $products[$i]->title;
           $this->response['data'][$i]['volume'] = app($this->productAttrClass)->getProductUnits($products[$i]->id);
-          $this->response['data'][$i]['product_id'] = $products[$i]->id;
+          $this->response['data'][$i]['product_id'] = $products[$i]->product_id;
           $this->response['data'][$i]['code'] = $products[$i]->code;
           $this->response['data'][$i]['type'] = $products[$i]->type;
           $this->response['data'][$i]['details'] = json_decode($products[$i]->details, true);
@@ -677,7 +678,7 @@ class TransferController extends APIController
     if(sizeof($result) > 0){  
       $i=0; 
       foreach($result as $key){
-        $productQty = app($this->transferredProductsClass)->getTransferredProduct($result[$i]->id, $result[$i]->merchant_id);
+        $productQty = app($this->transferredProductsClass)->getTransferredProduct($result[$i]->product_id, $result[$i]->merchant_id);
         if($productQty->qty > 0){
           $merchant =  app($this->merchantClass)->getColumnValueByParams('id', $result[$i]->merchant_id, 'name');
           $array = array(
@@ -690,6 +691,7 @@ class TransferController extends APIController
           $this->response['data'][$i]['merchant'] = array(
             'name' => $merchant);
           $this->response['data'][$i]['manufacturing_date'] = $productQty != null ? $productQty->manufacturing_date : null;
+          $this->response['data'][$i]['product_id'] = $products[$i]->product_id;
           $this->response['data'][$i]['title'] = $result[$i]->title;
           $this->response['data'][$i]['code'] = $result[$i]->code;
           $this->response['data'][$i]['type'] = $result[$i]->type;
@@ -853,7 +855,9 @@ class TransferController extends APIController
           $temp[$i]['id']        = $key['id'];
           $temp[$i]['merchant']  = array(
             'name' => $merchant);
-          $temp[$i]['qty']     = $temp[$i]['qty'];
+          $temp[$i]['inventory']     = array(
+            'qty' => $temp[$i]['qty']
+          );
           $temp[$i]['volume'] = app($this->productAttrClass)->getProductUnits($key['product_id']);
           $temp[$i]['qty_in_bundled'] = $this->getBundledProducts($data['merchant_id'], $key['id']);
           $temp[$i]['type']    = $key['type'];
@@ -951,7 +955,9 @@ class TransferController extends APIController
           $temp[$i]['id']        = $key['id'];
           $temp[$i]['merchant']  = array(
             'name' => $merchant);
-          $temp[$i]['qty']     = $temp[$i]['qty'];
+          $temp[$i]['inventory']  = array(
+              'qty' => $temp[$i]['qty']
+          );
           $temp[$i]['qty_in_bundled'] = $this->getBundledProducts($data['merchant_id'], $key['id']);
           $temp[$i]['type']    = $key['type'];
           $temp[$i]['details'] = json_decode($key['details'], true);
@@ -1027,25 +1033,24 @@ class TransferController extends APIController
     $i = 1;
     $size = $result->count();
     $testArray = array();
-    // $this->response['data'] = $result;
-    // return $this->response();
+    $finalResult = null;
     if(sizeof($result) > 0){ 
       foreach($result as $key => $value){
-        // dd($value[0]->payload);
-        $tempres = app($this->productClass)->getProductTitleWithTags('id', $key)[0]['merchant_id'];
-        $item = array(
-          'merchant' => app($this->merchantClass)->getColumnValueByParams('id', $tempres, 'name'),
-          'description' => app($this->productClass)->getProductTitleWithTags('id', $key)[0]['description'],
-          'title' => app($this->productClass)->getProductTitleWithTags('id', $key)[0]['title'],
-          'tags' => app($this->productClass)->getProductTitleWithTags('id', $key)[0]['tags'],
-          'unit' => app($this->productAttrClass)->getProductUnit($key),
-          'id' => $key
-        );
-        $testArray[] = $item;
+        $tempres = app($this->productClass)->getProductTitleWithTags('id', $key);
+        if(sizeof($tempres) > 0){
+          foreach ($tempres as $key) {
+            $tempres[0]->description = app($this->merchantClass)->getColumnValueByParams('id', $value[0]->merchant_id, 'name');
+            $tempres[0]->description = $tempres[0]->description;
+            $tempres[0]->title = $tempres[0]->title;
+            $tempres[0]->tags = $tempres[0]->tags;
+            $tempres[0]->unit = app($this->productAttrClass)->getProductUnit($value[0]->product_id);
+          }
+          $finalResult = $tempres;
+        }
       }
+      $this->response['data'] = $finalResult;
+      $this->response['size'] = $size;
     }
-    $this->response['data'] = $testArray;
-    $this->response['size'] = $size;
     return $this->response();
   }
 
