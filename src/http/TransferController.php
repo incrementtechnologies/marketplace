@@ -521,6 +521,7 @@ class TransferController extends APIController
       foreach ($products as $key) {
         // dd($products);
         $productQty = app($this->transferredProductsClass)->getTransferredProduct($products[$i]->product_id, $products[$i]->merchant_id);
+        $qty = app($this->productTraceClass)->getBalanceQtyOnManufacturer('product_id', $products[$i]->product_id);
         if($productQty->qty > 0){
           $merchant =  app($this->merchantClass)->getColumnValueByParams('id', $products[$i]->merchant_id, 'name');
           $array = array(
@@ -534,8 +535,9 @@ class TransferController extends APIController
             'name' => $merchant);
           $this->response['data'][$i]['manufacturing_date'] = $productQty != null ? $productQty->manufacturing_date : null;
           $this->response['data'][$i]['title'] = $products[$i]->title;
-          $this->response['data'][$i]['volume'] = app($this->productAttrClass)->getProductUnits($products[$i]->id);
+          $this->response['data'][$i]['volume'] = app($this->productAttrClass)->getProductUnits($products[$i]->product_id);
           $this->response['data'][$i]['product_id'] = $products[$i]->product_id;
+          $this->response['data'][$i]['qty_in_bundled'] = $qty['qty_in_bundled'];
           $this->response['data'][$i]['code'] = $products[$i]->code;
           $this->response['data'][$i]['type'] = $products[$i]->type;
           $this->response['data'][$i]['details'] = json_decode($products[$i]->details, true);
@@ -617,7 +619,6 @@ class TransferController extends APIController
               ->where($con['column'], 'like', $con['value'])
               ->where('T5.to', '=', $data['merchant_id'])
               ->where('T1.tags', 'like', $data['tags'])
-              ->skip($data['offset'])->take($data['limit'])
               ->orderBy($con['column'], $data['sort'][$con['column']])
               ->count();
         }
@@ -642,7 +643,6 @@ class TransferController extends APIController
             ->leftJoin('transfers as T5', 'T3.transfer_id', '=', 'T5.id')
             ->where('name', 'like', $con['value'])
             ->where('T5.to', '=', $data['merchant_id'])
-            ->skip($data['offset'])->take($data['limit'])
             ->orderBy($con['column'], $data['sort'][$con['column']])
             ->count();
       }
@@ -669,7 +669,6 @@ class TransferController extends APIController
           ->where($con['column'], 'like', $con['value'])
           ->where('T5.to', '=', $data['merchant_id'])
           ->where('T1.type', '=', $productType)
-          ->skip($data['offset'])->take($data['limit'])
           ->orderBy($con['column'], $data['sort'][$con['column']])
           ->count();
     }
@@ -679,6 +678,7 @@ class TransferController extends APIController
       $i=0; 
       foreach($result as $key){
         $productQty = app($this->transferredProductsClass)->getTransferredProduct($result[$i]->product_id, $result[$i]->merchant_id);
+        $qty = app($this->productTraceClass)->getBalanceQtyOnManufacturer('product_id', $result[$i]->product_id);
         if($productQty->qty > 0){
           $merchant =  app($this->merchantClass)->getColumnValueByParams('id', $result[$i]->merchant_id, 'name');
           $array = array(
@@ -691,8 +691,9 @@ class TransferController extends APIController
           $this->response['data'][$i]['merchant'] = array(
             'name' => $merchant);
           $this->response['data'][$i]['manufacturing_date'] = $productQty != null ? $productQty->manufacturing_date : null;
-          $this->response['data'][$i]['product_id'] = $products[$i]->product_id;
+          $this->response['data'][$i]['product_id'] = $result[$i]->product_id;
           $this->response['data'][$i]['title'] = $result[$i]->title;
+          $this->response['data'][$i]['qty_in_bundled'] = $qty['qty_in_bundled'];
           $this->response['data'][$i]['code'] = $result[$i]->code;
           $this->response['data'][$i]['type'] = $result[$i]->type;
           $this->response['data'][$i]['details'] = json_decode($result[$i]->details, true);
@@ -1039,7 +1040,8 @@ class TransferController extends APIController
         $tempres = app($this->productClass)->getProductTitleWithTags('id', $key);
         if(sizeof($tempres) > 0){
           foreach ($tempres as $key) {
-            $tempres[0]->description = app($this->merchantClass)->getColumnValueByParams('id', $value[0]->merchant_id, 'name');
+            $tempres[0]->merchant = app($this->merchantClass)->getColumnValueByParams('id', $value[0]->merchant_id, 'name');
+            $tempres[0]->id = $value[0]->product_id;
             $tempres[0]->description = $tempres[0]->description;
             $tempres[0]->title = $tempres[0]->title;
             $tempres[0]->tags = $tempres[0]->tags;
