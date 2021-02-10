@@ -541,6 +541,11 @@ class TransferController extends APIController
           $this->response['data'][$i]['code'] = $products[$i]->code;
           $this->response['data'][$i]['type'] = $products[$i]->type;
           $this->response['data'][$i]['details'] = json_decode($products[$i]->details, true);
+          $this->response['data'][$i]['details']['active'] = array();
+          $this->response['data'][$i]['details']['other_ingredient'] = null;
+          $this->response['data'][$i]['details']['shelf_life'] = null;
+          $this->response['data'][$i]['details']['approval_date'] = null;
+          $this->response['data'][$i]['details']['approval_number'] = null;
         }
         $i++;
       }
@@ -697,6 +702,11 @@ class TransferController extends APIController
           $this->response['data'][$i]['code'] = $result[$i]->code;
           $this->response['data'][$i]['type'] = $result[$i]->type;
           $this->response['data'][$i]['details'] = json_decode($result[$i]->details, true);
+          $this->response['data'][$i]['details']['active'] = array();
+          $this->response['data'][$i]['details']['other_ingredient'] = null;
+          $this->response['data'][$i]['details']['shelf_life'] = null;
+          $this->response['data'][$i]['details']['approval_date'] = null;
+          $this->response['data'][$i]['details']['approval_number'] = null;
         }
         $i++;
       }
@@ -865,6 +875,11 @@ class TransferController extends APIController
           $temp[$i]['details'] = json_decode($key['details'], true);
           $temp[$i]['batch_number'] = isset($key['batch_number']) ? $key['batch_number'] : null;
           $temp[$i]['manufacturing_date'] = isset($key['manufacturing_date']) ? $key['manufacturing_date'] : null;
+          $temp[$i]['details']['active'] = array();
+          $temp[$i]['details']['other_ingredient'] = null;
+          $temp[$i]['details']['shelf_life'] = null;
+          $temp[$i]['details']['approval_date'] = null;
+          $temp[$i]['details']['approval_number'] = null;
         $i++;
       }
       $this->response['data'] = $temp;
@@ -962,6 +977,12 @@ class TransferController extends APIController
           $temp[$i]['qty_in_bundled'] = $this->getBundledProducts($data['merchant_id'], $key['id']);
           $temp[$i]['type']    = $key['type'];
           $temp[$i]['details'] = json_decode($key['details'], true);
+          $temp[$i]['details']['active'] = array();
+          $temp[$i]['details']['other_ingredient'] = null;
+          $temp[$i]['details']['shelf_life'] = null;
+          $temp[$i]['details']['approval_date'] = null;
+          $temp[$i]['details']['approval_number'] = null;
+          
         $i++;
       }
       $this->response['data'] = $temp;
