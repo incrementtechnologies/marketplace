@@ -43,7 +43,7 @@ class PaddockPlanTaskController extends APIController
       }
   }
 
-    public function retrieveMobileBymParams(Request $request){
+    public function retrieveMobileByParams(Request $request){
         $data = $request->all();
         $con = $data['condition'];
         $result = PaddockPlanTask::where($con[0]['column'], '=', $con[0]['value'])->where($con[1]['column'], '=', $con[1]['value'])->get();
