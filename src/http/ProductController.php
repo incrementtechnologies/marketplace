@@ -302,6 +302,11 @@ class ProductController extends APIController
           $result[$i]['product_traces'] = null;
           $result[$i]['merchant'] = app($this->merchantController)->getByParams('id', $result[$i]['merchant_id']);
           $result[$i]['details'] = $this->retrieveProductByParams('id', $result[$i]['id']);
+          $result[$i]['details']['active'] = array();
+          $result[$i]['details']['other_ingredient'] = null;
+          $result[$i]['details']['shelf_life'] = null;
+          $result[$i]['details']['approval_date'] = null;
+          $result[$i]['details']['approval_number'] = null;
           $result[$i]['volume'] =  app($this->productAttrController)->getProductUnits($result[$i]['id']);
           if($inventoryType == 'inventory'){
             $result[$i]['inventories'] = app($this->inventoryController)->getInventory($result[$i]['id']);
@@ -329,6 +334,11 @@ class ProductController extends APIController
           $result[$i]['images'] = app($this->productImageController)->getProductImage($result[$i]['id'], null);
           $result[$i]['tag_array'] = $this->manageTags($result[$i]['tags']);
           $result[$i]['details'] = $this->retrieveProductByParams('id', $result[$i]['id']);
+          $result[$i]['details']['active'] = array();
+          $result[$i]['details']['other_ingredient'] = null;
+          $result[$i]['details']['shelf_life'] = null;
+          $result[$i]['details']['approval_date'] = null;
+          $result[$i]['details']['approval_number'] = null;
           $result[$i]['created_at_human'] = Carbon::createFromFormat('Y-m-d H:i:s', $result[$i]['created_at'])->copy()->tz($this->response['timezone'])->format('F j, Y H:i A');
           // $result[$i]['bundled_products'] = app($this->bundledProductController)->getByParams('product_id', $result[$i]['id']);
           // $result[$i]['bundled_settings'] = app($this->bundledSettingController)->getByParams('bundled', $result[$i]['id']);
