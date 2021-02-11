@@ -348,7 +348,11 @@ class ProductController extends APIController
           $result[$i]['images'] = app($this->productImageController)->getProductImage($result[$i]['id'], null);
           $result[$i]['tag_array'] = $this->manageTags($result[$i]['tags']);
           $result[$i]['details'] = $this->retrieveProductByParams('id', $result[$i]['id']);
-          $result[$i]['details']['active'] = array();
+          $result[$i]['details']['active'] = array(
+            'active_name' => null,
+            'value' => null,
+            'attributes' => null,
+          );
           $result[$i]['details']['other_ingredient'] = null;
           $result[$i]['details']['shelf_life'] = null;
           $result[$i]['details']['approval_date'] = null;
