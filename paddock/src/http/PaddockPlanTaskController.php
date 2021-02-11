@@ -56,6 +56,7 @@ class PaddockPlanTaskController extends APIController
 
                 $i++;
             }
+            $this->response['data'] = $temp;
         }
         return $this->response();
     }

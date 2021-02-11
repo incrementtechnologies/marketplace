@@ -18,6 +18,7 @@ class ProductTraceController extends APIController
   public $transferredProductController = 'Increment\Marketplace\Http\TransferredProductController';
   public $bundledProductController = 'Increment\Marketplace\Http\BundledProductController';
   public $bundledSettingController = 'Increment\Marketplace\Http\BundledSettingController';
+  public $productAttrClass = 'Increment\Marketplace\Http\ProductAttributeController';
   public $landBlockProductClass = 'App\Http\Controllers\LandBlockProductController';
   function __construct(){
   	$this->model = new ProductTrace();
@@ -95,6 +96,7 @@ class ProductTraceController extends APIController
     foreach ($this->response['data'] as $key) {
       $item = $this->response['data'][$i];
       $this->response['data'][$i]['product'] = app($this->productController)->getProductByParams('id', $item['product_id']);
+      $this->response['data'][$i]['volume'] = app($this->productAttrClass)->getProductUnits($item['product_id']);
       $item = $this->response['data'][$i];
       
       if(isset($data['nfc']) && ($item['nfc'] == null || $item['nfc'] == '')){
