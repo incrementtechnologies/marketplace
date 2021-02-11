@@ -64,4 +64,9 @@ class MachineController extends APIController
       $result = Machine::where('merchant_id', '=', $merchantId)->orderBy('name', 'asc')->get();
       return $result;
     }
+
+    public function getMachineNameByParams($column, $value){
+        $result = Machine::where($column, '=', $value)->select('name')->get();
+        return $result;
+    }
 }

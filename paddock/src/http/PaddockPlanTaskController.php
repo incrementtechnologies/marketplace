@@ -15,6 +15,8 @@ class PaddockPlanTaskController extends APIController
   
   public $paddockClass = 'Increment\Marketplace\Paddock\Http\PaddockController';
   public $sprayMixClass = 'Increment\Marketplace\Paddock\Http\SprayMixController';
+  public $batchPaddockTaskClass = 'Increment\Marketplace\Paddock\Http\BatchPaddockTaskController';
+
 
   function __construct(){
     $this->model = new PaddockPlanTask();
@@ -53,7 +55,7 @@ class PaddockPlanTaskController extends APIController
             foreach ($temp as $key) {
                 $temp[$i]['paddock'] = app($this->paddockClass)->getByParams('id', $key['paddock_id'], ['id', 'name']);
                 $temp[$i]['spray_mix'] = app($this->sprayMixClass)->getByParams('id', $key['paddock_id'], ['id', 'name']);
-
+                $temp[$i]['machine'] = app($this->batchPaddockTaskClass)->getMachinedByBatches($con[0]['column'], $con[0]['value']);
                 $i++;
             }
             $this->response['data'] = $temp;
@@ -69,7 +71,6 @@ class PaddockPlanTaskController extends APIController
                 $result[$i]['due_date'] = Carbon::createFromFormat('Y-m-d', $key['due_date'])->copy()->tz($this->response['timezone'])->format('d M');
                 $result[$i]['paddock'] = app($this->paddockClass)->getByParams('id', $result[$i]['paddock_id'], ['id', 'name']);
                 $result[$i]['spray_mix'] = app($this->sprayMixClass)->getByParams('id', $result[$i]['paddock_id'], ['id', 'name']);
-
                 $i++;
             }
         }

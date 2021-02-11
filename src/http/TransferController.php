@@ -424,6 +424,7 @@ class TransferController extends APIController
                         ->Where('T1.tags', 'not like', 'fungicide')
                         ->Where('T1.tags', 'not like', 'insecticide');
                 })
+                ->select('*', 'T1.code as product_code')
                 ->skip($data['offset'])->take($data['limit'])
                 ->orderBy($con['column'], $data['sort'][$con['column']])
                 ->get();
@@ -452,6 +453,7 @@ class TransferController extends APIController
                 ->where($con['column'], 'like', $con['value'])
                 ->where('T5.to', '=', $data['merchant_id'])
                 ->where('T1.tags', 'like', $data['tags'])
+                ->select('*', 'T1.code as product_code')
                 ->skip($data['offset'])->take($data['limit'])
                 ->orderBy($con['column'], $data['sort'][$con['column']])
                 ->get();
@@ -476,6 +478,7 @@ class TransferController extends APIController
                 ->leftJoin('transfers as T5', 'T3.transfer_id', '=', 'T5.id')
                 ->where($con['column'], 'like', $con['value'])
                 ->where('T5.to', '=', $data['merchant_id'])
+                ->select('*', 'T1.code as product_code')
                 ->skip($data['offset'])->take($data['limit'])
                 ->orderBy($con['column'], $data['sort'][$con['column']])
                 ->get();
@@ -492,7 +495,7 @@ class TransferController extends APIController
       }
     }
     else{
-      $product = DB::table('products as T1')
+      $products = DB::table('products as T1')
           ->leftJoin('product_attributes as T2', 'T2.product_id', '=', 'T1.id')
           ->leftJoin('transferred_products as T3', 'T3.product_id', '=', 'T1.id')
           ->leftJoin('product_traces as T4', 'T3.payload_value', '=', 'T4.id')
@@ -500,6 +503,7 @@ class TransferController extends APIController
           ->where($con['column'], 'like', $con['value'])
           ->where('T5.to', '=', $data['merchant_id'])
           ->where('T1.type', '=', $productType)
+          ->select('*', 'T1.code as product_code')
           ->skip($data['offset'])->take($data['limit'])
           ->orderBy($con['column'], $data['sort'][$con['column']])
           ->get();
@@ -515,7 +519,6 @@ class TransferController extends APIController
           ->orderBy($con['column'], $data['sort'][$con['column']])
           ->count();
     }
-
     if(sizeof($products) > 0){
       $i = 0;
       foreach ($products as $key) {
@@ -540,7 +543,7 @@ class TransferController extends APIController
           $this->response['data'][$i]['volume'] = app($this->productAttrClass)->getProductUnits($products[$i]->product_id);
           $this->response['data'][$i]['product_id'] = $products[$i]->product_id;
           $this->response['data'][$i]['qty_in_bundled'] = $qty['qty_in_bundled'];
-          $this->response['data'][$i]['code'] = $products[$i]->code;
+          $this->response['data'][$i]['code'] = $products[$i]->product_code;
           $this->response['data'][$i]['type'] = $products[$i]->type;
           $this->response['data'][$i]['details'] = json_decode($products[$i]->details, true);
           $this->response['data'][$i]['details']['active'] = array();
@@ -584,6 +587,7 @@ class TransferController extends APIController
                         ->Where('T1.tags', 'not like', 'fungicide')
                         ->Where('T1.tags', 'not like', 'insecticide');
                 })
+                ->select('*', 'T1.code as product_code')
                 ->skip($data['offset'])->take($data['limit'])
                 ->orderBy($con['column'], $data['sort'][$con['column']])
                 ->get();
@@ -613,6 +617,7 @@ class TransferController extends APIController
               ->where($con['column'], 'like', $con['value'])
               ->where('T5.to', '=', $data['merchant_id'])
               ->where('T1.tags', 'like', $data['tags'])
+              ->select('*', 'T1.code as product_code')
               ->skip($data['offset'])->take($data['limit'])
               ->orderBy($con['column'], $data['sort'][$con['column']])
               ->get();
@@ -638,6 +643,7 @@ class TransferController extends APIController
             ->leftJoin('transfers as T5', 'T3.transfer_id', '=', 'T5.id')
             ->where('name', 'like', $con['value'])
             ->where('T5.to', '=', $data['merchant_id'])
+            ->select('*', 'T1.code as product_code')
             ->skip($data['offset'])->take($data['limit'])
             ->orderBy($con['column'], $data['sort'][$con['column']])
             ->get();
@@ -663,6 +669,7 @@ class TransferController extends APIController
           ->where('name', 'like', $con['value'])
           ->where('T5.to', '=', $data['merchant_id'])
           ->where('T1.type', '=', $productType)
+          ->select('*', 'T1.code as product_code')
           ->skip($data['offset'])->take($data['limit'])
           ->orderBy($con['column'], $data['sort'][$con['column']])
           ->get();
@@ -703,7 +710,7 @@ class TransferController extends APIController
           $this->response['data'][$i]['product_id'] = $result[$i]->product_id;
           $this->response['data'][$i]['title'] = $result[$i]->title;
           $this->response['data'][$i]['qty_in_bundled'] = $qty['qty_in_bundled'];
-          $this->response['data'][$i]['code'] = $result[$i]->code;
+          $this->response['data'][$i]['code'] = $result[$i]->product_code;
           $this->response['data'][$i]['type'] = $result[$i]->type;
           $this->response['data'][$i]['details'] = json_decode($result[$i]->details, true);
           $this->response['data'][$i]['details']['active'] = array();
