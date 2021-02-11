@@ -10,6 +10,7 @@ use Carbon\Carbon;
 
 class BatchPaddockTaskController extends APIController
 {
+    public $machineClass = 'Increment\Marketplace\Paddock\Http\MachineController';
     //
     function __construct(){
         $this->model = new BatchPaddockTask();
@@ -29,5 +30,11 @@ class BatchPaddockTaskController extends APIController
         }else{
             return null;
         }
+    }
+
+    public function getMachinedByBatches($column, $value){
+        $result = BatchPaddockTask::with('batches')->where($column, '=', $value)->get();
+        $machine = sizeof($result) > 0 ? app($this->machineClass)->getMachineNameByParams('id', $result[0]->machine_id) : null;
+        return sizeof($machine) > 0 ? $machine[0]->name : null;
     }
 }

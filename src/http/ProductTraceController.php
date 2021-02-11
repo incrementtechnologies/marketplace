@@ -20,6 +20,8 @@ class ProductTraceController extends APIController
   public $bundledSettingController = 'Increment\Marketplace\Http\BundledSettingController';
   public $productAttrClass = 'Increment\Marketplace\Http\ProductAttributeController';
   public $landBlockProductClass = 'App\Http\Controllers\LandBlockProductController';
+  public $batchProductClass = 'Increment\Marketplace\Paddock\Http\BatchProductController';
+
   function __construct(){
   	$this->model = new ProductTrace();
 
@@ -169,6 +171,59 @@ class ProductTraceController extends APIController
     }
     return $this->response();
   }
+
+  public function retrieveByParamsEndUser(Request $request){
+    $data = $request->all();
+    $this->model = new ProductTrace();
+    $this->retrieveDB($data);
+    $i = 0;
+    foreach ($this->response['data'] as $key) {
+      $item = $this->response['data'][$i];
+      $this->response['data'][$i]['product'] = app($this->productController)->getProductByParamsEndUser('id', $item['product_id']);
+      $this->response['data'][$i]['volume'] = app($this->productAttrClass)->getProductUnits($item['product_id']);
+      $item = $this->response['data'][$i];
+      
+      if(isset($data['nfc']) && ($item['nfc'] == null || $item['nfc'] == '')){
+        $nfcResult = ProductTrace::where('nfc', '=', $data['nfc'])->get();
+        if(sizeof($nfcResult) > 0){
+          $this->response['data'] = null;
+          $this->response['error'] = 'Tag is already taken!';
+          return $this->response();
+        }else{
+          ProductTrace::where('id', '=', $item['id'])->update(array(
+            'nfc' => $data['nfc'],
+            'updated_at' => Carbon::now(),
+            'status' => 'active'
+          ));
+          $this->response['data'][$i]['nfc'] = $data['nfc'];
+        }
+      }
+
+      if(isset($data['nfc']) && $item['nfc'] != null && $item['nfc'] != $data['nfc']){
+        $this->response['data'] = null;
+        $this->response['error'] = 'Duplicate tag!';
+        return $this->response();
+      }
+
+      if($this->checkOwnProduct($item, $data['merchant_id']) == false){
+        $this->response['data'] = null;
+        $this->response['error'] = 'You don\'t own this product!';
+        return $this->response();
+      }
+
+      $this->response['data'][$i]['created_at_human'] = Carbon::createFromFormat('Y-m-d H:i:s', $item['created_at'])->copy()->tz($this->response['timezone'])->format('F j, Y h:i A');
+      $this->response['data'][$i]['bundled_product'] = app($this->bundledProductController)->getByParams('product_trace', $item['id']);
+      if($this->response['data'][$i]['product'] != null){
+        $type = $this->response['data'][$i]['product']['type'];
+        $this->response['data'][$i]['product']['qty'] = null;
+        $qty = $this->getBalanceQtyOtherUser($item['product_id'], $data['merchant_id'], $item['id']);
+        $this->response['data'][$i]['product']['qty'] = app($this->batchProductClass)->getProductTraceQty($item['id'], $this->response['data'][$i]['product']['variation'], $qty['qty']);
+      }
+      $i++;
+    }
+    return $this->response();
+  }
+
 
   public function retrieveWithTransfer(Request $request){
     $data = $request->all();
