@@ -34,7 +34,7 @@ class BatchPaddockTaskController extends APIController
 
     public function getMachinedByBatches($column, $value){
         $result = BatchPaddockTask::with('batches')->where($column, '=', $value)->get();
-        $machine = sizeof($result) > 0 ? app($this->machineClass)->getMachineNameByParams('id', $result[0]->machine_id) : null;
+        $machine = $result != null ? app($this->machineClass)->getMachineNameByParams('id', $result[0]->machine_id) : null;
         return $machine != null ? $machine[0]->name : null;
     }
 }
