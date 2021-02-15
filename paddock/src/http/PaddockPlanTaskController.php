@@ -64,7 +64,7 @@ class PaddockPlanTaskController extends APIController
     }
 
     public function retrievePaddockPlanTaskByParamsCompleted($column, $value){
-        $result = PaddockPlanTask::where($column, '=', $value)->where('status', '=', 'approved')->get();
+        $result = PaddockPlanTask::where($column, '=', $value)->where('status', '=', 'approved')->orWhere('status', '=', 'completed')->get();
         if(sizeof($result) > 0){
             $i = 0;
             foreach ($result as $key) {

@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Storage;
 use Increment\Common\Image\Models\Image;
 use Increment\Common\Payload\Models\Payload;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Arr;
 use Carbon\Carbon;
 class ProductController extends APIController
 {
@@ -315,12 +316,12 @@ class ProductController extends APIController
           $result[$i]['inventories'] = null;
           $result[$i]['product_traces'] = null;
           $result[$i]['merchant'] = app($this->merchantController)->getByParams('id', $result[$i]['merchant_id']);
-          $result[$i]['details'] = $this->retrieveProductByParams('id', $result[$i]['id']);
-          $result[$i]['details']['active'] = array();
-          $result[$i]['details']['other_ingredient'] = null;
-          $result[$i]['details']['shelf_life'] = null;
-          $result[$i]['details']['approval_date'] = null;
-          $result[$i]['details']['approval_number'] = null;
+          // $result[$i]['details'] = $this->retrieveProductByParams('id', $result[$i]['id']);
+          // $result[$i]['details']['active'] = array();
+          // $result[$i]['details']['other_ingredient'] = null;
+          // $result[$i]['details']['shelf_life'] = null;
+          // $result[$i]['details']['approval_date'] = null;
+          // $result[$i]['details']['approval_number'] = null;
           $result[$i]['volume'] =  app($this->productAttrController)->getProductUnits($result[$i]['id']);
           if($inventoryType == 'inventory'){
             $result[$i]['inventories'] = app($this->inventoryController)->getInventory($result[$i]['id']);
