@@ -101,20 +101,26 @@ class OrderRequestController extends APIController
 
   public function retrieveMobileByParams(Request $request){
     $data = $request->all();
-    $this->model = new OrderRequest();
-    $this->retrieveDB($data);
-  
-    if(sizeof($this->response['data']) > 0){
-      $this->response['data'] = $this->manageResultsMobile($this->response['data']);
+    $con = $data['condition'];
+    if($con[1]['value'] == 'pending'){
+      $result = OrderRequest::where($con[0]['column'], $con[0]['clause'], $con[0]['value'])
+              ->where($con[1]['column'], '!=', 'completed')->where($con[1]['column'], '!=', 'cancelled')->get();
+    }else{
+      $result = OrderRequest::where($con[0]['column'], $con[0]['clause'], $con[0]['value'])
+              ->where($con[1]['column'], '=', 'completed')->get();
+    }
+    if(sizeof($result) > 0){
+      $this->response['data'] = $this->manageResultsMobile($result);
     }
     return $this->response();
   }
 
   public function retrieveMobileDashboard(Request $request){
     $data = $request->all();
-    $this->model = new OrderRequest();
-    $this->retrieveDB($data);
-  
+    $con = $data['condition'];
+    $result = OrderRequest::where($con[0]['column'], $con[0]['clause'], $con[0]['value'])
+              ->where($con[1]['column'], '!=', 'completed')->where($con[1]['column'], '!=', 'cancelled')->get();
+    $this->response['data'] = $result;
     $merchant_id = $data['condition'][0];
     $totalOrder = sizeof($this->manageResultsMobile($this->response['data']));
     $totalRecent = sizeof(app($this->paddockPlanTaskClass)->retrievePaddockPlanTaskByParamsCompleted('merchant_id', $merchant_id['value']));
@@ -134,23 +140,23 @@ class OrderRequestController extends APIController
   public function manageResultsMobile($result){
     $array = array();
     if(sizeof($result) > 0){
-      foreach ($result as $key) { 
-        $item = array(
-          'merchant' => app($this->merchantClass)->getColumnByParams('id', $key['merchant_to'], ['name', 'address', 'id']),
-          'merchant_from' => app($this->merchantClass)->getColumnByParams('id', $key['merchant_id'], ['name', 'address', 'id']),
-          'date_of_delivery'  => Carbon::createFromFormat('Y-m-d H:i:s', $key['date_of_delivery'])->copy()->tz($this->response['timezone'])->format('d M'),
-          'status'        => $key['status'],
-          'delivered_by'  => $key['delivered_by'] ? $this->retrieveName($key['delivered_by']) : null,
-          'delivered_date'=> $key['date_delivered'] ? Carbon::createFromFormat('Y-m-d H:i:s', $key['date_delivered'])->copy()->tz($this->response['timezone'])->format('d M') : null,
-          'code'          => $key['code'],
-          'added_by'      => $key['code'],  
-          'id'      => $key['id'],
-          'order_number'      => $key['order_number'],
-          'daily_loading_list' => app($this->dailyLoadingListClass)->checkIfExist('order_request_id', $key['id']),
-          'daily_loading_list_id' => isset($key['daily_loading_list_id']) ? $key['daily_loading_list_id'] : null,
-          'created_at_human' => Carbon::createFromFormat('Y-m-d H:i:s', $key['date_of_delivery'])->copy()->tz($this->response['timezone'])->format('d M'),
-        );
-        $array[] = $item;
+      foreach ($result as $key) {
+          $item = array(
+            'merchant' => app($this->merchantClass)->getColumnByParams('id', $key['merchant_to'], ['name', 'address', 'id']),
+            'merchant_from' => app($this->merchantClass)->getColumnByParams('id', $key['merchant_id'], ['name', 'address', 'id']),
+            'date_of_delivery'  => Carbon::createFromFormat('Y-m-d H:i:s', $key['date_of_delivery'])->copy()->tz($this->response['timezone'])->format('d M'),
+            'status'        => $key['status'],
+            'delivered_by'  => $key['delivered_by'] ? $this->retrieveName($key['delivered_by']) : null,
+            'delivered_date'=> $key['date_delivered'] ? Carbon::createFromFormat('Y-m-d H:i:s', $key['date_delivered'])->copy()->tz($this->response['timezone'])->format('d M') : null,
+            'code'          => $key['code'],
+            'added_by'      => $key['code'],  
+            'id'      => $key['id'],
+            'order_number'      => $key['order_number'],
+            'daily_loading_list' => app($this->dailyLoadingListClass)->checkIfExist('order_request_id', $key['id']),
+            'daily_loading_list_id' => isset($key['daily_loading_list_id']) ? $key['daily_loading_list_id'] : null,
+            'created_at_human' => Carbon::createFromFormat('Y-m-d H:i:s', $key['date_of_delivery'])->copy()->tz($this->response['timezone'])->format('d M'),
+          );
+          $array[] = $item;
       }
       return $array;
     }else{

@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class UpdateProductsTableAddDetails extends Migration
+class UpdateProductsTableChangeDataTypeToLongText extends Migration
 {
     /**
      * Run the migrations.
@@ -13,11 +13,8 @@ class UpdateProductsTableAddDetails extends Migration
      */
     public function up()
     {
-
         Schema::table('products', function (Blueprint $table) {
-            $table->string('details')->after('status')->default(json_encode(array("solvent" => "", "safety" => "", "formulation" => "", "group"=> '', "active"=> array(), "safety_equipment" => array(), "mixing_order"=> array(), "files"=> array("url"=> '', "title"=> ''))));
-
-
+            $table->longText('details')->after('status')->default(json_encode(array("solvent" => "", "safety" => "", "formulation" => "", "group"=> '', "active"=> array(), "safety_equipment" => array(), "mixing_order"=> array(), "files"=> array("url"=> '', "title"=> ''))));
         });
     }
 
