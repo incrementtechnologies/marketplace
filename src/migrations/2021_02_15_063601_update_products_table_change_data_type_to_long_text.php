@@ -19,7 +19,7 @@ class UpdateProductsTableChangeDataTypeToLongText extends Migration
         });
             
         Schema::table('products', function (Blueprint $table) {
-            $table->longText('details')->after('status')->default(json_encode(array("solvent" => "", "safety" => "", "formulation" => "", "group"=> '', "active"=> [], "safety_equipment" => [], "mixing_order"=> [], "files"=> array("url"=> '', "title"=> ''))));
+            $table->longText('details')->after('status')->nullable();
         });
     }
 
