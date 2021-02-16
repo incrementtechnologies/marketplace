@@ -48,14 +48,22 @@ class PaddockPlanTaskController extends APIController
     public function retrieveMobileByParams(Request $request){
         $data = $request->all();
         $con = $data['condition'];
-        $result = PaddockPlanTask::where($con[0]['column'], '=', $con[0]['value'])->where($con[1]['column'], '=', $con[1]['value'])->get();
-        $temp = $this->retrieveDB($data);
+        if($con[1]['value'] == 'inprogress'){
+            $result = PaddockPlanTask::where($con[0]['column'], '=', $con[0]['value'])
+                ->where(function($query){
+                    $query->where('status', '=', 'pending')
+                            ->orWhere('status', '=', 'inprogress');
+                })->get();
+        }else{
+            $result = PaddockPlanTask::where($con[0]['column'], '=', $con[0]['value'])->where($con[1]['column'], '=', $con[1]['value'])->get();
+        }
+        $temp = $result;
         if(sizeof($temp) > 0){
             $i = 0;
             foreach ($temp as $key) {
                 $temp[$i]['paddock'] = app($this->paddockClass)->getByParams('id', $key['paddock_id'], ['id', 'name']);
                 $temp[$i]['spray_mix'] = app($this->sprayMixClass)->getByParams('id', $key['paddock_id'], ['id', 'name']);
-                $temp[$i]['machine'] = app($this->batchPaddockTaskClass)->getMachinedByBatches($con[0]['column'], $con[0]['value']);
+                $temp[$i]['machine'] = app($this->batchPaddockTaskClass)->getMachinedByBatches('paddock_plan_task_id', $key['id']);
                 $i++;
             }
             $this->response['data'] = $temp;

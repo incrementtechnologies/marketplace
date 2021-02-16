@@ -264,8 +264,8 @@ class CustomerController extends APIController
         ->select('T1.merchant', 'T1.merchant_id', 'T2.name', 'T3.account_type', 'T1.email', 'T1.code', 'T1.status', 'T1.id', 'T1.deleted_at')
         ->skip($data['offset'])
         ->take($data['limit'])
-        ->orderBy($this->con[0]['column'], $data['sort'][$this->con[0]['column']])
-        ->orderBy('name', $data['sort'][$this->con[0]['column']])
+        ->orderBy(array_keys($data['sort'])[0], $data['sort'][$this->con[0]['column']])
+        // ->orderBy('name', $data['sort'][$this->con[0]['column']])
         ->get();
         $this->response['size'] = sizeof($name);
         // DB::table('customers as T1')

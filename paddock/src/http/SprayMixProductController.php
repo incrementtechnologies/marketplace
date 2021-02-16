@@ -84,6 +84,7 @@ class SprayMixProductController extends APIController
     for ($i=0; $i < count($this->response['data']); $i++){
       $item = $this->response['data'][$i];
       $product = app($this->productClass)->getProductName('id', $item['product_id']);
+      $this->response['data'][$i]['rate'] = sprintf("%.2f", $this->response['data'][$i]['rate']);
       $this->response['data'][$i]['product'] = sizeof($product) > 0 ? $product[0] : null;
     }
     return $this->response();

@@ -15,9 +15,7 @@ class UpdateProductsTableAddDetails extends Migration
     {
 
         Schema::table('products', function (Blueprint $table) {
-            $table->string('details')->after('status')->default(json_encode(array("solvent" => "", "safety" => "", "formulation" => "", "group"=> '', "active"=> array(), "safety_equipment" => array(), "mixing_order"=> array(), "files"=> array("url"=> '', "title"=> ''))));
-
-
+            $table->string('details')->after('status')->nullable();
         });
     }
 

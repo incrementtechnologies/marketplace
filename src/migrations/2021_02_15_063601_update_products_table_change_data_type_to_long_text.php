@@ -13,8 +13,13 @@ class UpdateProductsTableChangeDataTypeToLongText extends Migration
      */
     public function up()
     {
+        Schema::table('products', function (Blueprint $table)
+        {
+            $table->dropColumn('details');
+        });
+            
         Schema::table('products', function (Blueprint $table) {
-            $table->longText('details')->after('status')->default(json_encode(array("solvent" => "", "safety" => "", "formulation" => "", "group"=> '', "active"=> array(), "safety_equipment" => array(), "mixing_order"=> array(), "files"=> array("url"=> '', "title"=> ''))));
+            $table->longText('details')->after('status')->default(json_encode(array("solvent" => "", "safety" => "", "formulation" => "", "group"=> '', "active"=> [], "safety_equipment" => [], "mixing_order"=> [], "files"=> array("url"=> '', "title"=> ''))));
         });
     }
 
@@ -25,18 +30,10 @@ class UpdateProductsTableChangeDataTypeToLongText extends Migration
      */
     public function down()
     {
-        if (Schema::hasColumn('products', 'details'))
 
+        Schema::table('products', function (Blueprint $table)
         {
-
-            Schema::table('products', function (Blueprint $table)
-
-            {
-
-                $table->dropColumn('details');
-
-            });
-
-        }
+            $table->dropColumn('details');
+        });
     }
 }
