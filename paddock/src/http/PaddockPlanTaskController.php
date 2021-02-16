@@ -7,6 +7,7 @@ use App\Http\Controllers\APIController;
 use Increment\Marketplace\Paddock\Models\PaddockPlanTask;
 use Increment\Marketplace\Paddock\Models\Paddock;
 use Increment\Marketplace\Paddock\Models\SprayMix;
+use Increment\Marketplace\Paddock\Models\Batch;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
@@ -14,6 +15,7 @@ class PaddockPlanTaskController extends APIController
 {
   
   public $paddockClass = 'Increment\Marketplace\Paddock\Http\PaddockController';
+  public $machineClass = 'Increment\Marketplace\Paddock\Http\MachineController';
   public $sprayMixClass = 'Increment\Marketplace\Paddock\Http\SprayMixController';
   public $batchPaddockTaskClass = 'Increment\Marketplace\Paddock\Http\BatchPaddockTaskController';
 
@@ -71,6 +73,34 @@ class PaddockPlanTaskController extends APIController
         return $this->response();
     }
 
+    public function retrieveMobileByParamsEndUser(Request $request){
+        $data = $request->all();
+        $con = $data['condition'];
+        if($con[1]['value'] == 'inprogress'){
+            $result = Batch::where($con[0]['column'], '=', $con[0]['value'])
+                ->where(function($query){
+                    $query->where('status', '=', 'pending')
+                            ->orWhere('status', '=', 'inprogress')
+                            ->orWhere('status', '=', 'ongoing');
+                })->get();
+        }else{
+            $result = Batch::where($con[0]['column'], '=', $con[0]['value'])->where($con[1]['column'], '=', $con[1]['value'])->get();
+        }
+        // dd($result);
+        $temp = $result;
+        if(sizeof($temp) > 0){
+            $i = 0;
+            foreach ($temp as $key) {
+                $temp[$i]['paddock'] = app($this->paddockClass)->getByParams('merchant_id', $con[0]['value'], ['id', 'name']);
+                $temp[$i]['spray_mix'] = app($this->sprayMixClass)->getByParams('merchant_id', $con[0]['value'], ['id', 'name']);
+                $temp[$i]['machine'] = app($this->machineClass)->getMachineNameByParams('id', $key['machine_id']);
+                $i++;
+            }
+            $this->response['data'] = $temp;
+        }
+        return $this->response();
+    }
+
     public function retrievePaddockPlanTaskByParamsCompleted($column, $value){
         $result = PaddockPlanTask::where($column, '=', $value)->where('status', '=', 'approved')->orWhere('status', '=', 'completed')->get();
         if(sizeof($result) > 0){
@@ -111,7 +141,7 @@ class PaddockPlanTaskController extends APIController
     public function retrieveAvailablePaddocks(Request $request){
         $data = $request->all();
         $returnResult = array();
- $result = DB::table('paddock_plans_tasks as T1')
+        $result = DB::table('paddock_plans_tasks as T1')
                 ->leftJoin('paddocks as T2', 'T1.paddock_id', '=', 'T2.id')
                 ->leftJoin('paddock_plans as T3', 'T3.id', '=', 'T1.paddock_plan_id')
                 ->leftJoin('crops as T4', 'T4.id', '=', 'T3.crop_id')
