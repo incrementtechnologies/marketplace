@@ -26,18 +26,6 @@ class UpdateProductsTableAddDetails extends Migration
      */
     public function down()
     {
-        if (Schema::hasColumn('products', 'details'))
-
-        {
-
-            Schema::table('products', function (Blueprint $table)
-
-            {
-
-                $table->dropColumn('details');
-
-            });
-
-        }
+        Schema::dropIfExists('products');
     }
 }

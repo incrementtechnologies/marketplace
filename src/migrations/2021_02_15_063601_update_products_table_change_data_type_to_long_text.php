@@ -13,10 +13,6 @@ class UpdateProductsTableChangeDataTypeToLongText extends Migration
      */
     public function up()
     {
-        Schema::table('products', function (Blueprint $table)
-        {
-            $table->dropColumn('details');
-        });
             
         Schema::table('products', function (Blueprint $table) {
             $table->longText('details')->after('status')->nullable();
@@ -31,9 +27,6 @@ class UpdateProductsTableChangeDataTypeToLongText extends Migration
     public function down()
     {
 
-        Schema::table('products', function (Blueprint $table)
-        {
-            $table->dropColumn('details');
-        });
+        Schema::dropIfExists('products');
     }
 }
