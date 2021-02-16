@@ -545,31 +545,8 @@ class TransferController extends APIController
           $this->response['data'][$i]['qty_in_bundled'] = $qty['qty_in_bundled'];
           $this->response['data'][$i]['code'] = $products[$i]->product_code;
           $this->response['data'][$i]['type'] = $products[$i]->type;
-          $this->response['data'][$i]['details'] = json_decode($products[$i]->details, true);
-          $this->response['data'][$i]['boolean'] = is_array($this->response['data'][$i]['details']);
-          if(is_array($this->response['data'][$i]['details']) == false){
-            $this->response['data'][$i]['details'] = json_decode($this->response['data'][$i]['details'], true);
-            if(is_array($this->response['data'][$i]['details']) == false){
-              $this->response['data'][$i]['details'] = json_decode($this->response['data'][$i]['details'], true);
-              $this->response['data'][$i]['details']['active'] = array();
-              $this->response['data'][$i]['details']['other_ingredient'] = null;
-              $this->response['data'][$i]['details']['shelf_life'] = null;
-              $this->response['data'][$i]['details']['approval_date'] = null;
-              $this->response['data'][$i]['details']['approval_number'] = null;
-            }
-            $this->response['data'][$i]['details']['active'] = array();
-            $this->response['data'][$i]['details']['other_ingredient'] = null;
-            $this->response['data'][$i]['details']['shelf_life'] = null;
-            $this->response['data'][$i]['details']['approval_date'] = null;
-            $this->response['data'][$i]['details']['approval_number'] = null;
-          }
-          else{
-            $this->response['data'][$i]['details']['active'] = array();
-            $this->response['data'][$i]['details']['other_ingredient'] = null;
-            $this->response['data'][$i]['details']['shelf_life'] = null;
-            $this->response['data'][$i]['details']['approval_date'] = null;
-            $this->response['data'][$i]['details']['approval_number'] = null;
-          }
+          $this->response['data'][$i]['details'] = $this->retrieveProductDetailsByParams('id', $products[$i]->product_id);
+          
         }
         $i++;
       }
@@ -731,30 +708,7 @@ class TransferController extends APIController
           $this->response['data'][$i]['qty_in_bundled'] = $qty['qty_in_bundled'];
           $this->response['data'][$i]['code'] = $result[$i]->product_code;
           $this->response['data'][$i]['type'] = $result[$i]->type;
-          $this->response['data'][$i]['details'] = json_decode($result[$i]->details, true);
-          if(is_array($this->response['data'][$i]['details']) == false){
-            $this->response['data'][$i]['details'] = json_decode($this->response['data'][$i]['details'], true);
-            if(is_array($this->response['data'][$i]['details']) == false){
-              $this->response['data'][$i]['details'] = json_decode($this->response['data'][$i]['details'], true);
-              $this->response['data'][$i]['details']['active'] = array();
-              $this->response['data'][$i]['details']['other_ingredient'] = null;
-              $this->response['data'][$i]['details']['shelf_life'] = null;
-              $this->response['data'][$i]['details']['approval_date'] = null;
-              $this->response['data'][$i]['details']['approval_number'] = null;
-            }
-            $this->response['data'][$i]['details']['active'] = array();
-            $this->response['data'][$i]['details']['other_ingredient'] = null;
-            $this->response['data'][$i]['details']['shelf_life'] = null;
-            $this->response['data'][$i]['details']['approval_date'] = null;
-            $this->response['data'][$i]['details']['approval_number'] = null;
-          }
-          else{
-            $this->response['data'][$i]['details']['active'] = array();
-            $this->response['data'][$i]['details']['other_ingredient'] = null;
-            $this->response['data'][$i]['details']['shelf_life'] = null;
-            $this->response['data'][$i]['details']['approval_date'] = null;
-            $this->response['data'][$i]['details']['approval_number'] = null;
-          }
+          $this->response['data'][$i]['details'] = $this->retrieveProductDetailsByParams('id', $result[$i]->product_id);
         }
         $i++;
       }
@@ -947,29 +901,7 @@ class TransferController extends APIController
           $temp[$i]['details'] = json_decode($key['details'], true);
           $temp[$i]['batch_number'] = isset($key['batch_number']) ? $key['batch_number'] : null;
           $temp[$i]['manufacturing_date'] = isset($key['manufacturing_date']) ? $key['manufacturing_date'] : null;
-          if(is_array($temp[$i]['details']) == false){
-            $temp[$i]['details'] = json_decode($temp[$i]['details'], true);
-            if(is_array($temp[$i]['details']) == false){
-              $temp[$i]['details'] = json_decode($temp[$i]['details'], true);
-              $temp[$i]['details']['active'] = array();
-              $temp[$i]['details']['other_ingredient'] = null;
-              $temp[$i]['details']['shelf_life'] = null;
-              $temp[$i]['details']['approval_date'] = null;
-              $temp[$i]['details']['approval_number'] = null;
-            }
-            $temp[$i]['details']['active'] = array();
-            $temp[$i]['details']['other_ingredient'] = null;
-            $temp[$i]['details']['shelf_life'] = null;
-            $temp[$i]['details']['approval_date'] = null;
-            $temp[$i]['details']['approval_number'] = null;
-          }
-          else{
-            $temp[$i]['details']['active'] = array();
-            $temp[$i]['details']['other_ingredient'] = null;
-            $temp[$i]['details']['shelf_life'] = null;
-            $temp[$i]['details']['approval_date'] = null;
-            $temp[$i]['details']['approval_number'] = null;
-          }
+          $temp[$i]['details'] = $this->retrieveProductDetailsByParams('id', $key['product_id']);
         $i++;
       }
       $this->response['data'] = $temp;
@@ -1076,30 +1008,7 @@ class TransferController extends APIController
           );
           $temp[$i]['qty_in_bundled'] = $this->getBundledProducts($data['merchant_id'], $key['id']);
           $temp[$i]['type']    = $key['type'];
-          $temp[$i]['details'] = json_decode($key['details'], true);
-          if(is_array($temp[$i]['details']) == false){
-            $temp[$i]['details'] = json_decode($temp[$i]['details'], true);
-            if(is_array($temp[$i]['details']) == false){
-              $temp[$i]['details'] = json_decode($temp[$i]['details'], true);
-              $temp[$i]['details']['active'] = array();
-              $temp[$i]['details']['other_ingredient'] = null;
-              $temp[$i]['details']['shelf_life'] = null;
-              $temp[$i]['details']['approval_date'] = null;
-              $temp[$i]['details']['approval_number'] = null;
-            }
-            $temp[$i]['details']['active'] = array();
-            $temp[$i]['details']['other_ingredient'] = null;
-            $temp[$i]['details']['shelf_life'] = null;
-            $temp[$i]['details']['approval_date'] = null;
-            $temp[$i]['details']['approval_number'] = null;
-          }
-          else{
-            $temp[$i]['details']['active'] = array();
-            $temp[$i]['details']['other_ingredient'] = null;
-            $temp[$i]['details']['shelf_life'] = null;
-            $temp[$i]['details']['approval_date'] = null;
-            $temp[$i]['details']['approval_number'] = null;
-          }
+          $temp[$i]['details'] = $this->retrieveProductDetailsByParams('id', $key['product_id']);
           
         $i++;
       }

@@ -107,6 +107,7 @@ class TransferredProductController extends APIController
       $result = DB::table('transferred_products as T1')
       ->leftJoin('product_traces as T2', 'T1.payload_value', '=', 'T2.id')
       ->where('T1.status', '=', 'active')
+      ->where('T1.deleted_at', '=', null)
       ->where('T1.product_id', '=', $productId)
       ->select(DB::raw('Count(T1.product_id) as qty'), 'T2.manufacturing_date')
       ->get();
