@@ -69,7 +69,7 @@ class PaddockPlanTaskController extends APIController
                 $temp[$i]['paddock'] = app($this->paddockClass)->getByParams('id', $key['paddock_id'], ['id', 'name']);
                 $temp[$i]['spray_mix'] = app($this->sprayMixClass)->getByParams('id', $key['paddock_id'], ['id', 'name']);
                 $temp[$i]['machine'] = app($this->batchPaddockTaskClass)->getMachinedByBatches('paddock_plan_task_id', $key['id']);
-                $temp[$i]['crop_name'] = app($this->cropClass)->retrieveCropById($paddocks[0]['crop_id'])[0]['name'];
+                $temp[$i]['crop_name'] = app($this->cropClass)->retrieveCropById($paddocks[0]['crop_id'])[0]->name;
                 $i++;
             }
             $this->response['data'] = $temp;

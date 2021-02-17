@@ -5,6 +5,7 @@ namespace Increment\Marketplace\Paddock\Http;
 use Illuminate\Http\Request;
 use App\Http\Controllers\APIController;
 use Increment\Marketplace\Paddock\Models\Crop;
+use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
 class CropController extends APIController
@@ -44,7 +45,7 @@ class CropController extends APIController
     }
 
     public function retrieveCropById($id){
-        $result = Crop::where('id', '=', $id)->get();
+        $result = DB::table('crops')->where('id', '=', $id)->get();
         if(sizeof($result) > 0){
             return $result;
         }else{
