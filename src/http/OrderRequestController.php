@@ -119,7 +119,7 @@ class OrderRequestController extends APIController
     $data = $request->all();
     $con = $data['condition'];
     $result = OrderRequest::where($con[0]['column'], $con[0]['clause'], $con[0]['value'])
-              ->where($con[1]['column'], '!=', 'completed')->where($con[1]['column'], '!=', 'cancelled')->get();
+              ->where($con[1]['column'], '!=', 'completed')->where($con[1]['column'], '!=', 'cancelled')->orderBy('created_at', 'desc')->limit(5)->get();
     $this->response['data'] = $result;
     $merchant_id = $data['condition'][0];
     $totalOrder = sizeof($this->manageResultsMobile($this->response['data']));
