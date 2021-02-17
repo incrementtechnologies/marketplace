@@ -42,6 +42,18 @@ class BatchController extends APIController
       return $this->response();
     }
 
+    public function update(Request $request){
+      $data = $request->all();
+      $result = Batch::where('id', '=', $data['id'])->update(array(
+        'status' => $data['status'],
+        'updated_at' => Carbon::now()
+      ));
+
+      $this->response['data'] = $result;
+
+      return $this->response();
+    }
+
     public function retrieveApplyTasksRecents(Request $request){
       $data = $request->all();
 
