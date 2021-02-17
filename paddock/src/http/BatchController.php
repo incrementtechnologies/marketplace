@@ -33,6 +33,15 @@ class BatchController extends APIController
       return $this->response();
     }
 
+    public function retrieveUnApplyTasks(Request $request){
+      $data = $request->all();
+      $result = Batch::where('status', $data['status'])->where('merchant_id', '=', $data['merchant_id'])->get();
+      
+      $this->response['data'] = $result;
+
+      return $this->response();
+    }
+
     public function retrieveApplyTasksRecents(Request $request){
       $data = $request->all();
 
