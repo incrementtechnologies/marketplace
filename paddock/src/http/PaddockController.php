@@ -146,7 +146,7 @@ class PaddockController extends APIController
   }
 
   public function getByParams($column, $value, $columns){
-    $result = Paddock::where($column, '=', $value)->get($columns);
+    $result = Paddock::where($column, '=', $value)->groupBy('id')->get($columns);
     return sizeof($result) > 0 ? $result[0] : null;
   }
 

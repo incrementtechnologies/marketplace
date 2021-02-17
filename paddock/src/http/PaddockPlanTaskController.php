@@ -92,6 +92,11 @@ class PaddockPlanTaskController extends APIController
             foreach ($temp as $key) {
                 $temp[$i]['paddock'] = app($this->paddockClass)->getByParams('merchant_id', $con[0]['value'], ['id', 'name']);
                 $temp[$i]['due_date'] = $this->retrieveByParams('paddock_id', $temp[$i]['paddock']->id, 'due_date');
+                $temp[$i]['category'] = $this->retrieveByParams('paddock_id', $temp[$i]['paddock']->id, 'category');
+                $temp[$i]['nickname'] = $this->retrieveByParams('paddock_id', $temp[$i]['paddock']->id, 'nickname');
+                $temp[$i]['paddock_plan_id'] = $this->retrieveByParams('paddock_id', $temp[$i]['paddock']->id, 'paddock_plan_id');
+                $temp[$i]['paddock_id'] = $this->retrieveByParams('paddock_id', $temp[$i]['paddock']->id, 'paddock_id');
+                $temp[$i]['spray_mix_id'] = $this->retrieveByParams('paddock_id', $temp[$i]['paddock']->id, 'spray_mix_id');
                 $temp[$i]['spray_mix'] = app($this->sprayMixClass)->getByParams('merchant_id', $con[0]['value'], ['id', 'name']);
                 $temp[$i]['machine'] = app($this->machineClass)->getMachineNameByParams('id', $key['machine_id']);
                 $i++;
@@ -129,6 +134,11 @@ class PaddockPlanTaskController extends APIController
             $i = 0;
             foreach ($temp as $key) {
                 $temp[$i]['paddock'] = app($this->paddockClass)->getByParams('merchant_id', $value, ['id', 'name']);
+                $temp[$i]['category'] = $this->retrieveByParams('paddock_id', $temp[$i]['paddock']['id'], 'category');
+                $temp[$i]['nickname'] = $this->retrieveByParams('paddock_id', $temp[$i]['paddock']['id'], 'nickname');
+                $temp[$i]['paddock_plan_id'] = $this->retrieveByParams('paddock_id', $temp[$i]['paddock']['id'], 'paddock_plan_id');
+                $temp[$i]['paddock_id'] = $this->retrieveByParams('paddock_id', $temp[$i]['paddock']->id, 'paddock_id');
+                $temp[$i]['spray_mix_id'] = $this->retrieveByParams('paddock_id', $temp[$i]['paddock']['id'], 'spray_mix_id');
                 $temp[$i]['due_date'] = $this->retrieveByParams('paddock_id', $temp[$i]['paddock']['id'], 'due_date');
                 $temp[$i]['due_date_format'] = Carbon::createFromFormat('Y-m-d', $temp[$i]['due_date'])->copy()->tz($this->response['timezone'])->format('d M');
                 $temp[$i]['spray_mix'] = app($this->sprayMixClass)->getByParams('merchant_id', $value, ['id', 'name']);
