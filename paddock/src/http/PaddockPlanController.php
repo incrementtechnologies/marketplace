@@ -38,4 +38,13 @@ class PaddockPlanController extends APIController
             return null;
         }
     }
+
+    public function retrievePlanByParams($column, $value, $returns){
+        $result = PaddockPlan::where($column, '=', $value)->select($returns)->get();
+        if(sizeof($result) > 0){
+            return $result;
+        }else{
+            return null;
+        } 
+    }
 }

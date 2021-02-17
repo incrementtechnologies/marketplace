@@ -15,8 +15,10 @@ class PaddockPlanTaskController extends APIController
 {
   
   public $paddockClass = 'Increment\Marketplace\Paddock\Http\PaddockController';
+  public $cropClass = 'Increment\Marketplace\Paddock\Http\CropController';
   public $machineClass = 'Increment\Marketplace\Paddock\Http\MachineController';
   public $sprayMixClass = 'Increment\Marketplace\Paddock\Http\SprayMixController';
+  public $paddockPlanClass = 'Increment\Marketplace\Paddock\Http\PaddockPlanController';
   public $batchPaddockTaskClass = 'Increment\Marketplace\Paddock\Http\BatchPaddockTaskController';
 
 
@@ -63,9 +65,11 @@ class PaddockPlanTaskController extends APIController
         if(sizeof($temp) > 0){
             $i = 0;
             foreach ($temp as $key) {
+                $paddocks = app($this->paddockPlanClass)->retrievePlanByParams('id', $key['paddock_plan_id'], 'crop_id');
                 $temp[$i]['paddock'] = app($this->paddockClass)->getByParams('id', $key['paddock_id'], ['id', 'name']);
                 $temp[$i]['spray_mix'] = app($this->sprayMixClass)->getByParams('id', $key['paddock_id'], ['id', 'name']);
                 $temp[$i]['machine'] = app($this->batchPaddockTaskClass)->getMachinedByBatches('paddock_plan_task_id', $key['id']);
+                $temp[$i]['crop_name'] = app($this->cropClass)->retrieveCropById($paddocks[0]['crop_id'])[0]['name'];
                 $i++;
             }
             $this->response['data'] = $temp;
