@@ -435,7 +435,6 @@ class TransferController extends APIController
               ->leftJoin('product_traces as T4', 'T3.payload_value', '=', 'T4.id')
               ->leftJoin('transfers as T5', 'T3.transfer_id', '=', 'T5.id')
               ->where($con['column'], 'like', $con['value'])
-              ->where('merchant_id', '=', $data['merchant_id'])
               ->where('T5.to', '=', $data['merchant_id'])
               ->where(function($query){
                 $query->where('T1.tags', 'not like', 'herbicide')
