@@ -32,6 +32,7 @@ class PaddockController extends APIController
         $result = Paddock::where("id", "=", $data['id'])
                 ->where("merchant_id", "=", $data['merchant_id'])
                 ->where("status", "=", $data['status'])
+                ->where('deleted_at', '=', null)
                 ->get();
         $result['area'] = $result['area'].' '.'Ha';
         $result['paddock_data'] = PaddockPlan::select()->where("paddock_id", "=", $data['id'])->orderBy('start_date','desc')->limit(2)->get();

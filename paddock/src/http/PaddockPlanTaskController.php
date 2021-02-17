@@ -69,7 +69,7 @@ class PaddockPlanTaskController extends APIController
                 $temp[$i]['paddock'] = app($this->paddockClass)->getByParams('id', $key['paddock_id'], ['id', 'name']);
                 $temp[$i]['spray_mix'] = app($this->sprayMixClass)->getByParams('id', $key['paddock_id'], ['id', 'name']);
                 $temp[$i]['machine'] = app($this->batchPaddockTaskClass)->getMachinedByBatches('paddock_plan_task_id', $key['id']);
-                $temp[$i]['crop_name'] = app($this->cropClass)->retrieveCropById($paddocks[0]['crop_id'])[0]->name;
+                $temp[$i]['paddock']['crop_name'] = app($this->cropClass)->retrieveCropById($paddocks[0]['crop_id'])[0]->name;
                 $i++;
             }
             $this->response['data'] = $temp;
@@ -171,6 +171,7 @@ class PaddockPlanTaskController extends APIController
                 ->leftJoin('crops as T4', 'T4.id', '=', 'T3.crop_id')
                 ->leftJoin('spray_mixes as T5', 'T5.id', '=', 'T1.spray_mix_id')
                 ->where('T1.spray_mix_id', '=', $data['spray_mix_id'])
+                ->where('T1.deleted_at', '=', null)
                 ->where('T2.merchant_id', $data['merchant_id'])
                 ->get(['T1.*', 'T2.*', 'T3.*', 'T4.name as crop_name', 'T5.name as mix_name', 'T5.application_rate', 'T5.minimum_rate', 'T5.maximum_rate']);
         if(sizeof($result) > 0){
