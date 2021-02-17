@@ -124,17 +124,19 @@ class PaddockPlanTaskController extends APIController
                                 ->orWhere('status', '=', 'inprogress')
                                 ->orWhere('status', '=', 'ongoing');
                     })->orderBy('created_at', 'desc')->limit(5)->get();
-        if(sizeof($result) > 0){
+        $temp = $result;
+        if(sizeof($temp) > 0){
             $i = 0;
-            foreach ($result as $key) {
-                $temp[$i]['paddock'] = app($this->paddockClass)->getByParams('merchant_id', $column, ['id', 'name']);
-                $temp[$i]['due_date'] = $this->retrieveByParams('id', $temp[$i]['paddock']['id'], 'due_date');
-                $temp[$i]['spray_mix'] = app($this->sprayMixClass)->getByParams('merchant_id', $column, ['id', 'name']);
+            foreach ($temp as $key) {
+                $temp[$i]['paddock'] = app($this->paddockClass)->getByParams('merchant_id', $value, ['id', 'name']);
+                $temp[$i]['due_date'] = $this->retrieveByParams('paddock_id', $temp[$i]['paddock']['id'], 'due_date');
+                $temp[$i]['due_date_format'] = Carbon::createFromFormat('Y-m-d', $temp[$i]['due_date'])->copy()->tz($this->response['timezone'])->format('d M');
+                $temp[$i]['spray_mix'] = app($this->sprayMixClass)->getByParams('merchant_id', $value, ['id', 'name']);
                 $temp[$i]['machine'] = app($this->machineClass)->getMachineNameByParams('id', $key['machine_id']);
                 $i++;
             }
         }
-        return $result;
+        return $temp;
     }
 
     public function retrievePaddockTaskByPaddock($paddockId){
