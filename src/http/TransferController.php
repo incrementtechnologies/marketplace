@@ -401,7 +401,6 @@ class TransferController extends APIController
 
   public function retrieveProductsFirstLevelEndUser(Request $request){
     $data = $request->all();
-    // dd($data);
     $con = $data['condition'];
     $result = null;
     $size = null;
@@ -409,7 +408,6 @@ class TransferController extends APIController
     $data['offset'] = isset($data['offset']) ? $data['offset'] : 0;
     $data['limit'] = isset($data['offset']) ? $data['limit'] : 5;
     if($productType == 'all'){
-      // dd(isset($data['tags']) && $data['tags'] == 'other');
       if(isset($data['tags'])){
         if($data['tags'] == 'other'){
           $products = DB::table('products as T1')
@@ -526,6 +524,7 @@ class TransferController extends APIController
           ->orderBy($con['column'], $data['sort'][$con['column']])
           ->count();
     }
+    dd($products);
     if(sizeof($products) > 0){
       $i = 0;
       foreach ($products as $key) {
