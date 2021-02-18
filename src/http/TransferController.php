@@ -418,13 +418,13 @@ class TransferController extends APIController
                 ->leftJoin('product_traces as T4', 'T3.payload_value', '=', 'T4.id')
                 ->leftJoin('transfers as T5', 'T3.transfer_id', '=', 'T5.id')
                 ->where('T5.to', '=', $data['merchant_id'])
-                ->where('T5.account_id', '=', $data['account_id'])
                 ->where($con['column'], 'like', $con['value'])
                 ->where(function($query){
                   $query->where('T1.tags', 'not like', 'herbicide')
                         ->Where('T1.tags', 'not like', 'fungicide')
                         ->Where('T1.tags', 'not like', 'insecticide');
                 })
+                ->groupBy('T1.id')
                 ->select('*', 'T1.code as product_code')
                 ->skip($data['offset'])->take($data['limit'])
                 ->orderBy($con['column'], $data['sort'][$con['column']])
@@ -437,12 +437,12 @@ class TransferController extends APIController
               ->leftJoin('transfers as T5', 'T3.transfer_id', '=', 'T5.id')
               ->where($con['column'], 'like', $con['value'])
               ->where('T5.to', '=', $data['merchant_id'])
-              ->where('T5.account_id', '=', $data['account_id'])
               ->where(function($query){
                 $query->where('T1.tags', 'not like', 'herbicide')
                       ->Where('T1.tags', 'not like', 'fungicide')
                       ->Where('T1.tags', 'not like', 'insecticide');
               })
+              ->groupBy('T1.id')
               ->orderBy($con['column'], $data['sort'][$con['column']])
               ->count();
         }else{
@@ -453,8 +453,8 @@ class TransferController extends APIController
                 ->leftJoin('transfers as T5', 'T3.transfer_id', '=', 'T5.id')
                 ->where($con['column'], 'like', $con['value'])
                 ->where('T5.to', '=', $data['merchant_id'])
-                ->where('T5.account_id', '=', $data['account_id'])
                 ->where('T1.tags', 'like', $data['tags'])
+                ->groupBy('T1.id')
                 ->select('*', 'T1.code as product_code')
                 ->skip($data['offset'])->take($data['limit'])
                 ->orderBy($con['column'], $data['sort'][$con['column']])
@@ -466,9 +466,9 @@ class TransferController extends APIController
                 ->leftJoin('product_traces as T4', 'T3.payload_value', '=', 'T4.id')
                 ->leftJoin('transfers as T5', 'T3.transfer_id', '=', 'T5.id')
                 ->where($con['column'], 'like', $con['value'])
-                ->where('T5.account_id', '=', $data['account_id'])
                 ->where('T5.to', '=', $data['merchant_id'])
                 ->where('T1.tags', 'like', $data['tags'])
+                ->groupBy('T1.id')
                 ->orderBy($con['column'], $data['sort'][$con['column']])
                 ->count();
         }
@@ -481,8 +481,8 @@ class TransferController extends APIController
                 ->leftJoin('transfers as T5', 'T3.transfer_id', '=', 'T5.id')
                 ->where($con['column'], 'like', $con['value'])
                 ->where('T5.to', '=', $data['merchant_id'])
-                ->where('T5.account_id', '=', $data['account_id'])
                 ->select('*', 'T1.code as product_code')
+                ->groupBy('T1.id')
                 ->skip($data['offset'])->take($data['limit'])
                 ->orderBy($con['column'], $data['sort'][$con['column']])
                 ->get();
@@ -493,8 +493,8 @@ class TransferController extends APIController
               ->leftJoin('product_traces as T4', 'T3.payload_value', '=', 'T4.id')
               ->leftJoin('transfers as T5', 'T3.transfer_id', '=', 'T5.id')
               ->where($con['column'], 'like', $con['value'])
-              ->where('T5.account_id', '=', $data['account_id'])
               ->where('T5.to', '=', $data['merchant_id'])
+              ->groupBy('T1.id')
               ->orderBy($con['column'], $data['sort'][$con['column']])
               ->count();
       }
@@ -508,6 +508,7 @@ class TransferController extends APIController
           ->where($con['column'], 'like', $con['value'])
           ->where('T5.to', '=', $data['merchant_id'])
           ->where('T1.type', '=', $productType)
+          ->groupBy('T1.id')
           ->select('*', 'T1.code as product_code')
           ->skip($data['offset'])->take($data['limit'])
           ->orderBy($con['column'], $data['sort'][$con['column']])
@@ -521,6 +522,7 @@ class TransferController extends APIController
           ->where($con['column'], 'like', $con['value'])
           ->where('T5.to', '=', $data['merchant_id'])
           ->where('T1.type', '=', $productType)
+          ->groupBy('T1.id')
           ->orderBy($con['column'], $data['sort'][$con['column']])
           ->count();
     }
@@ -583,12 +585,12 @@ class TransferController extends APIController
                 ->leftJoin('transfers as T5', 'T3.transfer_id', '=', 'T5.id')
                 ->where($con['column'], 'like', $con['value'])
                 ->where('T5.to', '=', $data['merchant_id'])
-                ->where('T5.account_id', '=', $data['account_id'])
                 ->where(function($query){
                   $query->where('T1.tags', 'not like', 'herbicide')
                         ->Where('T1.tags', 'not like', 'fungicide')
                         ->Where('T1.tags', 'not like', 'insecticide');
                 })
+                ->groupBy('T1.id')
                 ->select('*', 'T1.code as product_code')
                 ->skip($data['offset'])->take($data['limit'])
                 ->orderBy($con['column'], $data['sort'][$con['column']])
@@ -602,12 +604,12 @@ class TransferController extends APIController
               ->leftJoin('transfers as T5', 'T3.transfer_id', '=', 'T5.id')
               ->where($con['column'], 'like', $con['value'])
               ->where('T5.to', '=', $data['merchant_id'])
-              ->where('T5.account_id', '=', $data['account_id'])
               ->where(function($query){
                 $query->where('T1.tags', 'not like', 'herbicide')
                       ->Where('T1.tags', 'not like', 'fungicide')
                       ->Where('T1.tags', 'not like', 'insecticide');
               })
+              ->groupBy('T1.id')
               ->orderBy($con['column'], $data['sort'][$con['column']])
               ->count();
         }else{
@@ -619,8 +621,8 @@ class TransferController extends APIController
               ->leftJoin('transfers as T5', 'T3.transfer_id', '=', 'T5.id')
               ->where($con['column'], 'like', $con['value'])
               ->where('T5.to', '=', $data['merchant_id'])
-              ->where('T5.account_id', '=', $data['account_id'])
               ->where('T1.tags', 'like', $data['tags'])
+              ->groupBy('T1.id')
               ->select('*', 'T1.code as product_code')
               ->skip($data['offset'])->take($data['limit'])
               ->orderBy($con['column'], $data['sort'][$con['column']])
@@ -634,8 +636,8 @@ class TransferController extends APIController
               ->leftJoin('transfers as T5', 'T3.transfer_id', '=', 'T5.id')
               ->where($con['column'], 'like', $con['value'])
               ->where('T5.to', '=', $data['merchant_id'])
-              ->where('T5.account_id', '=', $data['account_id'])
               ->where('T1.tags', 'like', $data['tags'])
+              ->groupBy('T1.id')
               ->orderBy($con['column'], $data['sort'][$con['column']])
               ->count();
         }
@@ -648,7 +650,7 @@ class TransferController extends APIController
             ->leftJoin('transfers as T5', 'T3.transfer_id', '=', 'T5.id')
             ->where('name', 'like', $con['value'])
             ->where('T5.to', '=', $data['merchant_id'])
-            ->where('T5.account_id', '=', $data['account_id'])
+            ->groupBy('T1.id')
             ->select('*', 'T1.code as product_code')
             ->skip($data['offset'])->take($data['limit'])
             ->orderBy($con['column'], $data['sort'][$con['column']])
@@ -662,7 +664,7 @@ class TransferController extends APIController
             ->leftJoin('transfers as T5', 'T3.transfer_id', '=', 'T5.id')
             ->where('name', 'like', $con['value'])
             ->where('T5.to', '=', $data['merchant_id'])
-            ->where('T5.account_id', '=', $data['account_id'])
+            ->groupBy('T1.id')
             ->orderBy($con['column'], $data['sort'][$con['column']])
             ->count();
       }
@@ -675,8 +677,8 @@ class TransferController extends APIController
           ->leftJoin('transfers as T5', 'T3.transfer_id', '=', 'T5.id')
           ->where('name', 'like', $con['value'])
           ->where('T5.to', '=', $data['merchant_id'])
-          ->where('T5.account_id', '=', $data['account_id'])
           ->where('T1.type', '=', $productType)
+          ->groupBy('T1.id')
           ->select('*', 'T1.code as product_code')
           ->skip($data['offset'])->take($data['limit'])
           ->orderBy($con['column'], $data['sort'][$con['column']])
@@ -690,8 +692,8 @@ class TransferController extends APIController
           ->leftJoin('transfers as T5', 'T3.transfer_id', '=', 'T5.id')
           ->where($con['column'], 'like', $con['value'])
           ->where('T5.to', '=', $data['merchant_id'])
-          ->where('T5.account_id', '=', $data['account_id'])
           ->where('T1.type', '=', $productType)
+          ->groupBy('T1.id')
           ->orderBy($con['column'], $data['sort'][$con['column']])
           ->count();
     }
