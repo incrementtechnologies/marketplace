@@ -524,7 +524,6 @@ class TransferController extends APIController
           ->orderBy($con['column'], $data['sort'][$con['column']])
           ->count();
     }
-    dd($products);
     if(sizeof($products) > 0){
       $i = 0;
       foreach ($products as $key) {
