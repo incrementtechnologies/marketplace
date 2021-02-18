@@ -57,9 +57,9 @@ class PaddockPlanTaskController extends APIController
                 ->where(function($query){
                     $query->where('status', '=', 'pending')
                             ->orWhere('status', '=', 'inprogress');
-                })->get();
+                })->skip($data['offset'])->take($data['limit'])->get();
         }else{
-            $result = PaddockPlanTask::where($con[0]['column'], '=', $con[0]['value'])->where($con[1]['column'], '=', $con[1]['value'])->get();
+            $result = PaddockPlanTask::where($con[0]['column'], '=', $con[0]['value'])->where($con[1]['column'], '=', $con[1]['value'])->skip($data['offset'])->take($data['limit'])->get();
         }
         $temp = $result;
         if(sizeof($temp) > 0){
@@ -85,9 +85,9 @@ class PaddockPlanTaskController extends APIController
                 ->where(function($query){
                     $query->where('status', '=', 'pending')
                             ->orWhere('status', '=', 'inprogress');
-                })->get();
+                })->skip($data['offset'])->take($data['limit'])->get();
         }else{
-            $result = Batch::where($con[0]['column'], '=', $con[0]['value'])->where($con[1]['column'], '=', $con[1]['value'])->get();
+            $result = Batch::where($con[0]['column'], '=', $con[0]['value'])->where($con[1]['column'], '=', $con[1]['value'])->skip($data['offset'])->take($data['limit'])->get();
         }
         // dd($result);
         $temp = $result;
