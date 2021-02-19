@@ -321,7 +321,7 @@ class CustomerController extends APIController
         ->select('customers.merchant', 'customers.merchant_id', 'merchants.name', 'accounts.account_type', 'customers.email', 'customers.code', 'customers.status', 'customers.id', 'customers.deleted_at')
         ->skip($data['offset'])
         ->take($data['limit'])
-        ->orderBy($this->con[0]['column'], $data['sort'][$this->con[0]['column']])
+        ->orderBy('customers.'.$this->con[0]['column'], $data['sort'][$this->con[0]['column']])
         ->orderBy('name', $data['sort'][$this->con[0]['column']])
         ->get();
 
@@ -334,7 +334,7 @@ class CustomerController extends APIController
                   ->orWhere($this->con[2]['column'], '=', $this->con[2]['value']);
         })
         ->select('customers.merchant', 'customers.merchant_id', 'merchants.name', 'accounts.account_type', 'customers.email', 'customers.code', 'customers.status', 'customers.id', 'customers.deleted_at')
-        ->orderBy($this->con[0]['column'], $data['sort'][$this->con[0]['column']])
+        ->orderBy('customers.'.$this->con[0]['column'], $data['sort'][$this->con[0]['column']])
         ->orderBy('name', $data['sort'][$this->con[0]['column']])
         ->get();
         $this->response['size'] = sizeof($size);
