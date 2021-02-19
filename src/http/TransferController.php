@@ -1083,12 +1083,15 @@ class TransferController extends APIController
 
   public function retrieveProductTitle(Request $request){
     $data = $request->all();
-    $result = DB::table('transfers as T1')
-    ->join('transferred_products as T2', 'T2.transfer_id', '=', 'T1.id')
-    ->where('T1.to', '=', $data['merchant_id'])
-    ->where('T2.deleted_at', '=', null)
-    ->where('T1.deleted_at', '=', null)
-    ->get();
+    $result =DB::table('products as T1')
+      ->leftJoin('product_attributes as T2', 'T2.product_id', '=', 'T1.id')
+      ->leftJoin('transferred_products as T3', 'T3.product_id', '=', 'T1.id')
+      ->leftJoin('product_traces as T4', 'T3.payload_value', '=', 'T4.id')
+      ->leftJoin('transfers as T5', 'T3.transfer_id', '=', 'T5.id')
+      ->where('T5.to', '=', $data['merchant_id'])
+      ->where('T1.deleted_at', '=', null)
+      ->groupBy('T1.id')
+      ->get();
     $result = $result->groupBy('product_id');
     $data['offset'] = isset($data['offset']) ? $data['offset'] : 0;
     $data['limit'] = isset($data['limit']) ? $data['limit'] : 5;
