@@ -442,7 +442,7 @@ class TransferController extends APIController
               })
               ->groupBy('T1.id')
               ->orderBy($con['column'], $data['sort'][$con['column']])
-              ->count();
+              ->get();
         }else{
           $products = DB::table('products as T1')
                 ->leftJoin('product_attributes as T2', 'T2.product_id', '=', 'T1.id')
@@ -468,7 +468,7 @@ class TransferController extends APIController
                 ->where('T1.tags', 'like', $data['tags'])
                 ->groupBy('T1.id')
                 ->orderBy($con['column'], $data['sort'][$con['column']])
-                ->count();
+                ->get();
         }
         
       }else{
@@ -494,7 +494,7 @@ class TransferController extends APIController
               ->where('T5.to', '=', $data['merchant_id'])
               ->groupBy('T1.id')
               ->orderBy($con['column'], $data['sort'][$con['column']])
-              ->count();
+              ->get();
       }
     }
     else{
@@ -522,7 +522,7 @@ class TransferController extends APIController
           ->where('T1.type', '=', $productType)
           ->groupBy('T1.id')
           ->orderBy($con['column'], $data['sort'][$con['column']])
-          ->count();
+          ->get();
     }
     if(sizeof($products) > 0){
       $i = 0;
@@ -555,10 +555,10 @@ class TransferController extends APIController
         }
         $i++;
       }
-      $this->response['size'] = $size;
+      $this->response['size'] = sizeOf($size);
       return $this->response();
     }else{
-      $this->response['size'] = $size;
+      $this->response['size'] = sizeOf($size);
       $this->response['data'] = [];
       return $this->response();
     }
@@ -609,7 +609,7 @@ class TransferController extends APIController
               })
               ->groupBy('T1.id')
               ->orderBy($con['column'], $data['sort'][$con['column']])
-              ->count();
+              ->get();
         }else{
           $result = DB::table('products as T1')
               ->leftJoin('product_attributes as T2', 'T2.product_id', '=', 'T1.id')
@@ -637,7 +637,7 @@ class TransferController extends APIController
               ->where('T1.tags', 'like', $data['tags'])
               ->groupBy('T1.id')
               ->orderBy($con['column'], $data['sort'][$con['column']])
-              ->count();
+              ->get();
         }
       }else{
         $result = DB::table('products as T1')
@@ -664,7 +664,7 @@ class TransferController extends APIController
             ->where('T5.to', '=', $data['merchant_id'])
             ->groupBy('T1.id')
             ->orderBy($con['column'], $data['sort'][$con['column']])
-            ->count();
+            ->get();
       }
     }else{
       $result = DB::table('products as T1')
@@ -693,7 +693,7 @@ class TransferController extends APIController
           ->where('T1.type', '=', $productType)
           ->groupBy('T1.id')
           ->orderBy($con['column'], $data['sort'][$con['column']])
-          ->count();
+          ->get();
     }
 
     $testArray = array();
@@ -725,10 +725,10 @@ class TransferController extends APIController
         }
         $i++;
       }
-      $this->response['size'] = $size;
+      $this->response['size'] = sizeOf($size);
       return $this->response();
     }else{
-      $this->response['size'] = $size;
+      $this->response['size'] = sizeOf($size);
       return $this->response();
     }
   }
@@ -884,7 +884,7 @@ class TransferController extends APIController
           ->whereNull('T3.deleted_at')
           ->orderBy($con['column'], $data['sort'][$con['column']])
           ->groupBy('T3.product_id')
-          ->select('*', DB::raw('Count(T3.product_id) as qty'), 'T4.id as productTraceId', 'T1.code as product_code', 'T5.from')
+          ->select('*')
           ->groupBy('T3.product_id')
           ->where('T3.merchant_id', '=', $data['merchant_id'])
           ->count();
