@@ -1106,7 +1106,7 @@ class TransferController extends APIController
           'title' => app($this->productClass)->getProductTitleWithTags('id', $key[0]->id)[0]->title,
           'tags' => app($this->productClass)->getProductTitleWithTags('id', $key[0]->id)[0]->tags,
           'unit' => app($this->productAttrClass)->getProductUnit($key[0]->id),
-          'id' => $key
+          'id' => $key[0]->id
         );
         $testArray[] = $item;
       }
