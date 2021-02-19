@@ -85,9 +85,9 @@ class PaddockPlanTaskController extends APIController
                 ->where(function($query){
                     $query->where('status', '=', 'pending')
                             ->orWhere('status', '=', 'inprogress');
-                })->skip($data['offset'])->take($data['limit'])->get();
+                })->skip($data['offset'])->take($data['limit'])->orderBy('created_at', 'desc')->get();
         }else{
-            $result = Batch::where($con[0]['column'], '=', $con[0]['value'])->where($con[1]['column'], '=', $con[1]['value'])->skip($data['offset'])->take($data['limit'])->get();
+            $result = Batch::where($con[0]['column'], '=', $con[0]['value'])->where($con[1]['column'], '=', $con[1]['value'])->skip($data['offset'])->take($data['limit'])->orderBy('created_at', 'desc')->get();
         }
         // dd($result);
         $temp = $result;
@@ -111,8 +111,8 @@ class PaddockPlanTaskController extends APIController
     }
 
     public function retrievePaddockPlanTaskByParamsCompleted($column, $value){
-        $result = PaddockPlanTask::where($column, '=', $value)->where('status', '=', 'approved')->orWhere('status', '=', 'completed')->get()->toArray();
-        $batch = Batch::where($column, '=', $value)->where('status', '=', 'completed')->get()->toArray();
+        $result = PaddockPlanTask::where($column, '=', $value)->where('status', '=', 'approved')->orWhere('status', '=', 'completed')->orderBy('created_at', 'desc')->get()->toArray();
+        $batch = Batch::where($column, '=', $value)->where('status', '=', 'completed')->orderBy('created_at', 'desc')->get()->toArray();
         $array = array_merge($result, $batch);
         if(sizeof($result) > 0 || sizeof($batch)){
             $i = 0;
@@ -172,6 +172,7 @@ class PaddockPlanTaskController extends APIController
                 ->leftJoin('spray_mixes as T5', 'T5.id', '=', 'T1.spray_mix_id')
                 ->where('T1.spray_mix_id', '=', $data['spray_mix_id'])
                 ->where('T1.deleted_at', '=', null)
+                ->whereNull('T1.deleted_at')
                 ->where('T2.merchant_id', $data['merchant_id'])
                 ->get(['T1.*', 'T2.*', 'T3.*', 'T4.name as crop_name', 'T5.name as mix_name', 'T5.application_rate', 'T5.minimum_rate', 'T5.maximum_rate']);
         if(sizeof($result) > 0){
