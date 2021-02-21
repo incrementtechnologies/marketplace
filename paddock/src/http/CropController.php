@@ -19,9 +19,9 @@ class CropController extends APIController
 
     public function retrieve(Request $request){
         $data = $request->all();
-        $result = Crop::where('merchant_id', '=', $data['merchant_id'])->where('deleted_at', '=', null)->get();
-
-        $this->response['data'] = $result;
+        // $result = Crop::where('merchant_id', '=', $data['merchant_id'])->where('deleted_at', '=', null)->get();
+        $this->model = new Crop();
+        $this->retrieveDB($data);
         return $this->response();
     }
     
