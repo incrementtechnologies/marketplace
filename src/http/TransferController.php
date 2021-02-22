@@ -1088,6 +1088,7 @@ class TransferController extends APIController
       ->leftJoin('transferred_products as T3', 'T3.product_id', '=', 'T1.id')
       ->leftJoin('product_traces as T4', 'T3.payload_value', '=', 'T4.id')
       ->leftJoin('transfers as T5', 'T3.transfer_id', '=', 'T5.id')
+      ->select('T1.*')
       ->where('T5.to', '=', $data['merchant_id'])
       ->where('T1.deleted_at', '=', null)
       ->groupBy('T1.id')
@@ -1101,11 +1102,12 @@ class TransferController extends APIController
     // $this->response['data'] = $result;
     // return $this->response();
     if(sizeof($result) > 0){
+      // dd($result);
       $i = 0;
       foreach($result as $key){
         $tempres = app($this->productClass)->getProductTitleWithTags('id', $result[$i]->id)[0]->merchant_id;
         $item = array(
-          'merchant' => app($this->merchantClass)->getColumnValueByParams('id', $tempres, 'name'),
+          'merchant' => app($this->merchantClass)->getColumnValueByParams('id', $result[$i]->merchant_id, 'name'),
           'description' => $result[$i]->description,
           'title' => $result[$i]->title,
           'tags' => $result[$i]->tags,
