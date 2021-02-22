@@ -1092,7 +1092,7 @@ class TransferController extends APIController
       ->where('T1.deleted_at', '=', null)
       ->groupBy('T1.id')
       ->get();
-    $result = $result->groupBy('product_id');
+    // $result = $result->groupBy('product_id');
     $data['offset'] = isset($data['offset']) ? $data['offset'] : 0;
     $data['limit'] = isset($data['limit']) ? $data['limit'] : 5;
     $i = 1;
@@ -1101,16 +1101,19 @@ class TransferController extends APIController
     // $this->response['data'] = $result;
     // return $this->response();
     if(sizeof($result) > 0){ 
+      $i = 0;
       foreach($result as $key){
-        $tempres = app($this->productClass)->getProductTitleWithTags('id', $key[0]->id)[0]->merchant_id;
+        $tempres = app($this->productClass)->getProductTitleWithTags('id', $result[$i]->id)[0]->merchant_id;
         $item = array(
           'merchant' => app($this->merchantClass)->getColumnValueByParams('id', $tempres, 'name'),
-          'description' => app($this->productClass)->getProductTitleWithTags('id', $key[0]->id)[0]->description,
-          'title' => app($this->productClass)->getProductTitleWithTags('id', $key[0]->id)[0]->title,
-          'tags' => app($this->productClass)->getProductTitleWithTags('id', $key[0]->id)[0]->tags,
-          'unit' => app($this->productAttrClass)->getProductUnit($key[0]->id),
-          'id' => $key[0]->id
+          'description' => app($this->productClass)->getProductTitleWithTags('id', $result[$i]->id)[0]->description,
+          'title' => app($this->productClass)->getProductTitleWithTags('id', $result[$i]->id)[0]->title,
+          'tags' => app($this->productClass)->getProductTitleWithTags('id', $result[$i]->id)[0]->tags,
+          'details' => $this->retrieveProductDetailsByParams('id', $result[$i]->id),
+          'unit' => app($this->productAttrClass)->getProductUnit($result[$i]->id),
+          'id' => $result[$i]->id
         );
+        $i++;
         $testArray[] = $item;
       }
     }
