@@ -1100,15 +1100,15 @@ class TransferController extends APIController
     $testArray = array();
     // $this->response['data'] = $result;
     // return $this->response();
-    if(sizeof($result) > 0){ 
+    if(sizeof($result) > 0){
       $i = 0;
       foreach($result as $key){
         $tempres = app($this->productClass)->getProductTitleWithTags('id', $result[$i]->id)[0]->merchant_id;
         $item = array(
           'merchant' => app($this->merchantClass)->getColumnValueByParams('id', $tempres, 'name'),
-          'description' => app($this->productClass)->getProductTitleWithTags('id', $result[$i]->id)[0]->description,
-          'title' => app($this->productClass)->getProductTitleWithTags('id', $result[$i]->id)[0]->title,
-          'tags' => app($this->productClass)->getProductTitleWithTags('id', $result[$i]->id)[0]->tags,
+          'description' => $result[$i]->description,
+          'title' => $result[$i]->title,
+          'tags' => $result[$i]->tags,
           'details' => $this->retrieveProductDetailsByParams('id', $result[$i]->id),
           'unit' => app($this->productAttrClass)->getProductUnit($result[$i]->id),
           'id' => $result[$i]->id
