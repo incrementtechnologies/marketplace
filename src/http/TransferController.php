@@ -1105,7 +1105,6 @@ class TransferController extends APIController
       // dd($result);
       $i = 0;
       foreach($result as $key){
-        $tempres = app($this->productClass)->getProductTitleWithTags('id', $result[$i]->id)[0]->merchant_id;
         $item = array(
           'merchant' => app($this->merchantClass)->getColumnValueByParams('id', $result[$i]->merchant_id, 'name'),
           'description' => $result[$i]->description,
