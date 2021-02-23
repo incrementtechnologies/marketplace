@@ -528,7 +528,7 @@ class TransferController extends APIController
       $i = 0;
       foreach ($products as $key) {
         // dd($products);
-        $productQty = app($this->transferredProductsClass)->getTransferredProduct($products[$i]->product_id, $products[$i]->merchant_id);
+        $productQty = app($this->transferredProductsClass)->getTransferredProduct($products[$i]->product_id, $data['merchant_id']);
         $qty = app($this->productTraceClass)->getBalanceQtyOnManufacturer('product_id', $products[$i]->product_id);
         if($productQty->qty > 0){
           $merchantFrom = app($this->merchantClass)->getColumnValueByParams('id', $products[$i]->from, 'name');
