@@ -527,7 +527,6 @@ class TransferController extends APIController
     if(sizeof($products) > 0){
       $i = 0;
       foreach ($products as $key) {
-        // dd($products);
         $productQty = app($this->transferredProductsClass)->getTransferredProduct($products[$i]->product_id, $data['merchant_id']);
         $qty = app($this->productTraceClass)->getBalanceQtyOnManufacturer('product_id', $products[$i]->product_id);
         if($productQty->qty > 0){
@@ -537,7 +536,7 @@ class TransferController extends APIController
             'product_qty' => $productQty != null ? $productQty->qty : 0,
             'unit' => $products[$i]->payload,
             'unit_value' => $products[$i]->payload_value,
-            'qty' => app($this->batcProductClass)->getProductQtyTrace($products[$i]->merchant_id, 'product_id', $products[$i]->id, $products[$i]->payload_value, $productQty != null ? $productQty->qty : 0), 
+            'qty' => app($this->batcProductClass)->getProductQtyTrace($products[$i]->merchant_id, 'product_id', 101, $products[$i]->payload_value, $productQty != null ? $productQty->qty : 0), 
           );
           $this->response['data'][$i]['inventory'] = $array;
           $this->response['data'][$i]['merchant'] = array(
