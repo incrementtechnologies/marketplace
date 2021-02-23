@@ -8,6 +8,7 @@ use Increment\Marketplace\Paddock\Models\Batch;
 use Increment\Marketplace\Paddock\Models\Machine;
 use Increment\Marketplace\Paddock\Models\SprayMix;
 use Increment\Marketplace\Paddock\Models\PaddockPlanTask;
+use Increment\Marketplace\Paddock\Models\BatchProduct;
 use Carbon\Carbon;
 
 class BatchController extends APIController
@@ -26,12 +27,21 @@ class BatchController extends APIController
       $data = $request->all();
       $batchData = $data['batch'];
       $taskData = $data['tasks'];
+      $batchProduct = $data['batch_products'];
       $batch = Batch::create($batchData);
       $tasks = PaddockPlanTask::create($taskData);
       $this->response['data']['batch'] = $batch;
       $this->response['data']['tasks'] = $tasks;
+      $i = 0;
+      foreach ($batchProduct as $key) {
+        $batchProduct[$i]['batch_id'] = $this->response['data']['batch']['id'];
+
+        BatchProduct::create($batchProduct[$i]);
+        $i++;
+      }
       return $this->response();
     }
+
 
     public function retrieveUnApplyTasks(Request $request){
       $data = $request->all();

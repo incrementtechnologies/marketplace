@@ -171,6 +171,7 @@ class PaddockPlanTaskController extends APIController
                 ->leftJoin('crops as T4', 'T4.id', '=', 'T3.crop_id')
                 ->leftJoin('spray_mixes as T5', 'T5.id', '=', 'T1.spray_mix_id')
                 ->where('T1.spray_mix_id', '=', $data['spray_mix_id'])
+                ->where('T1.status', '=', 'approved')
                 ->where('T1.deleted_at', '=', null)
                 ->whereNull('T1.deleted_at')
                 ->where('T2.merchant_id', $data['merchant_id'])
