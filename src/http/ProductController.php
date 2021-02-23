@@ -316,7 +316,7 @@ class ProductController extends APIController
           $result[$i]['inventories'] = null;
           $result[$i]['product_traces'] = null;
           $result[$i]['merchant'] = app($this->merchantController)->getByParams('id', $result[$i]['merchant_id']);
-          $result[$i]['details'] = $this->retrieveProductDetailsByParams('id', $result[$i]['id']);
+          // $result[$i]['details'] = $this->retrieveProductDetailsByParams('id', $result[$i]['id']);
           $result[$i]['volume'] =  app($this->productAttrController)->getProductUnits($result[$i]['id']);
           if($inventoryType == 'inventory'){
             $result[$i]['inventories'] = app($this->inventoryController)->getInventory($result[$i]['id']);
