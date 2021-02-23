@@ -204,8 +204,8 @@ class PaddockPlanTaskController extends APIController
 
     public function getTotalBatchPaddockPlanTask($paddockPlanTaskId){
         $result = DB::table('batch_paddock_tasks as T1')
-                ->where('T1.paddock_plant_task_id', '=', $paddockPlanTaskId)
-                ->groupBy('T1.paddock_plant_task_id')
+                ->where('T1.paddock_plan_task_id', '=', $paddockPlanTaskId)
+                ->groupBy('T1.paddock_plan_task_id')
                 ->select(DB::raw('SUM(T1.area) as total_area'))
                 ->get();
         return sizeof($result) > 0 ? $result[0]->total_area : null;
