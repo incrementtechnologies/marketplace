@@ -174,13 +174,14 @@ class PaddockPlanTaskController extends APIController
                 ->where('T1.deleted_at', '=', null)
                 ->whereNull('T1.deleted_at')
                 ->where('T2.merchant_id', $data['merchant_id'])
-                ->get(['T1.*', 'T2.*', 'T3.*', 'T4.name as crop_name', 'T5.name as mix_name', 'T5.application_rate', 'T5.minimum_rate', 'T5.maximum_rate']);
+                ->get(['T1.*', 'T2.*', 'T3.*', 'T4.name as crop_name', 'T5.name as mix_name', 'T5.application_rate', 'T5.minimum_rate', 'T5.maximum_rate', 'T1.id as plan_task_id']);
         if(sizeof($result) > 0){
             $tempRes = json_decode(json_encode($result), true);
             $i = 0;
             foreach ($tempRes as $key) {
+                $totalBatchArea = $this->getTotalBatchPaddockPlanTask($tempRes[$i]['plan_task_id']);
                 $tempRes[$i]['area'] = (int)$tempRes[$i]['area'];
-                $tempRes[$i]['remaining_area'] = (int)$tempRes[$i]['area'];
+                $tempRes[$i]['remaining_area'] = $totalBatchArea != null ? ((int)$tempRes[$i]['area'] - (int)$totalBatchArea) : (int)$tempRes[$i]['area'];
                 $tempRes[$i]['units'] = "Ha";
                 $tempRes[$i]['spray_mix_units'] = "L/Ha";
                 $tempRes[$i]['partial'] = false;
@@ -199,5 +200,14 @@ class PaddockPlanTaskController extends APIController
     public function retrieveByParams($column, $value, $returns){
         $result = PaddockPlanTask::where($column, '=', $value)->where('deleted_at', '=', null)->select($returns)->get();
         return sizeof($result) > 0 ? $result[0][$returns] : null;  
+    }
+
+    public function getTotalBatchPaddockPlanTask($paddockPlanTaskId){
+        $result = DB::table('batch_paddock_tasks as T1')
+                ->where('T1.paddock_plant_task_id', '=', $paddockPlanTaskId)
+                ->groupBy('T1.paddock_plant_task_id')
+                ->select(DB::raw('SUM(T1.area) as total_area'))
+                ->get();
+        return sizeof($result) > 0 ? $result[0]->total_area : null;
     }
 }
