@@ -123,12 +123,12 @@ class OrderRequestController extends APIController
     $this->response['data'] = $result;
     $merchant_id = $data['condition'][0];
     $totalOrder = sizeof($this->manageResultsMobile($this->response['data']));
-    $totalRecent = sizeof(app($this->paddockPlanTaskClass)->retrievePaddockPlanTaskByParamsCompleted('merchant_id', $merchant_id['value']));
+    $totalRecent = sizeof(app($this->paddockPlanTaskClass)->retrievePaddockPlanTaskByParamsCompleted('merchant_id', 'merchant_to', $merchant_id['value']));
     $totalInfocus = sizeof(app($this->paddockPlanTaskClass)->retrievePaddockPlanTaskByParamsDue('merchant_id', $merchant_id['value']));
       $temp = array(
         'orders' => $this->manageResultsMobile($this->response['data']),
         'infocus' => app($this->paddockPlanTaskClass)->retrievePaddockPlanTaskByParamsDue('merchant_id', $merchant_id['value']),
-        'recent' => app($this->paddockPlanTaskClass)->retrievePaddockPlanTaskByParamsCompleted('merchant_id', $merchant_id['value']),
+        'recent' => app($this->paddockPlanTaskClass)->retrievePaddockPlanTaskByParamsCompleted('merchant_id', 'merchant_to', $merchant_id['value']),
         'totalOrders' => sizeof($this->manageResultsMobile($this->response['data'])),
         'totalRecent' => $totalRecent,
         'totalInfocus' => $totalInfocus

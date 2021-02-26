@@ -7,6 +7,7 @@ use App\Http\Controllers\APIController;
 use Increment\Marketplace\Paddock\Models\PaddockPlanTask;
 use Increment\Marketplace\Paddock\Models\Paddock;
 use Increment\Marketplace\Paddock\Models\SprayMix;
+use Increment\Marketplace\Models\OrderRequest;
 use Increment\Marketplace\Paddock\Models\Batch;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
@@ -110,10 +111,12 @@ class PaddockPlanTaskController extends APIController
         return $this->response();
     }
 
-    public function retrievePaddockPlanTaskByParamsCompleted($column, $value){
+    public function retrievePaddockPlanTaskByParamsCompleted($column, $column2, $value){
         $result = PaddockPlanTask::where($column, '=', $value)->where('status', '=', 'approved')->orWhere('status', '=', 'completed')->orderBy('created_at', 'desc')->get()->toArray();
         $batch = Batch::where($column, '=', $value)->where('status', '=', 'completed')->orderBy('created_at', 'desc')->get()->toArray();
-        $array = array_merge($result, $batch);
+        $orders = OrderRequest::where($column, '=', $value)->orWhere($column2, '=', $value)->where('status', '=', 'completed')->orderBy('created_at', 'desc')->get()->toArray();
+        $tempArray = array_merge($result, $batch);
+        $array = array_merge($tempArray, $orders);
         if(sizeof($result) > 0 || sizeof($batch)){
             $i = 0;
             foreach ($array as $key) {
@@ -129,8 +132,7 @@ class PaddockPlanTaskController extends APIController
     public function retrievePaddockPlanTaskByParamsDue($column, $value){
         $result = Batch::where($column, '=', $value)
                     ->where(function($query){
-                        $query->where('status', '=', 'pending')
-                                ->orWhere('status', '=', 'inprogress')
+                        $query->where('status', '=', 'inprogress')
                                 ->orWhere('status', '=', 'ongoing');
                     })->orderBy('created_at', 'desc')->limit(5)->get();
         $temp = $result;
