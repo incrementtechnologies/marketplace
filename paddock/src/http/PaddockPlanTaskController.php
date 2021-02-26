@@ -21,6 +21,7 @@ class PaddockPlanTaskController extends APIController
   public $sprayMixClass = 'Increment\Marketplace\Paddock\Http\SprayMixController';
   public $paddockPlanClass = 'Increment\Marketplace\Paddock\Http\PaddockPlanController';
   public $batchPaddockTaskClass = 'Increment\Marketplace\Paddock\Http\BatchPaddockTaskController';
+  public $orderRequestClass = 'Increment\Marketplace\Http\OrderRequestController';
 
 
   function __construct(){
@@ -114,16 +115,21 @@ class PaddockPlanTaskController extends APIController
     public function retrievePaddockPlanTaskByParamsCompleted($column, $column2, $value){
         $result = PaddockPlanTask::where($column, '=', $value)->where('status', '=', 'approved')->orWhere('status', '=', 'completed')->orderBy('created_at', 'desc')->get()->toArray();
         $batch = Batch::where($column, '=', $value)->where('status', '=', 'completed')->orderBy('created_at', 'desc')->get()->toArray();
-        $orders = OrderRequest::where($column, '=', $value)->orWhere($column2, '=', $value)->where('status', '=', 'completed')->orderBy('created_at', 'desc')->get()->toArray();
+        $orders = OrderRequest::where($column, '=', $value)->orWhere($column2, '=', $value)->where('status', '=', 'completed')->orderBy('created_at', 'desc')->get();
+        $orderArray = app($this->orderRequestClass)->manageResultsMobile($orders);
+        // dd($orderArray);
         $tempArray = array_merge($result, $batch);
-        $array = array_merge($tempArray, $orders);
+        $array = array_merge($tempArray, $orderArray);
         if(sizeof($result) > 0 || sizeof($batch)){
             $i = 0;
             foreach ($array as $key) {
-                $array[$i]['paddock'] = isset($array[$i]['paddock_id']) ? app($this->paddockClass)->getByParams('id', $array[$i]['paddock_id'], ['id', 'name']) : app($this->paddockClass)->getByParams('merchant_id', $value, ['id', 'name']);
-                $array[$i]['due_date'] = isset($array[$i]['paddock_id']) ? Carbon::createFromFormat('Y-m-d', $key['due_date'])->copy()->tz($this->response['timezone'])->format('d M') : $this->retrieveByParams('paddock_id', $array[$i]['paddock']['id'], 'due_date');;
-                $array[$i]['spray_mix'] = isset($array[$i]['paddock_id']) ? app($this->sprayMixClass)->getByParams('id', $array[$i]['paddock_id'], ['id', 'name']) : app($this->sprayMixClass)->getByParams('merchant_id', $value, ['id', 'name']);
-                $i++;
+                // $array[$i]['orders'] = isset($array[$i]['code']) ?  app($this->orderRequestClass)->manageResultsMobile($orders) : null;
+                if(!isset($array[$i]['code'])){
+                    $array[$i]['paddock'] = isset($array[$i]['paddock_id']) ? app($this->paddockClass)->getByParams('id', $array[$i]['paddock_id'], ['id', 'name']) : app($this->paddockClass)->getByParams('merchant_id', $value, ['id', 'name']);
+                    $array[$i]['due_date'] = isset($array[$i]['paddock_id']) ? Carbon::createFromFormat('Y-m-d', $key['due_date'])->copy()->tz($this->response['timezone'])->format('d M') : $this->retrieveByParams('paddock_id', $array[$i]['paddock']['id'], 'due_date');;
+                    $array[$i]['spray_mix'] = isset($array[$i]['paddock_id']) ? app($this->sprayMixClass)->getByParams('id', $array[$i]['paddock_id'], ['id', 'name']) : app($this->sprayMixClass)->getByParams('merchant_id', $value, ['id', 'name']);
+                    $i++;
+                }
             }
         }
         return $array;
