@@ -7,7 +7,7 @@ use App\Http\Controllers\APIController;
 use Increment\Marketplace\Paddock\Models\Batch;
 use Increment\Marketplace\Paddock\Models\Machine;
 use Increment\Marketplace\Paddock\Models\SprayMix;
-use Increment\Marketplace\Paddock\Models\PaddockPlanTask;
+use Increment\Marketplace\Paddock\Models\BatchPaddockTask;
 use Increment\Marketplace\Paddock\Models\BatchProduct;
 use Carbon\Carbon;
 
@@ -29,7 +29,7 @@ class BatchController extends APIController
       $taskData = $data['tasks'];
       $batchProduct = $data['batch_products'];
       $batch = Batch::create($batchData);
-      $tasks = PaddockPlanTask::create($taskData);
+      $tasks = BatchPaddockTask::create($taskData);
       $this->response['data']['batch'] = $batch;
       $this->response['data']['tasks'] = $tasks;
       $i = 0;
