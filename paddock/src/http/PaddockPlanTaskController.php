@@ -126,7 +126,7 @@ class PaddockPlanTaskController extends APIController
                 // $array[$i]['orders'] = isset($array[$i]['code']) ?  app($this->orderRequestClass)->manageResultsMobile($orders) : null;
                 if(!isset($array[$i]['code'])){
                     $array[$i]['paddock'] = isset($array[$i]['paddock_id']) ? app($this->paddockClass)->getByParams('id', $array[$i]['paddock_id'], ['id', 'name']) : app($this->paddockClass)->getByParams('merchant_id', $value, ['id', 'name']);
-                    $array[$i]['due_date'] = isset($array[$i]['paddock_id']) ? Carbon::createFromFormat('Y-m-d', $key['due_date'])->copy()->tz($this->response['timezone'])->format('d M') : $this->retrieveByParams('paddock_id', $array[$i]['paddock']['id'], 'due_date');;
+                    $array[$i]['date_completed'] = Carbon::createFromFormat('Y-m-d H:i:s', $key['updated_at'])->copy()->tz($this->response['timezone'])->format('d M');
                     $array[$i]['spray_mix'] = isset($array[$i]['paddock_id']) ? app($this->sprayMixClass)->getByParams('id', $array[$i]['paddock_id'], ['id', 'name']) : app($this->sprayMixClass)->getByParams('merchant_id', $value, ['id', 'name']);
                     $i++;
                 }
