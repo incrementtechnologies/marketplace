@@ -113,7 +113,7 @@ class PaddockPlanTaskController extends APIController
     }
 
     public function retrievePaddockPlanTaskByParamsCompleted($column, $column2, $value){
-        $result = PaddockPlanTask::where($column, '=', $value)->where('status', '=', 'approved')->orWhere('status', '=', 'completed')->orderBy('created_at', 'desc')->get()->toArray();
+        $result = PaddockPlanTask::where($column, '=', $value)->where('status', '=', 'completed')->orderBy('created_at', 'desc')->get()->toArray();
         $batch = Batch::where($column, '=', $value)->where('status', '=', 'completed')->orderBy('created_at', 'desc')->get()->toArray();
         $orders = OrderRequest::where($column, '=', $value)->orWhere($column2, '=', $value)->where('status', '=', 'completed')->orderBy('created_at', 'desc')->get();
         $orderArray = app($this->orderRequestClass)->manageResultsMobile($orders);
