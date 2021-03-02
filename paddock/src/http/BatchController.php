@@ -31,7 +31,6 @@ class BatchController extends APIController
       $batch = Batch::create($batchData);
       $tasks = BatchPaddockTask::create($taskData);
       $this->response['data']['batch'] = $batch;
-      $this->response['data']['tasks'] = $tasks;
       $i = 0;
       foreach ($batchProduct as $key) {
         $batchProduct[$i]['batch_id'] = $this->response['data']['batch']['id'];

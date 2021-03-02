@@ -131,6 +131,7 @@ class PaddockPlanTaskController extends APIController
         $orders = OrderRequest::where($column, '=', $value)->orWhere($column2, '=', $value)->where('status', '=', 'completed')->orderBy('created_at', 'desc')->get();
         $orderArray = app($this->orderRequestClass)->manageResultsMobile($orders);
         $obj = array_merge($batch, $orderArray);
+        $finalResult = null;
         if(sizeof($obj) > 0){
             $i = 0;
             $array = json_decode(json_encode($obj), true);
@@ -144,8 +145,9 @@ class PaddockPlanTaskController extends APIController
                     $i++;
                 }
             }
+            $finalResult = $array;
         }
-        return $array;
+        return $finalResult;
     }
 
     public function retrievePaddockPlanTaskByParamsDue($column, $value){
@@ -158,6 +160,7 @@ class PaddockPlanTaskController extends APIController
                             ->orWhere('T1.status', '=', 'ongoing');
                 })->take(5)->orderBy('T1.created_at', 'desc')->get();
         $obj = $result;
+        $finalResult = null;
         if(sizeof($obj) > 0){
             $i = 0;
             $temp = json_decode(json_encode($obj), true);
@@ -174,8 +177,9 @@ class PaddockPlanTaskController extends APIController
                 $temp[$i]['machine'] = app($this->machineClass)->getMachineNameByParams('id', $key['machine_id']);
                 $i++;
             }
+            $finalResult =  $temp;
         }
-        return $temp;
+        return $finalResult;
     }
 
     public function retrievePaddockTaskByPaddock($paddockId){
