@@ -131,7 +131,7 @@ class PaddockPlanTaskController extends APIController
         $orders = OrderRequest::where($column, '=', $value)->orWhere($column2, '=', $value)->where('status', '=', 'completed')->orderBy('created_at', 'desc')->get();
         $orderArray = app($this->orderRequestClass)->manageResultsMobile($orders);
         $obj = array_merge($batch, $orderArray);
-        $finalResult = null;
+        $finalResult = [];
         if(sizeof($obj) > 0){
             $i = 0;
             $array = json_decode(json_encode($obj), true);
@@ -160,7 +160,7 @@ class PaddockPlanTaskController extends APIController
                             ->orWhere('T1.status', '=', 'ongoing');
                 })->take(5)->orderBy('T1.created_at', 'desc')->get();
         $obj = $result;
-        $finalResult = null;
+        $finalResult = [];
         if(sizeof($obj) > 0){
             $i = 0;
             $temp = json_decode(json_encode($obj), true);
