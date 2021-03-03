@@ -180,30 +180,41 @@ class ProductTraceController extends APIController
     foreach ($this->response['data'] as $key) {
       $item = $this->response['data'][$i];
       $this->response['data'][$i]['product'] = app($this->productController)->getProductByParamsEndUser('id', $item['product_id']);
-      $this->response['data'][$i]['volume'] = app($this->productAttrClass)->getProductUnits($item['product_id']);
-      $item = $this->response['data'][$i];
+      $attributes = app($this->productAttrClass)->getProductUnitsByColumns($item['product_id']);
       
-      if(isset($data['nfc']) && ($item['nfc'] == null || $item['nfc'] == '')){
-        $nfcResult = ProductTrace::where('nfc', '=', $data['nfc'])->get();
-        if(sizeof($nfcResult) > 0){
-          $this->response['data'] = null;
-          $this->response['error'] = 'Tag is already taken!';
-          return $this->response();
-        }else{
-          ProductTrace::where('id', '=', $item['id'])->update(array(
-            'nfc' => $data['nfc'],
-            'updated_at' => Carbon::now(),
-            'status' => 'active'
-          ));
-          $this->response['data'][$i]['nfc'] = $data['nfc'];
-        }
+      $this->response['data'][$i]['volume'] = null;
+      $this->response['data'][$i]['units'] = null;
+      $volume = 0;
+      if($attributes){
+        $this->response['data'][$i]['volume'] = $attributes['payload_value'];
+        $this->response['data'][$i]['units'] = $attributes['payload'];
+        $volume = floatval($attributes['payload_value']);
       }
 
-      if(isset($data['nfc']) && $item['nfc'] != null && $item['nfc'] != $data['nfc']){
-        $this->response['data'] = null;
-        $this->response['error'] = 'Duplicate tag!';
-        return $this->response();
-      }
+      $item = $this->response['data'][$i];
+      
+      // if(isset($data['nfc']) && ($item['nfc'] == null || $item['nfc'] == '')){
+        // no need to update on end user
+        // $nfcResult = ProductTrace::where('nfc', '=', $data['nfc'])->get();
+        // if(sizeof($nfcResult) > 0){
+        //   $this->response['data'] = null;
+        //   $this->response['error'] = 'Tag is already taken!';
+        //   return $this->response();
+        // }else{
+        //   ProductTrace::where('id', '=', $item['id'])->update(array(
+        //     'nfc' => $data['nfc'],
+        //     'updated_at' => Carbon::now(),
+        //     'status' => 'active'
+        //   ));
+        //   $this->response['data'][$i]['nfc'] = $data['nfc'];
+        // }
+      // }
+
+      // if(isset($data['nfc']) && $item['nfc'] != null && $item['nfc'] != $data['nfc']){
+      //   $this->response['data'] = null;
+      //   $this->response['error'] = 'Duplicate tag!';
+      //   return $this->response();
+      // }
 
       if($this->checkOwnProduct($item, $data['merchant_id']) == false){
         $this->response['data'] = null;
@@ -213,11 +224,18 @@ class ProductTraceController extends APIController
 
       $this->response['data'][$i]['created_at_human'] = Carbon::createFromFormat('Y-m-d H:i:s', $item['created_at'])->copy()->tz($this->response['timezone'])->format('F j, Y h:i A');
       $this->response['data'][$i]['bundled_product'] = app($this->bundledProductController)->getByParams('product_trace', $item['id']);
+
       if($this->response['data'][$i]['product'] != null){
         $type = $this->response['data'][$i]['product']['type'];
         $this->response['data'][$i]['product']['qty'] = null;
-        $qty = $this->getBalanceQtyOtherUser($item['product_id'], $data['merchant_id'], $item['id']);
-        $this->response['data'][$i]['product']['qty'] = app($this->batchProductClass)->getProductTraceQty($item['id'], $this->response['data'][$i]['product']['variation'], $qty['qty']);
+        // $qty = $this->getBalanceQtyOtherUser($item['product_id'], $data['merchant_id'], $item['id']);
+        // $this->response['data'][$i]['product']['qty'] = app($this->batchProductClass)->getProductTraceQty($item['id'], $this->response['data'][$i]['product']['variation'], $qty['qty']);
+        $consumed = app('Increment\Marketplace\Paddock\Http\BatchProductController')->getTotalAppliedRateByParams('product_trace_id', $item['id']);
+        $remainingQty = 0;
+        if($volume > $consumed){
+          $remainingQty = $volume - $consumed;
+        }
+        $this->response['data'][$i]['qty' = $remainingQty;
       }
       $i++;
     }
