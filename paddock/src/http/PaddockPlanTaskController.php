@@ -105,6 +105,7 @@ class PaddockPlanTaskController extends APIController
             $i = 0;
             $temp = json_decode(json_encode($obj), true);
             foreach ($temp as $key) {
+                // dd($temp);
                 $paddockId = $this->retrieveByParams('id', $temp[$i]['paddock_plan_task_id'], 'paddock_id');
                 $temp[$i]['paddock'] = $paddockId != null ? app($this->paddockClass)->getByParams('id', $paddockId, ['id', 'name']) : null;
                 $temp[$i]['due_date'] = $this->retrieveByParams('id', $temp[$i]['paddock_plan_task_id'], 'due_date');
@@ -113,8 +114,8 @@ class PaddockPlanTaskController extends APIController
                 $temp[$i]['paddock_plan_id'] = $this->retrieveByParams('id', $temp[$i]['paddock_plan_task_id'], 'paddock_plan_id');
                 $temp[$i]['paddock_id'] = $this->retrieveByParams('id', $temp[$i]['paddock_plan_task_id'], 'id');
                 $temp[$i]['spray_mix_id'] = $this->retrieveByParams('id', $temp[$i]['paddock_plan_task_id'], 'spray_mix_id');
-                $temp[$i]['spray_mix'] = app($this->sprayMixClass)->getByParams('merchant_id', $con[0]['value'], ['id', 'name']);
-                $temp[$i]['machine'] = app($this->machineClass)->getMachineNameByParams('id', $key['machine_id']);
+                $temp[$i]['spray_mix'] = app($this->sprayMixClass)->getByParams('id', $temp[$i]['spray_mix_id'], ['id', 'name']);
+                $temp[$i]['machine'] = app($this->machineClass)->getMachineNameByParams('id', $temp[$i]['machine_id']);
                 $i++;
             }
             $this->response['data'] = $temp;
@@ -138,11 +139,13 @@ class PaddockPlanTaskController extends APIController
             $array = json_decode(json_encode($obj), true);
             foreach ($array as $key) {
                 if(!isset($array[$i]['code'])){
+                    // dd($array);
                     $paddockId = $this->retrieveByParams('id', $array[$i]['paddock_plan_task_id'], 'paddock_id');
                     $array[$i]['paddock'] = $paddockId != null ? app($this->paddockClass)->getByParams('id', $paddockId, ['id', 'name']) : null;
                     $array[$i]['date_completed'] = isset($key['updated_at']) ? Carbon::createFromFormat('Y-m-d H:i:s', $key['updated_at'])->copy()->tz($this->response['timezone'])->format('d M') : null;
                     $array[$i]['nickname'] = $this->retrieveByParams('id', $array[$i]['paddock_plan_task_id'], 'nickname');
-                    $array[$i]['spray_mix'] = $paddockId != null ? app($this->sprayMixClass)->getByParams('id', $paddockId, ['id', 'name']) : app($this->sprayMixClass)->getByParams('merchant_id', $value, ['id', 'name']);
+                    $array[$i]['spray_mix_id'] = $this->retrieveByParams('id', $array[$i]['paddock_plan_task_id'], 'spray_mix_id');
+                    $array[$i]['spray_mix'] = app($this->sprayMixClass)->getByParams('id', $array[$i]['spray_mix_id'], ['id', 'name']);
                     $i++;
                 }
             }
@@ -175,8 +178,8 @@ class PaddockPlanTaskController extends APIController
                 $temp[$i]['spray_mix_id'] = $this->retrieveByParams('id', $temp[$i]['paddock_plan_task_id'], 'spray_mix_id');
                 $temp[$i]['due_date'] = $this->retrieveByParams('id', $temp[$i]['paddock_plan_task_id'], 'due_date');
                 $temp[$i]['due_date_format'] = isset($temp[$i]['due_date']) ? Carbon::createFromFormat('Y-m-d', $temp[$i]['due_date'])->copy()->tz($this->response['timezone'])->format('d M') : null;
-                $temp[$i]['spray_mix'] = app($this->sprayMixClass)->getByParams('merchant_id', $value, ['id', 'name']);
-                $temp[$i]['machine'] = app($this->machineClass)->getMachineNameByParams('id', $key['machine_id']);
+                $temp[$i]['spray_mix'] = app($this->sprayMixClass)->getByParams('id', $temp[$i]['spray_mix_id'], ['id', 'name']);
+                $temp[$i]['machine'] = app($this->machineClass)->getMachineNameByParams('id', $temp[$i]['machine_id']);
                 $i++;
             }
             $finalResult =  $temp;
