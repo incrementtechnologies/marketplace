@@ -40,16 +40,18 @@ class BatchController extends APIController
       }
       $j = 0;
       foreach ($data['tasks']['paddock_plan_task_id'] as $key) {
-        $taskData['paddock_plan_task_id'] = $key;
+        $taskData['paddock_plan_task_id'] = (int)$key;
         $taskData['batch_id'] = $batchId;
         $taskData['spray_mix_id'] = $batchData['spray_mix_id'];
         $taskData['machine_id'] = $batchData['machine_id'];
         foreach ($data['tasks']['area'] as $key) {
-          $taskData['area'] = $key;
+          $taskData['area'] = (int)$key;
         }
         $j++;
         $tasks = BatchPaddockTask::create($taskData);
-      }
+      };
+      $result = Batch::where('id', '=', $this->response['data']['batch']['id'])->get();
+      $this->response['data']['batch'] = $result;
       return $this->response();
     }
 
