@@ -536,7 +536,7 @@ class TransferController extends APIController
           $merchant =  app($this->merchantClass)->getColumnValueByParams('id', $products[$i]->merchant_id, 'name');
           $volume = $attributes ? floatval($attributes[0]['payload_value']) : 0;
           $array = array(
-            'product_qty' => $productQty != null && $volume > 0 ? ($productQty->qty - floatval($consumed / $volume)) : 0,
+            'product_qty' => $productQty != null && $volume > 0 ? number_format(($productQty->qty - floatval($consumed / $volume)), 2) : 0,
             'unit' => $products[$i]->payload,
             'unit_value' => $products[$i]->payload_value,
             'qty' => app($this->batcProductClass)->getProductQtyTrace($products[$i]->merchant_id, 'product_id', $products[$i]->product_id, $products[$i]->payload_value, $productQty != null ? $productQty->qty : 0), 
