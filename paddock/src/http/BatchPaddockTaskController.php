@@ -23,7 +23,7 @@ class BatchPaddockTaskController extends APIController
             $i = 0;
             $response = null;
             foreach ($result as $key) {
-               $response = Batch::where('id', '=', $key[$i]['id']);
+               $response = Batch::where('id', '=', $key[$i]['id'])->get();
                $i++;
             }
             return $response;
