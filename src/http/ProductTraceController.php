@@ -235,7 +235,7 @@ class ProductTraceController extends APIController
         if($volume > $consumed){
           $remainingQty = $volume - $consumed;
         }
-        $this->response['data'][$i]['qty' = $remainingQty;
+        $this->response['data'][$i]['qty'] = $remainingQty;
       }
       $i++;
     }
