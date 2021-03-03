@@ -116,7 +116,6 @@ class TransferredProductController extends APIController
       
       return sizeof($result) > 0 ? $result[0] : null;
     }
-
     public function getByParamsOnly($column, $value){
       $result = TransferredProduct::where($column, '=', $value)->get();
       return sizeof($result) > 0 ? $result[0] : null;

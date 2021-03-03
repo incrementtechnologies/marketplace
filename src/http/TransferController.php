@@ -528,12 +528,15 @@ class TransferController extends APIController
       $i = 0;
       foreach ($products as $key) {
         $productQty = app($this->transferredProductsClass)->getTransferredProduct($products[$i]->product_id, $data['merchant_id']);
-        $qty = app($this->productTraceClass)->getBalanceQtyOnManufacturer('product_id', $products[$i]->product_id);
+        $consumed = app('Increment\Marketplace\Paddock\Http\BatchProductController')->getTotalAppliedRateBySpecifiedParams($products[$i]->product_id, $data['merchant_id']);
+        // $qty = app($this->productTraceClass)->getBalanceQtyOnManufacturer('product_id', $products[$i]->product_id);
+        $attributes = app($this->productAttrClass)->getByParams('product_id', $products[$i]->product_id);
         if($productQty->qty > 0){
           $merchantFrom = app($this->merchantClass)->getColumnValueByParams('id', $products[$i]->from, 'name');
           $merchant =  app($this->merchantClass)->getColumnValueByParams('id', $products[$i]->merchant_id, 'name');
+          $volume = $attributes ? floatval($attributes['payload_value']) : 0;
           $array = array(
-            'product_qty' => $productQty != null ? $productQty->qty : 0,
+            'product_qty' => $productQty != null && $volume > 0 ? ($productQty->qty - floatval($consumed / $volume)) : 0,
             'unit' => $products[$i]->payload,
             'unit_value' => $products[$i]->payload_value,
             'qty' => app($this->batcProductClass)->getProductQtyTrace($products[$i]->merchant_id, 'product_id', $products[$i]->product_id, $products[$i]->payload_value, $productQty != null ? $productQty->qty : 0), 
@@ -546,7 +549,7 @@ class TransferController extends APIController
           $this->response['data'][$i]['title'] = $products[$i]->title;
           $this->response['data'][$i]['volume'] = app($this->productAttrClass)->getProductUnits($products[$i]->product_id);
           $this->response['data'][$i]['product_id'] = $products[$i]->product_id;
-          $this->response['data'][$i]['qty_in_bundled'] = $qty['qty_in_bundled'];
+          $this->response['data'][$i]['qty_in_bundled'] = 0; // $qty['qty_in_bundled'];
           $this->response['data'][$i]['code'] = $products[$i]->product_code;
           $this->response['data'][$i]['type'] = $products[$i]->type;
           $this->response['data'][$i]['details'] = $this->retrieveProductDetailsByParams('id', $products[$i]->product_id);
