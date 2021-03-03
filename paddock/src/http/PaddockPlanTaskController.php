@@ -214,6 +214,7 @@ class PaddockPlanTaskController extends APIController
         if(sizeof($result) > 0){
             $tempRes = json_decode(json_encode($result), true);
             $i = 0;
+            $available = array();
             foreach ($tempRes as $key) {
                 $totalBatchArea = $this->getTotalBatchPaddockPlanTask($tempRes[$i]['plan_task_id']);
                 $tempRes[$i]['area'] = (int)$tempRes[$i]['area'];
@@ -222,10 +223,12 @@ class PaddockPlanTaskController extends APIController
                 $tempRes[$i]['spray_mix_units'] = "L/Ha";
                 $tempRes[$i]['partial'] = false;
                 $tempRes[$i]['partial_flag'] = false;
-
+                if($tempRes[$i]['remaining_area'] > 0){
+                    $available[] = $tempRes[$i];
+                }
                 $i++;
             }
-            $this->response['data'] = $tempRes;
+            $this->response['data'] = $available;
         }else{
             return $this->response['data'] = [];
         }
