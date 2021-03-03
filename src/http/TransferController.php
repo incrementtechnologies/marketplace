@@ -534,7 +534,7 @@ class TransferController extends APIController
         if($productQty->qty > 0){
           $merchantFrom = app($this->merchantClass)->getColumnValueByParams('id', $products[$i]->from, 'name');
           $merchant =  app($this->merchantClass)->getColumnValueByParams('id', $products[$i]->merchant_id, 'name');
-          $volume = $attributes ? floatval($attributes['payload_value']) : 0;
+          $volume = $attributes ? floatval($attributes[0]['payload_value']) : 0;
           $array = array(
             'product_qty' => $productQty != null && $volume > 0 ? ($productQty->qty - floatval($consumed / $volume)) : 0,
             'unit' => $products[$i]->payload,
