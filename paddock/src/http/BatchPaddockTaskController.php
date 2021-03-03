@@ -28,7 +28,7 @@ class BatchPaddockTaskController extends APIController
             }
             return $response;
         }else{
-            return null;
+            return array();
         }
     }
 
