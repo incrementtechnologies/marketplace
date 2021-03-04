@@ -147,6 +147,7 @@ class PaddockPlanTaskController extends APIController
                     $array[$i]['paddock_id'] = $this->retrieveByParams('id', $array[$i]['paddock_plan_task_id'], 'paddock_id');
                     $array[$i]['spray_mix_id'] = $this->retrieveByParams('id', $array[$i]['paddock_plan_task_id'], 'spray_mix_id');
                     $array[$i]['spray_mix'] = app($this->sprayMixClass)->getByParams('id', $array[$i]['spray_mix_id'], ['id', 'name']);
+                    $temp[$i]['machine'] = app($this->machineClass)->getMachineNameByParams('id', $temp[$i]['machine_id']);
                     $i++;
                 }
             }
