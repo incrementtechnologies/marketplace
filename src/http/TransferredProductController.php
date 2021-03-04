@@ -63,7 +63,7 @@ class TransferredProductController extends APIController
               'payload'     => 'product_traces',
               'payload_value' => $data['products'][$i]['id'],
               'product_id'    => $data['products'][$i]['product_id'],
-              'product_attribute_it' => $productTrace ? $productTrace['product_attribute_id'] : null
+              'product_attribute_it' => $productTrace ? $productTrace['product_attribute_id'] : null,
               'created_at'    => Carbon::now()
             );
           }
@@ -153,6 +153,11 @@ class TransferredProductController extends APIController
 
     public function getActiveProductQty($column, $value, $merchantId){
       $result = TransferredProduct::where($column, '=', $value)->where('merchant_id', '=', $merchantId)->where('status', '=', 'active')->count();
+      return $result;
+    }
+
+    public function getActiveProductQtyInAttribute($productId, $productAtributeId, $merchantId){
+      $result = TransferredProduct::where('product_id', '=', $productId)->where('product_attribute_id', '=', $productAtributeId)->where('merchant_id', '=', $merchantId)->where('status', '=', 'active')->count();
       return $result;
     }
 
