@@ -573,6 +573,11 @@ class ProductTraceController extends APIController
     return sizeof($result) > 0 ? $result[0] : null;
   }
 
+  public function getDetailsByParams($column, $value, $columns){
+    $result = ProductTrace::where($column, '=', $value)->where('deleted_at', '=', null)->get($columns);
+    return sizeof($result) > 0 ? $result[0] : null;
+  }
+
   public function deleteByParams($id){
     ProductTrace::where('id', '=', $id)->update(array(
       'deleted_at' => Carbon::now()
