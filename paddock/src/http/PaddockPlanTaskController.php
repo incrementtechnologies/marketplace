@@ -56,22 +56,25 @@ class PaddockPlanTaskController extends APIController
         $con = $data['condition'];
         if($con[1]['value'] == 'inprogress'){
             $result = PaddockPlanTask::where($con[0]['column'], '=', $con[0]['value'])
-                ->where(function($query){
-                    $query->where('status', '=', 'pending')
-                            ->orWhere('status', '=', 'inprogress');
-                })->skip($data['offset'])->take($data['limit'])->get();
+            ->where(function($query){
+                $query->where('status', '=', 'pending')
+                ->orWhere('status', '=', 'inprogress');
+            })->skip($data['offset'])->take($data['limit'])->get();
         }else{
             $result = PaddockPlanTask::where($con[0]['column'], '=', $con[0]['value'])->where($con[1]['column'], '=', $con[1]['value'])->skip($data['offset'])->take($data['limit'])->get();
+            // dd($result);
         }
         $temp = $result;
         if(sizeof($temp) > 0){
             $i = 0;
             foreach ($temp as $key) {
-                $paddocks = app($this->paddockPlanClass)->retrievePlanByParams('id', $key['paddock_plan_id'], 'crop_id');
-                $temp[$i]['paddock'] = app($this->paddockClass)->getByParams('id', $key['paddock_id'], ['id', 'name']);
+                $paddocks = app($this->paddockPlanClass)->retrievePlanByParams('id', $key['paddock_plan_id'], ['crop_id', 'paddock_id']);
+                $temp[$i]['paddock'] = app($this->paddockClass)->getByParams('id', $paddocks[0]['paddock_id'], ['id', 'name']);
                 $temp[$i]['spray_mix'] = app($this->sprayMixClass)->getByParams('id', $key['paddock_id'], ['id', 'name']);
                 $temp[$i]['machine'] = app($this->batchPaddockTaskClass)->getMachinedByBatches('paddock_plan_task_id', $key['id']);
-                $temp[$i]['paddock']['crop_name'] = app($this->cropClass)->retrieveCropById($paddocks[0]['crop_id'])[0]->name;
+                if(isset($temp[$i]['paddock']['crop_name'])){
+                    $temp[$i]['paddock']['crop_name'] = app($this->cropClass)->retrieveCropById($paddocks[0]['crop_id'])[0]->name;
+                }
                 $i++;
             }
             $this->response['data'] = $temp;
