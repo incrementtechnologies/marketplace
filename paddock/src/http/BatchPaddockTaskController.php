@@ -21,14 +21,14 @@ class BatchPaddockTaskController extends APIController
         $result = BatchPaddockTask::where('paddock_plan_task_id', '=', $paddockPlanTaskId)->get();
         if(sizeof($result) > 0){
             $i = 0;
-            $response = array();
+            $response = null;
             foreach ($result as $key) {
-               $response[] = Batch::where('id', '=', $result[$i]['id'])->get();
+               $response = Batch::where('id', '=', $result[$i]['id'])->get();
                $i++;
             }
-            return $response;
+            return $response[0];
         }else{
-            return array();
+            return null;
         }
     }
 

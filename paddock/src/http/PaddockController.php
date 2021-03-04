@@ -73,6 +73,7 @@ class PaddockController extends APIController
     $data = $request->all();
     $this->model = new Paddock();
     $this->retrieveDB($data);
+    $result = Paddock::where('id', '=', (int)$data['condition'][0]['value'])->get();
     for ($i = 0; $i < count($this->response['data']); $i++){
       $item = $this->response['data'][$i];
 
@@ -83,8 +84,7 @@ class PaddockController extends APIController
       $this->response['data'][$i]['start_date'] = null;
       $this->response['data'][$i]['end_date'] = null;
       $this->response['data'][$i]['crop_name'] = null;
-      $paddockPlan = PaddockPlan::select()->where("paddock_id", "=", $item['id'])->orderBy('start_date','desc')->limit(1)->get();  
-
+      $paddockPlan = PaddockPlan::select()->where("paddock_id", "=", $item['id'])->orderBy('start_date','desc')->limit(1)->get();
       if($paddockPlan){
         $this->response['data'][$i]['area'] = (int)$this->response['data'][$i]['area'];
         $this->response['data'][$i]['arable_area'] = (int)$this->response['data'][$i]['arable_area'];
@@ -98,9 +98,9 @@ class PaddockController extends APIController
           $temp = app($this->batchPaddockTaskClass)->retrieveBatchByPaddockPlanTask($paddockPlanTask[0]['id']);
           $this->response['data'][$i]['spray_mix'] = app($this->sprayMixClass)->getByParamsDefault('id', $paddockPlanTask[0]['spray_mix_id']);
           $this->response['data'][$i]['due_date'] = $paddockPlanTask[0]['due_date'];
-          $this->response['data'][$i]['start_date'] = sizeof($temp) > 0 ? Carbon::createFromFormat('Y-m-d H:i:s', $temp[0]['created_at'])->copy()->tz($this->response['timezone'])->format('F j, Y H:i A') : null;
+          $this->response['data'][$i]['start_date'] = $temp !== null ? Carbon::createFromFormat('Y-m-d H:i:s', $temp['created_at'])->copy()->tz($this->response['timezone'])->format('F j, Y H:i A') : null;
         // Carbon::createFromFormat('Y-m-d H:i:s', $result[$i]['created_at'])->copy()->tz($this->response['timezone'])->format('F j, Y h:i A');$paddockPlan[0]['start_date'];
-          $this->response['data'][$i]['end_date'] = sizeOf($temp) > 0 ? Carbon::createFromFormat('Y-m-d H:i:s', $temp[0]['updated_at'])->copy()->tz($this->response['timezone'])->format('F j, Y H:i A') : null;
+          $this->response['data'][$i]['end_date'] = $temp !== null ? Carbon::createFromFormat('Y-m-d H:i:s', $temp['updated_at'])->copy()->tz($this->response['timezone'])->format('F j, Y H:i A') : null;
         }
       }
       
