@@ -29,16 +29,19 @@ class TransferredProductController extends APIController
             $traceId = $data['products'][$i]['id'];
             $productId = $data['products'][$i]['product_id'];
             $transferId = $data['transfer_id'];
+
             if($type != 'regular'){
               // get the products from the bundled and transfer
               app($this->bundledProductController)->deleteByParams('bundled_trace', $traceId, $transferId);
             }else{
               $array = [];
+              $productTrace = app('Increment\Marketplace\Http\ProductTraceController')->getDetailsByParams('id', $traceId, ['product_attribute_id']);
               $array[] = array(
                 'transfer_id' => $transferId,
                 'payload'     => 'product_traces',
                 'payload_value' => $traceId,
                 'product_id'    => $productId,
+                'product_attribute_it' => $productTrace ? $productTrace['product_attribute_id'] : null,
                 'created_at'    => Carbon::now()
               );
               TransferredProduct::insert($array);
@@ -54,11 +57,13 @@ class TransferredProductController extends APIController
         if(sizeof($data['products']) > 0){
           $array = array();
           for ($i=0; $i < sizeof($data['products']); $i++) {
+            $productTrace = app('Increment\Marketplace\Http\ProductTraceController')->getDetailsByParams('id', $data['products'][$i]['id'], ['product_attribute_id']);
             $array[] = array(
               'transfer_id' => $data['transfer_id'],
               'payload'     => 'product_traces',
               'payload_value' => $data['products'][$i]['id'],
               'product_id'    => $data['products'][$i]['product_id'],
+              'product_attribute_it' => $productTrace ? $productTrace['product_attribute_id'] : null
               'created_at'    => Carbon::now()
             );
           }
