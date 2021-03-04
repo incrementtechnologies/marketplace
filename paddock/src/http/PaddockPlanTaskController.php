@@ -61,7 +61,7 @@ class PaddockPlanTaskController extends APIController
                 ->orWhere('status', '=', 'inprogress');
             })->skip($data['offset'])->take($data['limit'])->get();
         }else{
-            $result = PaddockPlanTask::where($con[0]['column'], '=', $con[0]['value'])->where($con[1]['column'], '=', $con[1]['value'])->skip($data['offset'])->take($data['limit'])->get();
+            $result = PaddockPlanTask::where($con[0]['column'], '=', $con[0]['value'])->where($con[1]['column'], '=', $con[1]['value'])->skip($data['offset'])->orderBy('created_at', 'desc')->take($data['limit'])->get();
             // dd($result);
         }
         $temp = $result;
