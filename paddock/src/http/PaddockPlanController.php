@@ -40,7 +40,7 @@ class PaddockPlanController extends APIController
     }
 
     public function retrievePlanByParams($column, $value, $returns){
-        $result = PaddockPlan::where($column, '=', $value)->select($returns)->get();
+        $result = PaddockPlan::where($column, '=', $value)->get($returns);
         if(sizeof($result) > 0){
             return $result;
         }else{
