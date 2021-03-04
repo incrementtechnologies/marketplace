@@ -54,7 +54,7 @@ class BatchProductController extends APIController
   }
 
   public function getTotalAppliedRateByParamsByAttribute($productId, $productAttributeId, $merchantId){
-    $result = BatchProduct::where('product_id', '=', $productId)->where('product_trace_id', '=', $productAttributeId)->where('merchant_id', '=', $merchantId)->sum('applied_rate');
+    $result = BatchProduct::where('product_id', '=', $productId)->where('product_attribute_id', '=', $productAttributeId)->where('merchant_id', '=', $merchantId)->sum('applied_rate');
     return floatval($result);
   }
 

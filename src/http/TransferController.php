@@ -586,7 +586,7 @@ class TransferController extends APIController
           $volume = floatval($attributes[$j]['payload_value']);
           $totalProductTraces = app($this->transferredProductsClass)->getActiveProductQtyInAttribute($productId, $productAttributeId, $data['merchant_id']);
           $totalConsumed = app('Increment\Marketplace\Paddock\Http\BatchProductController')->getTotalAppliedRateByParamsByAttribute($productId, $productAttributeId, $data['merchant_id']);
-          $totalConsumedInTraces = $volume > 0 ? floatval($totalConsumed / $volume) : 0;
+          $totalConsumedInTraces = floatval($totalConsumed / $volume);
           $qty += $totalProductTraces - $totalConsumedInTraces;
           $j++;
         }
