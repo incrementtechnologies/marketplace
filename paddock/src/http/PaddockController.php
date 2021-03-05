@@ -24,7 +24,7 @@ class PaddockController extends APIController
           'note'
       );
   }    
-
+  public $date;
   public function retrieve(Request $request){
     $data = $request->all();
     // dd($data);
@@ -44,17 +44,32 @@ class PaddockController extends APIController
         }
         $this->response['data'] = $result;
     }else{
-        $data = $request->all();
-        $this->model = new Paddock();
-        $this->retrieveDB($data);
-        for ($i = 0; $i < count($this->response['data']); $i++){
+      $data = $request->all();
+      if($data['condition'][0]['column'] === 'date') {
+        if($data['condition'][0]['value'] == '%%') {
+          $this->date = Carbon::now()->format('Y-m-d');
+        } else {
+          $this->date = date(substr($data['condition'][0]['value'], 1, -1));
+        }
+        $result = Paddock::where($data['condition'][1]['column'], $data['condition'][1]['clause'], $data['condition'][1]['value'])
+          ->where($data['condition'][2]['column'], $data['condition'][2]['clause'], $data['condition'][2]['value'])
+          ->skip($data['offset'])
+          ->take($data['limit'])
+          ->get();
+          $this->response['data'] = $result;
+        
+          for ($i = 0; $i < count($this->response['data']); $i++){
             $paddockData = $this->response['data'];
-            $paddock_id = $this->response['data'][$i]['id'];
-            $paddock_data = PaddockPlan::select()->where('paddock_id', '=', $paddock_id)->orderBy('start_date','desc')->limit(2)->get();
+            $paddock_id =$this->response['data'][$i]['id'];
+            $paddock_data = PaddockPlan::select()
+              ->where('paddock_id', '=', $paddock_id)
+              ->where('start_date', '<=', $this->date)
+              ->limit(1)
+              ->get();
             for ($x = 0; $x < count($paddock_data); $x++){
               $paddock_plan_tasks = PaddockPlanTask::select()->where("paddock_plan_id", "=", $paddock_data[$x]['id'])->get();
-                $this->response['data'][$x]['area'] = $this->response['data'][$x]['area'];
-                $this->response['data'][$x]['unit'] = 'Ha' ;
+              $this->response['data'][$x]['area'] = $this->response['data'][$x]['area'];
+              $this->response['data'][$x]['unit'] = 'Ha' ;
                 if (count($paddock_plan_tasks) > 0){
                     $paddock_data[$x]['paddock_tasks_data'] = $paddock_plan_tasks;
                 }
@@ -62,9 +77,47 @@ class PaddockController extends APIController
                 if (count($crop_name)>0){
                     $paddock_data[$x]['crop_name'] = $crop_name[0]['name'];
                 }
+                if(date($paddock_data[$x]['end_date']) >= $this->date) {
+                  $this->response['data'][$i]['paddock_data'] = $paddock_data;
+                } else {
+                  $this->response['data'][$i]['paddock_data'] = [];
+                }
+            }
+        }
+      } else {
+        $this->model = new Paddock();
+        $this->retrieveDB($data);
+        for ($i = 0; $i < count($this->response['data']); $i++){
+          $paddockData = $this->response['data'];
+          $paddock_id = $this->response['data'][$i]['id'];
+          $paddock_data = PaddockPlan::select()
+          ->where('paddock_id', '=', $paddock_id)
+          ->where('start_date', '<=', count($data['condition']) === 1 ? date($data['date']) : Carbon::now()->format('Y-m-d'))
+          ->orderBy('start_date','desc')
+          ->limit(1)
+          ->get();
+          if(count($paddock_data) > 0 && date($paddock_data[0]['end_date']) >= Carbon::now()->format('Y-m-d')) {
+            $paddock_plan_tasks = PaddockPlanTask::select()->where("paddock_plan_id", "=", $paddock_data[0]['id'])->get();
+            for ($p = 0; $p < count($paddock_plan_tasks); $p++){
+              if($paddock_plan_tasks[$p]['status'] === 'approved'){
+                $this->response['data'][$i]['status'] = 'approved';
+              }
+            }
+            $this->response['data'][0]['area'] = $this->response['data'][$i]['area'];
+            $this->response['data'][0]['unit'] = 'Ha' ;
+            if (count($paddock_plan_tasks) > 0){
+                $paddock_data[0]['paddock_tasks_data'] = $paddock_plan_tasks;
+            }
+            $crop_name = Crop::select('name')->where('id', '=', $paddock_data[0]['crop_id'])->get();
+            if (count($crop_name)>0){
+                $paddock_data[0]['crop_name'] = $crop_name[0]['name'];
             }
             $this->response['data'][$i]['paddock_data'] = $paddock_data;
+          } else {
+            $this->response['data'][$i]['paddock_data'] = [];
+          }
         }
+      }
     }
     return $this->response();
   }
