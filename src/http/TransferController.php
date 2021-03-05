@@ -423,7 +423,7 @@ class TransferController extends APIController
                         ->Where('T1.tags', 'not like', 'insecticide');
                 })
                 ->groupBy('T1.id')
-                ->select('*', 'T1.code as product_code')
+                ->select('*', 'T1.code as product_code', 'T2.payload as unit', 'T2.payload_value as unit_value')
                 ->skip($data['offset'])->take($data['limit'])
                 ->orderBy($con['column'], $data['sort'][$con['column']])
                 ->get();
@@ -453,7 +453,7 @@ class TransferController extends APIController
                 ->where('T5.to', '=', $data['merchant_id'])
                 ->where('T1.tags', 'like', $data['tags'])
                 ->groupBy('T1.id')
-                ->select('*', 'T1.code as product_code')
+                ->select('*', 'T1.code as product_code', 'T2.payload as unit', 'T2.payload_value as unit_value')
                 ->skip($data['offset'])->take($data['limit'])
                 ->orderBy($con['column'], $data['sort'][$con['column']])
                 ->get();
@@ -479,12 +479,12 @@ class TransferController extends APIController
                 ->leftJoin('transfers as T5', 'T3.transfer_id', '=', 'T5.id')
                 ->where($con['column'], 'like', $con['value'])
                 ->where('T5.to', '=', $data['merchant_id'])
-                ->select('*', 'T1.code as product_code')
-                ->groupBy('T1.id')
+                ->select('*', 'T1.code as product_code', 'T2.payload as unit', 'T2.payload_value as unit_value')
+                ->groupBy('T2.id')
                 ->skip($data['offset'])->take($data['limit'])
                 ->orderBy($con['column'], $data['sort'][$con['column']])
                 ->get();
-        
+        // dd($products);
         $size = DB::table('products as T1')
               ->leftJoin('product_attributes as T2', 'T2.product_id', '=', 'T1.id')
               ->leftJoin('transferred_products as T3', 'T3.product_id', '=', 'T1.id')
@@ -492,7 +492,7 @@ class TransferController extends APIController
               ->leftJoin('transfers as T5', 'T3.transfer_id', '=', 'T5.id')
               ->where($con['column'], 'like', $con['value'])
               ->where('T5.to', '=', $data['merchant_id'])
-              ->groupBy('T1.id')
+              ->groupBy('T2.id')
               ->orderBy($con['column'], $data['sort'][$con['column']])
               ->get();
       }
@@ -507,7 +507,7 @@ class TransferController extends APIController
           ->where('T5.to', '=', $data['merchant_id'])
           ->where('T1.type', '=', $productType)
           ->groupBy('T1.id')
-          ->select('*', 'T1.code as product_code')
+          ->select('*', 'T1.code as product_code', 'T2.payload as unit', 'T2.payload_value as unit_value')
           ->skip($data['offset'])->take($data['limit'])
           ->orderBy($con['column'], $data['sort'][$con['column']])
           ->get();
@@ -570,6 +570,7 @@ class TransferController extends APIController
   public function manageDataEndUser($products, $data){
     $i = 0;
     foreach ($products as $key) {
+      // dd($products);
       $productId = $products[$i]->product_id;
       $productQty = app($this->transferredProductsClass)->getTransferredProduct($productId, $data['merchant_id']);
       $consumed = app('Increment\Marketplace\Paddock\Http\BatchProductController')->getTotalAppliedRateBySpecifiedParams($productId, $data['merchant_id']);
@@ -590,12 +591,15 @@ class TransferController extends APIController
           $qty += $totalProductTraces - $totalConsumedInTraces;
           $j++;
         }
-
+        $string = $products[$i]->unit;
+        $temps = explode(' ', $string);
+        $final = array_pop($temps);
+        $this->response['data'][$i]['volume'] = $products[$i]->unit_value.' '.$final;
         $this->response['data'][$i]['merchant'] = array('name' => $merchant);
         $this->response['data'][$i]['merchant_from'] = $merchantFrom;
         $this->response['data'][$i]['manufacturing_date'] = $productQty != null ? $productQty->manufacturing_date : null;
         $this->response['data'][$i]['title'] = $products[$i]->title;
-        $this->response['data'][$i]['volume'] = app($this->productAttrClass)->getProductUnits($productId);
+        // $this->response['data'][$i]['volume'] = app($this->productAttrClass)->getProductUnits($productId);
         $this->response['data'][$i]['product_id'] = $products[$i]->product_id;
         $this->response['data'][$i]['qty'] = number_format($qty, 2);
         $this->response['data'][$i]['qty_in_bundled'] = 0; // $qty['qty_in_bundled'];
