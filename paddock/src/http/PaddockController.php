@@ -103,8 +103,8 @@ class PaddockController extends APIController
                 $this->response['data'][$i]['status'] = 'approved';
               }
             }
-            $this->response['data'][0]['area'] = $this->response['data'][$i]['area'];
-            $this->response['data'][0]['unit'] = 'Ha' ;
+            $this->response['data'][$i]['area'] = $this->response['data'][$i]['area'];
+            $this->response['data'][$i]['unit'] = 'Ha' ;
             if (count($paddock_plan_tasks) > 0){
                 $paddock_data[0]['paddock_tasks_data'] = $paddock_plan_tasks;
             }
