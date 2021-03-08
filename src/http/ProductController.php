@@ -76,20 +76,29 @@ class ProductController extends APIController
 
     public function retrieveBasic(Request $request){
       $data = $request->all();
+      $con = $data['condition'];
       $inventoryType = $data['inventory_type'];
       $accountId = $data['account_id'];
-      $this->model = new Product();
-      $this->retrieveDB($data);
+      $result = Product::where($con[0]['column'], $con[0]['clause'], $con[0]['value'])
+          ->where($con[1]['column'], $con[1]['clause'], $con[1]['value'])
+          ->where('type', '!=', 'bundled')
+          ->orderBy(array_keys($data['sort'])[0], $data['sort'][array_keys($data['sort'])[0]])
+          ->skip($data['offset'])
+          ->take($data['limit'])
+          ->get();
+      $this->response['data'] = $result;
+      // $this->model = new Product();
+      // $this->retrieveDB($data);
       $this->response['data'] = $this->manageResultBasic($this->response['data'], null, $inventoryType);
 
       if(sizeof($data['condition']) == 3){
         $this->response['size'] = Product::where($data['condition'][0]['column'], $data['condition'][0]['clause'], $data['condition'][0]['value'])
         ->where($data['condition'][1]['column'], $data['condition'][1]['clause'], $data['condition'][1]['value'])
-        ->where($data['condition'][2]['column'], $data['condition'][2]['clause'], $data['condition'][2]['value'])->count();
+        ->where($data['condition'][2]['column'], $data['condition'][2]['clause'], $data['condition'][2]['value'])->where('type', '!=', 'bundled')->count();
       }else if(sizeof($data['condition']) == 2){
-        $this->response['size'] = Product::where($data['condition'][0]['column'], $data['condition'][0]['clause'], $data['condition'][0]['value'])->where($data['condition'][1]['column'], $data['condition'][1]['clause'], $data['condition'][1]['value'])->count();
+        $this->response['size'] = Product::where($data['condition'][0]['column'], $data['condition'][0]['clause'], $data['condition'][0]['value'])->where($data['condition'][1]['column'], $data['condition'][1]['clause'], $data['condition'][1]['value'])->where('type', '!=', 'bundled')->count();
       }else if(sizeof($data['condition']) == 1){
-        $this->response['size'] = Product::where($data['condition'][0]['column'], $data['condition'][0]['clause'], $data['condition'][0]['value'])->count();
+        $this->response['size'] = Product::where($data['condition'][0]['column'], $data['condition'][0]['clause'], $data['condition'][0]['value'])->where('type', '!=', 'bundled')->count();
       }  
       return $this->response();
     }
