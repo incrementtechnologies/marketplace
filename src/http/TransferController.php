@@ -57,19 +57,25 @@ class TransferController extends APIController
               )
             );
           }
+          $productTrace = app($this->productTraceClass)->getDetailsByParams('id', $key['product_trace'], ['id', 'code', 'product_attribute_id']);
+          if($productTrace){
+            $item = array(
+              'transfer_id' => $this->response['data'],
+              'payload'     => 'product_traces',
+              'payload_value' => $key['product_trace'],
+              'product_id'  => $key['product_id'],
+              'merchant_id'  => $data['to'],
+              'product_attribute_id' => $productTrace['product_attribute_id'],
+              'status'      => 'active',
+              'created_at'  => Carbon::now()
+            );
 
-          $item = array(
-            'transfer_id' => $this->response['data'],
-            'payload'     => 'product_traces',
-            'payload_value' => $key['product_trace'],
-            'product_id'  => $key['product_id'],
-            'merchant_id'  => $data['to'],
-            'status'      => 'active',
-            'created_at'  => Carbon::now()
-          );
-
-          TransferredProduct::insert($item);
-
+            TransferredProduct::insert($item);
+          }else{
+            $this->response['data'] = null;
+            $this->response['error'] = 'Invalid product trace.';
+            return $this->response();
+          }
         }
 
         app($this->orderRequestClass)->updateByParams($data['order_request_id'], array(
