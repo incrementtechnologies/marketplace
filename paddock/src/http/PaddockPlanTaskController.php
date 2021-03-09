@@ -242,8 +242,8 @@ class PaddockPlanTaskController extends APIController
             $available = array();
             foreach ($tempRes as $key) {
                 $totalBatchArea = $this->getTotalBatchPaddockPlanTask($tempRes[$i]['plan_task_id']);
-                $tempRes[$i]['area'] = (int)$tempRes[$i]['area'];
-                $tempRes[$i]['remaining_area'] = $totalBatchArea != null ? ((int)$tempRes[$i]['area'] - (int)$totalBatchArea) : (int)$tempRes[$i]['area'];
+                $tempRes[$i]['area'] = (float)$tempRes[$i]['area'];
+                $tempRes[$i]['remaining_area'] = $totalBatchArea != null ? ((float)$tempRes[$i]['area'] - (float)$totalBatchArea) : (float)$tempRes[$i]['area'];
                 $tempRes[$i]['units'] = "Ha";
                 $tempRes[$i]['spray_mix_units'] = "L/Ha";
                 $tempRes[$i]['partial'] = false;
