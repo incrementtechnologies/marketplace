@@ -223,6 +223,9 @@ class PaddockPlanTaskController extends APIController
     public function retrieveAvailablePaddocks(Request $request){
         $data = $request->all();
         $returnResult = array();
+        $date =  Carbon::now();
+        $currDate = $date->toDateString();
+        // dd($currDate);
         $result = DB::table('paddock_plans_tasks as T1')
                 ->leftJoin('paddocks as T2', 'T1.paddock_id', '=', 'T2.id')
                 ->leftJoin('paddock_plans as T3', 'T3.id', '=', 'T1.paddock_plan_id')
@@ -235,21 +238,23 @@ class PaddockPlanTaskController extends APIController
                 ->whereNull('T2.deleted_at')
                 ->where('T2.merchant_id', $data['merchant_id'])
                 ->groupBy('T3.id')
-                ->get(['T1.*', 'T2.*', 'T3.*', 'T4.name as crop_name', 'T5.name as mix_name', 'T5.application_rate', 'T5.minimum_rate', 'T5.maximum_rate', 'T1.id as plan_task_id', 'T1.deleted_at']);
+                ->get(['T1.*', 'T2.*', 'T3.start_date', 'T3.end_date', 'T4.name as crop_name', 'T5.name as mix_name', 'T5.application_rate', 'T5.minimum_rate', 'T5.maximum_rate', 'T1.id as plan_task_id', 'T1.deleted_at']);
         if(sizeof($result) > 0){
             $tempRes = json_decode(json_encode($result), true);
             $i = 0;
             $available = array();
             foreach ($tempRes as $key) {
-                $totalBatchArea = $this->getTotalBatchPaddockPlanTask($tempRes[$i]['plan_task_id']);
-                $tempRes[$i]['area'] = (int)$tempRes[$i]['area'];
-                $tempRes[$i]['remaining_area'] = $totalBatchArea != null ? ((int)$tempRes[$i]['area'] - (int)$totalBatchArea) : (int)$tempRes[$i]['area'];
-                $tempRes[$i]['units'] = "Ha";
-                $tempRes[$i]['spray_mix_units'] = "L/Ha";
-                $tempRes[$i]['partial'] = false;
-                $tempRes[$i]['partial_flag'] = false;
-                if($tempRes[$i]['remaining_area'] > 0){
-                    $available[] = $tempRes[$i];
+                if($tempRes[$i]['start_date'] <= $currDate && $currDate <= $tempRes[$i]['end_date']){
+                    $totalBatchArea = $this->getTotalBatchPaddockPlanTask($tempRes[$i]['plan_task_id']);
+                    $tempRes[$i]['area'] = (float)$tempRes[$i]['area'];
+                    $tempRes[$i]['remaining_area'] = $totalBatchArea != null ? ((float)$tempRes[$i]['area'] - (float)$totalBatchArea) : (float)$tempRes[$i]['area'];
+                    $tempRes[$i]['units'] = "Ha";
+                    $tempRes[$i]['spray_mix_units'] = "L/Ha";
+                    $tempRes[$i]['partial'] = false;
+                    $tempRes[$i]['partial_flag'] = false;
+                    if($tempRes[$i]['remaining_area'] > 0){
+                        $available[] = $tempRes[$i];
+                    }
                 }
                 $i++;
             }
