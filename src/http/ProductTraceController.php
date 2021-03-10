@@ -34,18 +34,21 @@ class ProductTraceController extends APIController
 
   public function getByParams($column, $value){
     $result  = ProductTrace::where($column, '=', $value)->orderBy('created_at', 'desc')->limit(5)->get();
-    $size = ProductTrace::where($column, '=', $value)->orderBy('created_at', 'desc')->count();
     if(sizeof($result) > 0){
       $i = 0;
       foreach ($result as $key) {
         $result[$i]['created_at_human'] = Carbon::createFromFormat('Y-m-d H:i:s', $result[$i]['created_at'])->copy()->tz($this->response['timezone'])->format('F j, Y h:i A');
-        $result[$i]['qty'] = $size;
         $i++;
       }
     }
     return sizeof($result) > 0 ? $result : null;
   }
 
+  public function getTotalAttributeByParams($attrID){
+    $result = ProductTrace::where('product_attribute_id', '=', $attrID)->orderBy('created_at', 'desc')->count();
+
+    return $result;
+  }
   public function getByParamsLimitOne($column, $value){
     $result  = ProductTrace::where($column, '=', $value)->orderBy('created_at', 'desc')->get();
     if(sizeof($result) > 0){
@@ -60,13 +63,13 @@ class ProductTraceController extends APIController
 
   public function retrieve(Request $request){
     $data = $request->all();
-    $product = app($this->productController)->getProductByParams('code', $data['code']);
+    $product = app($this->productController)->getProductByParamsWithAttribute('code', $data['code'], $data['product_attribute_id']);
 
     if($product != null){
       $data['condition'][] = array(
         'column'  => 'product_id',
         'clause'  => '=',
-        'value'   => $product['id']
+        'value'   => $product['product_id']
       );
     }
 
