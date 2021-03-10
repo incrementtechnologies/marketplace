@@ -65,30 +65,39 @@ class PaddockPlanTaskController extends APIController
             // dd($result);
         }
         $temp = $result;
+        $finalResult = [];
         if(sizeof($temp) > 0){
             $i = 0;
+            $j = 1;
             foreach ($temp as $key) {
                 $paddocks = app($this->paddockPlanClass)->retrievePlanByParams('id', $key['paddock_plan_id'], ['crop_id', 'paddock_id']);
-                $temp[$i]['paddock'] = app($this->paddockClass)->getByParams('id', $paddocks[0]['paddock_id'], ['id', 'name']);
-                if($temp[$i]['paddock'] === null){
-                    $temp = null;
-                }else{
-                    $temp[$i]['spray_mix'] = app($this->sprayMixClass)->getByParams('id', $key['paddock_id'], ['id', 'name']);
-                    $temp[$i]['due_date'] = $this->retrieveByParams('id', $temp[$i]['id'], 'due_date');
-                    $temp[$i]['category'] = $this->retrieveByParams('id', $temp[$i]['id'], 'category');
-                    $temp[$i]['nickname'] = $this->retrieveByParams('id', $temp[$i]['id'], 'nickname');
-                    $temp[$i]['machine'] = app($this->batchPaddockTaskClass)->getMachinedByBatches('paddock_plan_task_id', $temp[$i]['id']);
-                    $temp[$i]['spray_mix_id'] = $this->retrieveByParams('id', $temp[$i]['id'], 'spray_mix_id');
-                    $temp[$i]['spray_mix'] = app($this->sprayMixClass)->getByParams('id', $temp[$i]['spray_mix_id'], ['id', 'name']);
-                    $temp[$i]['paddock_plan_id'] = $this->retrieveByParams('id', $temp[$i]['id'], 'paddock_plan_id');
-                    $temp[$i]['paddock_id'] = $this->retrieveByParams('id', $temp[$i]['id'], 'paddock_id');
-                    if(isset($temp[$i]['paddock']['crop_name'])){
-                        $temp[$i]['paddock']['crop_name'] = app($this->cropClass)->retrieveCropById($paddocks[0]['crop_id'])[0]->name;
+                $existInBatch = app($this->batchPaddockTaskClass)->retrieveByParams('paddock_plan_task_id', $temp[$i]['id'], ['id']);
+                if(sizeof($existInBatch) <= 0) {
+                    $temp[$i]['paddock'] = app($this->paddockClass)->getByParams('id', $paddocks[0]['paddock_id'], ['id', 'name']);
+                    if($temp[$i]['paddock'] === null){
+                        $temp = null;
+                    }else{
+                        $temp[$i]['spray_mix'] = app($this->sprayMixClass)->getByParams('id', $key['paddock_id'], ['id', 'name']);
+                        $temp[$i]['due_date'] = $this->retrieveByParams('id', $temp[$i]['id'], 'due_date');
+                        $temp[$i]['category'] = $this->retrieveByParams('id', $temp[$i]['id'], 'category');
+                        $temp[$i]['nickname'] = $this->retrieveByParams('id', $temp[$i]['id'], 'nickname');
+                        $temp[$i]['machine'] = app($this->batchPaddockTaskClass)->getMachinedByBatches('paddock_plan_task_id', $temp[$i]['id']);
+                        $temp[$i]['spray_mix_id'] = $this->retrieveByParams('id', $temp[$i]['id'], 'spray_mix_id');
+                        $temp[$i]['spray_mix'] = app($this->sprayMixClass)->getByParams('id', $temp[$i]['spray_mix_id'], ['id', 'name']);
+                        $temp[$i]['paddock_plan_id'] = $this->retrieveByParams('id', $temp[$i]['id'], 'paddock_plan_id');
+                        $temp[$i]['paddock_id'] = $this->retrieveByParams('id', $temp[$i]['id'], 'paddock_id');
+                        if(isset($temp[$i]['paddock']['crop_name'])){
+                            $temp[$i]['paddock']['crop_name'] = app($this->cropClass)->retrieveCropById($paddocks[0]['crop_id'])[0]->name;
+                        }
                     }
+                }else{
+                    unset($temp[$i]);
                 }
+                $temp = json_decode(json_encode($temp), true);
+                $finalResult = array_values($temp);
                 $i++;
             }
-            $this->response['data'] = $temp;
+            $this->response['data'] = $finalResult;
         }
         return $this->response();
     }
@@ -237,7 +246,7 @@ class PaddockPlanTaskController extends APIController
                 ->where('T1.deleted_at', '=', null)
                 ->whereNull('T2.deleted_at')
                 ->where('T2.merchant_id', $data['merchant_id'])
-                ->groupBy('T3.id')
+                ->groupBy('T2.id')
                 ->get(['T1.*', 'T2.*', 'T3.start_date', 'T3.end_date', 'T4.name as crop_name', 'T5.name as mix_name', 'T5.application_rate', 'T5.minimum_rate', 'T5.maximum_rate', 'T1.id as plan_task_id', 'T1.deleted_at']);
         if(sizeof($result) > 0){
             $tempRes = json_decode(json_encode($result), true);

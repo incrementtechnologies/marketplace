@@ -37,4 +37,9 @@ class BatchPaddockTaskController extends APIController
         $machine = sizeof($result) > 0 ? app($this->machineClass)->getMachineNameByParams('id', $result[0]['machine_id']) : null;
         return $machine != null ? $machine[0]['name'] : null;
     }
+
+    public function retrieveByParams($column, $value, $return){
+        $result = BatchPaddockTask::where($column, '=', $value)->get($return);
+        return $result;
+    }
 }
