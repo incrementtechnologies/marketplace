@@ -246,6 +246,24 @@ class ProductController extends APIController
       return sizeof($result) > 0 ? $result[0] : null;      
     }
 
+    public function getProductByParamsWithAttribute($column, $value, $attrId){
+      $temp = DB::table('products as T1')
+              ->leftJoin('product_attributes as T2', 'T2.product_id', '=', 'T1.id')
+              ->where($column, '=', $value)
+              ->where('T2.id', '=', $attrId)->get();
+      if(sizeof($temp) > 0){
+        $i= 0;
+        $result = json_decode(json_encode($temp), true);
+        foreach ($result as $key) {
+          $result[$i]['merchant'] = app($this->merchantController)->getByParams('id', $result[$i]['merchant_id']);
+          $result[$i]['featured'] = app($this->productImageController)->getProductImage($result[$i]['id'], 'featured');
+          // $result[$i]['images'] = app($this->productImageController)->getProductImage($result[$i]['id'], null);
+          // $result[$i]['variation'] = app($this->productAttrController)->getByParams('product_id', $result[$i]['id']);
+         }
+        return sizeof($result) > 0 ? $result[0] : null;      
+      }
+    }
+
     public function getProductByParamsEndUser($column, $value){
       $result = Product::where($column, '=', $value)->get();
       if(sizeof($result) > 0){

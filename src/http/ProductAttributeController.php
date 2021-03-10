@@ -39,6 +39,14 @@ class ProductAttributeController extends APIController
 
     public function getByParams($column, $value){
       $result = ProductAttribute::where($column, '=', $value)->where('deleted_at', '=', null)->orderBy('created_at', 'desc')->select(['id', 'payload', 'payload_value'])->get();
+      if(sizeof($result) > 0){
+        $i = 0;
+        foreach ($result as $key) {
+          $result[$i]['product_trace_qty'] = app('Increment\Marketplace\Http\ProductTraceController')->getTotalAttributeByParams($result[$i]['id']);
+
+          $i++;
+        }
+      }
       return (sizeof($result) > 0) ? $result : null;
     }
 }
