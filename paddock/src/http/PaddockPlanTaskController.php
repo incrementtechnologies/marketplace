@@ -169,9 +169,7 @@ class PaddockPlanTaskController extends APIController
                     // dd($array);
                     $paddockId = $this->retrieveByParams('id', $array[$i]['paddock_plan_task_id'], 'paddock_id');
                     $array[$i]['paddock'] = $paddockId != null ? app($this->paddockClass)->getByParams('id', $paddockId, ['id', 'name']) : null;
-                    if($array[$i]['paddock'] == null){
-                        $array = [];
-                    }else{
+                    if($array[$i]['paddock'] != null){
                         $array[$i]['date_completed'] = isset($key['updated_at']) ? Carbon::createFromFormat('Y-m-d H:i:s', $key['updated_at'])->copy()->tz($this->response['timezone'])->format('d M') : null;
                         $array[$i]['nickname'] = $this->retrieveByParams('id', $array[$i]['paddock_plan_task_id'], 'nickname');
                         $array[$i]['paddock_id'] = $this->retrieveByParams('id', $array[$i]['paddock_plan_task_id'], 'paddock_id');
@@ -179,8 +177,8 @@ class PaddockPlanTaskController extends APIController
                         $array[$i]['spray_mix'] = app($this->sprayMixClass)->getByParams('id', $array[$i]['spray_mix_id'], ['id', 'name']);
                         $array[$i]['machine'] = app($this->machineClass)->getMachineNameByParams('id', $array[$i]['machine_id']);
                     }
-                    $i++;
                 }
+                $i++;
             }
             $finalResult = $array;
         }
