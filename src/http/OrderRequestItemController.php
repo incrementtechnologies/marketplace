@@ -19,7 +19,7 @@ class OrderRequestItemController extends APIController
 
   public function create(Request $request){
     $data = $request->all();
-    if($this->checkIfExist($data['order_request_id'], $data['product_id']) == true){
+    if($this->checkIfExist($data['order_request_id'], $data['product_id'], $data['product_attribute_id']) == true){
       $this->response['error'] = 'Already exist to the list!';
       $this->response['data'] = null;
       return $this->response();
@@ -56,8 +56,8 @@ class OrderRequestItemController extends APIController
     return $this->response();
   }
 
-  public function checkIfExist($orderRequestId, $productId){
-    $result = OrderRequestItem::where('order_request_id', '=', $orderRequestId)->where('product_id', '=', $productId)->get();
+  public function checkIfExist($orderRequestId, $productId, $productAttributeId){
+    $result = OrderRequestItem::where('order_request_id', '=', $orderRequestId)->where('product_id', '=', $productId)->where('product_attribute_id', '=', $productAttributeId)->get();
     return sizeof($result) > 0 ? true : false;
   }
 }
