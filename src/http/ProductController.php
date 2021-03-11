@@ -350,6 +350,7 @@ class ProductController extends APIController
           $result[$i]['created_at_human'] = Carbon::createFromFormat('Y-m-d H:i:s', $result[$i]['created_at'])->copy()->tz($this->response['timezone'])->format('F j, Y H:i A');
           $result[$i]['inventories'] = null;
           $result[$i]['product_traces'] = null;
+          $result[$i]['variation'] = app($this->productAttrController)->getByParams('product_id', $result[$i]['id']);
           $result[$i]['merchant'] = app($this->merchantController)->getByParams('id', $result[$i]['merchant_id']);
           // $result[$i]['details'] = $this->retrieveProductDetailsByParams('id', $result[$i]['id']);
           $result[$i]['volume'] =  app($this->productAttrController)->getProductUnits($result[$i]['id']);
