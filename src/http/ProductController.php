@@ -83,9 +83,6 @@ class ProductController extends APIController
       if(sizeof($con) == 1){
         $result = Product::where($con[0]['column'], $con[0]['clause'], $con[0]['value'])
             ->where('type', '!=', 'bundled')
-            ->orderBy(array_keys($data['sort'])[0], $data['sort'][array_keys($data['sort'])[0]])
-            ->skip($data['offset'])
-            ->take($data['limit'])
             ->get();  
       }else if(sizeof($con) == 2){
         $result = Product::where($con[0]['column'], $con[0]['clause'], $con[0]['value'])
