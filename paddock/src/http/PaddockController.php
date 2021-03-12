@@ -68,6 +68,11 @@ class PaddockController extends APIController
               ->get();
             for ($x = 0; $x < count($paddock_data); $x++){
               $paddock_plan_tasks = PaddockPlanTask::select()->where("paddock_plan_id", "=", $paddock_data[$x]['id'])->get();
+              for ($p = 0; $p < count($paddock_plan_tasks); $p++){
+                if($paddock_plan_tasks[$p]['status'] === 'approved'){
+                  $this->response['data'][$i]['status'] = 'approved';
+                }
+              }
               $this->response['data'][$x]['area'] = $this->response['data'][$x]['area'];
               $this->response['data'][$x]['unit'] = 'Ha' ;
                 if (count($paddock_plan_tasks) > 0){
