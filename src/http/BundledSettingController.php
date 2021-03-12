@@ -15,6 +15,7 @@ class BundledSettingController extends APIController
   public $productController = 'Increment\Marketplace\Http\ProductController';
   public $productTraceController = 'Increment\Marketplace\Http\ProductTraceController';
   public $bundledProductController = 'Increment\Marketplace\Http\BundledProductController';
+  public $productAttrController = 'Increment\Marketplace\Http\ProductAttributeController';
   
   function __construct(){
     $this->model = new BundledSetting();
@@ -128,7 +129,9 @@ class BundledSettingController extends APIController
     if(sizeof($result) > 0){
       $i = 0;
       foreach ($result as $key) {
+        // dd($result);
         $result[$i]['product'] = app($this->productController)->getByParams('id', $result[$i]['product_id']);
+        $result[$i]['variation'] = app($this->productAttrController)->getByParams('id', $result[$i]['product_attribute_id']);
         $result[$i]['created_at_human'] = Carbon::createFromFormat('Y-m-d H:i:s', $result[$i]['created_at'])->copy()->tz($this->response['timezone'])->format('F j, Y H:i A');
         $i++;
       }
