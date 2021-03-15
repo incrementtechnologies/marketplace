@@ -79,16 +79,17 @@ class DailyLoadingListController extends APIController
       ->select(['T2.*', 'T1.id as daily_loading_list_id'])
       ->get();
 
-    $results = json_decode($tempResult->groupBy('product_id'), true);
+    $results = json_decode($tempResult->groupBy('product_attribute_id'), true);
     
     if(sizeof($results) > 0){
       foreach ($results as $key => $value) {
         $array = null;
         $totalQty = 0;
-        $product = app($this->productClass)->getByParams('id', $key);
+        $product = app($this->productClass)->getByParams('id', $value[0]['product_id']);
         $orderRequestId = null;
         $dailyLoadinglistId = null;
         $merchant = $product ? app($this->merchantClass)->getColumnValueByParams('id', $product['merchant_id'], 'name') : null;
+        $productId = $value[0]['product_id'];
         foreach ($value as $keyValues) {
           $totalQty += intval($keyValues['qty']);
           $orderRequestId = $keyValues['order_request_id'];
@@ -103,8 +104,9 @@ class DailyLoadingListController extends APIController
           'qty'       => $totalQty,
           'daily_loading_list_id' => $dailyLoadinglistId,
           'order_request_id' => $orderRequestId,
-          'product_id' => $key,
-          'counter'     => 0
+          'product_id' => $productId,
+          'counter'     => 0,
+          'product_attribute_id' => $key
         );
       }
     }
