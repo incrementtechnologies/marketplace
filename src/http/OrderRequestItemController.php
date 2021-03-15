@@ -29,6 +29,18 @@ class OrderRequestItemController extends APIController
     return $this->response();
   }
 
+  // public function update(Request $request){
+  //   $data = $request->all();
+  //   if($this->checkIfExist($data['order_request_id'], $data['product_id'], $data['product_attribute_id']) == true){
+  //     $this->response['error'] = 'Already exist to the list!';
+  //     $this->response['data'] = null;
+  //     return $this->response();
+  //   }
+  //   $this->model = new OrderRequestItem();
+  //   $this->updateDB($data);
+  //   return $this->response();
+  // }
+
   public function retrieve(Request $request){
     $data = $request->all();
     $this->retrieveDB($data);
