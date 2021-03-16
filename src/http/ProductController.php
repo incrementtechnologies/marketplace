@@ -373,9 +373,10 @@ class ProductController extends APIController
       if(sizeof($result) > 0){
         $i = 0;
         foreach ($result as $key) {
+          $merchantId = app($this->merchantController)->getColumnByParams('account_id', $accountId, 'id');
           // $result[$i]['account'] = $this->retrieveAccountDetails($result[$i]['account_id']);
           // $result[$i]['price'] = app($this->productPricingController)->getPrice($result[$i]['id']);
-          $result[$i]['variation'] = app($this->productAttrController)->getByParams('product_id', $result[$i]['id']);
+          $result[$i]['variation'] = app($this->productAttrController)->getByParamsWithMerchant('product_id', $result[$i]['id'], $merchantId);
           $result[$i]['bundled'] = app($this->bundledSettingController)->getByParams('product_id', $result[$i]['id']);
           $result[$i]['featured'] = app($this->productImageController)->getProductImage($result[$i]['id'], 'featured');
           $result[$i]['images'] = app($this->productImageController)->getProductImage($result[$i]['id'], null);

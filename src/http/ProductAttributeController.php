@@ -49,4 +49,18 @@ class ProductAttributeController extends APIController
       }
       return (sizeof($result) > 0) ? $result : null;
     }
+
+    public function getByParamsWithMerchant($column, $value, $merchantId){
+      $result = ProductAttribute::where($column, '=', $value)->where('deleted_at', '=', null)->orderBy('created_at', 'desc')->select(['id', 'payload', 'payload_value'])->get();
+      if(sizeof($result) > 0){
+        $i = 0;
+        foreach ($result as $key) {
+          $productQtyPerVariation = app('Increment\Marketplace\Http\ProductTraceController')->getTotalAttributeByParams($result[$i]['id']);
+          $productQtyTransferredPerVariation = app('Increment\Marketplace\Http\TransferredProductController')->getRemainingProductQty($value, $merchantId, $result[$i]['id']);
+          $result[$i]['product_trace_qty'] = (int)$productQtyPerVariation - (int)$productQtyTransferredPerVariation;
+          $i++;
+        }
+      }
+      return (sizeof($result) > 0) ? $result : null;
+    }
 }

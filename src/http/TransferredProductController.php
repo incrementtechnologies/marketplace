@@ -133,6 +133,20 @@ class TransferredProductController extends APIController
       ->get();
       return sizeof($result) > 0 ? $result[0] : null;
     }
+
+    public function getRemainingProductQty($productId, $merchantId, $productAtributeId){
+      $result = DB::table('transferred_products as T1')
+      ->leftJoin('product_traces as T2', 'T1.payload_value', '=', 'T2.id')
+      ->leftJoin('transfers as T3', 'T1.transfer_id', '=', 'T3.id')
+      ->where('T1.status', '=', 'active')
+      ->where('T1.deleted_at', '=', null)
+      ->where('T3.from', '=', $merchantId)
+      ->where('T1.product_id', '=', $productId)
+      ->where('T1.product_attribute_id', '=', $productAtributeId)
+      ->count();
+      return $result;
+    }
+
     public function getByParamsOnly($column, $value){
       $result = TransferredProduct::where($column, '=', $value)->get();
       return sizeof($result) > 0 ? $result[0] : null;
