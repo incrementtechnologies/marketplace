@@ -258,6 +258,7 @@ class PaddockPlanTaskController extends APIController
                     $tempRes[$i]['units'] = "Ha";
                     $tempRes[$i]['spray_mix_units'] = "L/Ha";
                     $tempRes[$i]['partial'] = false;
+                    // $tempRes[$i]['start_date'] = $tempRes[$i]['start_date'];
                     $tempRes[$i]['partial_flag'] = false;
                     if($tempRes[$i]['remaining_area'] > 0){
                         $available[] = $tempRes[$i];
