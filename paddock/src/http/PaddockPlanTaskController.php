@@ -56,7 +56,7 @@ class PaddockPlanTaskController extends APIController
         $con = $data['condition'];
         $result = PaddockPlanTask::where($con[0]['column'], '=', $con[0]['value'])->where($con[1]['column'], '=', $con[1]['value'])->skip($data['offset'])->orderBy('created_at', 'desc')->take($data['limit'])->get();
         $temp = $result;
-        $finalResult = [];
+        $finalResult = array();
         $date =  Carbon::now();
         $currDate = $date->toDateString();
         if(sizeof($temp) > 0){
@@ -81,12 +81,9 @@ class PaddockPlanTaskController extends APIController
                             if(isset($temp[$i]['paddock']['crop_name'])){
                                 $temp[$i]['paddock']['crop_name'] = app($this->cropClass)->retrieveCropById($paddocks[0]['crop_id'])[0]->name;
                             }
+                            $finalResult[] = $temp[$i];
                         }
-                    }else{
-                        unset($temp[$i]);
                     }
-                    $temp = json_decode(json_encode($temp), true);
-                    $finalResult = array_values($temp);
                 }
                 $i++;
             }
