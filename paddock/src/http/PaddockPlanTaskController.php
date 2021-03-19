@@ -67,7 +67,6 @@ class PaddockPlanTaskController extends APIController
                     $paddocks = app($this->paddockPlanClass)->retrievePlanByParams('id', $key['paddock_plan_id'], ['crop_id', 'paddock_id']);
                     $existInBatch = app($this->batchPaddockTaskClass)->retrieveByParams('paddock_plan_task_id', $temp[$i]['id'], ['id']);
                     if(sizeof($existInBatch) <= 0) {
-                        $paddocks[0]['paddock_id'] = 40;
                         $temp[$i]['paddock'] = app($this->paddockClass)->getByParams('id', $paddocks[0]['paddock_id'], ['id', 'name']);
                         if($temp[$i]['paddock'] !== null){
                             $temp[$i]['spray_mix'] = app($this->sprayMixClass)->getByParams('id', $key['paddock_id'], ['id', 'name']);
