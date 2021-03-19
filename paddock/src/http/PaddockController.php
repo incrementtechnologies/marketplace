@@ -147,12 +147,15 @@ class PaddockController extends APIController
       $this->response['data'][$i]['arable_area'] = (int)$this->response['data'][$i]['arable_area'];
       $this->response['data'][$i]['units'] = 'Ha';
       $this->response['data'][$i]['spray_area'] = (int)$this->response['data'][$i]['spray_area'];
+      $this->response['data'][$i]['paddockPalan'] = $paddockPlan;
       if(sizeof($paddockPlan) > 0){
         $this->response['data'][$i]['started'] = $paddockPlan[0]['start_date'];
         $crop = Crop::where("id", "=", $paddockPlan[0]['crop_id'])->get();
+        $this->response['data'][$i]['carops'] = $crop;
         $this->response['data'][$i]['crop_name'] = sizeof($crop) > 0 ? $crop[0]['name'] : null;
         $paddockPlanTask = PaddockPlanTask::where("paddock_plan_id", "=", $paddockPlan[0]['id'])->get();
-        if($paddockPlanTask && sizeof($paddockPlanTask) > 0){
+        $this->response['data'][$i]['paddockPalanTask'] = $paddockPlanTask;
+        if(sizeof($paddockPlanTask) > 0){
           $temp = app($this->batchPaddockTaskClass)->retrieveBatchByPaddockPlanTask($paddockPlanTask[0]['id']);
           $this->response['data'][$i]['spray_mix'] = app($this->sprayMixClass)->getByParamsDefault('id', $paddockPlanTask[0]['spray_mix_id']);
           $this->response['data'][$i]['due_date'] = $paddockPlanTask[0]['due_date'];

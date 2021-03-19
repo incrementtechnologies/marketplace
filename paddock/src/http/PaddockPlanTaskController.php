@@ -54,47 +54,41 @@ class PaddockPlanTaskController extends APIController
     public function retrieveMobileByParams(Request $request){
         $data = $request->all();
         $con = $data['condition'];
-        if($con[1]['value'] == 'inprogress'){
-            $result = PaddockPlanTask::where($con[0]['column'], '=', $con[0]['value'])
-            ->where(function($query){
-                $query->where('status', '=', 'pending')
-                ->orWhere('status', '=', 'inprogress');
-            })->skip($data['offset'])->take($data['limit'])->get();
-        }else{
-            $result = PaddockPlanTask::where($con[0]['column'], '=', $con[0]['value'])->where($con[1]['column'], '=', $con[1]['value'])->skip($data['offset'])->orderBy('created_at', 'desc')->take($data['limit'])->get();
-            // dd($result);
-        }
+        $result = PaddockPlanTask::where($con[0]['column'], '=', $con[0]['value'])->where($con[1]['column'], '=', $con[1]['value'])->skip($data['offset'])->orderBy('created_at', 'desc')->take($data['limit'])->get();
         $temp = $result;
         $finalResult = [];
+        $date =  Carbon::now();
+        $currDate = $date->toDateString();
         if(sizeof($temp) > 0){
             $i = 0;
             $j = 1;
             foreach ($temp as $key) {
-                $paddocks = app($this->paddockPlanClass)->retrievePlanByParams('id', $key['paddock_plan_id'], ['crop_id', 'paddock_id']);
-                $existInBatch = app($this->batchPaddockTaskClass)->retrieveByParams('paddock_plan_task_id', $temp[$i]['id'], ['id']);
-                if(sizeof($existInBatch) <= 0) {
-                    $temp[$i]['paddock'] = app($this->paddockClass)->getByParams('id', $paddocks[0]['paddock_id'], ['id', 'name']);
-                    if($temp[$i]['paddock'] === null){
-                        $temp = null;
-                    }else{
-                        $temp[$i]['spray_mix'] = app($this->sprayMixClass)->getByParams('id', $key['paddock_id'], ['id', 'name']);
-                        $temp[$i]['due_date'] = $this->retrieveByParams('id', $temp[$i]['id'], 'due_date');
-                        $temp[$i]['category'] = $this->retrieveByParams('id', $temp[$i]['id'], 'category');
-                        $temp[$i]['nickname'] = $this->retrieveByParams('id', $temp[$i]['id'], 'nickname');
-                        $temp[$i]['machine'] = app($this->batchPaddockTaskClass)->getMachinedByBatches('paddock_plan_task_id', $temp[$i]['id']);
-                        $temp[$i]['spray_mix_id'] = $this->retrieveByParams('id', $temp[$i]['id'], 'spray_mix_id');
-                        $temp[$i]['spray_mix'] = app($this->sprayMixClass)->getByParams('id', $temp[$i]['spray_mix_id'], ['id', 'name']);
-                        $temp[$i]['paddock_plan_id'] = $this->retrieveByParams('id', $temp[$i]['id'], 'paddock_plan_id');
-                        $temp[$i]['paddock_id'] = $this->retrieveByParams('id', $temp[$i]['id'], 'paddock_id');
-                        if(isset($temp[$i]['paddock']['crop_name'])){
-                            $temp[$i]['paddock']['crop_name'] = app($this->cropClass)->retrieveCropById($paddocks[0]['crop_id'])[0]->name;
+                if($currDate <= $temp[$i]['due_date']){
+                    $paddocks = app($this->paddockPlanClass)->retrievePlanByParams('id', $key['paddock_plan_id'], ['crop_id', 'paddock_id']);
+                    $existInBatch = app($this->batchPaddockTaskClass)->retrieveByParams('paddock_plan_task_id', $temp[$i]['id'], ['id']);
+                    if(sizeof($existInBatch) <= 0) {
+                        $paddocks[0]['paddock_id'] = 40;
+                        $temp[$i]['paddock'] = app($this->paddockClass)->getByParams('id', $paddocks[0]['paddock_id'], ['id', 'name']);
+                        if($temp[$i]['paddock'] !== null){
+                            $temp[$i]['spray_mix'] = app($this->sprayMixClass)->getByParams('id', $key['paddock_id'], ['id', 'name']);
+                            $temp[$i]['due_date'] = $this->retrieveByParams('id', $temp[$i]['id'], 'due_date');
+                            $temp[$i]['category'] = $this->retrieveByParams('id', $temp[$i]['id'], 'category');
+                            $temp[$i]['nickname'] = $this->retrieveByParams('id', $temp[$i]['id'], 'nickname');
+                            $temp[$i]['machine'] = app($this->batchPaddockTaskClass)->getMachinedByBatches('paddock_plan_task_id', $temp[$i]['id']);
+                            $temp[$i]['spray_mix_id'] = $this->retrieveByParams('id', $temp[$i]['id'], 'spray_mix_id');
+                            $temp[$i]['spray_mix'] = app($this->sprayMixClass)->getByParams('id', $temp[$i]['spray_mix_id'], ['id', 'name']);
+                            $temp[$i]['paddock_plan_id'] = $this->retrieveByParams('id', $temp[$i]['id'], 'paddock_plan_id');
+                            $temp[$i]['paddock_id'] = $this->retrieveByParams('id', $temp[$i]['id'], 'paddock_id');
+                            if(isset($temp[$i]['paddock']['crop_name'])){
+                                $temp[$i]['paddock']['crop_name'] = app($this->cropClass)->retrieveCropById($paddocks[0]['crop_id'])[0]->name;
+                            }
                         }
+                    }else{
+                        unset($temp[$i]);
                     }
-                }else{
-                    unset($temp[$i]);
+                    $temp = json_decode(json_encode($temp), true);
+                    $finalResult = array_values($temp);
                 }
-                $temp = json_decode(json_encode($temp), true);
-                $finalResult = array_values($temp);
                 $i++;
             }
             $this->response['data'] = $finalResult;
@@ -258,7 +252,6 @@ class PaddockPlanTaskController extends APIController
                     $tempRes[$i]['units'] = "Ha";
                     $tempRes[$i]['spray_mix_units'] = "L/Ha";
                     $tempRes[$i]['partial'] = false;
-                    // $tempRes[$i]['start_date'] = $tempRes[$i]['start_date'];
                     $tempRes[$i]['partial_flag'] = false;
                     if($tempRes[$i]['remaining_area'] > 0){
                         $available[] = $tempRes[$i];
