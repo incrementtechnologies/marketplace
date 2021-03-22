@@ -53,7 +53,7 @@ class OrderRequestItemController extends APIController
           'title'   => $product ? $product['title'] : null,
           'id'      => $key['id'],
           'qty'     => $key['qty'],
-          'variation' => app($this->productAttrController)->getByParams('product_id', $product['id']),
+          'variation' => app($this->productAttrController)->getByParamsWithoutQty('id', $product['product_attribute_id']),
           'counter' => 0,
           'product_id' => $key['product_id'],
           'type'    => $product['type'],
