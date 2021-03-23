@@ -63,13 +63,12 @@ class ProductTraceController extends APIController
 
   public function retrieve(Request $request){
     $data = $request->all();
-    $product = app($this->productController)->getProductByParamsWithAttribute('code', $data['code'], $data['product_attribute_id']);
-
+    $product = app($this->productController)->getProductByParams('code', $data['code']);
     if($product != null){
       $data['condition'][] = array(
         'column'  => 'product_id',
         'clause'  => '=',
-        'value'   => $product['product_id']
+        'value'   => $product['id']
       );
     }
 
