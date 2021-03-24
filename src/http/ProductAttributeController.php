@@ -56,7 +56,8 @@ class ProductAttributeController extends APIController
         $i = 0;
         foreach ($result as $key) {
           $productQtyPerVariation = app('Increment\Marketplace\Http\ProductTraceController')->getTotalAttributeByParams($result[$i]['id']);
-          $result[$i]['product_trace_qty'] = $productQtyPerVariation;
+          $transferredProductQty = app('Increment\Marketplace\Http\TransferredProductController')->getRemainingProductQty($value, $merchantId, $result[$i]['id']);
+          $result[$i]['product_trace_qty'] = $productQtyPerVariation - $transferredProductQty;
           $i++;
         }
       }
