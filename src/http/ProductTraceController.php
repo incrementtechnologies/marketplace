@@ -94,6 +94,39 @@ class ProductTraceController extends APIController
     return $this->response();
   }
 
+  public function retrieveWithAttribute(Request $request){
+    $data = $request->all();
+    $product = app($this->productController)->getProductByParamsWithAttribute('code', $data['code'], $data['attribute_id']);
+    if($product != null){
+      $data['condition'][] = array(
+        'column'  => 'product_id',
+        'clause'  => '=',
+        'value'   => $product['product_id']
+      );
+    }
+
+    $this->model = new ProductTrace();
+    $this->retrieveDB($data);
+
+    $i = 0;
+    $response = array();
+    foreach ($this->response['data'] as $key) {
+      $item = $this->response['data'][$i];
+      $this->response['data'][$i]['product'] = $product;
+      // $this->response['data'][$i]['manufacturing_date_human'] = Carbon::createFromFormat('Y-m-d H:i:s', $item['manufacturing_date'])->copy()->tz('Asia/Manila')->format('F j, Y H:i A');
+      $this->response['data'][$i]['created_at_human'] = Carbon::createFromFormat('Y-m-d H:i:s', $item['created_at'])->copy()->tz($this->response['timezone'])->format('F j, Y h:i A');
+      $bundled = BundledProduct::where('product_trace', '=', $item['id'])->where('deleted_at', '=', null)->get();
+      $transferred = TransferredProduct::where('payload_value', '=', $item['id'])->where('deleted_at', '=', null)->get();
+      if(sizeof($bundled) <= 0 && sizeof($transferred) <= 0){
+        $response[] = $this->response['data'][$i];
+      }
+      $i++;
+    }
+    $this->response['data'] =  $response;
+    $this->response['datetime_human'] = Carbon::now()->copy()->tz($this->response['timezone'])->format('F j Y h i A');
+    return $this->response();
+  }
+
   public function retrieveByParams(Request $request){
     $data = $request->all();
     $this->model = new ProductTrace();
