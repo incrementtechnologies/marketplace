@@ -13,6 +13,7 @@ class DailyLoadingListController extends APIController
   public $merchantClass = 'Increment\Marketplace\Http\MerchantController';
   public $orderRequestClass = 'Increment\Marketplace\Http\OrderRequestController';
   public $productClass = 'Increment\Marketplace\Http\ProductController';
+  public $productAttrController = 'Increment\Marketplace\Http\ProductAttributeController';
 
   function __construct(){
     $this->model = new DailyLoadingList();
@@ -95,6 +96,7 @@ class DailyLoadingListController extends APIController
           $orderRequestId = $keyValues['order_request_id'];
           $dailyLoadinglistId = $keyValues['daily_loading_list_id'];
         }
+        $variation = app($this->productAttrController)->getByParams('id', $key);
         $this->response['data'][] = array(
           'merchant'  => $merchant == null ? null : array(
             'name'   => $merchant,
@@ -106,6 +108,7 @@ class DailyLoadingListController extends APIController
           'order_request_id' => $orderRequestId,
           'product_id' => $productId,
           'counter'     => 0,
+          'variation'   => $variation,
           'product_attribute_id' => $key
         );
       }
