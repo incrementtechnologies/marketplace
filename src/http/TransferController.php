@@ -484,21 +484,22 @@ class TransferController extends APIController
       }else{
         $products = DB::table('products as T1')
                 ->leftJoin('product_attributes as T2', 'T2.product_id', '=', 'T1.id')
-                ->leftJoin('transferred_products as T3', 'T3.product_attribute_id', '=', 'T2.id')
+                ->leftJoin('transferred_products as T3', 'T3.product_id', '=', 'T1.id')
                 ->leftJoin('product_traces as T4', 'T3.payload_value', '=', 'T4.id')
                 ->leftJoin('transfers as T5', 'T3.transfer_id', '=', 'T5.id')
                 ->where($con['column'], 'like', $con['value'])
                 ->where('T5.to', '=', $data['merchant_id'])
                 ->where('T2.deleted_at', '=', null)
-                ->select('*', 'T1.code as product_code', 'T2.payload as unit', 'T2.payload_value as unit_value')
+                // ->where('T3.product_attribute_id', '=', 'T2.id')
+                ->select('T1.code as product_code', 'T2.payload as unit', 'T2.payload_value as unit_value', 'T3.product_attribute_id', 'T2.id')
                 ->groupBy('T2.id')
                 ->skip($data['offset'])->take($data['limit'])
                 ->orderBy($con['column'], $data['sort'][$con['column']])
                 ->get();
-        // dd($products);
+        dd($products);
         $size = DB::table('products as T1')
               ->leftJoin('product_attributes as T2', 'T2.product_id', '=', 'T1.id')
-              ->leftJoin('transferred_products as T3', 'T3.product_attribute_id', '=', 'T2.id')
+              ->leftJoin('transferred_products as T3', 'T3.product_id', '=', 'T1.id')
               ->leftJoin('product_traces as T4', 'T3.payload_value', '=', 'T4.id')
               ->leftJoin('transfers as T5', 'T3.transfer_id', '=', 'T5.id')
               ->where($con['column'], 'like', $con['value'])
@@ -608,7 +609,7 @@ class TransferController extends APIController
         $string = $products[$i]->unit;
         $temps = explode(' ', $string);
         $final = array_pop($temps);
-        $this->response['data'][$i]['volume'] = $products[$i]->unit_value.' '.$final;
+        $this->response['data'][$i]['volume'] = app($this->productAttrClass)->getProductUnit($products[$i]->product_id);
         $this->response['data'][$i]['merchant'] = array('name' => $merchant);
         $this->response['data'][$i]['merchant_from'] = $merchantFrom;
         $this->response['data'][$i]['manufacturing_date'] = $productQty != null ? $productQty->manufacturing_date : null;
