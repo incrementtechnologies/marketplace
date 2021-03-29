@@ -96,29 +96,31 @@ class ProductTraceController extends APIController
 
   public function retrieveWithAttribute(Request $request){
     $data = $request->all();
-    $product = app($this->productController)->getProductByParamsWithAttribute('code', $data['code'], $data['attribute_id']);
+    $con = $data['condition'];
+    $product = app($this->productController)->getProductByParamsWithAttribute('code', $data['code'], $data['product_attribute_id']);
+    $whereArray = array(
+      array($con[0]['column'], $con[0]['clause'], $con[0]['value']),
+      array($con[1]['column'], $con[1]['clause'], $con[1]['value'])
+    );
     if($product != null){
-      $data['condition'][] = array(
-        'column'  => 'product_id',
-        'clause'  => '=',
-        'value'   => $product['product_id']
-      );
+      array_push($whereArray, array('product_id', '=', $product['product_id']));
     }
-
-    $this->model = new ProductTrace();
-    $this->retrieveDB($data);
+    $this->response['data'] = ProductTrace::where($whereArray)->groupBy('batch_number')->orderBy(array_keys($data['sort'])[0], $data['sort'][array_keys($data['sort'])[0]])->get();
 
     $i = 0;
     $response = array();
     foreach ($this->response['data'] as $key) {
       $item = $this->response['data'][$i];
+      $this->response['data'][$i]['qty'] = $this->getProductQtyByStatus($item['product_attribute_id'], $con[1]['value']);
       $this->response['data'][$i]['product'] = $product;
+      $this->response['data'][$i]['variation'] = app($this->productAttrClass)->getByParams('id', $data['product_attribute_id']);
       // $this->response['data'][$i]['manufacturing_date_human'] = Carbon::createFromFormat('Y-m-d H:i:s', $item['manufacturing_date'])->copy()->tz('Asia/Manila')->format('F j, Y H:i A');
       $this->response['data'][$i]['created_at_human'] = Carbon::createFromFormat('Y-m-d H:i:s', $item['created_at'])->copy()->tz($this->response['timezone'])->format('F j, Y h:i A');
       $bundled = BundledProduct::where('product_trace', '=', $item['id'])->where('deleted_at', '=', null)->get();
       $transferred = TransferredProduct::where('payload_value', '=', $item['id'])->where('deleted_at', '=', null)->get();
       if(sizeof($bundled) <= 0 && sizeof($transferred) <= 0){
         $response[] = $this->response['data'][$i];
+        // array_push($response, array('product' => $product));
       }
       $i++;
     }
@@ -629,6 +631,11 @@ class ProductTraceController extends APIController
 
   public function getProductQtyByParams($producId, $attrID){
     $result = ProductTrace::where('product_id', '=', $producId)->where('status', '=', 'active')->where('product_attribute_id', '=', $attrID)->count();
+    return $result;
+  }
+
+  public function getProductQtyByStatus($attrID, $status){
+    $result = ProductTrace::where('status', '=', $status)->where('product_attribute_id', '=', $attrID)->count();
     return $result;
   }
 }
