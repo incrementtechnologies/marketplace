@@ -240,8 +240,8 @@ class ProductController extends APIController
       return sizeof($result) > 0 ? $result : null;
     }
 
-    public function getProductByParams($column, $value){
-      $result = Product::where($column, '=', $value)->get();
+    public function getProductByParams($column, $value, $returns){
+      $result = Product::where($column, '=', $value)->get($returns);
       if(sizeof($result) > 0){
         $i= 0;
         foreach ($result as $key) {
