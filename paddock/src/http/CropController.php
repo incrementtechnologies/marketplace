@@ -17,6 +17,19 @@ class CropController extends APIController
         $this->notRequired = array();
     }
 
+    public function create(Request $request){
+        $data = $request->all();
+        $isExist = $this->checkIfExist($data['merchant_id'], $data['name']);
+        if(!$isExist){
+            $this->model = new Crop();
+            $this->insertDB($data);
+        return $this->response();
+        }else{
+            $this->response['error']['message'] = 'Crop is already existed';
+            return $this->response();
+        }
+    }
+
     public function retrieve(Request $request){
         $data = $request->all();
         // $result = Crop::where('merchant_id', '=', $data['merchant_id'])->where('deleted_at', '=', null)->get();
@@ -51,5 +64,10 @@ class CropController extends APIController
         }else{
             return null;
         }
+    }
+
+    public function checkIfExist($merchantId, $cropName){
+        $result = Crop::where('merchant_id', '=', $merchantId)->where('name', '=', $cropName)->get();
+        return sizeof($result) > 0 ? true : false;
     }
 }
