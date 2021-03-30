@@ -131,7 +131,7 @@ class BundledSettingController extends APIController
       $i = 0;
       foreach ($result as $key) {
         $traceQty = app($this->productTraceController)->getProductQtyByParams($result[$i]['bundled'], $result[$i]['product_attribute_id']);
-        $result[$i]['product'] = app($this->productController)->getByParams('id', $result[$i]['product_id']);
+        // $result[$i]['product'] = app($this->productController)->getByParamsWithReturn('id', $result[$i]['product_id'], ['title', 'id', 'tags']);
         $result[$i]['variation'] = app($this->productAttrController)->getByParamsWithMerchant('id', $result[$i]['product_attribute_id'], $merchantId);
         $result[$i]['created_at_human'] = Carbon::createFromFormat('Y-m-d H:i:s', $result[$i]['created_at'])->copy()->tz($this->response['timezone'])->format('F j, Y H:i A');
         $result[$i]['qty'] = (int)$result[$i]['qty'];

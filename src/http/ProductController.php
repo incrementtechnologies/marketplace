@@ -64,6 +64,30 @@ class ProductController extends APIController
       return $this->response();
     }
 
+    public function retrieveBundled(Request $request){
+      $data= $request->all();
+      $con = $data['condition'];
+      $product = Product::where($con[0]['column'], $con[0]['clause'], $con[0]['value'])->where('deleted_at', '=', null)->get(['title', 'tags', 'id']);
+      $merchantId = app($this->merchantController)->getColumnByParams('account_id', $data['account_id'], 'id');
+      if(sizeof($product) > 0){
+        $product[0]['bundled'] = app($this->bundledSettingController)->getByParams('product_id', $product[0]['id'],  $merchantId);
+      }
+      $this->response['data'] = $product;
+      return $this->response();
+    }
+
+    public function retrieveVariation(Request $request){
+      $data= $request->all();
+      $con = $data['condition'];
+      $product = Product::where($con[0]['column'], $con[0]['clause'], $con[0]['value'])->where('deleted_at', '=', null)->get(['title', 'tags', 'id']);
+      $merchantId = app($this->merchantController)->getColumnByParams('account_id', $data['account_id'], 'id');
+      if(sizeof($product) > 0){
+        $product[0]['variation'] = app($this->productAttrController)->getByParamsWithMerchant('product_id', $product[0]['id'], $merchantId);
+      }
+      $this->response['data'] = $product;
+      return $this->response();
+    }
+
     public function retrieveMobile(Request $request){
       $data = $request->all();
       $inventoryType = $data['inventory_type'];
@@ -212,6 +236,11 @@ class ProductController extends APIController
 
     public function getByParams($column, $value){
       $result = Product::where($column, '=', $value)->get();
+      return sizeof($result) > 0 ? $result[0] : null;
+    }
+
+    public function getByParamsWithReturn($column, $value, $returns){
+      $result = Product::where($column, '=', $value)->get($returns);
       return sizeof($result) > 0 ? $result[0] : null;
     }
 
@@ -376,8 +405,10 @@ class ProductController extends APIController
           $merchantId = app($this->merchantController)->getColumnByParams('account_id', $accountId, 'id');
           // $result[$i]['account'] = $this->retrieveAccountDetails($result[$i]['account_id']);
           // $result[$i]['price'] = app($this->productPricingController)->getPrice($result[$i]['id']);
-          $result[$i]['variation'] = app($this->productAttrController)->getByParamsWithMerchant('product_id', $result[$i]['id'], $merchantId);
-          $result[$i]['bundled'] = app($this->bundledSettingController)->getByParams('product_id', $result[$i]['id'],  $merchantId);
+          // $result[$i]['variation'] = [];
+          // $result[$i]['bundled'] = [];
+          // app($this->productAttrController)->getByParamsWithMerchant('product_id', $result[$i]['id'], $merchantId)
+          // app($this->bundledSettingController)->getByParams('product_id', $result[$i]['id'],  $merchantId)
           $result[$i]['featured'] = app($this->productImageController)->getProductImage($result[$i]['id'], 'featured');
           $result[$i]['images'] = app($this->productImageController)->getProductImage($result[$i]['id'], null);
           $result[$i]['tag_array'] = $this->manageTags($result[$i]['tags']);
@@ -392,15 +423,15 @@ class ProductController extends APIController
           $result[$i]['inventories'] = null;
           $result[$i]['product_traces'] = null;
           $result[$i]['merchant'] = app($this->merchantController)->getByParams('id', $result[$i]['merchant_id']);
-          if($inventoryType == 'inventory'){
-            $result[$i]['inventories'] = app($this->inventoryController)->getInventory($result[$i]['id']);
-            $result[$i]['qty'] = $this->getRemainingQty($result[$i]['id']);
-          }else if($inventoryType == 'product_trace'){
+          // if($inventoryType == 'inventory'){
+          //   $result[$i]['inventories'] = app($this->inventoryController)->getInventory($result[$i]['id']);
+          //   $result[$i]['qty'] = $this->getRemainingQty($result[$i]['id']);
+          // }else if($inventoryType == 'product_trace'){
             $result[$i]['product_traces'] =  app($this->productTraceController)->getByParams('product_id', $result[$i]['id']);
             $qty = app($this->productTraceController)->getBalanceQtyOnManufacturer('product_id', $result[$i]['id']);
             $result[$i]['qty'] = $qty['qty'];
             $result[$i]['qty_in_bundled'] = $qty['qty_in_bundled'];
-          }
+          // }
           $i++;
         }
       }
