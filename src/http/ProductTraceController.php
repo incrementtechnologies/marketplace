@@ -94,6 +94,19 @@ class ProductTraceController extends APIController
     return $this->response();
   }
 
+  public function retrieveProductTraveAsInventory(Request $request){
+    $data = $request->all();
+    $result = ProductTrace::where('product_attribute_id', '=', $data['product_attribute_id'])->where('deleted_at', '=', null)->get();
+    if(sizeof($result) > 0){
+      $i=0;
+      foreach ($result as $key) {
+        $result[$i]['created_at_human'] =  Carbon::createFromFormat('Y-m-d H:i:s', $result[$i]['created_at'])->copy()->tz($this->response['timezone'])->format('F j, Y H:i A');
+      }
+    }
+    $this->response['data'] = $result;
+    return $this->response();
+  }
+
   public function retrieveWithAttribute(Request $request){
     $data = $request->all();
     $con = $data['condition'];

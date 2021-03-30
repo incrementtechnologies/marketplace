@@ -434,7 +434,7 @@ class TransferController extends APIController
             ->groupBy('T2.product_attribute_id')
             ->skip($data['offset'])->take($data['limit'])
             ->orderBy($con['column'], $data['sort'][$con['column']])
-            ->select('T1.id', 'T1.code', 'T1.title',  'T2.product_attribute_id', 'T1.tags', 'T1.merchant_id as from', 'T2.merchant_id as to', 'T1.type')
+            ->select('T1.id', 'T1.code', 'T1.title',  'T2.product_attribute_id', 'T1.tags', 'T1.merchant_id as from', 'T2.merchant_id as to', 'T1.type', 'T1.tags', 'T1.description')
             ->get();
       }else{
         array_push($whereArray, array('T1.tags', 'like', $data['tags']));
@@ -444,7 +444,7 @@ class TransferController extends APIController
           ->groupBy('T2.product_attribute_id')
           ->skip($data['offset'])->take($data['limit'])
           ->orderBy($con['column'], $data['sort'][$con['column']])
-          ->select('T1.id', 'T1.code', 'T1.title',  'T2.product_attribute_id', 'T1.tags', 'T1.merchant_id as from', 'T2.merchant_id as to', 'T1.type')
+          ->select('T1.id', 'T1.code', 'T1.title',  'T2.product_attribute_id', 'T1.tags', 'T1.merchant_id as from', 'T2.merchant_id as to', 'T1.type', 'T1.tags', 'T1.description')
           ->get();
       }
     }else{
@@ -454,7 +454,7 @@ class TransferController extends APIController
         ->groupBy('T2.product_attribute_id')
         ->skip($data['offset'])->take($data['limit'])
         ->orderBy($con['column'], $data['sort'][$con['column']])
-        ->select('T1.id', 'T1.code', 'T1.title',  'T2.product_attribute_id', 'T1.tags', 'T1.merchant_id as from', 'T2.merchant_id as to', 'T1.type')
+        ->select('T1.id', 'T1.code', 'T1.title',  'T2.product_attribute_id', 'T1.tags', 'T1.merchant_id as from', 'T2.merchant_id as to', 'T1.type', 'T1.tags', 'T1.description')
         ->get();
     }
 
@@ -498,6 +498,8 @@ class TransferController extends APIController
         $this->response['data'][$i]['merchant'] = array('name' => $merchant);
         $this->response['data'][$i]['type'] = $products[$i]->type;
         $this->response['data'][$i]['title'] = $products[$i]->title;
+        $this->response['data'][$i]['tags'] = $products[$i]->tags;
+        $this->response['data'][$i]['description'] = $products[$i]->description;
         $this->response['data'][$i]['product_attribute_id'] = $products[$i]->product_attribute_id;
         $this->response['data'][$i]['merchant_from'] = $merchantFrom;
         $this->response['data'][$i]['manufacturing_date'] = $productQty != null ? $productQty->manufacturing_date : null;
