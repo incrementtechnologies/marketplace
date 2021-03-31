@@ -1201,10 +1201,16 @@ class TransferController extends APIController
         $array = array();
         foreach ($result as $key) {
           $trace = app($this->productTraceClass)->getByParamsDetails('id', $key['payload_value']);
+          $attributes = app($this->productAttrClass)->getByParams('id', $trace[0]['product_attribute_id']);
+          $string = $attributes[0]['payload'];
+          $temps = explode(' ', $string);
+          $final = array_pop($temps);
+
           $item = array(
             'title'         => $trace[0]['product']['title'],
             'batch_number'  => $trace[0]['batch_number'],
-            'manufacturing_date' => $trace[0]['manufacturing_date']
+            'manufacturing_date' => $trace[0]['manufacturing_date'],
+            'product_attribute' => $attributes[0]['payload_value'].''.$final
           );
           $array[] = $item;
         }
