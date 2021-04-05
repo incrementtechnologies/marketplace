@@ -123,7 +123,7 @@ class ProductTraceController extends APIController
     $response = array();
     foreach ($this->response['data'] as $key) {
       $item = $this->response['data'][$i];
-      $this->response['data'][$i]['qty'] = $this->getProductQtyByStatus($item['product_attribute_id'], $con[1]['value']);
+      $this->response['data'][$i]['qty'] = $this->getProductQtyByStatus($item['product_attribute_id'], null);
       $this->response['data'][$i]['product'] = $product;
       $this->response['data'][$i]['variation'] = app($this->productAttrClass)->getByParams('id', $data['product_attribute_id']);
       // $this->response['data'][$i]['manufacturing_date_human'] = Carbon::createFromFormat('Y-m-d H:i:s', $item['manufacturing_date'])->copy()->tz('Asia/Manila')->format('F j, Y H:i A');
@@ -647,7 +647,7 @@ class ProductTraceController extends APIController
   }
 
   public function getProductQtyByStatus($attrID, $status){
-    $result = ProductTrace::where('status', '=', $status)->where('product_attribute_id', '=', $attrID)->count();
+    $result = ProductTrace::where('product_attribute_id', '=', $attrID)->groupBy('status')->count();
     return $result;
   }
 }
