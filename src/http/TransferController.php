@@ -500,6 +500,7 @@ class TransferController extends APIController
         $this->response['data'][$i]['title'] = $products[$i]->title;
         $this->response['data'][$i]['tags'] = $products[$i]->tags;
         $this->response['data'][$i]['code'] = $products[$i]->code;
+        $this->response['data'][$i]['product_id'] = $products[$i]->id;
         $this->response['data'][$i]['description'] = $products[$i]->description;
         $this->response['data'][$i]['product_attribute_id'] = $products[$i]->product_attribute_id;
         $this->response['data'][$i]['merchant_from'] = $merchantFrom;
