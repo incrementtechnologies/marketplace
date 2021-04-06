@@ -112,7 +112,8 @@ class ProductTraceController extends APIController
     $con = $data['condition'];
     $product = app($this->productController)->getProductByParamsWithAttribute('code', $data['code'], $data['product_attribute_id']);
     $whereArray = array(
-      array($con[0]['column'], $con[0]['clause'], $con[0]['value'])
+      array($con[0]['column'], $con[0]['clause'], $con[0]['value']),
+      array('product_attribute_id', '=', $data['product_attribute_id'])
     );
     if($product != null){
       array_push($whereArray, array('product_id', '=', $product['product_id']));
