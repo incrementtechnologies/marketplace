@@ -287,7 +287,7 @@ class ProductController extends APIController
       $temp = DB::table('products as T1')
               ->leftJoin('product_attributes as T2', 'T2.product_id', '=', 'T1.id')
               ->where($column, '=', $value)
-              ->where('T2.id', '=', $attrId)->get();
+              ->where('T2.id', '=', $attrId)->get(['T1.id', 'T1.title', 'T1.merchant_id']);
       if(sizeof($temp) > 0){
         $i= 0;
         $result = json_decode(json_encode($temp), true);
