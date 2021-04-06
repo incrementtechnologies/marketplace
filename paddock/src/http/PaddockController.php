@@ -143,17 +143,17 @@ class PaddockController extends APIController
       $this->response['data'][$i]['start_date'] = null;
       $this->response['data'][$i]['end_date'] = null;
       $this->response['data'][$i]['crop_name'] = null;
-      $paddockPlan = PaddockPlan::select()->where("paddock_id", "=", $item['id'])->orderBy('start_date','desc')->limit(1)->get();
-      if($paddockPlan){
-        $this->response['data'][$i]['area'] = (int)$this->response['data'][$i]['area'];
-        $this->response['data'][$i]['arable_area'] = (int)$this->response['data'][$i]['arable_area'];
-        $this->response['data'][$i]['units'] = 'Ha';
-        $this->response['data'][$i]['spray_area'] = (int)$this->response['data'][$i]['spray_area'];
+      $this->response['data'][$i]['area'] = (int)$this->response['data'][$i]['area'];
+      $this->response['data'][$i]['arable_area'] = (int)$this->response['data'][$i]['arable_area'];
+      $this->response['data'][$i]['units'] = 'Ha';
+      $this->response['data'][$i]['spray_area'] = (int)$this->response['data'][$i]['spray_area'];
+      $paddockPlan = PaddockPlan::select()->where("paddock_id", "=", (int)$data['condition'][0]['value'])->orderBy('start_date','desc')->limit(1)->get();
+      if(sizeof($paddockPlan) > 0){
         $this->response['data'][$i]['started'] = $paddockPlan[0]['start_date'];
         $crop = Crop::where("id", "=", $paddockPlan[0]['crop_id'])->get();
         $this->response['data'][$i]['crop_name'] = sizeof($crop) > 0 ? $crop[0]['name'] : null;
         $paddockPlanTask = PaddockPlanTask::where("paddock_plan_id", "=", $paddockPlan[0]['id'])->get();
-        if($paddockPlanTask && sizeof($paddockPlanTask) > 0){
+        if(sizeof($paddockPlanTask) > 0){
           $temp = app($this->batchPaddockTaskClass)->retrieveBatchByPaddockPlanTask($paddockPlanTask[0]['id']);
           $this->response['data'][$i]['spray_mix'] = app($this->sprayMixClass)->getByParamsDefault('id', $paddockPlanTask[0]['spray_mix_id']);
           $this->response['data'][$i]['due_date'] = $paddockPlanTask[0]['due_date'];
@@ -208,7 +208,7 @@ class PaddockController extends APIController
   }
 
   public function getByParams($column, $value, $columns){
-    $result = Paddock::where($column, '=', $value)->groupBy('id')->get($columns);
+    $result = Paddock::where($column, '=', $value)->where('deleted_at', '=', null)->groupBy('id')->get($columns);
     return sizeof($result) > 0 ? $result[0] : null;
   }
 

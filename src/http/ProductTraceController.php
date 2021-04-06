@@ -44,6 +44,11 @@ class ProductTraceController extends APIController
     return sizeof($result) > 0 ? $result : null;
   }
 
+  public function getTotalAttributeByParams($attrID){
+    $result = ProductTrace::where('product_attribute_id', '=', $attrID)->where('status', '=', 'active')->orderBy('created_at', 'desc')->count();
+
+    return $result;
+  }
   public function getByParamsLimitOne($column, $value){
     $result  = ProductTrace::where($column, '=', $value)->orderBy('created_at', 'desc')->get();
     if(sizeof($result) > 0){
@@ -59,7 +64,6 @@ class ProductTraceController extends APIController
   public function retrieve(Request $request){
     $data = $request->all();
     $product = app($this->productController)->getProductByParams('code', $data['code']);
-
     if($product != null){
       $data['condition'][] = array(
         'column'  => 'product_id',
@@ -82,6 +86,53 @@ class ProductTraceController extends APIController
       $transferred = TransferredProduct::where('payload_value', '=', $item['id'])->where('deleted_at', '=', null)->get();
       if(sizeof($bundled) <= 0 && sizeof($transferred) <= 0){
         $response[] = $this->response['data'][$i];
+      }
+      $i++;
+    }
+    $this->response['data'] =  $response;
+    $this->response['datetime_human'] = Carbon::now()->copy()->tz($this->response['timezone'])->format('F j Y h i A');
+    return $this->response();
+  }
+
+  public function retrieveProductTraceAsInventory(Request $request){
+    $data = $request->all();
+    $result = ProductTrace::where('product_attribute_id', '=', $data['product_attribute_id'])->where('deleted_at', '=', null)->where('status', '=', $data['status'])->get();
+    if(sizeof($result) > 0){
+      $i=0;
+      foreach ($result as $key) {
+        $result[$i]['created_at_human'] =  Carbon::createFromFormat('Y-m-d H:i:s', $result[$i]['created_at'])->copy()->tz($this->response['timezone'])->format('F j, Y H:i A');
+      }
+    }
+    $this->response['data'] = $result;
+    return $this->response();
+  }
+
+  public function retrieveWithAttribute(Request $request){
+    $data = $request->all();
+    $con = $data['condition'];
+    $product = app($this->productController)->getProductByParamsWithAttribute('code', $data['code'], $data['product_attribute_id']);
+    $whereArray = array(
+      array($con[0]['column'], $con[0]['clause'], $con[0]['value'])
+    );
+    if($product != null){
+      array_push($whereArray, array('product_id', '=', $product['product_id']));
+    }
+    $this->response['data'] = ProductTrace::where($whereArray)->groupBy('batch_number')->orderBy(array_keys($data['sort'])[0], $data['sort'][array_keys($data['sort'])[0]])->get();
+
+    $i = 0;
+    $response = array();
+    foreach ($this->response['data'] as $key) {
+      $item = $this->response['data'][$i];
+      $this->response['data'][$i]['qty'] = $this->getProductQtyByStatus($item['product_attribute_id'], null);
+      $this->response['data'][$i]['product'] = $product;
+      $this->response['data'][$i]['variation'] = app($this->productAttrClass)->getByParams('id', $data['product_attribute_id']);
+      // $this->response['data'][$i]['manufacturing_date_human'] = Carbon::createFromFormat('Y-m-d H:i:s', $item['manufacturing_date'])->copy()->tz('Asia/Manila')->format('F j, Y H:i A');
+      $this->response['data'][$i]['created_at_human'] = Carbon::createFromFormat('Y-m-d H:i:s', $item['created_at'])->copy()->tz($this->response['timezone'])->format('F j, Y h:i A');
+      $bundled = BundledProduct::where('product_trace', '=', $item['id'])->where('deleted_at', '=', null)->get();
+      $transferred = TransferredProduct::where('payload_value', '=', $item['id'])->where('deleted_at', '=', null)->get();
+      if(sizeof($bundled) <= 0 && sizeof($transferred) <= 0){
+        $response[] = $this->response['data'][$i];
+        // array_push($response, array('product' => $product));
       }
       $i++;
     }
@@ -586,8 +637,17 @@ class ProductTraceController extends APIController
   }
 
   public function retrieveBatchNumber($productId){
-    $result = ProductTrace::where('product_id', $productId)->select('batch_number')->groupBy('batch_number')->get();
+    $result = ProductTrace::where('product_id', '=', $productId)->select('batch_number')->groupBy('batch_number')->get();
+    return $result;
+  }
 
+  public function getProductQtyByParams($producId, $attrID){
+    $result = ProductTrace::where('product_id', '=', $producId)->where('status', '=', 'active')->where('product_attribute_id', '=', $attrID)->count();
+    return $result;
+  }
+
+  public function getProductQtyByStatus($attrID, $status){
+    $result = ProductTrace::where('product_attribute_id', '=', $attrID)->groupBy('status')->count();
     return $result;
   }
 }

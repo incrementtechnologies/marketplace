@@ -29,6 +29,7 @@ class BundledProductController extends APIController
           'product_trace' => $data['products_traces'][$i]['id'],
           'bundled_trace' => $data['bundled_trace'],
           'product_on_settings' => $data['product_on_settings'],
+          'product_attribute_id' => $data['product_attribute_id'],
           'created_at'    => Carbon::now()
         );
       }
@@ -138,6 +139,7 @@ class BundledProductController extends APIController
             'payload'     => 'product_traces',
             'payload_value' => $key['product_trace'],
             'product_id'  => $key['product_on_settings'],
+            'product_attribute_id' => $key['product_attribute_id'],
             'created_at'  => Carbon::now()
           );
           $parameter[] = $newArray;
@@ -168,6 +170,7 @@ class BundledProductController extends APIController
           'payload'     => 'product_traces',
           'payload_value' => $key['product_trace'],
           'product_id'  => $key['product_on_settings'],
+          'product_attribute_id' => $key['product_attribute_id'],
           'created_at'  => Carbon::now()
         );
         $parameter[] = $newArray;

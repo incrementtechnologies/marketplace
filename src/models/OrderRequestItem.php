@@ -6,5 +6,5 @@ use App\APIModel;
 class OrderRequestItem extends APIModel
 {
     protected $table = 'order_request_items';
-    protected $fillable = ['order_request_id', 'product_id', 'qty'];
+    protected $fillable = ['order_request_id', 'product_id', 'qty', 'product_attribute_id'];
 }

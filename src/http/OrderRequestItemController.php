@@ -19,7 +19,7 @@ class OrderRequestItemController extends APIController
 
   public function create(Request $request){
     $data = $request->all();
-    if($this->checkIfExist($data['order_request_id'], $data['product_id']) == true){
+    if($this->checkIfExist($data['order_request_id'], $data['product_id'], $data['product_attribute_id']) == true){
       $this->response['error'] = 'Already exist to the list!';
       $this->response['data'] = null;
       return $this->response();
@@ -28,6 +28,18 @@ class OrderRequestItemController extends APIController
     $this->insertDB($data);
     return $this->response();
   }
+
+  // public function update(Request $request){
+  //   $data = $request->all();
+  //   if($this->checkIfExist($data['order_request_id'], $data['product_id'], $data['product_attribute_id']) == true){
+  //     $this->response['error'] = 'Already exist to the list!';
+  //     $this->response['data'] = null;
+  //     return $this->response();
+  //   }
+  //   $this->model = new OrderRequestItem();
+  //   $this->updateDB($data);
+  //   return $this->response();
+  // }
 
   public function retrieve(Request $request){
     $data = $request->all();
@@ -41,11 +53,12 @@ class OrderRequestItemController extends APIController
           'title'   => $product ? $product['title'] : null,
           'id'      => $key['id'],
           'qty'     => $key['qty'],
-          'variation' => app($this->productAttrController)->getByParams('product_id', $product['id']),
+          'variation' => app($this->productAttrController)->getByParams('id', $key['product_attribute_id']),
           'counter' => 0,
           'product_id' => $key['product_id'],
           'type'    => $product['type'],
           'order_request_id'     => $key['order_request_id'],
+          'product_attribute_id' =>$key['product_attribute_id'],
           'merchant'     => $product ? app($this->merchantClass)->getColumnValueByParams('id', $product['merchant_id'], 'name') : null
         );
         $array[] = $item;
@@ -55,8 +68,8 @@ class OrderRequestItemController extends APIController
     return $this->response();
   }
 
-  public function checkIfExist($orderRequestId, $productId){
-    $result = OrderRequestItem::where('order_request_id', '=', $orderRequestId)->where('product_id', '=', $productId)->get();
+  public function checkIfExist($orderRequestId, $productId, $productAttributeId){
+    $result = OrderRequestItem::where('order_request_id', '=', $orderRequestId)->where('product_id', '=', $productId)->where('product_attribute_id', '=', $productAttributeId)->get();
     return sizeof($result) > 0 ? true : false;
   }
 }

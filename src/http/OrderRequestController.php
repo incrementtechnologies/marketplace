@@ -107,7 +107,7 @@ class OrderRequestController extends APIController
               ->where($con[1]['column'], '!=', 'completed')->where($con[1]['column'], '!=', 'cancelled')->skip($data['offset'])->take($data['limit'])->get();
     }else{
       $result = OrderRequest::where($con[0]['column'], $con[0]['clause'], $con[0]['value'])
-              ->where($con[1]['column'], '=', 'completed')->skip($data['offset'])->take($data['limit'])->get();
+              ->where($con[1]['column'], '=', 'completed')->orderBy('created_at', 'desc')->skip($data['offset'])->take($data['limit'])->get();
     }
     if(sizeof($result) > 0){
       $this->response['data'] = $this->manageResultsMobile($result);

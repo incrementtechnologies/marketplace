@@ -15,7 +15,8 @@ class BundledSettingController extends APIController
   public $productController = 'Increment\Marketplace\Http\ProductController';
   public $productTraceController = 'Increment\Marketplace\Http\ProductTraceController';
   public $bundledProductController = 'Increment\Marketplace\Http\BundledProductController';
-  
+  public $productAttrController = 'Increment\Marketplace\Http\ProductAttributeController';
+
   function __construct(){
     $this->model = new BundledSetting();
   }
@@ -51,6 +52,7 @@ class BundledSettingController extends APIController
       $i = 0;
       foreach ($result as $key) {
         $this->response['data'][$i]['product'] = app($this->productController)->getByParams('id', $result[$i]['product_id']);
+        $this->response['data'][$i]['variation'] = app($this->productAttrController)->getByParams('id', $result[$i]['product_attribute_id']);
         $this->response['data'][$i]['created_at_human'] = Carbon::createFromFormat('Y-m-d H:i:s', $result[$i]['created_at'])->copy()->tz($this->response['timezone'])->format('F j, Y h:i A');
         $remainingQty = intval($result[$i]['qty']);
         $this->response['data'][$i]['remaining_qty'] = $remainingQty;
@@ -122,14 +124,18 @@ class BundledSettingController extends APIController
   }
 
 
-  public function getByParams($column, $value){
+  public function getByParams($column, $value, $merchantId){
     $this->localization();
     $result = BundledSetting::where($column, '=', $value)->get();
     if(sizeof($result) > 0){
       $i = 0;
       foreach ($result as $key) {
-        $result[$i]['product'] = app($this->productController)->getByParams('id', $result[$i]['product_id']);
+        $traceQty = app($this->productTraceController)->getProductQtyByParams($result[$i]['bundled'], $result[$i]['product_attribute_id']);
+        // $result[$i]['product'] = app($this->productController)->getByParamsWithReturn('id', $result[$i]['product_id'], ['title', 'id', 'tags']);
+        $result[$i]['variation'] = app($this->productAttrController)->getByParamsWithMerchant('id', $result[$i]['product_attribute_id'], $merchantId);
         $result[$i]['created_at_human'] = Carbon::createFromFormat('Y-m-d H:i:s', $result[$i]['created_at'])->copy()->tz($this->response['timezone'])->format('F j, Y H:i A');
+        $result[$i]['qty'] = (int)$result[$i]['qty'];
+        $result[$i]['scanned_qty'] = (int)$traceQty == (int)$result[$i]['qty'] ? 1 : 0;
         $i++;
       }
     }

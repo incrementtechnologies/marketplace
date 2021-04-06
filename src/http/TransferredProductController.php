@@ -36,15 +36,22 @@ class TransferredProductController extends APIController
             }else{
               $array = [];
               $productTrace = app('Increment\Marketplace\Http\ProductTraceController')->getDetailsByParams('id', $traceId, ['product_attribute_id']);
-              $array[] = array(
-                'transfer_id' => $transferId,
-                'payload'     => 'product_traces',
-                'payload_value' => $traceId,
-                'product_id'    => $productId,
-                'product_attribute_it' => $productTrace ? $productTrace['product_attribute_id'] : null,
-                'created_at'    => Carbon::now()
-              );
-              TransferredProduct::insert($array);
+              if($productTrace){
+                $array[] = array(
+                  'transfer_id' => $transferId,
+                  'payload'     => 'product_traces',
+                  'payload_value' => $traceId,
+                  'product_id'    => $productId,
+                  'product_attribute_it' => $productTrace['product_attribute_id'],
+                  'created_at'    => Carbon::now()
+                );
+                TransferredProduct::insert($array);                
+              }else{
+                $this->response['data'] = null;
+                $this->response['error'] = 'Invalid product trace.';
+                return $this->response();
+              }
+
             }
           }
           $this->response['data'] = true;
@@ -58,14 +65,21 @@ class TransferredProductController extends APIController
           $array = array();
           for ($i=0; $i < sizeof($data['products']); $i++) {
             $productTrace = app('Increment\Marketplace\Http\ProductTraceController')->getDetailsByParams('id', $data['products'][$i]['id'], ['product_attribute_id']);
-            $array[] = array(
-              'transfer_id' => $data['transfer_id'],
-              'payload'     => 'product_traces',
-              'payload_value' => $data['products'][$i]['id'],
-              'product_id'    => $data['products'][$i]['product_id'],
-              'product_attribute_it' => $productTrace ? $productTrace['product_attribute_id'] : null,
-              'created_at'    => Carbon::now()
-            );
+            if($productTrace){
+              $array[] = array(
+                'transfer_id' => $data['transfer_id'],
+                'payload'     => 'product_traces',
+                'payload_value' => $data['products'][$i]['id'],
+                'product_id'    => $data['products'][$i]['product_id'],
+                'product_attribute_it' => $productTrace ? $productTrace['product_attribute_id'] : null,
+                'created_at'    => Carbon::now()
+              );
+              TransferredProduct::insert($array);                
+            }else{
+              $this->response['data'] = null;
+              $this->response['error'] = 'Invalid product trace.';
+              return $this->response();
+            }
           }
           TransferredProduct::insert($array);
           $this->response['data'] = true;
@@ -107,20 +121,31 @@ class TransferredProductController extends APIController
       return sizeof($result) > 0 ? $result : null;
     }
 
-    public function getTransferredProduct($productId, $merchantId){
-      // dd($productId);
+    public function getTransferredProduct($productId, $merchantId, $attrId){
+      $result = DB::table('transferred_products as T1')
+      ->leftJoin('product_traces as T2', 'T1.payload_value', '=', 'T2.id')
+      ->where('T1.status', '=', 'active')
+      ->where('T1.deleted_at', '=', null)
+      ->where('T1.merchant_id', '=', $merchantId)
+      ->where('T1.product_attribute_id', '=', $attrId)
+      ->select(DB::raw('Count(T1.product_attribute_id) as qty'), 'T2.manufacturing_date')
+      ->get();
+      return sizeof($result) > 0 ? $result[0] : null;
+    }
+
+    public function getRemainingProductQty($productId, $merchantId, $productAtributeId){
       $result = DB::table('transferred_products as T1')
       ->leftJoin('product_traces as T2', 'T1.payload_value', '=', 'T2.id')
       ->leftJoin('transfers as T3', 'T1.transfer_id', '=', 'T3.id')
       ->where('T1.status', '=', 'active')
       ->where('T1.deleted_at', '=', null)
-      ->where('T3.to', '=', $merchantId)
+      ->where('T3.from', '=', $merchantId)
       ->where('T1.product_id', '=', $productId)
-      ->select(DB::raw('Count(T1.product_id) as qty'), 'T2.manufacturing_date')
-      ->get();
-      
-      return sizeof($result) > 0 ? $result[0] : null;
+      ->where('T1.product_attribute_id', '=', $productAtributeId)
+      ->count();
+      return $result;
     }
+
     public function getByParamsOnly($column, $value){
       $result = TransferredProduct::where($column, '=', $value)->get();
       return sizeof($result) > 0 ? $result[0] : null;

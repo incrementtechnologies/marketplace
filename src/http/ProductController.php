@@ -64,6 +64,30 @@ class ProductController extends APIController
       return $this->response();
     }
 
+    public function retrieveBundled(Request $request){
+      $data= $request->all();
+      $con = $data['condition'];
+      $product = Product::where($con[0]['column'], $con[0]['clause'], $con[0]['value'])->where('deleted_at', '=', null)->get(['title', 'tags', 'id']);
+      $merchantId = app($this->merchantController)->getColumnByParams('account_id', $data['account_id'], 'id');
+      if(sizeof($product) > 0){
+        $product[0]['bundled'] = app($this->bundledSettingController)->getByParams('product_id', $product[0]['id'],  $merchantId);
+      }
+      $this->response['data'] = $product;
+      return $this->response();
+    }
+
+    public function retrieveVariation(Request $request){
+      $data= $request->all();
+      $con = $data['condition'];
+      $product = Product::where($con[0]['column'], $con[0]['clause'], $con[0]['value'])->where('deleted_at', '=', null)->get(['title', 'tags', 'id']);
+      $merchantId = app($this->merchantController)->getColumnByParams('account_id', $data['account_id'], 'id');
+      if(sizeof($product) > 0){
+        $product[0]['variation'] = app($this->productAttrController)->getByParamsWithMerchant('product_id', $product[0]['id'], $merchantId);
+      }
+      $this->response['data'] = $product;
+      return $this->response();
+    }
+
     public function retrieveMobile(Request $request){
       $data = $request->all();
       $inventoryType = $data['inventory_type'];
@@ -76,20 +100,37 @@ class ProductController extends APIController
 
     public function retrieveBasic(Request $request){
       $data = $request->all();
+      $con = $data['condition'];
       $inventoryType = $data['inventory_type'];
       $accountId = $data['account_id'];
-      $this->model = new Product();
-      $this->retrieveDB($data);
+      $result = null;
+      if(sizeof($con) == 1){
+        $result = Product::where($con[0]['column'], $con[0]['clause'], $con[0]['value'])
+            ->where('type', '!=', 'bundled')
+            ->get();  
+      }else if(sizeof($con) == 2){
+        $result = Product::where($con[0]['column'], $con[0]['clause'], $con[0]['value'])
+            ->where($con[1]['column'], $con[1]['clause'], $con[1]['value'])
+            ->where('type', '!=', 'bundled')
+            ->orderBy(array_keys($data['sort'])[0], $data['sort'][array_keys($data['sort'])[0]])
+            ->skip($data['offset'])
+            ->take($data['limit'])
+            ->get();        
+      }
+
+      $this->response['data'] = $result;
+      // $this->model = new Product();
+      // $this->retrieveDB($data);
       $this->response['data'] = $this->manageResultBasic($this->response['data'], null, $inventoryType);
 
       if(sizeof($data['condition']) == 3){
         $this->response['size'] = Product::where($data['condition'][0]['column'], $data['condition'][0]['clause'], $data['condition'][0]['value'])
         ->where($data['condition'][1]['column'], $data['condition'][1]['clause'], $data['condition'][1]['value'])
-        ->where($data['condition'][2]['column'], $data['condition'][2]['clause'], $data['condition'][2]['value'])->count();
+        ->where($data['condition'][2]['column'], $data['condition'][2]['clause'], $data['condition'][2]['value'])->where('type', '!=', 'bundled')->count();
       }else if(sizeof($data['condition']) == 2){
-        $this->response['size'] = Product::where($data['condition'][0]['column'], $data['condition'][0]['clause'], $data['condition'][0]['value'])->where($data['condition'][1]['column'], $data['condition'][1]['clause'], $data['condition'][1]['value'])->count();
+        $this->response['size'] = Product::where($data['condition'][0]['column'], $data['condition'][0]['clause'], $data['condition'][0]['value'])->where($data['condition'][1]['column'], $data['condition'][1]['clause'], $data['condition'][1]['value'])->where('type', '!=', 'bundled')->count();
       }else if(sizeof($data['condition']) == 1){
-        $this->response['size'] = Product::where($data['condition'][0]['column'], $data['condition'][0]['clause'], $data['condition'][0]['value'])->count();
+        $this->response['size'] = Product::where($data['condition'][0]['column'], $data['condition'][0]['clause'], $data['condition'][0]['value'])->where('type', '!=', 'bundled')->count();
       }  
       return $this->response();
     }
@@ -198,6 +239,11 @@ class ProductController extends APIController
       return sizeof($result) > 0 ? $result[0] : null;
     }
 
+    public function getByParamsWithReturn($column, $value, $returns){
+      $result = Product::where($column, '=', $value)->get($returns);
+      return sizeof($result) > 0 ? $result[0] : null;
+    }
+
     public function getByTypes($column, $value, $type){
       if($type == 'all'){
         $result = Product::where($column, '=', $value)->get();
@@ -223,8 +269,8 @@ class ProductController extends APIController
       return sizeof($result) > 0 ? $result : null;
     }
 
-    public function getProductByParams($column, $value){
-      $result = Product::where($column, '=', $value)->get();
+    public function getProductByParams($column, $value, $returns){
+      $result = Product::where($column, '=', $value)->get($returns);
       if(sizeof($result) > 0){
         $i= 0;
         foreach ($result as $key) {
@@ -235,6 +281,24 @@ class ProductController extends APIController
          } 
       }
       return sizeof($result) > 0 ? $result[0] : null;      
+    }
+
+    public function getProductByParamsWithAttribute($column, $value, $attrId){
+      $temp = DB::table('products as T1')
+              ->leftJoin('product_attributes as T2', 'T2.product_id', '=', 'T1.id')
+              ->where($column, '=', $value)
+              ->where('T2.id', '=', $attrId)->get();
+      if(sizeof($temp) > 0){
+        $i= 0;
+        $result = json_decode(json_encode($temp), true);
+        foreach ($result as $key) {
+          $result[$i]['merchant'] = app($this->merchantController)->getByParams('id', $result[$i]['merchant_id']);
+          $result[$i]['featured'] = app($this->productImageController)->getProductImage($result[$i]['id'], 'featured');
+          // $result[$i]['images'] = app($this->productImageController)->getProductImage($result[$i]['id'], null);
+          // $result[$i]['variation'] = app($this->productAttrController)->getByParams('product_id', $result[$i]['id']);
+         }
+        return sizeof($result) > 0 ? $result[0] : null;      
+      }
     }
 
     public function getProductByParamsEndUser($column, $value){
@@ -315,6 +379,7 @@ class ProductController extends APIController
           $result[$i]['created_at_human'] = Carbon::createFromFormat('Y-m-d H:i:s', $result[$i]['created_at'])->copy()->tz($this->response['timezone'])->format('F j, Y H:i A');
           $result[$i]['inventories'] = null;
           $result[$i]['product_traces'] = null;
+          $result[$i]['variation'] = app($this->productAttrController)->getByParams('product_id', $result[$i]['id']);
           $result[$i]['merchant'] = app($this->merchantController)->getByParams('id', $result[$i]['merchant_id']);
           // $result[$i]['details'] = $this->retrieveProductDetailsByParams('id', $result[$i]['id']);
           $result[$i]['volume'] =  app($this->productAttrController)->getProductUnits($result[$i]['id']);
@@ -337,9 +402,13 @@ class ProductController extends APIController
       if(sizeof($result) > 0){
         $i = 0;
         foreach ($result as $key) {
+          $merchantId = app($this->merchantController)->getColumnByParams('account_id', $accountId, 'id');
           // $result[$i]['account'] = $this->retrieveAccountDetails($result[$i]['account_id']);
           // $result[$i]['price'] = app($this->productPricingController)->getPrice($result[$i]['id']);
-          $result[$i]['variation'] = app($this->productAttrController)->getByParams('product_id', $result[$i]['id']);
+          // $result[$i]['variation'] = [];
+          // $result[$i]['bundled'] = [];
+          // app($this->productAttrController)->getByParamsWithMerchant('product_id', $result[$i]['id'], $merchantId)
+          // app($this->bundledSettingController)->getByParams('product_id', $result[$i]['id'],  $merchantId)
           $result[$i]['featured'] = app($this->productImageController)->getProductImage($result[$i]['id'], 'featured');
           $result[$i]['images'] = app($this->productImageController)->getProductImage($result[$i]['id'], null);
           $result[$i]['tag_array'] = $this->manageTags($result[$i]['tags']);
@@ -354,15 +423,15 @@ class ProductController extends APIController
           $result[$i]['inventories'] = null;
           $result[$i]['product_traces'] = null;
           $result[$i]['merchant'] = app($this->merchantController)->getByParams('id', $result[$i]['merchant_id']);
-          if($inventoryType == 'inventory'){
-            $result[$i]['inventories'] = app($this->inventoryController)->getInventory($result[$i]['id']);
-            $result[$i]['qty'] = $this->getRemainingQty($result[$i]['id']);
-          }else if($inventoryType == 'product_trace'){
+          // if($inventoryType == 'inventory'){
+          //   $result[$i]['inventories'] = app($this->inventoryController)->getInventory($result[$i]['id']);
+          //   $result[$i]['qty'] = $this->getRemainingQty($result[$i]['id']);
+          // }else if($inventoryType == 'product_trace'){
             $result[$i]['product_traces'] =  app($this->productTraceController)->getByParams('product_id', $result[$i]['id']);
             $qty = app($this->productTraceController)->getBalanceQtyOnManufacturer('product_id', $result[$i]['id']);
             $result[$i]['qty'] = $qty['qty'];
             $result[$i]['qty_in_bundled'] = $qty['qty_in_bundled'];
-          }
+          // }
           $i++;
         }
       }
