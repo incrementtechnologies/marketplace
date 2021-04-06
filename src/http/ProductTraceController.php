@@ -119,20 +119,21 @@ class ProductTraceController extends APIController
       array_push($whereArray, array('product_id', '=', $product['product_id']));
     }
     $this->response['data'] = ProductTrace::where($whereArray)->groupBy('batch_number')->orderBy(array_keys($data['sort'])[0], $data['sort'][array_keys($data['sort'])[0]])->get();
-
+    // dd($product);
     $i = 0;
     $response = array();
     foreach ($this->response['data'] as $key) {
+      // $this->response['data'][$i]['product'] = $product;
       $item = $this->response['data'][$i];
       $this->response['data'][$i]['qty'] = $this->getProductQtyByStatus($item['product_attribute_id'], null);
-      $this->response['data'][$i]['product'] = $product;
       $this->response['data'][$i]['variation'] = app($this->productAttrClass)->getByParams('id', $data['product_attribute_id']);
       // $this->response['data'][$i]['manufacturing_date_human'] = Carbon::createFromFormat('Y-m-d H:i:s', $item['manufacturing_date'])->copy()->tz('Asia/Manila')->format('F j, Y H:i A');
       $this->response['data'][$i]['created_at_human'] = Carbon::createFromFormat('Y-m-d H:i:s', $item['created_at'])->copy()->tz($this->response['timezone'])->format('F j, Y h:i A');
       $bundled = BundledProduct::where('product_trace', '=', $item['id'])->where('deleted_at', '=', null)->get();
       $transferred = TransferredProduct::where('payload_value', '=', $item['id'])->where('deleted_at', '=', null)->get();
       if(sizeof($bundled) <= 0 && sizeof($transferred) <= 0){
-        $response[] = $this->response['data'][$i];
+        $response[]['traces'] = $this->response['data'][$i];
+        $response[]['product'] = $product;
         // array_push($response, array('product' => $product));
       }
       $i++;

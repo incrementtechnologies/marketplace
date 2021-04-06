@@ -67,7 +67,7 @@ class ProductController extends APIController
     public function retrieveBundled(Request $request){
       $data= $request->all();
       $con = $data['condition'];
-      $product = Product::where($con[0]['column'], $con[0]['clause'], $con[0]['value'])->where('deleted_at', '=', null)->get(['title', 'tags', 'id']);
+      $product = Product::where($con[0]['column'], $con[0]['clause'], $con[0]['value'])->where('deleted_at', '=', null)->get(['title', 'tags', 'id', 'description']);
       $merchantId = app($this->merchantController)->getColumnByParams('account_id', $data['account_id'], 'id');
       if(sizeof($product) > 0){
         $product[0]['bundled'] = app($this->bundledSettingController)->getByParams('product_id', $product[0]['id'],  $merchantId);
