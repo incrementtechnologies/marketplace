@@ -116,27 +116,26 @@ class ProductTraceController extends APIController
       array('product_attribute_id', '=', $data['product_attribute_id'])
     );
     if($product != null){
-      array_push($whereArray, array('product_id', '=', $product['product_id']));
+      array_push($whereArray, array('product_id', '=', $product['id']));
     }
     $this->response['data'] = ProductTrace::where($whereArray)->groupBy('batch_number')->orderBy(array_keys($data['sort'])[0], $data['sort'][array_keys($data['sort'])[0]])->get();
+    // dd($product['id']);
     $i = 0;
     $response = array();
     unset($product['details']);
     unset($product['description']);
     unset($product['merchant']);
     $product['variation'] = app($this->productAttrClass)->getByParams('id', $data['product_attribute_id']);;
-    $response[]['product'] = $product; 
+    $response[]['product'] = $product;
+    $response[]['traces'] = [];
     foreach ($this->response['data'] as $key) {
-      // $this->response['data'][$i]['product'] = $product;
       $item = $this->response['data'][$i];
       $this->response['data'][$i]['qty'] = $this->getProductQtyByStatus($item['product_attribute_id'], null);
-      // $this->response['data'][$i]['manufacturing_date_human'] = Carbon::createFromFormat('Y-m-d H:i:s', $item['manufacturing_date'])->copy()->tz('Asia/Manila')->format('F j, Y H:i A');
       $this->response['data'][$i]['created_at_human'] = Carbon::createFromFormat('Y-m-d H:i:s', $item['created_at'])->copy()->tz($this->response['timezone'])->format('F j, Y h:i A');
       $bundled = BundledProduct::where('product_trace', '=', $item['id'])->where('deleted_at', '=', null)->get();
       $transferred = TransferredProduct::where('payload_value', '=', $item['id'])->where('deleted_at', '=', null)->get();
       if(sizeof($bundled) <= 0 && sizeof($transferred) <= 0){
-        $response[]['traces'] = $this->response['data'][$i];
-        // array_push($response, array('product' => $product));
+        array_push($response[1]['traces'], $this->response['data'][$i]);
       }
       $i++;
     }
