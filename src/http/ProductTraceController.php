@@ -121,6 +121,9 @@ class ProductTraceController extends APIController
     $this->response['data'] = ProductTrace::where($whereArray)->groupBy('batch_number')->orderBy(array_keys($data['sort'])[0], $data['sort'][array_keys($data['sort'])[0]])->get();
     $i = 0;
     $response = array();
+    unset($product['details']);
+    unset($product['description']);
+    unset($product['merchant']);
     $product['variation'] = app($this->productAttrClass)->getByParams('id', $data['product_attribute_id']);;
     $response[]['product'] = $product; 
     foreach ($this->response['data'] as $key) {
