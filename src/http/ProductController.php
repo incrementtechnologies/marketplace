@@ -301,6 +301,19 @@ class ProductController extends APIController
       }
     }
 
+    public function getProductByParamsWithVariationId($column, $value, $attrId){
+      $result = Product::where($column, '=', $value)->get();
+      if(sizeof($result) > 0){
+        $i= 0;
+        foreach ($result as $key) {
+          $result[$i]['merchant'] = app($this->merchantController)->getByParams('id', $result[$i]['merchant_id']);
+          $result[$i]['featured'] = app($this->productImageController)->getProductImage($result[$i]['id'], 'featured');
+          $result[$i]['variation'] = app($this->productAttrController)->getByParams('id', $attrId);
+         } 
+      }
+      return sizeof($result) > 0 ? $result[0] : null;     
+    }
+
     public function getProductByParamsEndUser($column, $value){
       $result = Product::where($column, '=', $value)->get();
       if(sizeof($result) > 0){
