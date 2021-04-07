@@ -62,7 +62,6 @@ class ProductAttributeController extends APIController
           $i++;
         }
       }
-      // $result = json_decode(json_encode($result), true);
       return $result;
     }
 }

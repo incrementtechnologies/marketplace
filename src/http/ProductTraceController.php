@@ -125,7 +125,6 @@ class ProductTraceController extends APIController
     $this->response['data'] = ProductTrace::where($whereArray)->groupBy('batch_number')->orderBy(array_keys($data['sort'])[0], $data['sort'][array_keys($data['sort'])[0]])->get();
     // dd($product['id']);
     $i = 0;
-    $j=0;
     $response = array();
     unset($product['details']);
     unset($product['description']);
@@ -135,7 +134,7 @@ class ProductTraceController extends APIController
     $response[]['traces'] = [];
     foreach ($this->response['data'] as $key) {
       $item = $this->response['data'][$i];
-      $this->response['data'][$i]['qty'] = $this->getProductQtyByStatus($item['product_attribute_id'], null);
+      $this->response['data'][$i]['qty'] = $this->getProductQtyByStatus('batch_number' ,$item['batch_number'], null);
       $this->response['data'][$i]['created_at_human'] = Carbon::createFromFormat('Y-m-d H:i:s', $item['created_at'])->copy()->tz($this->response['timezone'])->format('F j, Y h:i A');
       $bundled = BundledProduct::where('product_trace', '=', $item['id'])->where('deleted_at', '=', null)->get();
       $transferred = TransferredProduct::where('payload_value', '=', $item['id'])->where('deleted_at', '=', null)->get();
@@ -654,8 +653,8 @@ class ProductTraceController extends APIController
     return $result;
   }
 
-  public function getProductQtyByStatus($attrID, $status){
-    $result = ProductTrace::where('product_attribute_id', '=', $attrID)->groupBy('status')->count();
+  public function getProductQtyByStatus($column ,$value, $status){
+    $result = ProductTrace::where($column, '=', $value)->groupBy('status')->count();
     return $result;
   }
 }
