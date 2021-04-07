@@ -51,8 +51,7 @@ class ProductAttributeController extends APIController
     }
 
     public function getByParamsWithMerchant($column, $value, $merchantId){
-      $order = "CAST(payload_value AS INTEGER) ASC";
-      $result = ProductAttribute::where($column, '=', $value)->where('deleted_at', '=', null)->orderByRaw($order)->select(['id', 'payload', 'payload_value'])->get();
+      $result = ProductAttribute::where($column, '=', $value)->where('deleted_at', '=', null)->orderBy('payload_value', 'asc')->select(['id', 'payload', 'payload_value'])->get();
       if(sizeof($result) > 0){
         $i = 0;
         foreach ($result as $key) {
@@ -63,6 +62,7 @@ class ProductAttributeController extends APIController
           $i++;
         }
       }
-      return (sizeof($result) > 0) ? $result : null;
+      // $result = json_decode(json_encode($result), true);
+      return $result;
     }
 }
