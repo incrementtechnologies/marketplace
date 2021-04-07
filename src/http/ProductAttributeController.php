@@ -62,7 +62,7 @@ class ProductAttributeController extends APIController
           $i++;
         }
       }
-      $result->sortBy('payload_value');
+      $result = $result->sortBy('payload_value');
       return (sizeof($result) > 0) ? $result : null;
     }
 }
