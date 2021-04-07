@@ -162,7 +162,7 @@ class ProductController extends APIController
       $accountId = $data['account_id'];
       $this->model = new Product();
       $this->retrieveDB($data);
-      $this->response['data'] = $this->manageResultBasic($this->response['data'], null, $inventoryType);
+      $this->response['data'] = $this->manageResultBasic($this->response['data'], $data, $inventoryType);
       $result = $this->response['data'];
 
       if(sizeof($result) > 0 && $data['order_request_id'] != null){
@@ -383,7 +383,7 @@ class ProductController extends APIController
     }
 
     
-    public function manageResultBasic($result, $accountId, $inventoryType){
+    public function manageResultBasic($result, $data, $inventoryType){
       if(sizeof($result) > 0){
         $i = 0;
         foreach ($result as $key) {
@@ -395,7 +395,7 @@ class ProductController extends APIController
           $result[$i]['variation'] = app($this->productAttrController)->getByParams('product_id', $result[$i]['id']);
           $result[$i]['merchant'] = app($this->merchantController)->getByParams('id', $result[$i]['merchant_id']);
           // $result[$i]['details'] = $this->retrieveProductDetailsByParams('id', $result[$i]['id']);
-          $result[$i]['volume'] =  app($this->productAttrController)->getProductUnits($result[$i]['id']);
+          $result[$i]['volume'] =  app($this->productAttrController)->getProductUnits('id', $data['product_attribute_id']);
           if($inventoryType == 'inventory'){
             $result[$i]['inventories'] = app($this->inventoryController)->getInventory($result[$i]['id']);
             $result[$i]['qty'] = $this->getRemainingQty($result[$i]['id']);
