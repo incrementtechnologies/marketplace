@@ -111,6 +111,10 @@ class ProductTraceController extends APIController
     $data = $request->all();
     $con = $data['condition'];
     $product = app($this->productController)->getProductByParamsWithAttribute('code', $data['code'], $data['product_attribute_id']);
+    $merchant = array(
+      'name' => $product['merchant']->name,
+      'website' => $product['merchant']->website,
+    );
     $whereArray = array(
       array($con[0]['column'], $con[0]['clause'], $con[0]['value']),
       array('product_attribute_id', '=', $data['product_attribute_id'])
@@ -121,10 +125,11 @@ class ProductTraceController extends APIController
     $this->response['data'] = ProductTrace::where($whereArray)->groupBy('batch_number')->orderBy(array_keys($data['sort'])[0], $data['sort'][array_keys($data['sort'])[0]])->get();
     // dd($product['id']);
     $i = 0;
+    $j=0;
     $response = array();
     unset($product['details']);
     unset($product['description']);
-    unset($product['merchant']);
+    $product['merchant'] = $merchant;
     $product['variation'] = app($this->productAttrClass)->getByParams('id', $data['product_attribute_id']);;
     $response[]['product'] = $product;
     $response[]['traces'] = [];
