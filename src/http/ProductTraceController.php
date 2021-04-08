@@ -101,6 +101,7 @@ class ProductTraceController extends APIController
       $i=0;
       foreach ($result as $key) {
         $result[$i]['created_at_human'] =  Carbon::createFromFormat('Y-m-d H:i:s', $result[$i]['created_at'])->copy()->tz($this->response['timezone'])->format('F j, Y H:i A');
+      $i++;
       }
     }
     $this->response['data'] = $result;
@@ -303,6 +304,8 @@ class ProductTraceController extends APIController
 
   public function retrieveWithTransfer(Request $request){
     $data = $request->all();
+    $con = $data['condition'];
+    $temp = ProductTrace::where($con[0]['column'], $con[0]['clause'], $con[0]['value'])->where('account_id', '=', $data['account_id'])->get();
     $this->model = new ProductTrace();
     $this->retrieveDB($data);
     $i = 0;
