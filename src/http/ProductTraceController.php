@@ -96,7 +96,7 @@ class ProductTraceController extends APIController
 
   public function retrieveProductTraceAsInventory(Request $request){
     $data = $request->all();
-    $result = ProductTrace::where('product_attribute_id', '=', $data['product_attribute_id'])->where('batch_number', '=', $data['batch_number'])->where('deleted_at', '=', null)->where('status', '=', $data['status'])->get();
+    $result = ProductTrace::where('product_attribute_id', '=', $data['product_attribute_id'])->where('batch_number', '=', $data['batch_number'])->where('deleted_at', '=', null)->get();
     if(sizeof($result) > 0){
       $i=0;
       foreach ($result as $key) {
@@ -137,11 +137,11 @@ class ProductTraceController extends APIController
       $item = $this->response['data'][$i];
       $this->response['data'][$i]['qty'] = $this->getProductQtyByStatus('batch_number' ,$item['batch_number'], null);
       $this->response['data'][$i]['created_at_human'] = Carbon::createFromFormat('Y-m-d H:i:s', $item['created_at'])->copy()->tz($this->response['timezone'])->format('F j, Y h:i A');
-      $bundled = BundledProduct::where('product_trace', '=', $item['id'])->where('deleted_at', '=', null)->get();
-      $transferred = TransferredProduct::where('payload_value', '=', $item['id'])->where('deleted_at', '=', null)->get();
-      if(sizeof($bundled) <= 0 && sizeof($transferred) <= 0){
-        array_push($response[1]['traces'], $this->response['data'][$i]);
-      }
+      // $bundled = BundledProduct::where('product_trace', '=', $item['id'])->where('deleted_at', '=', null)->get();
+      // $transferred = TransferredProduct::where('payload_value', '=', $item['id'])->where('deleted_at', '=', null)->get();
+      // if(sizeof($bundled) <= 0 && sizeof($transferred) <= 0){
+      array_push($response[1]['traces'], $this->response['data'][$i]);
+      // }
       $i++;
     }
     $this->response['data'] =  $response;
