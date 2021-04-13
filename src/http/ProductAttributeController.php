@@ -26,10 +26,23 @@ class ProductAttributeController extends APIController
       if(sizeof($result) > 0){
         $i = 0;
         foreach ($result as $key) {
-          $result[$i]['volume'] = $result[$i]['payload_value'].' '.$result[$i]['payload'];
+          $unit = $this->convertUnits($result[$i]['payload']);
+          $result[$i]['volume'] = $result[$i]['payload_value'].' '.$unit;
         }
       }
       return (sizeof($result) > 0) ? $result[0]->volume : null;
+    }
+
+    public function convertUnits($payload){
+      switch($payload){
+        case 'Liters (L)': return 'L';
+        case 'Litres (L)': return 'L';
+        case 'Milliliters (ml)': return 'ml';
+        case 'Millilitres (ml)': return 'ml';
+        case 'Kilograms (kg)': return 'kg';
+        case 'Grams (g)': return 'g';
+        case 'Milligrams (mg)': return 'mg';
+      }
     }
 
     public function getProductUnitsByColumns($id){
