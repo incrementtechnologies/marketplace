@@ -27,7 +27,7 @@ class ProductAttributeController extends APIController
         $i = 0;
         foreach ($result as $key) {
           $unit = $this->convertUnits($result[$i]['payload']);
-          $result[$i]['volume'] = $result[$i]['payload_value'].' '.$unit;
+          $result[$i]['volume'] = $result[$i]['payload_value'].''.$unit;
         }
       }
       return (sizeof($result) > 0) ? $result[0]->volume : null;
