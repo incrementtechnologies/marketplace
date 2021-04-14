@@ -157,7 +157,7 @@ class ProductTraceController extends APIController
     foreach ($this->response['data'] as $key) {
       $item = $this->response['data'][$i];
       $this->response['data'][$i]['product'] = app($this->productController)->getProductByParamsWithVariationId('id', $item['product_id'], $item['product_attribute_id']);
-      $this->response['data'][$i]['volume'] = app($this->productAttrClass)->getProductUnits('product_id', $item['product_id']);
+      $this->response['data'][$i]['volume'] = app($this->productAttrClass)->getProductUnits('id', $item['product_attribute_id']);
       $item = $this->response['data'][$i];
       
       if(isset($data['nfc']) && ($item['nfc'] == null || $item['nfc'] == '')){
