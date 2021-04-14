@@ -978,7 +978,7 @@ class TransferController extends APIController
           $temp[$i]['merchant']  = array(
             'name' => $merchant);
           $temp[$i]['merchant_from'] = $merchantFrom;
-          $temp[$i]['qty']   = app($this->transferredProductsClass)->getTransferredProduct($temp[$i]['product_id'], $data['merchant_id'])->qty;
+          $temp[$i]['qty']   = app($this->transferredProductsClass)->getTransferredProduct($temp[$i]['product_id'], $data['merchant_id'], $data['product_attribute_id'])->qty;
           $temp[$i]['volume'] = app($this->productAttrClass)->getProductUnits('product_id', $key['product_id']);
           $temp[$i]['qty_in_bundled'] = $this->getBundledProducts($data['merchant_id'], $key['id']);
           $temp[$i]['type']    = $key['type'];
