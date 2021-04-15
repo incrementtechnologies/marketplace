@@ -83,7 +83,7 @@ class TransferController extends APIController
           'date_delivered'  => Carbon::now(),
           'updated_at'  => Carbon::now()
         ));
-
+        
         app($this->dailyLoadingListClass)->updateByParams('order_request_id', $data['order_request_id'], array(
           'status'  => 'completed',
           'updated_at'  => Carbon::now()
