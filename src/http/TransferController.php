@@ -811,7 +811,7 @@ class TransferController extends APIController
         
       }
       if($productData !== null){
-        $final  = $products[$i];
+        $final[]  = $products[$i];
       }
       $i++;
     }
