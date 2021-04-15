@@ -66,6 +66,7 @@ class ProductAttributeController extends APIController
       if(sizeof($result) > 0){
         $i = 0;
         foreach ($result as $key) {
+          $result[$i]['unit'] = $this->convertUnits($result[$i]['payload']);
           $result[$i]['product_trace_qty'] = app('Increment\Marketplace\Http\ProductTraceController')->getTotalAttributeByParams($result[$i]['id']);
 
           $i++;
