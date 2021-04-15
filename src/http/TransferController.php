@@ -773,7 +773,7 @@ class TransferController extends APIController
 
   public function manageResult2ndLevel($products, $data){
     $i = 0;
-    $final = array();
+    $result = array();
     foreach ($products as $key) {
       $products = json_decode(json_encode($products), true);
       $productId = $products[$i]['product_id'];
@@ -811,11 +811,11 @@ class TransferController extends APIController
         
       }
       if($productData !== null){
-        $final[]  = $products[$i];
+        $result[] =  $products[$i];
       }
       $i++;
     }
-    return $final;
+    return $result;
   }
 
   public function retrieveProductsFirstLevel(Request $request){
