@@ -798,7 +798,7 @@ class TransferController extends APIController
         $string = $attributes[0]['payload'];
         $temps = explode(' ', $string);
         $final = array_pop($temps);
-        $products[$i]['volume'] = $attributes[0]['payload_value'].''.$final;
+        $products[$i]['volume'] = app($this->productAttrClass)->getProductUnit($products[$i]['product_id']);
         $products[$i]['merchant'] = array('name' => $merchant);
         $products[$i]['type'] = $productData['type'];
         $products[$i]['title'] =$productData['title'];
