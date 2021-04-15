@@ -776,15 +776,15 @@ class TransferController extends APIController
   public function manageResult2ndLevel($products, $data){
     $i = 0;
     foreach ($products as $key) {
-      $productId = $products[$i]->product_id;
-      $productData = app($this->productClass)->getProductByParams('id', $products[$i]->product_id, ['title', 'type', 'merchant_id', 'id']);
-      $productQty = app($this->transferredProductsClass)->getTransferredProduct($productId, $data['merchant_id'], $products[$i]->product_attribute_id);
+      $productId = $products[$i]['product_id'];
+      $productData = app($this->productClass)->getProductByParams('id', $products[$i]['product_id'], ['title', 'type', 'merchant_id', 'id']);
+      $productQty = app($this->transferredProductsClass)->getTransferredProduct($productId, $data['merchant_id'], $products[$i]['product_attribute_id']);
       // $consumed = app('Increment\Marketplace\Paddock\Http\BatchProductController')->getTotalAppliedRateBySpecifiedParams($productId, $data['merchant_id']);
       // $qty = app($this->productTraceClass)->getBalanceQtyOnManufacturer('product_id', $products[$i]->product_id);
-      $attributes = app($this->productAttrClass)->getByParams('id', $products[$i]->product_attribute_id);
+      $attributes = app($this->productAttrClass)->getByParams('id', $products[$i]['product_attribute_id']);
       if($productQty->qty > 0){
         $merchantFrom = app($this->merchantClass)->getColumnValueByParams('id', $productData['merchant_id'], 'name');
-        $merchant =  app($this->merchantClass)->getColumnValueByParams('id', $products[$i]->merchant_id, 'name');
+        $merchant =  app($this->merchantClass)->getColumnValueByParams('id', $products[$i]['merchant_id'], 'name');
 
         $qty = 0;
         $j = 0;
@@ -804,7 +804,7 @@ class TransferController extends APIController
         $products[$i]['merchant'] = array('name' => $merchant);
         $products[$i]['type'] = $productData['type'];
         $products[$i]['title'] =$productData['title'];
-        $products[$i]['product_attribute_id'] = $products[$i]->product_attribute_id;
+        $products[$i]['product_attribute_id'] = $products[$i]['product_attribute_id'];
         $products[$i]['merchant_from'] = $merchantFrom;
         $products[$i]['manufacturing_date'] = $productQty != null ? $productQty->manufacturing_date : null;
         $products[$i]['qty'] = number_format($qty, 2);
