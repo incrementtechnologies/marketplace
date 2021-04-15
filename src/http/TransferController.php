@@ -810,10 +810,10 @@ class TransferController extends APIController
           $products[$i]['details'] = $this->retrieveProductDetailsByParams('id', $productId);
           
         }
-        $i++;
       }
-    return $products;
+      $i++;
     }
+    return $products;
   }
 
   public function retrieveProductsFirstLevel(Request $request){
