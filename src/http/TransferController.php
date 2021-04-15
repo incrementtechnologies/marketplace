@@ -491,10 +491,8 @@ class TransferController extends APIController
           $qty += $totalProductTraces - $totalConsumedInTraces;
           $j++;
         }
-        $string = $attributes[0]['payload'];
-        $temps = explode(' ', $string);
-        $final = array_pop($temps);
-        $this->response['data'][$i]['volume'] = $attributes[0]['payload_value'].''.$final;
+        $string = $attributes[0]['unit'];
+        $this->response['data'][$i]['volume'] = $attributes[0]['payload_value'].' '.$string;
         $this->response['data'][$i]['merchant'] = array('name' => $merchant);
         $this->response['data'][$i]['type'] = $products[$i]->type;
         $this->response['data'][$i]['title'] = $products[$i]->title;
