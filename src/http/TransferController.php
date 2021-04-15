@@ -768,6 +768,7 @@ class TransferController extends APIController
       return $this->response();
     }else{
       $this->response['size'] = sizeOf($size);
+      $this->response['data'] = [];
       return $this->response();
     }
   }
