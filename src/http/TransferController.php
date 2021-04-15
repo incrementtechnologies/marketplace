@@ -813,7 +813,7 @@ class TransferController extends APIController
         
       }
       $i++;
-      return $products
+      return $products;
     }
   }
 
