@@ -763,7 +763,7 @@ class TransferController extends APIController
       ->get();
     $testArray = array();
     if(sizeof($result) > 0){  
-      $this->reponse['data'] = $this->manageResult2ndLevel($result, $data);
+      $this->reponse['data'][] = $this->manageResult2ndLevel($result, $data);
       $this->response['size'] = sizeOf($size);
       return $this->response();
     }else{
