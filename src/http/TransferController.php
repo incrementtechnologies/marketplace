@@ -729,7 +729,6 @@ class TransferController extends APIController
         $this->response['data'][$i]['code'] = $products[$i]->product_code;
         $this->response['data'][$i]['type'] = $products[$i]->type;
         $this->response['data'][$i]['details'] = $this->retrieveProductDetailsByParams('id', $productId);
-        
       }
       $i++;
     }
@@ -762,7 +761,7 @@ class TransferController extends APIController
       ->orderBy($con['column'], $data['sort'][$con['column']])
       ->get();
     if(sizeof($result) > 0){  
-      $this->manageResult2ndLevel($result, $data);
+      $this->response['data'] = $this->manageResult2ndLevel($result, $data);
       $this->response['size'] = sizeOf($size);
       return $this->response();
     }else{
@@ -775,13 +774,14 @@ class TransferController extends APIController
   public function manageResult2ndLevel($products, $data){
     $i = 0;
     foreach ($products as $key) {
-      $productId = $products[$i]->product_id;
-      $productData = app($this->productClass)->getProductByParams('id', $products[$i]->product_id, ['title', 'type', 'merchant_id', 'id']);
-      $productQty = app($this->transferredProductsClass)->getTransferredProduct($productId, $data['merchant_id'], $products[$i]->product_attribute_id);
-      $attributes = app($this->productAttrClass)->getByParams('id', $products[$i]->product_attribute_id);
+      $products = json_decode(json_encode($products), true);
+      $productId = $products[$i]['product_id'];
+      $productData = app($this->productClass)->getProductByParams('id', $products[$i]['product_id'], ['title', 'type', 'merchant_id', 'id']);
+      $productQty = app($this->transferredProductsClass)->getTransferredProduct($productId, $data['merchant_id'], $products[$i]['product_attribute_id']);
+      $attributes = app($this->productAttrClass)->getByParams('id', $products[$i]['product_attribute_id']);
       if($productQty->qty > 0){
         $merchantFrom = app($this->merchantClass)->getColumnValueByParams('id', $productData['merchant_id'], 'name');
-        $merchant =  app($this->merchantClass)->getColumnValueByParams('id', $products[$i]->merchant_id, 'name');
+        $merchant =  app($this->merchantClass)->getColumnValueByParams('id', $products[$i]['merchant_id'], 'name');
 
         $qty = 0;
         $j = 0;
@@ -797,20 +797,21 @@ class TransferController extends APIController
         $string = $attributes[0]['payload'];
         $temps = explode(' ', $string);
         $final = array_pop($temps);
-        $this->response['data'][$i]['volume'] = $attributes[0]['payload_value'].''.$final;
-        $this->response['data'][$i]['merchant'] = array('name' => $merchant);
-        $this->response['data'][$i]['type'] = $productData['type'];
-        $this->response['data'][$i]['title'] =$productData['title'];
-        $this->response['data'][$i]['product_attribute_id'] = $products[$i]->product_attribute_id;
-        $this->response['data'][$i]['merchant_from'] = $merchantFrom;
-        $this->response['data'][$i]['manufacturing_date'] = $productQty != null ? $productQty->manufacturing_date : null;
-        $this->response['data'][$i]['qty'] = number_format($qty, 2);
-        $this->response['data'][$i]['qty_in_bundled'] = 0; // $qty['qty_in_bundled'];
-        $this->response['data'][$i]['details'] = $this->retrieveProductDetailsByParams('id', $productId);
+        $products[$i]['volume'] = $attributes[0]['payload_value'].''.$final;
+        $products[$i]['merchant'] = array('name' => $merchant);
+        $products[$i]['type'] = $productData['type'];
+        $products[$i]['title'] =$productData['title'];
+        $products[$i]['product_attribute_id'] = $products[$i]['product_attribute_id'];
+        $products[$i]['merchant_from'] = $merchantFrom;
+        $products[$i]['manufacturing_date'] = $productQty != null ? $productQty->manufacturing_date : null;
+        $products[$i]['qty'] = number_format($qty, 2);
+        $products[$i]['qty_in_bundled'] = 0; // $qty['qty_in_bundled'];
+        $products[$i]['details'] = $this->retrieveProductDetailsByParams('id', $productId);
         
       }
       $i++;
     }
+    return $products;
   }
 
   public function retrieveProductsFirstLevel(Request $request){
