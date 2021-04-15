@@ -808,10 +808,9 @@ class TransferController extends APIController
         $products[$i]['qty'] = number_format($qty, 2);
         $products[$i]['qty_in_bundled'] = 0; // $qty['qty_in_bundled'];
         $products[$i]['details'] = $this->retrieveProductDetailsByParams('id', $productId);
-        
-      }
-      if($productData !== null){
-        $result[] =  $products[$i];
+        if($productData !== null){
+          $result[] =  $products[$i];
+        }
       }
       $i++;
     }
