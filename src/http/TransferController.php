@@ -777,7 +777,7 @@ class TransferController extends APIController
       $products = json_decode(json_encode($products), true);
       $productId = $products[$i]['product_id'];
       $productData = app($this->productClass)->getProductByParams('id', $products[$i]['product_id'], ['title', 'type', 'merchant_id', 'id']);
-      if(sizeof($productData) > 0){
+      if($productData !== null){
         $productQty = app($this->transferredProductsClass)->getTransferredProduct($productId, $data['merchant_id'], $products[$i]['product_attribute_id']);
         $attributes = app($this->productAttrClass)->getByParams('id', $products[$i]['product_attribute_id']);
         if($productQty->qty > 0){
