@@ -773,47 +773,49 @@ class TransferController extends APIController
 
   public function manageResult2ndLevel($products, $data){
     $i = 0;
+    $final = array();
     foreach ($products as $key) {
       $products = json_decode(json_encode($products), true);
       $productId = $products[$i]['product_id'];
       $productData = app($this->productClass)->getProductByParams('id', $products[$i]['product_id'], ['title', 'type', 'merchant_id', 'id']);
-      if($productData !== null){
-        $productQty = app($this->transferredProductsClass)->getTransferredProduct($productId, $data['merchant_id'], $products[$i]['product_attribute_id']);
-        $attributes = app($this->productAttrClass)->getByParams('id', $products[$i]['product_attribute_id']);
-        if($productQty->qty > 0){
-          $merchantFrom = app($this->merchantClass)->getColumnValueByParams('id', $productData['merchant_id'], 'name');
-          $merchant =  app($this->merchantClass)->getColumnValueByParams('id', $products[$i]['merchant_id'], 'name');
+      $productQty = app($this->transferredProductsClass)->getTransferredProduct($productId, $data['merchant_id'], $products[$i]['product_attribute_id']);
+      $attributes = app($this->productAttrClass)->getByParams('id', $products[$i]['product_attribute_id']);
+      if($productQty->qty > 0){
+        $merchantFrom = app($this->merchantClass)->getColumnValueByParams('id', $productData['merchant_id'], 'name');
+        $merchant =  app($this->merchantClass)->getColumnValueByParams('id', $products[$i]['merchant_id'], 'name');
 
-          $qty = 0;
-          $j = 0;
-          foreach ($attributes as $attributeKey) {
-            $productAttributeId = $attributes[$j]['id'];
-            $volume = floatval($attributes[$j]['payload_value']);
-            $totalProductTraces = app($this->transferredProductsClass)->getActiveProductQtyInAttribute($productId, $productAttributeId, $data['merchant_id']);
-            $totalConsumed = app('Increment\Marketplace\Paddock\Http\BatchProductController')->getTotalAppliedRateByParamsByAttribute($productId, $productAttributeId, $data['merchant_id']);
-            $totalConsumedInTraces = floatval($totalConsumed / $volume);
-            $qty += $totalProductTraces - $totalConsumedInTraces;
-            $j++;
-          }
-          $string = $attributes[0]['payload'];
-          $temps = explode(' ', $string);
-          $final = array_pop($temps);
-          $products[$i]['volume'] = $attributes[0]['payload_value'].''.$final;
-          $products[$i]['merchant'] = array('name' => $merchant);
-          $products[$i]['type'] = $productData['type'];
-          $products[$i]['title'] =$productData['title'];
-          $products[$i]['product_attribute_id'] = $products[$i]['product_attribute_id'];
-          $products[$i]['merchant_from'] = $merchantFrom;
-          $products[$i]['manufacturing_date'] = $productQty != null ? $productQty->manufacturing_date : null;
-          $products[$i]['qty'] = number_format($qty, 2);
-          $products[$i]['qty_in_bundled'] = 0; // $qty['qty_in_bundled'];
-          $products[$i]['details'] = $this->retrieveProductDetailsByParams('id', $productId);
-          
+        $qty = 0;
+        $j = 0;
+        foreach ($attributes as $attributeKey) {
+          $productAttributeId = $attributes[$j]['id'];
+          $volume = floatval($attributes[$j]['payload_value']);
+          $totalProductTraces = app($this->transferredProductsClass)->getActiveProductQtyInAttribute($productId, $productAttributeId, $data['merchant_id']);
+          $totalConsumed = app('Increment\Marketplace\Paddock\Http\BatchProductController')->getTotalAppliedRateByParamsByAttribute($productId, $productAttributeId, $data['merchant_id']);
+          $totalConsumedInTraces = floatval($totalConsumed / $volume);
+          $qty += $totalProductTraces - $totalConsumedInTraces;
+          $j++;
         }
+        $string = $attributes[0]['payload'];
+        $temps = explode(' ', $string);
+        $final = array_pop($temps);
+        $products[$i]['volume'] = $attributes[0]['payload_value'].''.$final;
+        $products[$i]['merchant'] = array('name' => $merchant);
+        $products[$i]['type'] = $productData['type'];
+        $products[$i]['title'] =$productData['title'];
+        $products[$i]['product_attribute_id'] = $products[$i]['product_attribute_id'];
+        $products[$i]['merchant_from'] = $merchantFrom;
+        $products[$i]['manufacturing_date'] = $productQty != null ? $productQty->manufacturing_date : null;
+        $products[$i]['qty'] = number_format($qty, 2);
+        $products[$i]['qty_in_bundled'] = 0; // $qty['qty_in_bundled'];
+        $products[$i]['details'] = $this->retrieveProductDetailsByParams('id', $productId);
+        
+      }
+      if($productData !== null){
+        $final  = $products[$i];
       }
       $i++;
     }
-    return $products;
+    return $final;
   }
 
   public function retrieveProductsFirstLevel(Request $request){
