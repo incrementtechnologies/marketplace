@@ -244,12 +244,12 @@ class PaddockPlanTaskController extends APIController
                 if($tempRes[$i]['start_date'] <= $currDate && $currDate <= $tempRes[$i]['end_date']){
                     $totalBatchArea = $this->getTotalBatchPaddockPlanTask($tempRes[$i]['plan_task_id']);
                     $tempRes[$i]['area'] = (float)$tempRes[$i]['area'];
-                    $tempRes[$i]['remaining_spray_area'] = $totalBatchArea != null ? ((float)$tempRes[$i]['spray_area'] - (float)$totalBatchArea) : (float)$tempRes[$i]['spray_area'];
+                    $tempRes[$i]['remaining_area'] = $totalBatchArea != null ? ((float)$tempRes[$i]['area'] - (float)$totalBatchArea) : (float)$tempRes[$i]['area'];
                     $tempRes[$i]['units'] = "Ha";
                     $tempRes[$i]['spray_mix_units'] = "L/Ha";
                     $tempRes[$i]['partial'] = false;
                     $tempRes[$i]['partial_flag'] = false;
-                    if($tempRes[$i]['remaining_spray_area'] > 0){
+                    if($tempRes[$i]['remaining_area'] > 0){
                         $available[] = $tempRes[$i];
                     }
                 }
