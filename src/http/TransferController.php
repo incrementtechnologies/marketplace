@@ -417,7 +417,7 @@ class TransferController extends APIController
     $whereArray = array(
       array($con['column'], 'like', $con['value']),
       array('T1.deleted_at', '=', null),
-      array('T2.status', '=', 'active'),
+      // array('T2.status', '=', 'active'),
       array('T2.merchant_id', '=', $data['merchant_id'])
     );
 
