@@ -413,6 +413,7 @@ class TransferController extends APIController
     $productType = $data['productType'];
     $data['offset'] = isset($data['offset']) ? $data['offset'] : 0;
     $data['limit'] = isset($data['offset']) ? $data['limit'] : 5;
+    $condition = array();
     if($productType == 'all'){
       if(isset($data['tags'])){
         if($data['tags'] == 'other'){
