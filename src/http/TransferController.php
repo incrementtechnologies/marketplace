@@ -812,8 +812,8 @@ class TransferController extends APIController
         }
       }
       $i++;
-    return $products;
     }
+    return $products;
   }
 
   public function retrieveProductsFirstLevel(Request $request){
