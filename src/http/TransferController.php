@@ -752,7 +752,7 @@ class TransferController extends APIController
         ->skip($data['offset'])->take($data['limit'])
         ->orderBy($con['column'], $data['sort'][$con['column']])
         ->get();
-    $result = json_decode(json_encode($result), true);
+
     $size =  DB::table('merchants as T1')
       ->leftJoin('transferred_products as T2', 'T2.merchant_id', '=', 'T1.id')
       ->where($con['column'], 'like', $con['value'])
@@ -763,7 +763,7 @@ class TransferController extends APIController
       ->get();
     $testArray = array();
     if(sizeof($result) > 0){  
-      $this->reponse['data'] = $this->manageResult2ndLevel($result, $data);
+      $this->reponse['data'][] = $this->manageResult2ndLevel($result, $data);
       $this->response['size'] = sizeOf($size);
       return $this->response();
     }else{
@@ -800,20 +800,19 @@ class TransferController extends APIController
         $string = $attributes[0]['payload'];
         $temps = explode(' ', $string);
         $final = array_pop($temps);
-        $products[$i]['volume'] = $attributes[0]['payload_value'].''.$final;
-        $products[$i]['merchant'] = array('name' => $merchant);
-        $products[$i]['type'] = $productData['type'];
-        $products[$i]['title'] =$productData['title'];
-        $products[$i]['product_attribute_id'] = $products[$i]->product_attribute_id;
-        $products[$i]['merchant_from'] = $merchantFrom;
-        $products[$i]['manufacturing_date'] = $productQty != null ? $productQty->manufacturing_date : null;
-        $products[$i]['qty'] = number_format($qty, 2);
-        $products[$i]['qty_in_bundled'] = 0; // $qty['qty_in_bundled'];
-        $products[$i]['details'] = $this->retrieveProductDetailsByParams('id', $productId);
+        $this->response['data'][$i]['volume'] = $attributes[0]['payload_value'].''.$final;
+        $this->response['data'][$i]['merchant'] = array('name' => $merchant);
+        $this->response['data'][$i]['type'] = $productData['type'];
+        $this->response['data'][$i]['title'] =$productData['title'];
+        $this->response['data'][$i]['product_attribute_id'] = $products[$i]->product_attribute_id;
+        $this->response['data'][$i]['merchant_from'] = $merchantFrom;
+        $this->response['data'][$i]['manufacturing_date'] = $productQty != null ? $productQty->manufacturing_date : null;
+        $this->response['data'][$i]['qty'] = number_format($qty, 2);
+        $this->response['data'][$i]['qty_in_bundled'] = 0; // $qty['qty_in_bundled'];
+        $this->response['data'][$i]['details'] = $this->retrieveProductDetailsByParams('id', $productId);
         
       }
       $i++;
-      return $products;
     }
   }
 
