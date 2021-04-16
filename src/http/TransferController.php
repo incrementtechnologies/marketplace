@@ -43,6 +43,17 @@ class TransferController extends APIController
       $this->insertDB($data);
 
       if($this->response['data'] > 0){
+        app($this->dailyLoadingListClass)->updateByParams('order_request_id', $data['order_request_id'], array(
+          'status'  => 'completed',
+          'updated_at'  => Carbon::now()
+        ));
+        
+        app($this->orderRequestClass)->updateByParams($data['order_request_id'], array(
+          'status'  => 'completed',
+          'date_delivered'  => Carbon::now(),
+          'updated_at'  => Carbon::now()
+        ));
+
         $products = $data['products'];
 
         foreach ($products as $key) {
@@ -77,17 +88,6 @@ class TransferController extends APIController
             return $this->response();
           }
         }
-
-        app($this->orderRequestClass)->updateByParams($data['order_request_id'], array(
-          'status'  => 'completed',
-          'date_delivered'  => Carbon::now(),
-          'updated_at'  => Carbon::now()
-        ));
-        
-        app($this->dailyLoadingListClass)->updateByParams('order_request_id', $data['order_request_id'], array(
-          'status'  => 'completed',
-          'updated_at'  => Carbon::now()
-        ));
       }
 
       return $this->response();
