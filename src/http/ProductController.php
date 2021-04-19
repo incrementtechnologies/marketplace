@@ -72,7 +72,7 @@ class ProductController extends APIController
       if(sizeof($product) > 0){
         $tempVar = app($this->productAttrController)->getByParamsSortedCreatedAt('product_id', $product[0]['id'], $merchantId);
         $product[0]['variation'] = app($this->bundledSettingController)->getByParams('product_id', $product[0]['id'],  $merchantId);
-        $product[0]['bundled'] = sizeof($tempVar) > 0 ? $tempVar[0] : null;
+        $product[0]['bundled'] = $tempVar;
       }
       $this->response['data'] = $product;
       return $this->response();
