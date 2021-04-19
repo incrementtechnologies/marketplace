@@ -89,4 +89,19 @@ class ProductAttributeController extends APIController
       }
       return $result;
     }
+
+    public function getByParamsSortedCreatedAt($column, $value, $merchantId){
+      $result = ProductAttribute::where($column, '=', $value)->where('deleted_at', '=', null)->orderBy('created_at', 'desc')->select(['id', 'payload', 'payload_value'])->get();
+      if(sizeof($result) > 0){
+        $i = 0;
+        foreach ($result as $key) {
+          $result[$i]['payload_value'] = (int)$result[$i]['payload_value'];
+          $productQtyPerVariation = app('Increment\Marketplace\Http\ProductTraceController')->getTotalAttributeByParams($result[$i]['id']);
+          $transferredProductQty = app('Increment\Marketplace\Http\TransferredProductController')->getRemainingProductQty($value, $merchantId, $result[$i]['id']);
+          $result[$i]['product_trace_qty'] = $productQtyPerVariation - $transferredProductQty;
+          $i++;
+        }
+      }
+      return $result;
+    }
 }

@@ -70,7 +70,9 @@ class ProductController extends APIController
       $product = Product::where($con[0]['column'], $con[0]['clause'], $con[0]['value'])->where('deleted_at', '=', null)->get(['title', 'tags', 'id', 'description']);
       $merchantId = app($this->merchantController)->getColumnByParams('account_id', $data['account_id'], 'id');
       if(sizeof($product) > 0){
+        $tempVar = app($this->productAttrController)->getByParamsSortedCreatedAt('product_id', $product[0]['id'], $merchantId);
         $product[0]['bundled'] = app($this->bundledSettingController)->getByParams('product_id', $product[0]['id'],  $merchantId);
+        $product[0]['bundled'] = sizeof($tempVar) > 0 ? $tempVar[0] : null;
       }
       $this->response['data'] = $product;
       return $this->response();
