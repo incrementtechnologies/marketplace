@@ -71,8 +71,8 @@ class ProductController extends APIController
       $merchantId = app($this->merchantController)->getColumnByParams('account_id', $data['account_id'], 'id');
       if(sizeof($product) > 0){
         $tempVar = app($this->productAttrController)->getByParamsSortedCreatedAt('product_id', $product[0]['id'], $merchantId);
-        $product[0]['variation'] = app($this->bundledSettingController)->getByParams('product_id', $product[0]['id'],  $merchantId);
-        $product[0]['bundled'] = $tempVar;
+        $product[0]['bundled'] = app($this->bundledSettingController)->getByParams('product_id', $product[0]['id'],  $merchantId);
+        $product[0]['variation'] = sizeof($tempVar) > 0 ? $tempVar[0] : null;
       }
       $this->response['data'] = $product;
       return $this->response();
