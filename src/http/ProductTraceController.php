@@ -558,8 +558,9 @@ class ProductTraceController extends APIController
   public function create(Request $request){
     $data = $request->all();
     $currQty = ProductTrace::where('batch_number', '=', $data['batch_number'])->where('deleted_at', '=', null)->count();
-    $qty = ((int)$currQty - int($data['qty']));
+    $qty = null;
     if(isset($data['isEdit'])){
+      $qty = ((int)$currQty - int($data['qty']));
       for ($i=0; $i < $qty; $i++) {
         $data['code'] = $this->generateCode();
         $data['status'] = 'inactive';
@@ -567,6 +568,7 @@ class ProductTraceController extends APIController
         $this->insertDB($data);
       }
     }else{
+      $qty = int($data['qty']);
       $exist = ProductTrace::where('batch_number', '=', $data['batch_number'])->where('deleted_at', '=', null)->get();
       if(sizeof($exist) > 0){
         $this->response['error'] = 'Batch number is already existed';
