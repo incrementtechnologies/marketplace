@@ -558,15 +558,24 @@ class ProductTraceController extends APIController
   public function create(Request $request){
     $data = $request->all();
     $qty = intval($data['qty']);
-    $exist = ProductTrace::where('batch_number', '=', $data['batch_number'])->where('deleted_at', '=', null)->get();
-    if(sizeof($exist) > 0){
-      $this->response['error'] = 'Batch number is already existed';
-    }else{
+    if(isset($data['isEdit'])){
       for ($i=0; $i < $qty; $i++) {
         $data['code'] = $this->generateCode();
         $data['status'] = 'inactive';
         $this->model = new ProductTrace();
         $this->insertDB($data);
+      }
+    }else{
+      $exist = ProductTrace::where('batch_number', '=', $data['batch_number'])->where('deleted_at', '=', null)->get();
+      if(sizeof($exist) > 0){
+        $this->response['error'] = 'Batch number is already existed';
+      }else{
+        for ($i=0; $i < $qty; $i++) {
+          $data['code'] = $this->generateCode();
+          $data['status'] = 'inactive';
+          $this->model = new ProductTrace();
+          $this->insertDB($data);
+        }
       }
     }
     return $this->response();
