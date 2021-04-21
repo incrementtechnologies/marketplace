@@ -673,7 +673,7 @@ class ProductTraceController extends APIController
 
   public function getProductQtyByStatus($column ,$value, $status){
     $all = ProductTrace::where($column, '=', $value)->count();
-    $active = ProductTrace::where($column, '=', $value)->where('status', '=', $tatus)->count();
+    $active = ProductTrace::where($column, '=', $value)->where('status', '=', $status)->count();
     $result = array(
       'total_qty' => $all,
       'active_qty' => $active
