@@ -44,6 +44,14 @@ class ProductTraceController extends APIController
     return sizeof($result) > 0 ? $result : null;
   }
 
+  public function update(Request $request){
+    $data = $request->all();
+    ProductTrace::where('id', '=', $data['id'])->update(array(
+      'qty' => $data['qty']
+    ));
+    return $this->response();
+  }
+
   public function getTotalAttributeByParams($attrID){
     $result = ProductTrace::where('product_attribute_id', '=', $attrID)->where('status', '=', 'active')->orderBy('created_at', 'desc')->count();
 
