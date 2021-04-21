@@ -557,7 +557,8 @@ class ProductTraceController extends APIController
 
   public function create(Request $request){
     $data = $request->all();
-    $qty = intval($data['qty']);
+    $currQty = ProductTrace::where('batch_number', '=', $data['batch_number'])->where('deleted_at', '=', null)->count();
+    $qty = ((int)$currQty - int($data['qty']));
     if(isset($data['isEdit'])){
       for ($i=0; $i < $qty; $i++) {
         $data['code'] = $this->generateCode();
