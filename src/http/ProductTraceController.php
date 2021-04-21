@@ -560,7 +560,7 @@ class ProductTraceController extends APIController
     $currQty = ProductTrace::where('batch_number', '=', $data['batch_number'])->where('deleted_at', '=', null)->count();
     $qty = null;
     if(isset($data['isEdit'])){
-      $qty = ((int)$currQty - (int)$data['qty']);
+      $qty = ((int)$data['qty'] - (int)$currQty);
       for ($i=0; $i < $qty; $i++) {
         $data['code'] = $this->generateCode();
         $data['status'] = 'inactive';
