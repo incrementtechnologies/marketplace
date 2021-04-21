@@ -662,7 +662,7 @@ class ProductTraceController extends APIController
   }
 
   public function getProductQtyByStatus($column ,$value, $status){
-    $result = ProductTrace::where($column, '=', $value)->groupBy('status')->count();
+    $result = ProductTrace::where($column, '=', $value)->count();
     return $result;
   }
 }
