@@ -133,6 +133,7 @@ Route::post($route.'retrieve_by_params_end_user', $controller."retrieveByParamsE
 Route::post($route.'retrieve_by_bundled', $controller."retrieveByBundled");
 Route::post($route.'retrieve_with_transfer', $controller."retrieveWithTransfer");
 Route::post($route.'update', $controller."update");
+Route::post($route.'update_trace', $controller."updateTrace");
 Route::post($route.'delete', $controller."delete");
 Route::get($route.'test', $controller."test");
 
