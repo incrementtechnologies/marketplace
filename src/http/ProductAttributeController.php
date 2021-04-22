@@ -133,7 +133,7 @@ class ProductAttributeController extends APIController
         }
       }else{
         $unit = $this->convertUnits($payloadValue);
-        return $payload.' '.$unit;
+        return $payloadValue.' '.$unit;
       }
     }
 }
