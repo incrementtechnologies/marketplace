@@ -132,7 +132,6 @@ class ProductTraceController extends APIController
       array_push($whereArray, array('product_id', '=', $product['id']));
     }
     $this->response['data'] = ProductTrace::where($whereArray)->groupBy('batch_number')->orderBy(array_keys($data['sort'])[0], $data['sort'][array_keys($data['sort'])[0]])->get();
-    // dd($product['id']);
     $i = 0;
     $response = array();
     unset($product['details']);
@@ -147,11 +146,7 @@ class ProductTraceController extends APIController
       $this->response['data'][$i]['total_qty'] = $qty['total_qty'];
       $this->response['data'][$i]['active_qty'] = $qty['active_qty'];
       $this->response['data'][$i]['created_at_human'] = Carbon::createFromFormat('Y-m-d H:i:s', $item['created_at'])->copy()->tz($this->response['timezone'])->format('F j, Y h:i A');
-      // $bundled = BundledProduct::where('product_trace', '=', $item['id'])->where('deleted_at', '=', null)->get();
-      // $transferred = TransferredProduct::where('payload_value', '=', $item['id'])->where('deleted_at', '=', null)->get();
-      // if(sizeof($bundled) <= 0 && sizeof($transferred) <= 0){
       array_push($response[1]['traces'], $this->response['data'][$i]);
-      // }
       $i++;
     }
     $this->response['data'] =  $response;
