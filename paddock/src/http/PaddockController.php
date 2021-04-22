@@ -143,10 +143,10 @@ class PaddockController extends APIController
       $this->response['data'][$i]['start_date'] = null;
       $this->response['data'][$i]['end_date'] = null;
       $this->response['data'][$i]['crop_name'] = null;
-      $this->response['data'][$i]['area'] = (int)$this->response['data'][$i]['area'];
-      $this->response['data'][$i]['arable_area'] = (int)$this->response['data'][$i]['arable_area'];
+      $this->response['data'][$i]['area'] = $this->numberConvention($this->response['data'][$i]['area']);
+      $this->response['data'][$i]['arable_area'] = $this->numberConvention($this->response['data'][$i]['arable_area']);
       $this->response['data'][$i]['units'] = 'Ha';
-      $this->response['data'][$i]['spray_area'] = (int)$this->response['data'][$i]['spray_area'];
+      $this->response['data'][$i]['spray_area'] = $this->numberConvention($this->response['data'][$i]['spray_area']);
       $paddockPlan = PaddockPlan::select()->where("paddock_id", "=", (int)$data['condition'][0]['value'])->orderBy('start_date','desc')->limit(1)->get();
       if(sizeof($paddockPlan) > 0){
         $this->response['data'][$i]['started'] = $paddockPlan[0]['start_date'];
