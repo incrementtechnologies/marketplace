@@ -492,7 +492,7 @@ class TransferController extends APIController
           $j++;
         }
         $string = $attributes[0]['unit'];
-        $this->response['data'][$i]['volume'] = app($this->productAttrClass)->convertVariation($string, $attributes[0]['payload_value']);
+        $this->response['data'][$i]['volume'] = app($this->productAttrClass)->convertVariation($attributes[0]['payload'], $attributes[0]['payload_value']);
         $this->response['data'][$i]['merchant'] = array('name' => $merchant);
         $this->response['data'][$i]['type'] = $products[$i]->type;
         $this->response['data'][$i]['title'] = $products[$i]->title;
@@ -575,7 +575,7 @@ class TransferController extends APIController
           $j++;
         }
         $string = $attributes[0]['unit'];
-        $products[$i]['volume'] = app($this->productAttrClass)->convertVariation($string, $attributes[0]['payload_value']);
+        $products[$i]['volume'] = app($this->productAttrClass)->convertVariation($attributes[0]['payload'], $attributes[0]['payload_value']);
         $products[$i]['merchant'] = array('name' => $merchant);
         $products[$i]['type'] = $productData['type'];
         $products[$i]['title'] =$productData['title'];
