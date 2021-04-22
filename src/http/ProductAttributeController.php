@@ -27,7 +27,7 @@ class ProductAttributeController extends APIController
         $i = 0;
         foreach ($result as $key) {
           $unit = $this->convertUnits($result[$i]['payload']);
-          $result[$i]['volume'] = $result[$i]['payload_value'].' '.$unit;
+          $result[$i]['volume'] = $this->convertVariation($result[$i]['payload'], $result[$i]['payload_value']);
         }
       }
       return (sizeof($result) > 0) ? $result[0]->volume : null;
@@ -92,5 +92,37 @@ class ProductAttributeController extends APIController
         }
       }
       return $result;
+    }
+
+    public function convertVariation($payload, $payloadValue){
+      if((float)$payloadValue % 10000 == 0){
+        $result = null;
+        switch($payload){
+          case 'Liters (L)': 
+            $result = (float)$payloadValue/1000;
+            return $result.' m3';
+          case 'Litres (L)': 
+            $result = (float)$payloadValue/1000;
+            return $result.' m3';
+          case 'Milliliters (ml)': 
+            $result = (float)$payloadValue/1000;
+            return $result.' L';
+          case 'Millilitres (ml)': 
+            $result = (float)$payloadValue/1000;
+            return $result.' L';
+          case 'Kilograms (kg)': 
+            $result = (float)$payloadValue/1000;
+            return $result.' tonne';
+          case 'Grams (g)': 
+            $result = (float)$payloadValue/1000;
+            return $result.' kg';
+          case 'Milligrams (mg)': 
+            $result = (float)$payloadValue/1000;
+            return $result.' mg';
+        }
+      }else{
+        $unit = $this->convertUnits($payloadValue);
+        return $payload.' '.$unit;
+      }
     }
 }
