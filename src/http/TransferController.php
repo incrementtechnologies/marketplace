@@ -104,9 +104,9 @@ class TransferController extends APIController
     }
 
     public function retrieve(Request $request){
-      $data = $request->all();
+    $data = $request->all();
       $data['offset'] = isset($data['offset']) ? $data['offset'] : 0;
-      $data['limit'] = isset($data['offset']) ? $data['limit'] : 5;
+      $data['limit'] = isset($data['limit']) ? $data['limit'] : 5;
       $size = null;
       $result = array();
       if($data['column'] == 'created_at'){
