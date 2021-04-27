@@ -106,7 +106,7 @@ class BundledSettingController extends APIController
   }
 
   public function getStatusByProductTrace($bundled, $bundledTrace){
-    $result = BundledSetting::where('bundled', '=', $bundled)->get();
+    $result = BundledSetting::where('bundled', '=', $bundled)->where('deleted_at', '=', null)->get();
     $status = 1;
     if(sizeof($result) > 0){
       $i = 0;
@@ -126,7 +126,7 @@ class BundledSettingController extends APIController
 
   public function getByParams($column, $value, $merchantId){
     $this->localization();
-    $result = BundledSetting::where($column, '=', $value)->get();
+    $result = BundledSetting::where($column, '=', $value)->where('deleted_at', '=', null)->get();
     if(sizeof($result) > 0){
       $i = 0;
       foreach ($result as $key) {
@@ -143,7 +143,7 @@ class BundledSettingController extends APIController
   }
 
   public function getByParamsDetails($column, $value){
-    $result = BundledSetting::where($column, '=', $value)->get();
+    $result = BundledSetting::where($column, '=', $value)->where('deleted_at', '=', null)->get();
     return sizeof($result) > 0 ? $result : null;
   }
 }

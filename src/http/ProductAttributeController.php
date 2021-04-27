@@ -12,17 +12,17 @@ class ProductAttributeController extends APIController
     }
 
     public function getAttribute($id, $payload){
-      $result = ProductAttribute::where('product_id', '=', $id)->where('payload', '=', $payload)->get();
+      $result = ProductAttribute::where('product_id', '=', $id)->where('payload', '=', $payload)->where('deleted_at', '=', null)->get();
       return (sizeof($result) > 0) ? $result : null;
     }
 
     public function getProductUnit($id){
-      $result = ProductAttribute::where('product_id', '=', $id)->select('id', 'payload', 'payload_value')->get();
+      $result = ProductAttribute::where('product_id', '=', $id)->where('deleted_at', '=', null)->select('id', 'payload', 'payload_value')->get();
       return (sizeof($result) > 0) ? $result : null;
     }
 
     public function getProductUnits($column, $id){
-      $result = ProductAttribute::where($column, '=', $id)->select('id', 'payload', 'payload_value')->get();
+      $result = ProductAttribute::where($column, '=', $id)->where('deleted_at', '=', null)->select('id', 'payload', 'payload_value')->get();
       if(sizeof($result) > 0){
         $i = 0;
         foreach ($result as $key) {
@@ -34,7 +34,7 @@ class ProductAttributeController extends APIController
     }
 
     public function getAttributeByParams($column, $id){
-      $result = ProductAttribute::where($column, '=', $id)->select('id', 'payload', 'payload_value')->get();
+      $result = ProductAttribute::where($column, '=', $id)->where('deleted_at', '=', null)->select('id', 'payload', 'payload_value')->get();
       if(sizeof($result) > 0){
         $i = 0;
         foreach ($result as $key) {
@@ -57,12 +57,12 @@ class ProductAttributeController extends APIController
     }
 
     public function getProductUnitsByColumns($id){
-      $result = ProductAttribute::where('product_id', '=', $id)->select('id', 'payload', 'payload_value')->get();
+      $result = ProductAttribute::where('product_id', '=', $id)->where('deleted_at', '=', null)->select('id', 'payload', 'payload_value')->get();
       return (sizeof($result) > 0) ? $result[0] : null;
     }
 
     public function getByParams($column, $value){
-      $result = ProductAttribute::where($column, '=', $value)->where('deleted_at', '=', null)->orderBy('created_at', 'desc')->select(['id', 'payload', 'payload_value'])->get();
+      $result = ProductAttribute::where($column, '=', $value)->where('deleted_at', '=', null)->where('deleted_at', '=', null)->orderBy('created_at', 'desc')->select(['id', 'payload', 'payload_value'])->get();
       if(sizeof($result) > 0){
         $i = 0;
         foreach ($result as $key) {
