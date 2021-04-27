@@ -566,17 +566,18 @@ class TransferController extends APIController
 
         $qty = 0;
         $j = 0;
-        foreach ($attributes as $attributeKey) {
-          $productAttributeId = $attributes[$j]['id'];
-          $volume = floatval($attributes[$j]['payload_value']);
-          $totalProductTraces = app($this->transferredProductsClass)->getActiveProductQtyInAttribute($productId, $productAttributeId, $data['merchant_id']);
-          $totalConsumed = app('Increment\Marketplace\Paddock\Http\BatchProductController')->getTotalAppliedRateByParamsByAttribute($productId, $productAttributeId, $data['merchant_id']);
-          $totalConsumedInTraces = floatval($totalConsumed / $volume);
-          $qty += $totalProductTraces - $totalConsumedInTraces;
-          $j++;
-        }
-        $string = $attributes[0]['unit'];
-        $products[$i]['volume'] = app($this->productAttrClass)->convertVariation($attributes[0]['payload'], $attributes[0]['payload_value']);
+        if(sizeof($attributes) > 0){
+          foreach ($attributes as $attributeKey) {
+            $productAttributeId = $attributes[$j]['id'];
+            $volume = floatval($attributes[$j]['payload_value']);
+            $totalProductTraces = app($this->transferredProductsClass)->getActiveProductQtyInAttribute($productId, $productAttributeId, $data['merchant_id']);
+            $totalConsumed = app('Increment\Marketplace\Paddock\Http\BatchProductController')->getTotalAppliedRateByParamsByAttribute($productId, $productAttributeId, $data['merchant_id']);
+            $totalConsumedInTraces = floatval($totalConsumed / $volume);
+            $qty += $totalProductTraces - $totalConsumedInTraces;
+            $j++;
+          }
+        };
+        $products[$i]['volume'] = sizeof($attributes) > 0 ? app($this->productAttrClass)->convertVariation($attributes[0]['payload'], $attributes[0]['payload_value']) : null;
         $products[$i]['merchant'] = array('name' => $merchant);
         $products[$i]['type'] = $productData['type'];
         $products[$i]['title'] =$productData['title'];
