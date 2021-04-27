@@ -493,8 +493,7 @@ class TransferController extends APIController
             $j++;
           }
         }
-        $string = $attributes[0]['unit'];
-        $this->response['data'][$i]['volume'] = app($this->productAttrClass)->convertVariation($attributes[0]['payload'], $attributes[0]['payload_value']);
+        $this->response['data'][$i]['volume'] = sizeof($attributes) > 0 ? app($this->productAttrClass)->convertVariation($attributes[0]['payload'], $attributes[0]['payload_value']) : null;
         $this->response['data'][$i]['merchant'] = array('name' => $merchant);
         $this->response['data'][$i]['type'] = $products[$i]->type;
         $this->response['data'][$i]['title'] = $products[$i]->title;
