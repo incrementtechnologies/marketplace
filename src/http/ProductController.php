@@ -389,7 +389,7 @@ class ProductController extends APIController
       $bundledData = app($this->bundledSettingController)->getByParamsDetails($column, $value);
       if($bundledData !== null){
         $product = Product::where('id', '=', $bundledData[0]['product_id'])->get($return);
-
+        $product[0]['volume'] = app($this->productAttrController)->getProductUnits('id', $bundledData[0]['product_attribute_id']);
         return $product;
       }
     }
@@ -431,15 +431,17 @@ class ProductController extends APIController
         $i = 0;
         foreach ($result as $key) {
           $merchantId = app($this->merchantController)->getColumnByParams('account_id', $accountId, 'id');
-          $parentProduct = $this->retrieveProductByBundledSetting('bundled', $result[$i]['id'], ['title', 'id as product_id']);
-          // dd($parentProduct[0]);
           // $result[$i]['account'] = $this->retrieveAccountDetails($result[$i]['account_id']);
           // $result[$i]['price'] = app($this->productPricingController)->getPrice($result[$i]['id']);
           // $result[$i]['variation'] = [];
           // $result[$i]['bundled'] = [];
           // app($this->productAttrController)->getByParamsWithMerchant('product_id', $result[$i]['id'], $merchantId)
           // app($this->bundledSettingController)->getByParams('product_id', $result[$i]['id'],  $merchantId)
-          $result[$i]['parent_product'] = $parentProduct[0]['title'];
+          if($result[$i]['type'] == 'bundled'){
+            $parentProduct = $this->retrieveProductByBundledSetting('bundled', $result[$i]['id'], ['title', 'id as product_id']);
+            $result[$i]['parent_product'] = $parentProduct[0]['title'];
+            $result[$i]['volume'] = $parentProduct[0]['volume'];
+          }
           $result[$i]['featured'] = app($this->productImageController)->getProductImage($result[$i]['type'] == 'bundled' ? $parentProduct[0]['product_id'] : $result[$i]['id'], 'featured');
           $result[$i]['images'] = app($this->productImageController)->getProductImage($result[$i]['type'] == 'bundled' ? $parentProduct[0]['product_id'] : $result[$i]['id'], null);
           $result[$i]['tag_array'] = $this->manageTags($result[$i]['tags']);
