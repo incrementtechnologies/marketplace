@@ -603,79 +603,6 @@ class TransferController extends APIController
     $data['offset'] = isset($data['offset']) ? $data['offset'] : 0;
     $data['limit'] = isset($data['offset']) ? $data['limit'] : 5;
     if($productType == 'all'){
-      if(isset($data['tags'])){
-        if($data['tags'] != 'other'){
-          $result = DB::table('products as T1')
-          ->leftJoin('product_attributes as T2', 'T2.product_id', '=', 'T1.id')
-          ->leftJoin('merchants as T6', 'T1.merchant_id', '=', 'T6.id')
-          ->leftJoin('transferred_products as T3', 'T3.product_attribute_id', '=', 'T2.id')
-          ->leftJoin('product_traces as T4', 'T3.payload_value', '=', 'T4.id')
-          ->leftJoin('transfers as T5', 'T3.transfer_id', '=', 'T5.id')
-          ->where('T5.to', '=', $data['merchant_id'])
-          ->where('T3.status', '=', 'active')
-          ->where($con['column'], 'like', $con['value'])
-          ->whereNull('T3.deleted_at')
-          ->skip($data['offset'])->take($data['limit'])
-          ->orderBy($con['column'], $data['sort'][$con['column']])
-          ->select('*', 'T4.id as productTraceId', 'T1.code as product_code', 'T5.from')
-          ->groupBy('T3.product_id')
-          ->get();
-
-          $size = DB::table('products as T1')
-          ->leftJoin('product_attributes as T2', 'T2.product_id', '=', 'T1.id')
-          ->leftJoin('merchants as T6', 'T1.merchant_id', '=', 'T6.id')
-          ->leftJoin('transferred_products as T3', 'T3.product_attribute_id', '=', 'T2.id')
-          ->leftJoin('product_traces as T4', 'T3.payload_value', '=', 'T4.id')
-          ->leftJoin('transfers as T5', 'T3.transfer_id', '=', 'T5.id')
-          ->where('T5.to', '=', $data['merchant_id'])
-          ->where('T3.status', '=', 'active')
-          ->where($con['column'], 'like', $con['value'])
-          ->whereNull('T3.deleted_at')
-          ->orderBy($con['column'], $data['sort'][$con['column']])
-          ->select('*', 'T4.id as productTraceId', 'T1.code as product_code', 'T5.from')
-          ->groupBy('T3.product_id')
-          ->count();
-        }else{
-          $result = DB::table('products as T1')
-          ->leftJoin('product_attributes as T2', 'T2.product_id', '=', 'T1.id')
-          ->leftJoin('merchants as T6', 'T1.merchant_id', '=', 'T6.id')
-          ->leftJoin('transferred_products as T3', 'T3.product_attribute_id', '=', 'T2.id')
-          ->leftJoin('product_traces as T4', 'T3.payload_value', '=', 'T4.id')
-          ->leftJoin('transfers as T5', 'T3.transfer_id', '=', 'T5.id')
-          ->where('T5.to', '=', $data['merchant_id'])
-          ->where('T3.status', '=', 'active')
-          ->where(function($query){
-            $query->where('T1.tags', 'not like', 'herbicide')
-                  ->Where('T1.tags', 'not like', 'fungicide')
-                  ->Where('T1.tags', 'not like', 'insecticide');
-          })
-          ->whereNull('T3.deleted_at')
-          ->skip($data['offset'])->take($data['limit'])
-          ->orderBy($con['column'], $data['sort'][$con['column']])
-          ->select('*', 'T4.id as productTraceId', 'T1.code as product_code', 'T5.from')
-          ->groupBy('T3.product_id')
-          ->get();
-
-          $size = DB::table('products as T1')
-            ->leftJoin('product_attributes as T2', 'T2.product_id', '=', 'T1.id')
-            ->leftJoin('merchants as T6', 'T1.merchant_id', '=', 'T6.id')
-            ->leftJoin('transferred_products as T3', 'T3.product_attribute_id', '=', 'T2.id')
-            ->leftJoin('product_traces as T4', 'T3.payload_value', '=', 'T4.id')
-            ->leftJoin('transfers as T5', 'T3.transfer_id', '=', 'T5.id')
-            ->where('T5.to', '=', $data['merchant_id'])
-            ->where('T3.status', '=', 'active')
-            ->where(function($query){
-              $query->where('T1.tags', 'not like', 'herbicide')
-                    ->Where('T1.tags', 'not like', 'fungicide')
-                    ->Where('T1.tags', 'not like', 'insecticide');
-            })
-            ->whereNull('T3.deleted_at')
-            ->orderBy($con['column'], $data['sort'][$con['column']])
-            ->select('*', 'T4.id as productTraceId', 'T1.code as product_code', 'T5.from')
-            ->groupBy('T3.product_id')
-            ->count();
-        }
-      }else{
         $result = DB::table('products as T1')
           ->leftJoin('product_attributes as T2', 'T2.product_id', '=', 'T1.id')
           ->leftJoin('merchants as T6', 'T1.merchant_id', '=', 'T6.id')
@@ -683,11 +610,11 @@ class TransferController extends APIController
           ->leftJoin('product_traces as T4', 'T3.payload_value', '=', 'T4.id')
           ->leftJoin('transfers as T5', 'T3.transfer_id', '=', 'T5.id')
           ->where('T5.to', '=', $data['merchant_id'])
-          ->where('T3.status', '=', 'active')
+          // ->where('T3.status', '=', 'active')
           ->whereNull('T3.deleted_at')
           ->skip($data['offset'])->take($data['limit'])
           ->orderBy($con['column'], $data['sort'][$con['column']])
-          ->select('*', 'T4.id as productTraceId', 'T1.code as product_code', 'T5.from')
+          ->select('*', 'T4.id as productTraceId', 'T1.code as product_code', 'T5.from', 'T2.id as product_attribute_id')
           ->groupBy('T3.product_id')
           ->get();
 
@@ -698,46 +625,9 @@ class TransferController extends APIController
           ->leftJoin('product_traces as T4', 'T3.payload_value', '=', 'T4.id')
           ->leftJoin('transfers as T5', 'T3.transfer_id', '=', 'T5.id')
           ->where('T5.to', '=', $data['merchant_id'])
-          ->where('T3.status', '=', 'active')
+          // ->where('T3.status', '=', 'active')
           ->whereNull('T3.deleted_at')
           ->orderBy($con['column'], $data['sort'][$con['column']])
-          ->select('*', 'T4.id as productTraceId', 'T1.code as product_code', 'T5.from')
-          ->groupBy('T3.product_id')
-          ->count();
-      }
-    }
-    else{
-       $result = DB::table('products as T1')
-        ->leftJoin('product_attributes as T2', 'T2.product_id', '=', 'T1.id')
-        ->leftJoin('merchants as T6', 'T1.merchant_id', '=', 'T6.id')
-        ->leftJoin('transferred_products as T3', 'T3.product_attribute_id', '=', 'T2.id')
-        ->leftJoin('product_traces as T4', 'T3.payload_value', '=', 'T4.id')
-        ->leftJoin('transfers as T5', 'T3.transfer_id', '=', 'T5.id')
-        ->where('T5.to', '=', $data['merchant_id'])
-        ->where('T3.status', '=', 'active')
-        ->where($con['column'], 'like', $con['value'])
-        ->where('T1.type', '=', $productType)
-        ->whereNull('T3.deleted_at')
-        ->skip($data['offset'])->take($data['limit'])
-        ->orderBy($con['column'], $data['sort'][$con['column']])
-        ->groupBy('T3.product_id')
-        ->select('*', 'T4.id as productTraceId', 'T1.code as product_code', 'T5.from')
-        ->groupBy('T3.product_id')
-        ->get();
-        $size = DB::table('products as T1')
-          ->leftJoin('product_attributes as T2', 'T2.product_id', '=', 'T1.id')
-          ->leftJoin('merchants as T6', 'T1.merchant_id', '=', 'T6.id')
-          ->leftJoin('transferred_products as T3', 'T3.product_attribute_id', '=', 'T2.id')
-          ->leftJoin('product_traces as T4', 'T3.payload_value', '=', 'T4.id')
-          ->leftJoin('transfers as T5', 'T3.transfer_id', '=', 'T5.id')
-          ->where('T5.to', '=', $data['merchant_id'])
-          ->where('T3.status', '=', 'active')
-          ->where($con['column'], 'like', $con['value'])
-          ->where('T1.type', '=', $productType)
-          ->whereNull('T3.deleted_at')
-          ->orderBy($con['column'], $data['sort'][$con['column']])
-          ->groupBy('T3.product_id')
-          ->select('*')
           ->groupBy('T3.product_id')
           ->count();
     }
@@ -758,7 +648,7 @@ class TransferController extends APIController
             'name' => $merchant);
           $temp[$i]['merchant_from'] = $merchantFrom;
           $temp[$i]['qty']   = app($this->transferredProductsClass)->getTransferredProduct($temp[$i]['product_id'], $data['merchant_id'], $temp[$i]['product_attribute_id'])->qty;
-          $temp[$i]['volume'] = app($this->productAttrClass)->getProductUnits('id', $temp[$i]['product_attribute_id']);
+          $temp[$i]['volume'] = app($this->productAttrClass)->getProductUnits('id', $key['product_attribute_id']);
           $temp[$i]['qty_in_bundled'] = $this->getBundledProducts($data['merchant_id'], $key['id']);
           $temp[$i]['type']    = $key['type'];
           $temp[$i]['details'] = json_decode($key['details'], true);
@@ -791,8 +681,8 @@ class TransferController extends APIController
       ->leftJoin('merchants as T3', 'T2.merchant_id', '=', 'T3.id')
       ->leftJoin('transfers as T4', 'T1.transfer_id', '=', 'T4.id')
       ->leftJoin('product_traces as T5', 'T1.payload_value', '=', 'T5.id')
-      ->where('T5.to', '=', $data['merchant_id'])
-      ->where('T1.status', '=', 'active')
+      ->where('T4.to', '=', $data['merchant_id'])
+      // ->where('T1.status', '=', 'active')
       ->where('T3.name', 'like', $con['value'])
       ->whereNull('T1.deleted_at')
       ->skip($data['offset'])->take($data['limit'])
@@ -806,8 +696,8 @@ class TransferController extends APIController
       ->leftJoin('merchants as T3', 'T2.merchant_id', '=', 'T3.id')
       ->leftJoin('transfers as T4', 'T1.transfer_id', '=', 'T4.id')
       ->leftJoin('product_traces as T5', 'T1.payload_value', '=', 'T5.id')
-      ->where('T5.to', '=', $data['merchant_id'])
-      ->where('T1.status', '=', 'active')
+      ->where('T4.to', '=', $data['merchant_id'])
+      // ->where('T1.status', '=', 'active')
       ->where('T3.name', 'like', $con['value'])
       ->whereNull('T1.deleted_at')
       ->skip($data['offset'])->take($data['limit'])
@@ -816,39 +706,7 @@ class TransferController extends APIController
       ->groupBy('T1.product_id')
       ->count();
 
-    }else{
-      $result = DB::table('transferred_products as T1')
-      ->leftJoin('products as T2', 'T2.id', '=', 'T1.product_id')
-      ->leftJoin('merchants as T3', 'T2.merchant_id', '=', 'T3.id')
-      ->leftJoin('transfers as T4', 'T1.transfer_id', '=', 'T4.id')
-      ->leftJoin('product_traces as T5', 'T1.payload_value', '=', 'T5.id')
-      ->where('T5.to', '=', $data['merchant_id'])
-      ->where('T1.status', '=', 'active')
-      ->where('T3.name', 'like', $con['value'])
-      ->where('T2.type', '=', $productType)
-      ->whereNull('T1.deleted_at')
-      ->skip($data['offset'])->take($data['limit'])
-      ->orderBy($con['column'], $data['sort'][$con['column']])
-      ->select('*', 'T2.title', 'T2.code', 'T4.from')
-      ->groupBy('T1.product_id')
-      ->get();
-
-      $size = DB::table('transferred_products as T1')
-      ->leftJoin('products as T2', 'T2.id', '=', 'T1.product_id')
-      ->leftJoin('merchants as T3', 'T2.merchant_id', '=', 'T3.id')
-      ->leftJoin('transfers as T4', 'T1.transfer_id', '=', 'T4.id')
-      ->leftJoin('product_traces as T5', 'T1.payload_value', '=', 'T5.id')
-      ->where('T5.to', '=', $data['merchant_id'])
-      ->where('T1.status', '=', 'active')
-      ->where('T3.name', 'like', $con['value'])
-      ->where('T2.type', '=', $productType)
-      ->whereNull('T1.deleted_at')
-      ->orderBy($con['column'], $data['sort'][$con['column']])
-      ->select('*', 'T2.title', 'T2.code', 'T4.from')
-      ->groupBy('T1.product_id')
-      ->count();
     }
-
     $testArray = array();
     if(sizeof($result) > 0){  
       $temp =  json_decode(json_encode($result), true);
@@ -866,8 +724,9 @@ class TransferController extends APIController
           $temp[$i]['merchant']  = array(
             'name' => $merchant);
           $temp[$i]['merchant_from'] = $merchantFrom;
-          $temp[$i]['qty']  = app($this->transferredProductsClass)->getTransferredProduct($temp[$i]['product_id'], $data['merchant_id'])->qty;
+          $temp[$i]['qty']  = app($this->transferredProductsClass)->getTransferredProduct($temp[$i]['product_id'], $data['merchant_id'], $temp[$i]['product_attribute_id'])->qty;
           $temp[$i]['qty_in_bundled'] = $this->getBundledProducts($data['merchant_id'], $key['id']);
+          $temp[$i]['volume'] = app($this->productAttrClass)->getProductUnits('id', $key['product_attribute_id']);
           $temp[$i]['type']    = $key['type'];
           $temp[$i]['details'] = $this->retrieveProductDetailsByParams('id', $key['product_id']);
           
