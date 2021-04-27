@@ -72,7 +72,7 @@ class ProductAttributeController extends APIController
           $i++;
         }
       }
-      return (sizeof($result) > 0) ? $result : null;
+      return (sizeof($result) > 0) ? $result : [];
     }
 
     public function getByParamsWithMerchant($column, $value, $merchantId){
