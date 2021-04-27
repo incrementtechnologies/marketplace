@@ -440,10 +440,10 @@ class ProductController extends APIController
           // app($this->productAttrController)->getByParamsWithMerchant('product_id', $result[$i]['id'], $merchantId)
           // app($this->bundledSettingController)->getByParams('product_id', $result[$i]['id'],  $merchantId)
           $result[$i]['parent_product'] = $parentProduct[0]['title'];
-          $result[$i]['featured'] = app($this->productImageController)->getProductImage($result[$i]['type'] == 'bunded' ? $parentProduct[0]['product_id'] : $result[$i]['id'], 'featured');
-          $result[$i]['images'] = app($this->productImageController)->getProductImage($result[$i]['type'] == 'bunded' ? $parentProduct[0]['product_id'] : $result[$i]['id'], null);
+          $result[$i]['featured'] = app($this->productImageController)->getProductImage($result[$i]['type'] == 'bundled' ? $parentProduct[0]['product_id'] : $result[$i]['id'], 'featured');
+          $result[$i]['images'] = app($this->productImageController)->getProductImage($result[$i]['type'] == 'bundled' ? $parentProduct[0]['product_id'] : $result[$i]['id'], null);
           $result[$i]['tag_array'] = $this->manageTags($result[$i]['tags']);
-          $result[$i]['details'] = $this->retrieveProductDetailsByParams('id', $result[$i]['type'] == 'bunded' ? $parentProduct[0]['product_id'] : $result[$i]['id']);
+          $result[$i]['details'] = $this->retrieveProductDetailsByParams('id', $result[$i]['type'] == 'bundled' ? $parentProduct[0]['product_id'] : $result[$i]['id']);
           $result[$i]['created_at_human'] = Carbon::createFromFormat('Y-m-d H:i:s', $result[$i]['created_at'])->copy()->tz($this->response['timezone'])->format('F j, Y H:i A');
           // $result[$i]['bundled_products'] = app($this->bundledProductController)->getByParams('product_id', $result[$i]['id']);
           // $result[$i]['bundled_settings'] = app($this->bundledSettingController)->getByParams('bundled', $result[$i]['id']);
