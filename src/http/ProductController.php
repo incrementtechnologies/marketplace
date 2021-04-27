@@ -385,6 +385,15 @@ class ProductController extends APIController
       return sizeof($result) > 0 ? $result[0] : null;      
     }
 
+    public function retrieveProductByBundledSetting($column, $value, $return){
+      $bundledData = app($this->bundledSettingController)->getByParamsDetails($column, $value);
+      if($bundledData !== null){
+        $product = Product::where('id', '=', $bundledData[0]['product_id'])->get($return);
+
+        return $product;
+      }
+    }
+
     
     public function manageResultBasic($result, $data, $inventoryType){
       if(sizeof($result) > 0){
@@ -422,16 +431,19 @@ class ProductController extends APIController
         $i = 0;
         foreach ($result as $key) {
           $merchantId = app($this->merchantController)->getColumnByParams('account_id', $accountId, 'id');
+          $parentProduct = $this->retrieveProductByBundledSetting('bundled', $result[$i]['id'], ['title', 'id as product_id']);
+          // dd($parentProduct[0]);
           // $result[$i]['account'] = $this->retrieveAccountDetails($result[$i]['account_id']);
           // $result[$i]['price'] = app($this->productPricingController)->getPrice($result[$i]['id']);
           // $result[$i]['variation'] = [];
           // $result[$i]['bundled'] = [];
           // app($this->productAttrController)->getByParamsWithMerchant('product_id', $result[$i]['id'], $merchantId)
           // app($this->bundledSettingController)->getByParams('product_id', $result[$i]['id'],  $merchantId)
-          $result[$i]['featured'] = app($this->productImageController)->getProductImage($result[$i]['id'], 'featured');
-          $result[$i]['images'] = app($this->productImageController)->getProductImage($result[$i]['id'], null);
+          $result[$i]['parent_product'] = $parentProduct[0]['title'];
+          $result[$i]['featured'] = app($this->productImageController)->getProductImage($result[$i]['type'] == 'bunded' ? $parentProduct[0]['product_id'] : $result[$i]['id'], 'featured');
+          $result[$i]['images'] = app($this->productImageController)->getProductImage($result[$i]['type'] == 'bunded' ? $parentProduct[0]['product_id'] : $result[$i]['id'], null);
           $result[$i]['tag_array'] = $this->manageTags($result[$i]['tags']);
-          $result[$i]['details'] = $this->retrieveProductDetailsByParams('id', $result[$i]['id']);
+          $result[$i]['details'] = $this->retrieveProductDetailsByParams('id', $result[$i]['type'] == 'bunded' ? $parentProduct[0]['product_id'] : $result[$i]['id']);
           $result[$i]['created_at_human'] = Carbon::createFromFormat('Y-m-d H:i:s', $result[$i]['created_at'])->copy()->tz($this->response['timezone'])->format('F j, Y H:i A');
           // $result[$i]['bundled_products'] = app($this->bundledProductController)->getByParams('product_id', $result[$i]['id']);
           // $result[$i]['bundled_settings'] = app($this->bundledSettingController)->getByParams('bundled', $result[$i]['id']);

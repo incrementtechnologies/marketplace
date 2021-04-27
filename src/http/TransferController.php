@@ -482,14 +482,16 @@ class TransferController extends APIController
 
         $qty = 0;
         $j = 0;
-        foreach ($attributes as $attributeKey) {
-          $productAttributeId = $attributes[$j]['id'];
-          $volume = floatval($attributes[$j]['payload_value']);
-          $totalProductTraces = app($this->transferredProductsClass)->getActiveProductQtyInAttribute($productId, $productAttributeId, $data['merchant_id']);
-          $totalConsumed = app('Increment\Marketplace\Paddock\Http\BatchProductController')->getTotalAppliedRateByParamsByAttribute($productId, $productAttributeId, $data['merchant_id']);
-          $totalConsumedInTraces = floatval($totalConsumed / $volume);
-          $qty += $totalProductTraces - $totalConsumedInTraces;
-          $j++;
+        if(sizeof($attributes) > 0){
+          foreach ($attributes as $attributeKey) {
+            $productAttributeId = $attributes[$j]['id'];
+            $volume = floatval($attributes[$j]['payload_value']);
+            $totalProductTraces = app($this->transferredProductsClass)->getActiveProductQtyInAttribute($productId, $productAttributeId, $data['merchant_id']);
+            $totalConsumed = app('Increment\Marketplace\Paddock\Http\BatchProductController')->getTotalAppliedRateByParamsByAttribute($productId, $productAttributeId, $data['merchant_id']);
+            $totalConsumedInTraces = floatval($totalConsumed / $volume);
+            $qty += $totalProductTraces - $totalConsumedInTraces;
+            $j++;
+          }
         }
         $string = $attributes[0]['unit'];
         $this->response['data'][$i]['volume'] = app($this->productAttrClass)->convertVariation($attributes[0]['payload'], $attributes[0]['payload_value']);
