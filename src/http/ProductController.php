@@ -128,11 +128,11 @@ class ProductController extends APIController
       if(sizeof($data['condition']) == 3){
         $this->response['size'] = Product::where($data['condition'][0]['column'], $data['condition'][0]['clause'], $data['condition'][0]['value'])
         ->where($data['condition'][1]['column'], $data['condition'][1]['clause'], $data['condition'][1]['value'])
-        ->where($data['condition'][2]['column'], $data['condition'][2]['clause'], $data['condition'][2]['value'])->where('type', '!=', 'bundled')->count();
+        ->where($data['condition'][2]['column'], $data['condition'][2]['clause'], $data['condition'][2]['value'])->where('type', '!=', 'bundled')->where('deleted_at', '=', null)->count();
       }else if(sizeof($data['condition']) == 2){
-        $this->response['size'] = Product::where($data['condition'][0]['column'], $data['condition'][0]['clause'], $data['condition'][0]['value'])->where($data['condition'][1]['column'], $data['condition'][1]['clause'], $data['condition'][1]['value'])->where('type', '!=', 'bundled')->count();
+        $this->response['size'] = Product::where($data['condition'][0]['column'], $data['condition'][0]['clause'], $data['condition'][0]['value'])->where($data['condition'][1]['column'], $data['condition'][1]['clause'], $data['condition'][1]['value'])->where('type', '!=', 'bundled')->where('deleted_at', '=', null)->count();
       }else if(sizeof($data['condition']) == 1){
-        $this->response['size'] = Product::where($data['condition'][0]['column'], $data['condition'][0]['clause'], $data['condition'][0]['value'])->where('type', '!=', 'bundled')->count();
+        $this->response['size'] = Product::where($data['condition'][0]['column'], $data['condition'][0]['clause'], $data['condition'][0]['value'])->where('type', '!=', 'bundled')->where('deleted_at', '=', null)->count();
       }  
       return $this->response();
     }
@@ -142,18 +142,18 @@ class ProductController extends APIController
       $inventoryType = $data['inventory_type'];
       $accountId = $data['account_id'];
       $result  = Product::where($data['condition'][0]['column'], $data['condition'][0]['clause'], $data['condition'][0]['value'])
-                ->where($data['condition'][1]['column'], $data['condition'][1]['clause'], $data['condition'][1]['value'])->get();
+                ->where($data['condition'][1]['column'], $data['condition'][1]['clause'], $data['condition'][1]['value'])->where('deleted_at', '=', null)->get();
       $this->retrieveDB($data);
       $this->response['data'] = $this->manageResultBasic($result, null, $inventoryType);
 
       if(sizeof($data['condition']) == 3){
         $this->response['size'] = Product::where($data['condition'][0]['column'], $data['condition'][0]['clause'], $data['condition'][0]['value'])
         ->where($data['condition'][1]['column'], $data['condition'][1]['clause'], $data['condition'][1]['value'])
-        ->where($data['condition'][2]['column'], $data['condition'][2]['clause'], $data['condition'][2]['value'])->count();
+        ->where($data['condition'][2]['column'], $data['condition'][2]['clause'], $data['condition'][2]['value'])->where('deleted_at', '=', null)->count();
       }else if(sizeof($data['condition']) == 2){
-        $this->response['size'] = Product::where($data['condition'][0]['column'], $data['condition'][0]['clause'], $data['condition'][0]['value'])->where($data['condition'][1]['column'], $data['condition'][1]['clause'], $data['condition'][1]['value'])->count();
+        $this->response['size'] = Product::where($data['condition'][0]['column'], $data['condition'][0]['clause'], $data['condition'][0]['value'])->where($data['condition'][1]['column'], $data['condition'][1]['clause'], $data['condition'][1]['value'])->where('deleted_at', '=', null)->count();
       }else if(sizeof($data['condition']) == 1){
-        $this->response['size'] = Product::where($data['condition'][0]['column'], $data['condition'][0]['clause'], $data['condition'][0]['value'])->count();
+        $this->response['size'] = Product::where($data['condition'][0]['column'], $data['condition'][0]['clause'], $data['condition'][0]['value'])->where('deleted_at', '=', null)->count();
       }  
       return $this->response();
     }
@@ -237,42 +237,42 @@ class ProductController extends APIController
     }
 
     public function getByParams($column, $value){
-      $result = Product::where($column, '=', $value)->get();
+      $result = Product::where($column, '=', $value)->where('deleted_at', '=', null)->get();
       return sizeof($result) > 0 ? $result[0] : null;
     }
 
     public function getByParamsWithReturn($column, $value, $returns){
-      $result = Product::where($column, '=', $value)->get($returns);
+      $result = Product::where($column, '=', $value)->where('deleted_at', '=', null)->get($returns);
       return sizeof($result) > 0 ? $result[0] : null;
     }
 
     public function getByTypes($column, $value, $type){
       if($type == 'all'){
-        $result = Product::where($column, '=', $value)->get();
+        $result = Product::where($column, '=', $value)->where('deleted_at', '=', null)->get();
         return sizeof($result) > 0 ? $result[0] : null;
       }else{
-        $result = Product::where($column, '=', $value)->where('type', '=', $type)->get();
+        $result = Product::where($column, '=', $value)->where('deleted_at', '=', null)->where('type', '=', $type)->get();
         return sizeof($result) > 0 ? $result[0] : null;
       }
     }
 
     public function getCount($column, $value){
-      $result = Product::where($column, '=', $value)->count();
+      $result = Product::where($column, '=', $value)->where('deleted_at', '=', null)->count();
       return $result;
     }
 
     public function getProductColumnByParams($column, $value, $productColumn){
-      $result = Product::where($column, '=', $value)->get();
+      $result = Product::where($column, '=', $value)->where('deleted_at', '=', null)->get();
       return sizeof($result) > 0 ? $result[0][$productColumn] : null;
     }
 
     public function getProductTitleWithTags($column, $value){
-      $result = DB::table('products')->where($column, '=', $value)->select('title', 'tags', 'merchant_id', 'description')->get();
+      $result = DB::table('products')->where($column, '=', $value)->where('deleted_at', '=', null)->select('title', 'tags', 'merchant_id', 'description')->get();
       return sizeof($result) > 0 ? $result : null;
     }
 
     public function getProductByParams($column, $value, $returns){
-      $result = Product::where($column, '=', $value)->get($returns);
+      $result = Product::where($column, '=', $value)->where('deleted_at', '=', null)->get($returns);
       if(sizeof($result) > 0){
         $i= 0;
         foreach ($result as $key) {
@@ -289,6 +289,7 @@ class ProductController extends APIController
       $temp = DB::table('products as T1')
               ->leftJoin('product_attributes as T2', 'T2.product_id', '=', 'T1.id')
               ->where($column, '=', $value)
+              ->where('T1.deleted_at', '=', null)
               ->where('T2.id', '=', $attrId)->get(['T1.id', 'T1.title', 'T1.merchant_id']);
       if(sizeof($temp) > 0){
         $i= 0;
@@ -304,7 +305,7 @@ class ProductController extends APIController
     }
 
     public function getProductByParamsWithVariationId($column, $value, $attrId){
-      $result = Product::where($column, '=', $value)->get();
+      $result = Product::where($column, '=', $value)->where('deleted_at', '=', null)->get();
       if(sizeof($result) > 0){
         $i= 0;
         foreach ($result as $key) {
@@ -317,7 +318,7 @@ class ProductController extends APIController
     }
 
     public function getProductByParamsEndUser($column, $value){
-      $result = Product::where($column, '=', $value)->get();
+      $result = Product::where($column, '=', $value)->where('deleted_at', '=', null)->get();
       if(sizeof($result) > 0){
         $i= 0;
         foreach ($result as $key) {
@@ -332,7 +333,7 @@ class ProductController extends APIController
 
 
     public function getProductByParamsConsignments($column, $value){
-      $result = Product::where($column, '=', $value)->get(['id', 'code', 'type', 'title', 'merchant_id']);
+      $result = Product::where($column, '=', $value)->where('deleted_at', '=', null)->get(['id', 'code', 'type', 'title', 'merchant_id']);
       if(sizeof($result) > 0){
         $i= 0;
         foreach ($result as $key) {
@@ -347,7 +348,7 @@ class ProductController extends APIController
 
 
     public function getProductByParamsOrderDetails($column, $value){
-      $result = Product::where($column, '=', $value)->get(['id', 'code', 'type', 'title', 'merchant_id']);
+      $result = Product::where($column, '=', $value)->where('deleted_at', '=', null)->get(['id', 'code', 'type', 'title', 'merchant_id']);
       if(sizeof($result) > 0){
         $i= 0;
         foreach ($result as $key) {
@@ -360,7 +361,7 @@ class ProductController extends APIController
     }
 
     public function getProductName($column, $value){
-      $result = Product::where($column, '=', $value)->get(['id', 'code', 'type', 'title', 'merchant_id']);
+      $result = Product::where($column, '=', $value)->where('deleted_at', '=', null)->get(['id', 'code', 'type', 'title', 'merchant_id']);
       if(sizeof($result) > 0){
         $i= 0;
         foreach ($result as $key) {
@@ -374,7 +375,7 @@ class ProductController extends APIController
 
 
     public function getProductByVariations($column, $value){
-      $result = Product::where($column, '=', $value)->get(['id', 'code', 'type', 'title', 'merchant_id']);
+      $result = Product::where($column, '=', $value)->where('deleted_at', '=', null)->get(['id', 'code', 'type', 'title', 'merchant_id']);
       if(sizeof($result) > 0){
         $i= 0;
         foreach ($result as $key) {
