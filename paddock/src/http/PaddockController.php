@@ -66,6 +66,7 @@ class PaddockController extends APIController
               ->where('start_date', '<=', $this->date)
               ->limit(1)
               ->get();
+              // dd($paddock_data);
             for ($x = 0; $x < count($paddock_data); $x++){
               $paddock_plan_tasks = PaddockPlanTask::select()->where("paddock_plan_id", "=", $paddock_data[$x]['id'])->get();
               for ($p = 0; $p < count($paddock_plan_tasks); $p++){

@@ -33,6 +33,17 @@ class ProductAttributeController extends APIController
       return (sizeof($result) > 0) ? $result[0]->volume : null;
     }
 
+    public function getAttributeByParams($column, $id){
+      $result = ProductAttribute::where($column, '=', $id)->select('id', 'payload', 'payload_value')->get();
+      if(sizeof($result) > 0){
+        $i = 0;
+        foreach ($result as $key) {
+          $result[$i]['payload'] = $this->convertUnits($result[$i]['payload']);
+        }
+      }
+      return (sizeof($result) > 0) ? $result[0] : null;
+    }
+
     public function convertUnits($payload){
       switch($payload){
         case 'Liters (L)': return 'L';
@@ -71,7 +82,7 @@ class ProductAttributeController extends APIController
         foreach ($result as $key) {
           $result[$i]['payload_value'] = (int)$result[$i]['payload_value'];
           $productQtyPerVariation = app('Increment\Marketplace\Http\ProductTraceController')->getTotalAttributeByParams($result[$i]['id']);
-          $transferredProductQty = app('Increment\Marketplace\Http\TransferredProductController')->getRemainingProductQty($value, $merchantId, $result[$i]['id']);
+          $transferredProductQty = app('Increment\Marketplace\Http\TransferredProductController')->getTransferredProductInManufacturer($value, $result[$i]['id']);
           $result[$i]['product_trace_qty'] = $productQtyPerVariation - $transferredProductQty;
           $i++;
         }

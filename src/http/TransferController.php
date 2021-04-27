@@ -1010,43 +1010,50 @@ class TransferController extends APIController
 
   public function retrieveProductTitle(Request $request){
     $data = $request->all();
-    $result =DB::table('products as T1')
-      ->leftJoin('product_attributes as T2', 'T2.product_id', '=', 'T1.id')
-      ->leftJoin('transferred_products as T3', 'T3.product_attribute_id', '=', 'T2.id')
-      ->leftJoin('product_traces as T4', 'T3.payload_value', '=', 'T4.id')
-      ->leftJoin('transfers as T5', 'T3.transfer_id', '=', 'T5.id')
-      ->select('T1.*')
-      ->where('T5.to', '=', $data['merchant_id'])
+    $result =DB::table('transferred_products as T1')
+      ->leftJoin('products as T3', 'T3.id', '=', 'T1.product_id')
+      ->select(['T3.*', 'T1.product_attribute_id'])
+      ->where('T1.merchant_id', '=', $data['merchant_id'])
       ->where('T1.deleted_at', '=', null)
-      ->groupBy('T1.id')
       ->get();
-    // $result = $result->groupBy('product_id');
-    $data['offset'] = isset($data['offset']) ? $data['offset'] : 0;
-    $data['limit'] = isset($data['limit']) ? $data['limit'] : 5;
+    $result = $result->groupBy('id');
     $i = 1;
-    $size = $result->count();
-    $testArray = array();
-    // $this->response['data'] = $result;
-    // return $this->response();
     if(sizeof($result) > 0){
       // dd($result);
       $i = 0;
-      foreach($result as $key){
+      // print_r($result);
+      foreach($result as $key => $value){
+        // print_r($result[$i]);
+        $attributes = sizeof($value) > 0 ? $value->groupBy('product_attribute_id') : null;
+        $variation = [];
+        $product = null;
+        if($attributes){
+          foreach ($attributes as $jKey => $jValue) {
+            $productAttribute = app($this->productAttrClass)->getAttributeByParams('id', $jKey);
+            $product = sizeof($jValue) > 0 ? $jValue[0] : null;
+            if($productAttribute){
+              $variation[] = $productAttribute;
+            }
+          }
+        }else{
+          $variation = null;
+        }
         $item = array(
-          'merchant' => app($this->merchantClass)->getColumnValueByParams('id', $result[$i]->merchant_id, 'name'),
-          'description' => $result[$i]->description,
-          'title' => $result[$i]->title,
-          'tags' => $result[$i]->tags,
-          'details' => $this->retrieveProductDetailsByParams('id', $result[$i]->id),
-          'unit' => app($this->productAttrClass)->getProductUnit($result[$i]->id),
-          'id' => $result[$i]->id
+          'merchant' => $product ?  app($this->merchantClass)->getColumnValueByParams('id', $product->merchant_id, 'name') : null,
+          'description' => $product ? $product->description : null,
+          'title' => $product ? $product->title : null,
+          'tags' => $product ? $product->tags : null,
+          'details' => $product ? $this->retrieveProductDetailsByParams('id', $product->id) : null,
+          'unit' => $variation,
+          'id' => $product ? $product->id : null,
+          'variation' => $variation
         );
         $i++;
         $testArray[] = $item;
       }
     }
     $this->response['data'] = $testArray;
-    $this->response['size'] = $size;
+    // $this->response['size'] = 0;
     return $this->response();
   }
     public function retrieveTransferredItems(Request $request){
@@ -1060,16 +1067,13 @@ class TransferController extends APIController
         $array = array();
         foreach ($result as $key) {
           $trace = app($this->productTraceClass)->getByParamsDetails('id', $key['payload_value']);
-          $attributes = app($this->productAttrClass)->getByParams('id', $trace[0]['product_attribute_id']);
-          $string = $attributes[0]['payload'];
-          $temps = explode(' ', $string);
-          $final = array_pop($temps);
+          $attributes = app($this->productAttrClass)->getProductUnits('id', $trace[0]['product_attribute_id']);
 
           $item = array(
             'title'         => $trace[0]['product']['title'],
             'batch_number'  => $trace[0]['batch_number'],
             'manufacturing_date' => $trace[0]['manufacturing_date'],
-            'product_attribute' => $attributes[0]['payload_value'].''.$final
+            'product_attribute' => $attributes
           );
           $array[] = $item;
         }
