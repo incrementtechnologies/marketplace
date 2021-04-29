@@ -158,6 +158,17 @@ class TransferredProductController extends APIController
       return $result;
     }
 
+    public function functionGEtTransferredQtyDisTributor($productId, $merchantId, $productAtributeId){
+      $result = DB::table('transferred_products')
+        ->where('merchant_id', '=', $merchantId)
+        ->where('product_id', '=', $productId)
+        ->where('product_attribute_id', '=', $productAtributeId)
+        ->select(DB::Raw('count(*) as qty'))
+        ->get();
+
+      return $result[0]->qty;
+    }
+
     public function getByParamsOnly($column, $value){
       $result = TransferredProduct::where($column, '=', $value)->get();
       return sizeof($result) > 0 ? $result[0] : null;
