@@ -693,4 +693,12 @@ class ProductTraceController extends APIController
     );
     return $result;
   }
+
+  public function deleteAll(Request $request){
+    $data = $request->all();
+    $result = ProductTrace::where('batch_number', '=', $data['batch_number'])
+      ->where('status', '=', 'inactive')
+      ->update(array('deleted_at' => Carbon::now()));
+    return $this->response();
+  }
 }
