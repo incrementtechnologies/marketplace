@@ -135,6 +135,7 @@ Route::post($route.'retrieve_with_transfer', $controller."retrieveWithTransfer")
 Route::post($route.'update', $controller."update");
 Route::post($route.'update_trace', $controller."updateTrace");
 Route::post($route.'delete', $controller."delete");
+Route::post($route.'delete_all', $controller."deleteAll");
 Route::get($route.'test', $controller."test");
 
 // Transferrs
