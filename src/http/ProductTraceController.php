@@ -131,7 +131,7 @@ class ProductTraceController extends APIController
     if($product != null){
       array_push($whereArray, array('product_id', '=', $product['id']));
     }
-    $this->response['data'] = ProductTrace::where($whereArray)->groupBy('batch_number')->orderBy(array_keys($data['sort'])[0], $data['sort'][array_keys($data['sort'])[0]])->get();
+    $this->response['data'] = ProductTrace::where($whereArray)->groupBy('batch_number')->orderBy(array_keys($data['sort'])[0], $data['sort'][array_keys($data['sort'])[0]])->where('delete-at', '=', null)->get();
     $i = 0;
     $response = array();
     unset($product['details']);
@@ -162,7 +162,7 @@ class ProductTraceController extends APIController
     foreach ($this->response['data'] as $key) {
       $item = $this->response['data'][$i];
       $this->response['data'][$i]['product'] = app($this->productController)->getProductByParamsWithVariationId('id', $item['product_id'], $item['product_attribute_id']);
-      $this->response['data'][$i]['volume'] = app($this->productAttrClass)->getProductUnits('id', $item['product_attribute_id']);
+      $this->response['data'][$i]['volume'] = app($this->productAttrClass)->getProductUnits('product_id', $item['product_id']);
       $item = $this->response['data'][$i];
       
       if(isset($data['nfc']) && ($item['nfc'] == null || $item['nfc'] == '')){
