@@ -131,7 +131,7 @@ class ProductTraceController extends APIController
     if($product != null){
       array_push($whereArray, array('product_id', '=', $product['id']));
     }
-    $this->response['data'] = ProductTrace::where($whereArray)->groupBy('batch_number')->orderBy(array_keys($data['sort'])[0], $data['sort'][array_keys($data['sort'])[0]])->where('delete-at', '=', null)->get();
+    $this->response['data'] = ProductTrace::where($whereArray)->groupBy('batch_number')->orderBy(array_keys($data['sort'])[0], $data['sort'][array_keys($data['sort'])[0]])->where('deleted_at', '=', null)->get();
     $i = 0;
     $response = array();
     unset($product['details']);
