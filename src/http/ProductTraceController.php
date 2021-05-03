@@ -54,7 +54,7 @@ class ProductTraceController extends APIController
 
   public function getTotalAttributeByParams($attrID){
     $result = ProductTrace::where('product_attribute_id', '=', $attrID)->where('status', '=', 'active')->orderBy('created_at', 'desc')->count();
-
+    
     return $result;
   }
   public function getByParamsLimitOne($column, $value){

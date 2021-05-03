@@ -85,6 +85,8 @@ class ProductAttributeController extends APIController
           $result[$i]['payload_value'] = (int)$result[$i]['payload_value'];
           $productQtyPerVariation = app('Increment\Marketplace\Http\ProductTraceController')->getTotalAttributeByParams($result[$i]['id']);
           $transferredProductQty = app('Increment\Marketplace\Http\TransferredProductController')->getTransferredProductInManufacturer($value, $result[$i]['id']);
+          $result[$i]['total_active_variation'] = $productQtyPerVariation;
+          $result[$i]['total_transferred_variation'] = $transferredProductQty;
           $result[$i]['product_trace_qty'] = $productQtyPerVariation - $transferredProductQty;
           $result[$i]['is_used'] = $exist !== null ? true : false;
           $i++;
