@@ -100,6 +100,21 @@ class ProductController extends APIController
       return $this->response();
     }
 
+    public function retrieveProductPublished(Request $request){
+      $result = Product::where('merchant_id', '=', $data['merchant_id'])->where('status', '=', 'published')->where('deleted_at', '=', null)->get();
+      if(sizeof($result) > 0){
+        $i = 0;
+        foreach ($result as $value) {
+          $result[$i]['details'] = $this->retrieveProductDetailsByParams('id', $value['id']);
+          $result[$i]['variations'] = app($this->productAttrController)->getByParams('product_id', $result[$i]['id']);
+          $result[$i]['merchant'] = app($this->merchantController)->getByParams('id', $result[$i]['merchant_id']);
+        $i++;
+        }
+        $this->response['data'] = $result;
+      }
+      return $this->response();
+    }
+
     public function retrieveBasic(Request $request){
       $data = $request->all();
       $con = $data['condition'];

@@ -52,6 +52,7 @@ $controller = 'Increment\Marketplace\Http\ProductController@';
 Route::post($route.'create', $controller."create");
 Route::post($route.'retrieve', $controller."retrieve");
 Route::post($route.'retrieve_basic', $controller."retrieveBasic");
+Route::post($route.'retrieve_published_products', $controller."retrieveProductPublished");
 Route::post($route.'retrieve_bundled', $controller."retrieveBundled");
 Route::post($route.'retrieve_variation', $controller."retrieveVariation");
 Route::post($route.'retrieve_basic_mobile', $controller."retrieveBasicMobile");
