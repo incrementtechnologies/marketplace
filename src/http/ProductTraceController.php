@@ -104,7 +104,11 @@ class ProductTraceController extends APIController
 
   public function retrieveProductTraceAsInventory(Request $request){
     $data = $request->all();
-    $result = ProductTrace::where('product_attribute_id', '=', $data['product_attribute_id'])->where('batch_number', '=', $data['batch_number'])->where('deleted_at', '=', null)->get();
+    if(isset($data['status'])){
+      $result = ProductTrace::where('product_attribute_id', '=', $data['product_attribute_id'])->where('status', '=', $data['status'])->where('batch_number', '=', $data['batch_number'])->where('deleted_at', '=', null)->get();
+    }else{
+      $result = ProductTrace::where('product_attribute_id', '=', $data['product_attribute_id'])->where('batch_number', '=', $data['batch_number'])->where('deleted_at', '=', null)->get();
+    }
     if(sizeof($result) > 0){
       $i=0;
       foreach ($result as $key) {
