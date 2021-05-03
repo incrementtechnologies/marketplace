@@ -135,6 +135,7 @@ class TransferredProductController extends APIController
 
     public function getTransferredProductInManufacturer($productId, $productAtributeId){
       $result = DB::table('transferred_products as T1')
+      ->where('T1.status', '=', 'active')
       ->where('T1.deleted_at', '=', null)
       ->where('T1.product_id', '=', $productId)
       ->where('T1.product_attribute_id', '=', $productAtributeId)
