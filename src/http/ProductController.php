@@ -101,7 +101,8 @@ class ProductController extends APIController
     }
 
     public function retrieveProductPublished(Request $request){
-      $result = Product::where('merchant_id', '=', $data['merchant_id'])->where('status', '=', 'published')->where('deleted_at', '=', null)->get();
+      $data = $request->all();
+      $result = Product::where('status', '=', 'published')->where('deleted_at', '=', null)->get();
       if(sizeof($result) > 0){
         $i = 0;
         foreach ($result as $value) {
