@@ -489,9 +489,8 @@ class ProductTraceController extends APIController
       foreach ($result as $key) {
         $item = $result[$i];
         $bundled = BundledProduct::where('product_trace', '=', $item['id'])->where('deleted_at', '=', null)->get();
-
+        
         $transferred = TransferredProduct::where('payload_value', '=', $item['id'])->where('deleted_at', '=', null)->get();
-
         if(sizeof($bundled) == 0 && sizeof($transferred) == 0){
           if($merchantId == null){
             $counter++;
