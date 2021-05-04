@@ -395,7 +395,7 @@ class ProductTraceController extends APIController
       if($this->response['data'][$i]['product'] != null){
         // $this->response['data'][$i]['product']['qty'] = $this->getBalanceQty('product_id', $item['product_id']);
         $merchant = intval($item['product']['merchant_id']);
-        $qty = $this->getBalanceQtyWithInBundled('product_id', $item['product_id'], 'active', $item['product']['merchant_id'], null);
+        $qty = $this->getBalanceQtyWithInBundled('product_id', $item['product_id'], 'active', $item['product']['merchant_id'],  $item['product_attribute_id']);
         $this->response['data'][$i]['product']['qty'] = $qty['qty'];
         $this->response['data'][$i]['product']['qty_in_bundled'] = $qty['qty_in_bundled'];
         // if($data['account_type'] == 'MANUFACTURER' || $merchant == intval($data['merchant_id'])){
