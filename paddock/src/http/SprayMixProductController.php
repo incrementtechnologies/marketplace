@@ -51,6 +51,7 @@ class SprayMixProductController extends APIController
             $tempRes[$i]['application_rate'] = $applicationRate.' '.'L/ha';
             $tempRes[$i]['minimum_rate'] = $minRate.' '.'L/ha';
             $tempRes[$i]['maximum_rate'] = $maxRate.' '.'L/ha';
+            $tempRes[$i]['rate'] = $this->numberConvention($tempRes[$i]['rate']);
 
             $i++;
           }
