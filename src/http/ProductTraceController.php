@@ -313,8 +313,6 @@ class ProductTraceController extends APIController
 
   public function retrieveWithTransfer(Request $request){
     $data = $request->all();
-    $con = $data['condition'];
-    $temp = ProductTrace::where($con[0]['column'], $con[0]['clause'], $con[0]['value'])->where('account_id', '=', $data['account_id'])->get();
     $this->model = new ProductTrace();
     $this->retrieveDB($data);
     $i = 0;

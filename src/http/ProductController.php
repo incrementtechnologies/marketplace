@@ -63,6 +63,14 @@ class ProductController extends APIController
       $this->response['data'] = $this->manageResult($this->response['data'], null, $inventoryType);
       return $this->response();
     }
+    
+    // public function retrieveBundledMobile(Request $request){
+    //   $data = $request->all();
+    //   $cond = $data['condition'];
+    //   $result = Product::where($cond[0]['column'], $cond[0]['clause'], $cond[0]['value'])->where($cond[1]['column'], $cond[1]['clause'], $cond[1]['value'])->limit($data['limit'])->get();
+    //   print($result);
+    //   dd();
+    // }
 
     public function retrieveBundled(Request $request){
       $data= $request->all();
