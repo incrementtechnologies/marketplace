@@ -55,6 +55,7 @@ Route::post($route.'retrieve_basic', $controller."retrieveBasic");
 Route::post($route.'retrieve_bundled_mobile', $controller."retrieveBundledMobile");
 Route::post($route.'retrieve_published_products', $controller."retrieveProductPublished");
 Route::post($route.'retrieve_bundled', $controller."retrieveBundled");
+Route::post($route.'retrieve_bundled_agrisend', $controller."retrieveBundledAgrisend");
 Route::post($route.'retrieve_variation', $controller."retrieveVariation");
 Route::post($route.'retrieve_basic_mobile', $controller."retrieveBasicMobile");
 Route::post($route.'retrieve_mobile', $controller."retrieveMobile");
