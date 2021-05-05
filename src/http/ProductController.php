@@ -86,6 +86,20 @@ class ProductController extends APIController
       return $this->response();
     }
 
+    public function retrieveBundledAgrisend(Request $request){
+      $data= $request->all();
+      $con = $data['condition'];
+      $product = Product::where($con[0]['column'], $con[0]['clause'], $con[0]['value'])->where('deleted_at', '=', null)->get(['title', 'tags', 'id', 'description']);
+      $merchantId = app($this->merchantController)->getColumnByParams('account_id', $data['account_id'], 'id');
+      $temp = [];
+      if(sizeof($product) > 0){
+        // $tempVar = app($this->productAttrController)->getByParamsSortedCreatedAt('product_id', $product[0]['id'], $merchantId);
+        $temp = app($this->bundledSettingController)->getByParamsWithProduct('product_id', $product[0]['id'],  $merchantId);
+      }
+      $this->response['data'] = $temp;
+      return $this->response();
+    }
+
     public function retrieveVariation(Request $request){
       $data= $request->all();
       $con = $data['condition'];
@@ -288,6 +302,11 @@ class ProductController extends APIController
     public function getProductColumnByParams($column, $value, $productColumn){
       $result = Product::where($column, '=', $value)->where('deleted_at', '=', null)->get();
       return sizeof($result) > 0 ? $result[0][$productColumn] : null;
+    }
+
+    public function getProductColumnWithReturns($column, $value, $returns){
+      $result = Product::where($column, '=', $value)->where('deleted_at', '=', null)->get($returns);
+      return $result[0];
     }
 
     public function getProductTitleWithTags($column, $value){
