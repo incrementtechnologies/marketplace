@@ -158,6 +158,44 @@ class ProductTraceController extends APIController
     return $this->response();
   }
 
+  public function retrieveWithAttributeMobile(Request $request){
+    $data = $request->all();
+    $con = $data['condition'];
+    $product = app($this->productController)->getProductByParamsWithAttribute('product_id', $data['product_id'], $data['product_attribute_id']);
+    $merchant = array(
+      'name' => $product['merchant']->name,
+      'website' => $product['merchant']->website,
+    );
+    $whereArray = array(
+      array($con[0]['column'], $con[0]['clause'], $con[0]['value']),
+      array('product_attribute_id', '=', $data['product_attribute_id'])
+    );
+    if($product != null){
+      array_push($whereArray, array('product_id', '=', $product['id']));
+    }
+    $this->response['data'] = ProductTrace::where($whereArray)->groupBy('batch_number')->orderBy(array_keys($data['sort'])[0], $data['sort'][array_keys($data['sort'])[0]])->where('deleted_at', '=', null)->get();
+    $i = 0;
+    $response = array();
+    unset($product['details']);
+    unset($product['description']);
+    $product['merchant'] = $merchant;
+    $product['variation'] = app($this->productAttrClass)->getByParams('id', $data['product_attribute_id']);;
+    $response[]['product'] = $product;
+    $response[]['traces'] = [];
+    foreach ($this->response['data'] as $key) {
+      $item = $this->response['data'][$i];
+      $qty = $this->getProductQtyByStatus('batch_number' ,$item['batch_number'], 'active');
+      $this->response['data'][$i]['total_qty'] = $qty['total_qty'];
+      $this->response['data'][$i]['active_qty'] = $qty['active_qty'];
+      $this->response['data'][$i]['created_at_human'] = Carbon::createFromFormat('Y-m-d H:i:s', $item['created_at'])->copy()->tz($this->response['timezone'])->format('F j, Y h:i A');
+      array_push($response[1]['traces'], $this->response['data'][$i]);
+      $i++;
+    }
+    $this->response['data'] =  $response;
+    $this->response['datetime_human'] = Carbon::now()->copy()->tz($this->response['timezone'])->format('F j Y h i A');
+    return $this->response();
+  }
+
   public function retrieveByParams(Request $request){
     $data = $request->all();
     $this->model = new ProductTrace();

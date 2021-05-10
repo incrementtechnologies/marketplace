@@ -130,6 +130,7 @@ Route::post($route.'create', $controller."create");
 Route::post($route.'create_bundled', $controller."createBundled");
 Route::post($route.'retrieve', $controller."retrieve");
 Route::post($route.'retrieve_with_attribute', $controller."retrieveWithAttribute");
+Route::post($route.'retrieve_with_attribute_mobile', $controller."retrieveWithAttributeMobile");
 Route::post($route.'retrieve_with_traces', $controller."retrieveProductTraceAsInventory");
 Route::post($route.'retrieve_by_params', $controller."retrieveByParams");
 Route::post($route.'retrieve_by_params_end_user', $controller."retrieveByParamsEndUser");
