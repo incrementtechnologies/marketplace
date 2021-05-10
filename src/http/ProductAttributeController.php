@@ -76,7 +76,7 @@ class ProductAttributeController extends APIController
     }
 
     public function getByParamsWithMerchant($column, $value, $merchantId){
-      $result = ProductAttribute::where($column, '=', $value)->where('deleted_at', '=', null)->orderBy('payload_value', 'asc')->select(['id', 'payload', 'payload_value'])->get();
+      $result = ProductAttribute::where($column, '=', $value)->where('deleted_at', '=', null)->orderBy('payload_value', 'asc')->select(['id', 'payload', 'payload_value', 'product_id'])->get();
       $finalResult = array();
       if(sizeof($result) > 0){
         $i = 0;
