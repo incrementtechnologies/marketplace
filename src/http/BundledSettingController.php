@@ -155,6 +155,9 @@ class BundledSettingController extends APIController
         $result[$i]['qty'] = (int)$result[$i]['qty'];
         $result[$i]['scanned_qty'] = (int)$traceQty == (int)$result[$i]['qty'] ? 1 : 0;
         $result[$i]['product'] = app($this->productController)->getProductColumnWithReturns('id', $result[$i]['bundled'], ['title']);
+        $result[$i]['component_product'] = app($this->productController)->getProductColumnWithReturns('id', $result[$i]['product_id'], ['title']);
+        $result[$i]['component_qty'] = app($this->productTraceController)->getProductQtyByParams($result[$i]['product_id'], $result[$i]['product_attribute_id']);
+        $result[$i]['available_stock'] = app($this->productTraceController)->getProductQtyByParams($result[$i]['bundled'], $result[$i]['product_attribute_id']);
         $i++;
       }
     }
