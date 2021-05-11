@@ -609,7 +609,7 @@ class ProductTraceController extends APIController
       }
     }else{
       $qty = (int)$data['qty'];
-      $exist = ProductTrace::where('batch_number', '=', $data['batch_number'])->where('deleted_at', '=', null)->get();
+      $exist = ProductTrace::where('batch_number', '=', $data['batch_number'])->where('product_attribute_id', '=', $data['product_attribute_id'])->where('deleted_at', '=', null)->get();
       if(sizeof($exist) > 0){
         $this->response['error'] = 'Batch number is already existed';
       }else{
