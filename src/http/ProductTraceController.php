@@ -713,6 +713,11 @@ class ProductTraceController extends APIController
     return true;
   }
 
+  public function getTraceByParams($whereArray, $returns){
+    $result = ProductTrace::where($whereArray)->where('deleted_at', '=', null)->get($returns);
+    return sizeof($result) > 0 ? $result[0] : null;
+  }
+
   public function retrieveBatchNumber($productId){
     $result = ProductTrace::where('product_id', '=', $productId)->select('batch_number')->groupBy('batch_number')->get();
     return $result;
