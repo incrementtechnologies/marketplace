@@ -452,7 +452,9 @@ class ProductController extends APIController
           // $result[$i]['details'] = $this->retrieveProductDetailsByParams('id', $result[$i]['id']);
           $result[$i]['volume'] =  null;
           if($data){
-            $result[$i]['volume'] = app($this->productAttrController)->getProductUnits('id', $data['product_attribute_id']);
+            if(isset($data['product_attribute_id'])){
+              $result[$i]['volume'] = app($this->productAttrController)->getProductUnits('id', $data['product_attribute_id']);
+            }
           }
           if($inventoryType == 'inventory'){
             $result[$i]['inventories'] = app($this->inventoryController)->getInventory($result[$i]['id']);
