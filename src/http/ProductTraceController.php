@@ -448,6 +448,41 @@ class ProductTraceController extends APIController
     return $this->response();
   }
 
+
+  public function retrieveByBundledAgrisend(Request $request){
+    $data = $request->all();
+    $this->model = new ProductTrace();
+    $this->retrieveDB($data);
+    $i = 0;
+    foreach ($this->response['data'] as $key) {
+      $item = $this->response['data'][$i];
+      $this->response['data'][$i]['product'] = app($this->productController)->getByParams('id', $item['product_id']);
+      $item = $this->response['data'][$i];
+      $productTrace = $item['id'];
+      if($this->checkOwnProduct($item, $data['merchant_id']) == false){
+        $this->response['data'] = null;
+        $this->response['error'] = 'You don\'t own this product!';
+        return $this->response();
+      }
+      $this->response['data'][$i]['bundled_product'] = app($this->bundledProductController)->getByParams('product_trace', $item['id']);
+      if($this->response['data'][$i]['product'] != null){
+        // $this->response['data'][$i]['product']['qty'] = $this->getBalanceQty('product_id', $item['product_id']);
+        $merchant = intval($item['product']['merchant_id']);
+        $qty = $this->getBalanceQtyWithInBundled('product_id', $item['product_id'], 'active', $item['product']['merchant_id'],  $item['product_attribute_id']);
+        $this->response['data'][$i]['product']['qty'] = $qty['qty'];
+        $this->response['data'][$i]['product']['qty_in_bundled'] = $qty['qty_in_bundled'];
+        // if($data['account_type'] == 'MANUFACTURER' || $merchant == intval($data['merchant_id'])){
+        //   $this->response['data'][$i]['product']['qty'] = $this->getBalanceQty('product_id', $item['product_id'], 'active');
+        // }else{
+        //   $this->response['data'][$i]['product']['qty'] = app($this->transferController)->getQtyTransferred($data['merchant_id'], $item['product_id']);
+        // }
+      }
+      $i++;
+    }
+    
+    return $this->response();
+  }
+
   public function getByParamsDetails($column, $value){
     $result  = ProductTrace::where($column, '=', $value)->get();
     if(sizeof($result) > 0){
