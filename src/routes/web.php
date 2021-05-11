@@ -135,6 +135,7 @@ Route::post($route.'retrieve_with_traces', $controller."retrieveProductTraceAsIn
 Route::post($route.'retrieve_by_params', $controller."retrieveByParams");
 Route::post($route.'retrieve_by_params_end_user', $controller."retrieveByParamsEndUser");
 Route::post($route.'retrieve_by_bundled', $controller."retrieveByBundled");
+Route::post($route.'retrieve_by_bundled_agrisend', $controller."retrieveByBundledAgrisend");
 Route::post($route.'retrieve_with_transfer', $controller."retrieveWithTransfer");
 Route::post($route.'update', $controller."update");
 Route::post($route.'update_trace', $controller."updateTrace");
