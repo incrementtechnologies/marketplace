@@ -986,10 +986,16 @@ class TransferController extends APIController
 
   public function retrieveProductTitle(Request $request){
     $data = $request->all();
-    $result =DB::table('transferred_products as T1')
+    // $result =DB::table('transferred_products as T1')
+    //   ->leftJoin('products as T3', 'T3.id', '=', 'T1.product_id')
+    //   ->select(['T3.*', 'T1.product_attribute_id'])
+    //   ->where('T1.merchant_id', '=', $data['merchant_id'])
+    //   ->where('T1.deleted_at', '=', null)
+    //   ->get();
+    $result = DB::table('product_attributes as T1')
       ->leftJoin('products as T3', 'T3.id', '=', 'T1.product_id')
-      ->select(['T3.*', 'T1.product_attribute_id'])
-      ->where('T1.merchant_id', '=', $data['merchant_id'])
+      ->where('T3.status', '=', 'Published')
+      ->select(['T3.*', 'T1.id as product_attribute_id'])
       ->where('T1.deleted_at', '=', null)
       ->get();
     $result = $result->groupBy('id');
