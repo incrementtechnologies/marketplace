@@ -154,7 +154,7 @@ class BundledSettingController extends APIController
               array('product_id', '=', $result[$i]['product_id']),
               array('product_attribute_id', '=', $result[$i]['product_attribute_id']),
             ),
-            ['id', 'product_attribute_id', 'product_id', 'batch_number', 'manufacturing_date']
+            ['id', 'product_attribute_id', 'product_id']
         );
         // $result[$i]['product'] = app($this->productController)->getByParamsWithReturn('id', $result[$i]['product_id'], ['title', 'id', 'tags']);
         $result[$i]['parent_trace'] = $parentTrace;
