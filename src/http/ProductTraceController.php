@@ -451,8 +451,9 @@ class ProductTraceController extends APIController
 
   public function retrieveByBundledAgrisend(Request $request){
     $data = $request->all();
-    $this->model = new ProductTrace();
-    $this->retrieveDB($data);
+    $con = $data['condition'];
+    $temp = ProductTrace::where($con[0]['column'], $con[0]['clause'], $con[0]['value']);
+    $this->response['data'] = $temp;
     $i = 0;
     foreach ($this->response['data'] as $key) {
       $item = $this->response['data'][$i];
@@ -477,6 +478,7 @@ class ProductTraceController extends APIController
         //   $this->response['data'][$i]['product']['qty'] = app($this->transferController)->getQtyTransferred($data['merchant_id'], $item['product_id']);
         // }
       }
+      
       $i++;
     }
     
@@ -632,27 +634,37 @@ class ProductTraceController extends APIController
 
   public function create(Request $request){
     $data = $request->all();
-    $currQty = ProductTrace::where('batch_number', '=', $data['batch_number'])->where('deleted_at', '=', null)->count();
-    $qty = null;
-    if(isset($data['isEdit'])){
-      $qty = ((int)$data['qty'] - (int)$currQty);
+    if($data['inventory_type'] === 'bundled_trace'){
+      $qty = (int)$data['qty'];
       for ($i=0; $i < $qty; $i++) {
         $data['code'] = $this->generateCode();
-        $data['status'] = 'inactive';
+        $data['status'] = 'active';
         $this->model = new ProductTrace();
         $this->insertDB($data);
       }
     }else{
-      $qty = (int)$data['qty'];
-      $exist = ProductTrace::where('batch_number', '=', $data['batch_number'])->where('product_attribute_id', '=', $data['product_attribute_id'])->where('deleted_at', '=', null)->get();
-      if(sizeof($exist) > 0){
-        $this->response['error'] = 'Batch number is already existed';
-      }else{
+      $currQty = ProductTrace::where('batch_number', '=', $data['batch_number'])->where('deleted_at', '=', null)->count();
+      $qty = null;
+      if(isset($data['isEdit'])){
+        $qty = ((int)$data['qty'] - (int)$currQty);
         for ($i=0; $i < $qty; $i++) {
           $data['code'] = $this->generateCode();
           $data['status'] = 'inactive';
           $this->model = new ProductTrace();
           $this->insertDB($data);
+        }
+      }else{
+        $qty = (int)$data['qty'];
+        $exist = ProductTrace::where('batch_number', '=', $data['batch_number'])->where('product_attribute_id', '=', $data['product_attribute_id'])->where('deleted_at', '=', null)->get();
+        if(sizeof($exist) > 0){
+          $this->response['error'] = 'Batch number is already existed';
+        }else{
+          for ($i=0; $i < $qty; $i++) {
+            $data['code'] = $this->generateCode();
+            $data['status'] = 'inactive';
+            $this->model = new ProductTrace();
+            $this->insertDB($data);
+          }
         }
       }
     }
