@@ -451,9 +451,11 @@ class ProductTraceController extends APIController
 
   public function retrieveByBundledAgrisend(Request $request){
     $data = $request->all();
-    $con = $data['condition'];
-    $temp = ProductTrace::where($con[0]['column'], $con[0]['clause'], $con[0]['value']);
-    $this->response['data'] = $temp;
+    // $con = $data['condition'];
+    $this->model = new ProductTrace();
+    $this->retrieveDB($data);
+    // $temp = ProductTrace::where($con[0]['column'], $con[0]['clause'], $con[0]['value']);
+    // $this->response['data'] = $temp;
     $i = 0;
     foreach ($this->response['data'] as $key) {
       $item = $this->response['data'][$i];
@@ -638,6 +640,7 @@ class ProductTraceController extends APIController
       $qty = (int)$data['qty'];
       for ($i=0; $i < $qty; $i++) {
         $data['code'] = $this->generateCode();
+        $data['status'] = 'inactive';
         $data['status'] = 'active';
         $this->model = new ProductTrace();
         $this->insertDB($data);
