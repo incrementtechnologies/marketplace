@@ -660,7 +660,7 @@ class ProductTraceController extends APIController
         $qty = (int)$data['qty'];
         $exist = ProductTrace::where('batch_number', '=', $data['batch_number'])->where('product_attribute_id', '=', $data['product_attribute_id'])->where('deleted_at', '=', null)->get();
         if(sizeof($exist) > 0){
-          $this->response['error'] = 'Batch number is already existed';
+          $this->response['error'] = 'Hold on, that batch number already exists. Update the batch number, or close to edit an existing batch.';
         }else{
           for ($i=0; $i < $qty; $i++) {
             $data['code'] = $this->generateCode();
