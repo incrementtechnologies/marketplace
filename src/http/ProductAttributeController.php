@@ -34,7 +34,7 @@ class ProductAttributeController extends APIController
     }
 
     public function getAttributeByParams($column, $id){
-      $result = ProductAttribute::where($column, '=', $id)->where('deleted_at', '=', null)->select('id', 'payload', 'payload_value')->get();
+      $result = ProductAttribute::where($column, '=', $id)->where('deleted_at', '=', null)->select('id', 'payload', 'payload_value')->orderBy('payload_value', 'asc')->get();
       if(sizeof($result) > 0){
         $i = 0;
         foreach ($result as $key) {
