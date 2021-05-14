@@ -433,4 +433,11 @@ class CustomerController extends APIController
       return $code;
     }
   }
+
+  public function retrieveAccount(Request $request){
+    $data = $request->all();
+    $result = Customer::where('merchant', '=', $data['merchant'])->where('merchant_id', '=', $data['merchant_id'])->get();
+    $this->response['data'] = sizeof($result) > 0 ? true : false;
+    return $this->response();
+  }
 }
