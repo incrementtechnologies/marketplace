@@ -44,6 +44,10 @@ class ProductAttributeController extends APIController
       return (sizeof($result) > 0) ? $result[0] : null;
     }
 
+    public function cmp($a, $b) {
+      return strcmp($a->name, $b->name);
+    }
+
     public function convertUnits($payload){
       switch($payload){
         case 'Liters (L)': return 'L';
@@ -73,6 +77,33 @@ class ProductAttributeController extends APIController
         }
       }
       return (sizeof($result) > 0) ? $result : [];
+    }
+
+    public function getByParamsBasic($column, $value){
+      $result = ProductAttribute::where($column, '=', 47)->where('deleted_at', '=', null)->orderBy('payload_value', 'asc')->select(['id', 'payload', 'payload_value'])->get();
+      if(sizeof($result) > 0){
+        $i = 0;
+        foreach ($result as $key) {
+          $result[$i]['unit'] = $this->convertUnits($result[$i]['payload']);
+          $result[$i]['product_trace_qty'] = app('Increment\Marketplace\Http\ProductTraceController')->getTotalAttributeByParams($result[$i]['id']);
+
+          $i++;
+        }
+      }
+      $result = json_decode($result, true);
+      usort($result,  array($this, "sortArray"));
+      // print(json_encode($result));
+      // dd();
+      return (sizeof($result) > 0) ? $result : [];
+    }
+
+    public function sortArray($a, $b){
+        if($a['payload_value'] > $b['payload_value']){
+          return 1;
+        }else if($a['payload_value'] < $b['payload_value']){
+          return -1;
+        }
+        return 0;
     }
 
     public function getByParamsWithMerchant($column, $value, $merchantId){
