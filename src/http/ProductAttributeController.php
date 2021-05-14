@@ -80,7 +80,7 @@ class ProductAttributeController extends APIController
     }
 
     public function getByParamsBasic($column, $value){
-      $result = ProductAttribute::where($column, '=', 47)->where('deleted_at', '=', null)->orderBy('payload_value', 'asc')->select(['id', 'payload', 'payload_value'])->get();
+      $result = ProductAttribute::where($column, '=', $value)->where('deleted_at', '=', null)->orderBy('payload_value', 'asc')->select(['id', 'payload', 'payload_value'])->get();
       if(sizeof($result) > 0){
         $i = 0;
         foreach ($result as $key) {
@@ -92,8 +92,6 @@ class ProductAttributeController extends APIController
       }
       $result = json_decode($result, true);
       usort($result,  array($this, "sortArray"));
-      // print(json_encode($result));
-      // dd();
       return (sizeof($result) > 0) ? $result : [];
     }
 
