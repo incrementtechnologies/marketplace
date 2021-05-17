@@ -1137,4 +1137,9 @@ class TransferController extends APIController
         return null;
       }
     }
+
+    public function retrieveTransferredByParams($from, $to){
+      $result = Transfer::where('from', '=', $from)->where('to', '=', $to)->where('deleted_at', '=', null)->get();
+      return sizeof($result) > 0 ? true : false;
+    }
 }
