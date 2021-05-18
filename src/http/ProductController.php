@@ -40,6 +40,7 @@ class ProductController extends APIController
       $data['price_settings'] = 'fixed';
       if($data['type'] === 'bundled'){
         $existProduct = Product::where('title', '=', $data['title'])->get();
+        dd($existProduct);
         if(sizeof($existProduct) > 0){
           $this->response['data'] = [];
           $this->response['error'] = "Bundled is already existed";
