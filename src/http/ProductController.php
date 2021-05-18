@@ -40,7 +40,7 @@ class ProductController extends APIController
       $data['price_settings'] = 'fixed';
       if($data['type'] === 'bundled'){
         $traces = app($this->productTraceController)->getProductQtyByStatus('product_attribute_id', $data['product_attribute_id'], 'active');
-        $remainingTraces = ((int)$traces['total_qty'] - (int)$taces['active_qty']);
+        $remainingTraces = ((int)$traces['total_qty'] - (int)$traces['active_qty']);
         if((int)$data['qty'] > $remainingTraces){
           $this->response['data'] = [];
           $this->response['error'] = "You've reached the maximum qty in your batch";
