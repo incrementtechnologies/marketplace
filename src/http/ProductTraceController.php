@@ -636,6 +636,8 @@ class ProductTraceController extends APIController
 
   public function create(Request $request){
     $data = $request->all();
+
+
     if($data['inventory_type'] === 'bundled_trace'){
       $qty = (int)$data['qty'];
       for ($i=0; $i < $qty; $i++) {
@@ -781,8 +783,8 @@ class ProductTraceController extends APIController
   }
 
   public function getProductQtyByStatus($column ,$value, $status){
-    $all = ProductTrace::where($column, '=', $value)->count();
-    $active = ProductTrace::where($column, '=', $value)->where('status', '=', $status)->count();
+    $all = ProductTrace::where($column, '=', $value)->where('deleted_at', '=', null)->count();
+    $active = ProductTrace::where($column, '=', $value)->where('status', '=', $status)->where('deleted_at', '=', null)->count();
     $result = array(
       'total_qty' => $all,
       'active_qty' => $active
