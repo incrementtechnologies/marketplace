@@ -40,19 +40,19 @@ class ProductController extends APIController
       $data['price_settings'] = 'fixed';
       if($data['type'] === 'bundled'){
         $existProduct = Product::where('title', '=', $data['title'])->get();
-        dd($existProduct);
         if(sizeof($existProduct) > 0){
           $this->response['data'] = [];
           $this->response['error'] = "Bundled is already existed";
-        }
-        $traces = app($this->productTraceController)->getProductQtyByStatus('product_attribute_id', $data['product_attribute_id'], 'active');
-        $remainingTraces = ((int)$traces['total_qty'] - (int)$traces['active_qty']);
-        if((int)$data['qty'] > $remainingTraces){
-          $this->response['data'] = [];
-          $this->response['error'] = "You've reached the maximum qty in your batch";
         }else{
-          $this->model = new Product();
-          $this->insertDB($data);
+          $traces = app($this->productTraceController)->getProductQtyByStatus('product_attribute_id', $data['product_attribute_id'], 'active');
+          $remainingTraces = ((int)$traces['total_qty'] - (int)$traces['active_qty']);
+          if((int)$data['qty'] > $remainingTraces){
+            $this->response['data'] = [];
+            $this->response['error'] = "You've reached the maximum qty in your batch";
+          }else{
+            $this->model = new Product();
+            $this->insertDB($data);
+          }
         }
       }else{
         $this->model = new Product();
