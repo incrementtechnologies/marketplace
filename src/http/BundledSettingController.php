@@ -24,7 +24,6 @@ class BundledSettingController extends APIController
 
   public function create(Request $request){
     $data = $request->all();
-
     $result = BundledSetting::where('bundled', '=', $data['bundled'])->where('product_id', '=', $data['product_id'])->where('deleted_at', '=', null)->get();
     if(sizeof($result) > 0){
       $this->response['data'] = null;
