@@ -208,7 +208,7 @@ class ProductTraceController extends APIController
       $item = $this->response['data'][$i];
       
       if(isset($data['nfc']) && ($item['nfc'] == null || $item['nfc'] == '')){
-        $nfcResult = ProductTrace::where('nfc', '=', $data['nfc'])->get();
+        $nfcResult = ProductTrace::where('nfc', '=', $data['nfc'])->where('deleted_at', '=', null)->get();
         if(sizeof($nfcResult) > 0){
           $this->response['data'] = null;
           $this->response['error'] = 'Tag is already taken!';
@@ -641,9 +641,11 @@ class ProductTraceController extends APIController
       for ($i=0; $i < $qty; $i++) {
         $data['code'] = $this->generateCode();
         $data['status'] = 'inactive';
-        $data['status'] = 'active';
         $this->model = new ProductTrace();
         $this->insertDB($data);
+        $id = $this->response['data'];
+        $this->response['data'] = $data;
+        $this->response['data']['id'] = $id;
       }
     }else{
       $currQty = ProductTrace::where('batch_number', '=', $data['batch_number'])->where('deleted_at', '=', null)->count();
