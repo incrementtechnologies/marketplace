@@ -60,6 +60,7 @@ Route::post($route.'retrieve_variation', $controller."retrieveVariation");
 Route::post($route.'retrieve_basic_mobile', $controller."retrieveBasicMobile");
 Route::post($route.'retrieve_mobile', $controller."retrieveMobile");
 Route::post($route.'retrieve_with_order_number', $controller."retrieveWithOrderNumber");
+Route::post($route.'retrieve_featured_images', $controller."retrieveFeaturedImage");
 Route::post($route.'update', $controller."update");
 Route::post($route.'delete', $controller."delete");
 Route::post($route.'file_upload', $controller."fileUpload");
