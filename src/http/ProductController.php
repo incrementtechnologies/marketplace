@@ -81,6 +81,24 @@ class ProductController extends APIController
       $this->response['data'] = $this->manageResult($this->response['data'], null, $inventoryType);
       return $this->response();
     }
+
+    public function retrieveFeaturedImage(Request $request){
+      $data = $request->all();
+      $inventoryType = $data['inventory_type'];
+      $accountId = $data['account_id'];
+      $this->model = new Product();
+      $this->retrieveDB($data);
+      foreach ($this->response['data'] as $value) {
+        unset($this->response['data'][0]['details']);
+        $res = array(
+          'featured' => app($this->productImageController)->getProductImage($value['id'], 'featured'),
+          'images' => app($this->productImageController)->getProductImage($value['id'], null),
+          'id' => $value['id']
+        );
+        $this->response['data'] = $res;
+      }
+      return $this->response();
+    }
     
     // public function retrieveBundledMobile(Request $request){
     //   $data = $request->all();
