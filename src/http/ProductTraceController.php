@@ -643,11 +643,8 @@ class ProductTraceController extends APIController
       for ($i=0; $i < $qty; $i++) {
         $data['code'] = $this->generateCode();
         $data['status'] = 'inactive';
-        $this->model = new ProductTrace();
-        $this->insertDB($data);
-        $id = $this->response['data'];
-        $this->response['data'] = $data;
-        $this->response['data']['id'] = $id;
+        $temp = ProductTrace::create($data);
+        $this->response['data'] = $temp;
       }
     }else{
       $currQty = ProductTrace::where('batch_number', '=', $data['batch_number'])->where('deleted_at', '=', null)->count();
