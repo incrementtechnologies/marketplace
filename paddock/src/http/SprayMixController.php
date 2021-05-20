@@ -78,6 +78,7 @@ class SprayMixController extends APIController
       $con = $data['condition'];
       $sortKey = null;
       $sortValue = null;
+      $size = null;
       foreach ($data['sort'] as $key) {
           $sortKey = array_keys($data['sort'])[0];
           $sortValue = $key;
@@ -95,6 +96,12 @@ class SprayMixController extends APIController
                         ->orderBy($sortKey, $sortValue)
                         ->get();
       }
+
+      $size = SprayMix::where($con[1]['column'], $con[1]['clause'], $con[1]['value'])
+          ->where($con[0]['column'], $con[0]['clause'], $con[0]['value'])
+          ->orderBy($sortKey, $sortValue)
+          ->get();
+
       $res = array();
       if(sizeof($tempData) > 0){
         $i = 0;
@@ -116,6 +123,7 @@ class SprayMixController extends APIController
 
         }
         $this->response['data'] = $temp;
+        $this->response['size'] = sizeof($size);
       }
       return $this->response();
   }
