@@ -57,6 +57,21 @@ class ProductTraceController extends APIController
     
     return $result;
   }
+  public function retrieveBundledTrace($attrID, $productId, $returns){
+    $whereArray = array(
+      array('product_attribute_id', '=', $attrID),
+      array('product_id', '=', $productId),
+      array('status', '=', 'active'),
+      array('nfc', '!=', null)
+    );
+    $result = ProductTrace::where($whereArray)->orderBy('created_at', 'desc')->get($returns); 
+    return $result;
+  }
+
+  public function getTotalAttributeByParamsWithProductId($productId, $attrID){
+    $result = ProductTrace::where('product_id', '=', $productId)->where('product_attribute_id', '=', $attrID)->where('status', '=', 'active')->orderBy('created_at', 'desc')->count();
+    return $result;
+  }
   public function getByParamsLimitOne($column, $value){
     $result  = ProductTrace::where($column, '=', $value)->orderBy('created_at', 'desc')->get();
     if(sizeof($result) > 0){

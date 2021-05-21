@@ -106,17 +106,30 @@ class ProductAttributeController extends APIController
 
     public function getByParamsWithMerchant($column, $value, $merchantId){
       $result = ProductAttribute::where($column, '=', $value)->where('deleted_at', '=', null)->orderBy('payload_value', 'asc')->select(['id', 'payload', 'payload_value', 'product_id'])->get();
-      $finalResult = array();
+      $bundledProductsQty = null;
       if(sizeof($result) > 0){
         $i = 0;
         foreach ($result as $key) {
           $exist = app('Increment\Marketplace\Http\BundledSettingController')->getByParamsDetails('product_attribute_id', $result[$i]['id']);
+          if($exist !== null){
+            $bundledTrace = app('Increment\Marketplace\Http\ProductTraceController')->retrieveBundledTrace($exist[0]['product_attribute_id'], $exist[0]['bundled'], ['id', 'code']);
+            if(sizeof($bundledTrace) > 0){
+              $bundledProducts = app('Increment\Marketplace\Http\BundledProductController')->retrieveDataWithBundledSetting($bundledTrace[0]['id']);
+              $bundledProductsQty = $bundledProducts;
+            }
+          }
           $result[$i]['payload_value'] = (int)$result[$i]['payload_value'];
-          $productQtyPerVariation = app('Increment\Marketplace\Http\ProductTraceController')->getTotalAttributeByParams($result[$i]['id']);
+          $productQtyPerVariation = app('Increment\Marketplace\Http\ProductTraceController')->getTotalAttributeByParamsWithProductId($result[$i]['product_id'], $result[$i]['id']);
           $transferredProductQty = app('Increment\Marketplace\Http\TransferredProductController')->getTransferredProductInManufacturer($value, $result[$i]['id']);
           $result[$i]['total_active_variation'] = $productQtyPerVariation;
           $result[$i]['total_transferred_variation'] = $transferredProductQty;
-          $result[$i]['product_trace_qty'] = $productQtyPerVariation - $transferredProductQty;
+          if($exist !== null && $bundledProductsQty == $exist[0]['qty']){
+            $result[$i]['qty_in_bundled'] = $exist[0]['qty'];
+            $result[$i]['scanned_bundled_qty'] = $bundledProductsQty;
+            $result[$i]['product_trace_qty'] = ($productQtyPerVariation - $transferredProductQty) - $bundledProductsQty;
+          }else{
+            $result[$i]['product_trace_qty'] = $productQtyPerVariation - $transferredProductQty;
+          }
           $result[$i]['is_used'] = $exist !== null ? true : false;
           $i++;
         }

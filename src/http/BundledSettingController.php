@@ -134,7 +134,7 @@ class BundledSettingController extends APIController
         $result[$i]['variation'] = app($this->productAttrController)->getByParamsWithMerchant('id', $result[$i]['product_attribute_id'], $merchantId);
         $result[$i]['created_at_human'] = Carbon::createFromFormat('Y-m-d H:i:s', $result[$i]['created_at'])->copy()->tz($this->response['timezone'])->format('F j, Y H:i A');
         $result[$i]['qty'] = (int)$result[$i]['qty'];
-        $result[$i]['scanned_qty'] = (int)$traceQty == (int)$result[$i]['qty'] ? 1 : 0;
+        $result[$i]['scanned_qty'] = sizeof($traceQty) > 0  ? 1 : 0;
         $i++;
       }
     }
