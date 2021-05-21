@@ -124,7 +124,9 @@ class PaddockPlanTaskController extends APIController
                 if($temp[$i]['paddock'] == null){
                     $temp = null;
                 }else{
-                    $temp[$i]['due_date'] = $this->retrieveByParams('id', $temp[$i]['paddock_plan_task_id'], 'due_date');
+                    $paddoctId = $this->retrieveByParams('id', $temp[$i]['paddock_plan_task_id'], 'paddock_plan_id');
+                    $paddockPlanDate = app($this->paddockPlanClass)->retrievePlanByParams('id', $paddoctId, ['start_date']);
+                    $temp[$i]['due_date'] = $paddockPlanDate !== null ? $paddockPlanDate[0]['start_date'] : $this->retrieveByParams('id', $temp[$i]['paddock_plan_task_id'], 'due_date');
                     $temp[$i]['category'] = $this->retrieveByParams('id', $temp[$i]['paddock_plan_task_id'], 'category');
                     $temp[$i]['nickname'] = $this->retrieveByParams('id', $temp[$i]['paddock_plan_task_id'], 'nickname');
                     $temp[$i]['paddock_plan_id'] = $this->retrieveByParams('id', $temp[$i]['paddock_plan_task_id'], 'paddock_plan_id');

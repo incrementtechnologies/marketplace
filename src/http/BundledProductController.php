@@ -188,4 +188,9 @@ class BundledProductController extends APIController
     app($this->productTraceController)->deleteByParams($value);
     return true;
   }
+
+  public function retrieveDataWithBundledSetting($bundledTrace){
+    $res = BundledProduct::where('bundled_trace', '=', $bundledTrace)->where('deleted_at', '=', null)->get(['bundled_trace']);
+    return sizeof($res);
+  }
 }
