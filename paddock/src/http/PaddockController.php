@@ -70,7 +70,7 @@ class PaddockController extends APIController
             for ($x = 0; $x < count($paddock_data); $x++){
               $paddock_plan_tasks = PaddockPlanTask::select()->where("paddock_plan_id", "=", $paddock_data[$x]['id'])->get();
               for ($p = 0; $p < count($paddock_plan_tasks); $p++){
-                if($paddock_plan_tasks[$p]['status'] === 'approved'){
+                if($paddock_plan_tasks[$p]['status'] === 'approved' || $paddock_plan_tasks[$p]['status'] === 'completed'){
                   $this->response['data'][$i]['status'] = 'approved';
                 }
               }
