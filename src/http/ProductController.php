@@ -25,6 +25,7 @@ class ProductController extends APIController
     public $bundledProductController = 'Increment\Marketplace\Http\BundledProductController';
     public $bundledSettingController = 'Increment\Marketplace\Http\BundledSettingController';
     public $transferClasss = 'Increment\Marketplace\Http\TransferController';
+    public $transferredProductController = 'Increment\Marketplace\Http\TransferredProductController';
     public $batchProductClass = 'Increment\Marketplace\Paddock\Http\BatchProductController';
     function __construct(){
     	$this->model = new Product();
@@ -44,8 +45,8 @@ class ProductController extends APIController
           $this->response['data'] = [];
           $this->response['error'] = "Bundled is already existed";
         }else{
-          $traces = app($this->productTraceController)->getProductQtyByStatus('product_attribute_id', $data['product_attribute_id'], 'active');
-          $remainingTraces = ((int)$traces['total_qty'] - (int)$traces['active_qty']);
+          $traces = app($this->transferredProductController)->getSizeNoDate('product_attribute_id', $data['product_attribute_id']);
+          $remainingTraces = ((int)$traces - (int)$traces['active_qty']);
           if((int)$data['qty'] > $remainingTraces){
             $this->response['data'] = [];
             $this->response['error'] = "You've reached the maximum qty in your batch";
