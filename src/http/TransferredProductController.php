@@ -146,11 +146,11 @@ class TransferredProductController extends APIController
     public function getRemainingProductQty($productId, $merchantId, $productAtributeId){
       $result = DB::table('transferred_products as T1')
       ->leftJoin('product_traces as T2', 'T1.payload_value', '=', 'T2.id')
-      ->leftJoin('transfers as T3', 'T1.transfer_id', '=', 'T3.id')
+      // ->leftJoin('transfers as T3', 'T1.transfer_id', '=', 'T3.id')
       ->where('T1.status', '=', 'active')
       ->where('T1.deleted_at', '=', null)
-      ->where('T3.from', '=', $merchantId)
-      ->where('T1.product_id', '=', $productId)
+      ->where('T1.merchant_id', '=', $merchantId)
+      // ->where('T1.product_id', '=', $productId)
       ->where('T1.product_attribute_id', '=', $productAtributeId)
       ->count();
       return $result;
