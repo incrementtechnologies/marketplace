@@ -123,6 +123,7 @@ class ProductAttributeController extends APIController
           $transferredProductQty = app('Increment\Marketplace\Http\TransferredProductController')->getTransferredProductInManufacturer($value, $result[$i]['id']);
           $result[$i]['total_active_variation'] = $productQtyPerVariation;
           $result[$i]['total_transferred_variation'] = $transferredProductQty;
+          $result[$i]['total_bundled_product'] = $bundledProductsQty;
           if($exist !== null && $bundledProductsQty == $exist[0]['qty']){
             $result[$i]['qty_in_bundled'] = $exist[0]['qty'];
             $result[$i]['scanned_bundled_qty'] = $bundledProductsQty;
