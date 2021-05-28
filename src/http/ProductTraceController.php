@@ -772,6 +772,11 @@ class ProductTraceController extends APIController
     return sizeof($result) > 0 ? $result[0] : null;
   }
 
+  public function countTraceByParams($column, $value, $status){
+    $result = ProductTrace::where($column, '=', $value)->where('batch_number', '!=', null)->where('status', '=', $status)->where('deleted_at', '=', null)->count();
+    return $result;
+  }
+
   public function deleteByParams($id){
     ProductTrace::where('id', '=', $id)->update(array(
       'deleted_at' => Carbon::now()
