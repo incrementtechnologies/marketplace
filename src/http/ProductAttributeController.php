@@ -113,7 +113,6 @@ class ProductAttributeController extends APIController
           $exist = app('Increment\Marketplace\Http\BundledSettingController')->getByParamsDetails('product_attribute_id', $result[$i]['id']);
           if($exist !== null){
             $bundledTrace = app('Increment\Marketplace\Http\ProductTraceController')->retrieveBundledTrace($exist[0]['product_attribute_id'], $exist[0]['bundled'], ['id', 'code']);
-            dd($exist[0]['product_attribute_id'], $exist[0]['bundled']);
             if(sizeof($bundledTrace) > 0){
               $bundledProducts = app('Increment\Marketplace\Http\BundledProductController')->retrieveDataWithBundledSetting($bundledTrace[0]['id']);
               $bundledProductsQty = $bundledProducts;
