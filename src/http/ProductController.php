@@ -45,8 +45,9 @@ class ProductController extends APIController
           $this->response['data'] = [];
           $this->response['error'] = "Bundled is already existed";
         }else{
+          $productTrace = app($this->productTraceController)->countTraceByParams('product_attribute_id', $data['product_attribute_id'], 'active');
           $traces = app($this->transferredProductController)->getSizeNoDate('product_attribute_id', $data['product_attribute_id']);
-          $remainingTraces = ((int)$traces - (int)$traces['active_qty']);
+          $remainingTraces = ((int)$productTrace) - (int)$traces;
           if((int)$data['qty'] > $remainingTraces){
             $this->response['data'] = [];
             $this->response['error'] = "You've reached the maximum qty in your batch";
