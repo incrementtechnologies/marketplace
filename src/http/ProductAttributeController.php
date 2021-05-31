@@ -124,13 +124,9 @@ class ProductAttributeController extends APIController
           $result[$i]['total_active_variation'] = $productQtyPerVariation;
           $result[$i]['total_transferred_variation'] = $transferredProductQty;
           $result[$i]['total_bundled_product'] = $bundledProductsQty;
-          if($exist !== null && $bundledProductsQty == $exist[0]['qty']){
-            $result[$i]['qty_in_bundled'] = $exist[0]['qty'];
-            $result[$i]['scanned_bundled_qty'] = $bundledProductsQty;
-            $result[$i]['product_trace_qty'] = ($productQtyPerVariation - $transferredProductQty) - $bundledProductsQty;
-          }else{
-            $result[$i]['product_trace_qty'] = $productQtyPerVariation - $transferredProductQty;
-          }
+          $result[$i]['qty_in_bundled'] = $exist[0]['qty'];
+          $result[$i]['scanned_bundled_qty'] = $bundledProductsQty;
+          $result[$i]['product_trace_qty'] = ($productQtyPerVariation - $transferredProductQty);
           $result[$i]['is_used'] = $exist !== null ? true : false;
           $i++;
         }
