@@ -97,7 +97,7 @@ class SprayMixProductController extends APIController
   }
 
   public function retrieveDetailsWithParams($column, $value, $returns){
-    $result = SprayMixProduct::where($column, '=', $value)->where('units', '=', 'ml')->orWhere('units', '=', 'L')->where('deleted_at', '=', null)->get($returns);
+    $result = SprayMixProduct::where($column, '=', $value)->where('deleted_at', '=', null)->get($returns);
     return $result;
   }
 }
