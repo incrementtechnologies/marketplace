@@ -134,6 +134,7 @@ Route::post($route.'retrieve_with_attribute', $controller."retrieveWithAttribute
 Route::post($route.'retrieve_with_attribute_mobile', $controller."retrieveWithAttributeMobile");
 Route::post($route.'retrieve_with_traces', $controller."retrieveProductTraceAsInventory");
 Route::post($route.'retrieve_by_params', $controller."retrieveByParams");
+Route::post($route.'retrieve_nfc', $controller."retrieveNFC");
 Route::post($route.'retrieve_by_params_end_user', $controller."retrieveByParamsEndUser");
 Route::post($route.'retrieve_by_bundled', $controller."retrieveByBundled");
 Route::post($route.'retrieve_by_bundled_agrisend', $controller."retrieveByBundledAgrisend");

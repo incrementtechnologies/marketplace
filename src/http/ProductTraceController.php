@@ -211,6 +211,15 @@ class ProductTraceController extends APIController
     return $this->response();
   }
 
+  public function retrieveNFC(Request $request){{
+    $data = $request->all();
+    $this->model = new ProductTrace();
+    $this->retrieveDB($data);
+    return $this->response();
+  }
+
+  }
+
   public function retrieveByParams(Request $request){
     $data = $request->all();
     $this->model = new ProductTrace();
