@@ -63,7 +63,8 @@ class PaddockPlanTaskController extends APIController
             $i = 0;
             $j = 1;
             foreach ($temp as $key) {
-                if($currDate <= $temp[$i]['due_date']){
+                $paddockPlan = app($this->paddockPlanClass)->retrievePlanByParams('id', $key['paddock_plan_id'], ['start_date', 'end_date']);
+                if($paddockPlan[0]['start_date'] <= $currDate && $currDate <= $paddockPlan[0]['end_date']){
                     $paddocks = app($this->paddockPlanClass)->retrievePlanByParams('id', $key['paddock_plan_id'], ['crop_id', 'paddock_id']);
                     $existInBatch = app($this->batchPaddockTaskClass)->retrieveByParams('paddock_plan_task_id', $temp[$i]['id'], ['id']);
                     if(sizeof($existInBatch) <= 0) {
