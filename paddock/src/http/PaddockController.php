@@ -131,7 +131,7 @@ class PaddockController extends APIController
   public function retrieveWithSprayMix(Request $request){
     $data = $request->all();
     $task = PaddockPlanTask::where('id', '=', $data['id'])->get();
-    $result = Paddock::where('id', '=', $task[0]['paddock_id'])->get();
+    $result = Paddock::where('id', '=', $task[0]['paddock_id'])->where('deleted_at', '=', null)->get();
     $this->response['data'] = $result;
     for ($i = 0; $i < count($this->response['data']); $i++){
       $item = $this->response['data'][$i];
