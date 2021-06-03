@@ -666,7 +666,6 @@ class ProductTraceController extends APIController
       $qty = (int)$data['qty'];
       for ($i=0; $i < $qty; $i++) {
         $data['code'] = $this->generateCode();
-        $data['status'] = 'inactive';
         $temp = ProductTrace::create($data);
         $this->response['data'] = $temp;
       }
