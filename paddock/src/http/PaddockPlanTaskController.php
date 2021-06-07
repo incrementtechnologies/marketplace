@@ -68,8 +68,12 @@ class PaddockPlanTaskController extends APIController
                     $paddocks = app($this->paddockPlanClass)->retrievePlanByParams('id', $key['paddock_plan_id'], ['crop_id', 'paddock_id']);
                     $existInBatch = app($this->batchPaddockTaskClass)->retrieveByParams('paddock_plan_task_id', $temp[$i]['id'], ['id']);
                     if(sizeof($existInBatch) <= 0) {
-                        $temp[$i]['paddock'] = app($this->paddockClass)->getByParams('id', $paddocks[0]['paddock_id'], ['id', 'name']);
+                        $temp[$i]['paddock'] = app($this->paddockClass)->getByParams('id', $paddocks[0]['paddock_id'], ['id', 'name', 'spray_area']);
                         if($temp[$i]['paddock'] !== null){
+                            $totalBatchArea = $this->getTotalBatchPaddockPlanTask($temp[$i]['id']);
+                            $temp[$i]['area'] = (float)$temp[$i]['area'];
+                            $totalArea =  $totalBatchArea != null ? ((float)$temp[$i]['paddock']['spray_area'] - (float)$totalBatchArea) : (float)$temp[$i]['paddock']['spray_area'];
+                            $temp[$i]['remaining_spray_area'] = $this->numberConvention($totalArea);
                             $temp[$i]['spray_mix'] = app($this->sprayMixClass)->getByParams('id', $key['paddock_id'], ['id', 'name']);
                             $temp[$i]['due_date'] = $this->retrieveByParams('id', $temp[$i]['id'], 'due_date');
                             $temp[$i]['category'] = $this->retrieveByParams('id', $temp[$i]['id'], 'category');
@@ -82,7 +86,9 @@ class PaddockPlanTaskController extends APIController
                             if(isset($temp[$i]['paddock']['crop_name'])){
                                 $temp[$i]['paddock']['crop_name'] = app($this->cropClass)->retrieveCropById($paddocks[0]['crop_id'])[0]->name;
                             }
-                            $finalResult[] = $temp[$i];
+                            if($temp[$i]['remaining_spray_area'] > 0){
+                                $finalResult[] = $temp[$i];
+                            }
                         }
                     }
                 }
