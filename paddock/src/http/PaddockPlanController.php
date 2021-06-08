@@ -41,13 +41,18 @@ class PaddockPlanController extends APIController
 
     public function create(Request $request) {
       $data = $request->all();
-      PaddockPlan::create($data);
-      $this->response['data'] = $data;
+      $paddockPlan = new PaddockPlan;
+      $paddockPlan->paddock_id = $data['paddock_id'];
+      $paddockPlan->crop_id = $data['crop_id'];
+      $paddockPlan->start_date = $data['start_date'];
+      $paddockPlan->end_date = $data['end_date'];
+      $paddockPlan->save();
+      $this->response['data'] = $paddockPlan;
       return $this->response();
     }
 
     public function retrievePlanByParams($column, $value, $returns){
-        $result = PaddockPlan::where($column, '=', $value)->get($returns);
+        $result = PaddockPlan::where($column, '=', $value)->where('deleted_at', '=', null)->get($returns);
         if(sizeof($result) > 0){
             return $result;
         }else{

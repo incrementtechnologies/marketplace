@@ -24,7 +24,6 @@ class BundledSettingController extends APIController
 
   public function create(Request $request){
     $data = $request->all();
-
     $result = BundledSetting::where('bundled', '=', $data['bundled'])->where('product_id', '=', $data['product_id'])->where('deleted_at', '=', null)->get();
     if(sizeof($result) > 0){
       $this->response['data'] = null;
@@ -106,7 +105,7 @@ class BundledSettingController extends APIController
   }
 
   public function getStatusByProductTrace($bundled, $bundledTrace){
-    $result = BundledSetting::where('bundled', '=', $bundled)->get();
+    $result = BundledSetting::where('bundled', '=', $bundled)->where('deleted_at', '=', null)->get();
     $status = 1;
     if(sizeof($result) > 0){
       $i = 0;
@@ -126,24 +125,54 @@ class BundledSettingController extends APIController
 
   public function getByParams($column, $value, $merchantId){
     $this->localization();
-    $result = BundledSetting::where($column, '=', $value)->get();
+    $result = BundledSetting::where($column, '=', $value)->where('deleted_at', '=', null)->get();
     if(sizeof($result) > 0){
       $i = 0;
       foreach ($result as $key) {
         $traceQty = app($this->productTraceController)->getProductQtyByParams($result[$i]['bundled'], $result[$i]['product_attribute_id']);
-        $result[$i]['product'] = app($this->productController)->getByParams('id', $result[$i]['product_id']);
+        // $result[$i]['product'] = app($this->productController)->getByParamsWithReturn('id', $result[$i]['product_id'], ['title', 'id', 'tags']);
+        $result[$i]['variation'] = app($this->productAttrController)->getByParamsWithMerchant('id', $result[$i]['product_attribute_id'], $merchantId);
+        $result[$i]['created_at_human'] = Carbon::createFromFormat('Y-m-d H:i:s', $result[$i]['created_at'])->copy()->tz($this->response['timezone'])->format('F j, Y H:i A');
+        $result[$i]['qty'] = (int)$result[$i]['qty'];
+        $result[$i]['scanned_qty'] = $traceQty;
+        $i++;
+      }
+    }
+    return sizeof($result) > 0 ? $result : [];
+  }
+
+  public function getByParamsWithProduct($column, $value, $merchantId){
+    $this->localization();
+    $result = BundledSetting::where($column, '=', $value)->where('deleted_at', '=', null)->get();
+    if(sizeof($result) > 0){
+      $i = 0;
+      foreach ($result as $key) {
+        $traceQty = app($this->productTraceController)->getProductQtyByParams($result[$i]['bundled'], $result[$i]['product_attribute_id']);
+        $parentTrace = app($this->productTraceController)->getTraceByParams(
+            array(
+              array('product_id', '=', $result[$i]['product_id']),
+              array('product_attribute_id', '=', $result[$i]['product_attribute_id']),
+            ),
+            ['id', 'product_attribute_id', 'product_id', 'batch_number']
+        );
+        // $result[$i]['product'] = app($this->productController)->getByParamsWithReturn('id', $result[$i]['product_id'], ['title', 'id', 'tags']);
+        $result[$i]['parent_trace'] = $parentTrace;
         $result[$i]['variation'] = app($this->productAttrController)->getByParamsWithMerchant('id', $result[$i]['product_attribute_id'], $merchantId);
         $result[$i]['created_at_human'] = Carbon::createFromFormat('Y-m-d H:i:s', $result[$i]['created_at'])->copy()->tz($this->response['timezone'])->format('F j, Y H:i A');
         $result[$i]['qty'] = (int)$result[$i]['qty'];
         $result[$i]['scanned_qty'] = (int)$traceQty == (int)$result[$i]['qty'] ? 1 : 0;
-        $i++;
+        $result[$i]['product'] = app($this->productController)->getProductColumnWithReturns('id', $result[$i]['bundled'], ['title']);
+        $result[$i]['component_product'] = app($this->productController)->getProductColumnWithReturns('id', $result[$i]['product_id'], ['title']);
+        $result[$i]['component_qty'] = app($this->productTraceController)->getProductQtyByParams($result[$i]['product_id'], $result[$i]['product_attribute_id']);
+        $result[$i]['available_stock'] = app($this->productTraceController)->getProductQtyByParams($result[$i]['bundled'], $result[$i]['product_attribute_id']);
+        $i++; 
       }
     }
-    return sizeof($result) > 0 ? $result : null;
+    return sizeof($result) > 0 ? $result : [];
   }
 
   public function getByParamsDetails($column, $value){
-    $result = BundledSetting::where($column, '=', $value)->get();
+    $result = BundledSetting::where($column, '=', $value)->where('deleted_at', '=', null)->get();
     return sizeof($result) > 0 ? $result : null;
   }
 }

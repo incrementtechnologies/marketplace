@@ -6,5 +6,5 @@ use App\APIModel;
 class ProductTrace extends APIModel
 {
     protected $table = 'product_traces';
-    protected $fillable = ['product_id', 'account_id', 'batch_number', 'manufacturing_date', 'nfc', 'rf', 'status'];
+    protected $fillable = ['product_id', 'account_id', 'batch_number', 'manufacturing_date', 'nfc', 'rf', 'status','code', 'product_attribute_id'];
 }

@@ -44,10 +44,14 @@ class SprayMixProductController extends APIController
         if(sizeof($tempRes) > 0){
           $i = 0;
           foreach ($tempRes as $key) {
+            $applicationRate = $this->numberConvention($tempRes[$i]['application_rate']);
+            $minRate = $this->numberConvention($tempRes[$i]['minimum_rate']);
+            $maxRate = $this->numberConvention($tempRes[$i]['maximum_rate']);
             $tempRes[$i]['details'] = $this->retrieveProductDetailsByParams('id', $tempRes[$i]['product_id']);
-            $tempRes[$i]['application_rate'] = $tempRes[$i]['application_rate'].' '.'L/ha';
-            $tempRes[$i]['minimum_rate'] = $tempRes[$i]['minimum_rate'].' '.'L/ha';
-            $tempRes[$i]['maximum_rate'] = $tempRes[$i]['maximum_rate'].' '.'L/ha';
+            $tempRes[$i]['application_rate'] = $applicationRate.' '.'L/ha';
+            $tempRes[$i]['minimum_rate'] = $minRate.' '.'L/ha';
+            $tempRes[$i]['maximum_rate'] = $maxRate.' '.'L/ha';
+            $tempRes[$i]['rate'] = $this->numberConvention($tempRes[$i]['rate']);
 
             $i++;
           }
@@ -68,7 +72,7 @@ class SprayMixProductController extends APIController
                 $result[$i]['products'] = app($this->productClass)->getProductName('id', $sprayMixProduct[$k]['product_id']);
                 $k++;
             }
-            $result[$i]['application_rate'] = $sprayMix[0]['application_rate'];
+            $result[$i]['application_rate'] = $this->numberConvention($sprayMix[0]['application_rate']);
         }
         $this->response['data'] = $result;
         return $this->response();
@@ -86,9 +90,17 @@ class SprayMixProductController extends APIController
       $item = $this->response['data'][$i];
       $product = app($this->productClass)->getProductName('id', $item['product_id']);
       $this->response['data'][$i]['product'] = sizeof($product) > 0 ? $product[0] : null;
-      $this->response['data'][$i]['product']['rate'] = $item['rate'];
+      $this->response['data'][$i]['product']['rate'] = $this->numberConvention($item['rate']);
       $this->response['data'][$i]['product']['units'] = $item['units'];
     }
     return $this->response();
+  }
+
+  public function retrieveDetailsWithParams($column, $value, $returns){
+    $result = SprayMixProduct::where($column, '=', $value)->where(function($query){
+      $query->where('units', '=', 'ml')
+      ->orWhere('units', '=', 'L');
+    })->where('deleted_at', '=', null)->sum('rate');
+    return $result;
   }
 }

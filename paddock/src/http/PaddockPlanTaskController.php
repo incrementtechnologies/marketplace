@@ -54,7 +54,12 @@ class PaddockPlanTaskController extends APIController
     public function retrieveMobileByParams(Request $request){
         $data = $request->all();
         $con = $data['condition'];
-        $result = PaddockPlanTask::where($con[0]['column'], '=', $con[0]['value'])->where($con[1]['column'], '=', $con[1]['value'])->skip($data['offset'])->orderBy('created_at', 'desc')->take($data['limit'])->get();
+        $result = null;
+        if(isset($data['limit'])){
+            $result = PaddockPlanTask::where($con[0]['column'], '=', $con[0]['value'])->where($con[1]['column'], '=', $con[1]['value'])->skip($data['offset'])->orderBy('created_at', 'desc')->take($data['limit'])->get();
+        }else{
+            $result = PaddockPlanTask::where($con[0]['column'], '=', $con[0]['value'])->where($con[1]['column'], '=', $con[1]['value'])->get();
+        }
         $temp = $result;
         $finalResult = array();
         $date =  Carbon::now();
@@ -63,12 +68,18 @@ class PaddockPlanTaskController extends APIController
             $i = 0;
             $j = 1;
             foreach ($temp as $key) {
-                if($currDate <= $temp[$i]['due_date']){
+                $paddockPlan = app($this->paddockPlanClass)->retrievePlanByParams('id', $key['paddock_plan_id'], ['start_date', 'end_date']);
+                
+                if($paddockPlan[0]['start_date'] <= $currDate && $currDate <= $paddockPlan[0]['end_date']){
                     $paddocks = app($this->paddockPlanClass)->retrievePlanByParams('id', $key['paddock_plan_id'], ['crop_id', 'paddock_id']);
                     $existInBatch = app($this->batchPaddockTaskClass)->retrieveByParams('paddock_plan_task_id', $temp[$i]['id'], ['id']);
                     if(sizeof($existInBatch) <= 0) {
-                        $temp[$i]['paddock'] = app($this->paddockClass)->getByParams('id', $paddocks[0]['paddock_id'], ['id', 'name']);
+                        $temp[$i]['paddock'] = app($this->paddockClass)->getByParams('id', $paddocks[0]['paddock_id'], ['id', 'name', 'spray_area']);
                         if($temp[$i]['paddock'] !== null){
+                            $totalBatchArea = $this->getTotalBatchPaddockPlanTask($temp[$i]['id']);
+                            $temp[$i]['area'] = (float)$temp[$i]['area'];
+                            $totalArea =  $totalBatchArea != null ? ((float)$temp[$i]['paddock']['spray_area'] - (float)$totalBatchArea) : (float)$temp[$i]['paddock']['spray_area'];
+                            $temp[$i]['remaining_spray_area'] = $this->numberConvention($totalArea);
                             $temp[$i]['spray_mix'] = app($this->sprayMixClass)->getByParams('id', $key['paddock_id'], ['id', 'name']);
                             $temp[$i]['due_date'] = $this->retrieveByParams('id', $temp[$i]['id'], 'due_date');
                             $temp[$i]['category'] = $this->retrieveByParams('id', $temp[$i]['id'], 'category');
@@ -81,7 +92,9 @@ class PaddockPlanTaskController extends APIController
                             if(isset($temp[$i]['paddock']['crop_name'])){
                                 $temp[$i]['paddock']['crop_name'] = app($this->cropClass)->retrieveCropById($paddocks[0]['crop_id'])[0]->name;
                             }
-                            $finalResult[] = $temp[$i];
+                            if($temp[$i]['remaining_spray_area'] > 0){
+                                $finalResult[] = $temp[$i];
+                            }
                         }
                     }
                 }
@@ -124,7 +137,10 @@ class PaddockPlanTaskController extends APIController
                 if($temp[$i]['paddock'] == null){
                     $temp = null;
                 }else{
-                    $temp[$i]['due_date'] = $this->retrieveByParams('id', $temp[$i]['paddock_plan_task_id'], 'due_date');
+                    $paddoctId = $this->retrieveByParams('id', $temp[$i]['paddock_plan_task_id'], 'paddock_plan_id');
+                    $paddockPlanDate = app($this->paddockPlanClass)->retrievePlanByParams('id', $paddoctId, ['start_date']);
+                    $paddockPlanDate[0]['start_date'] = Carbon::createFromFormat('Y-m-d', $paddockPlanDate[0]['start_date'])->copy()->tz($this->response['timezone'])->format('d/m/Y');
+                    $temp[$i]['due_date'] = $paddockPlanDate !== null ? $paddockPlanDate[0]['start_date'] : Carbon::createFromFormat('Y-m-d',  $this->retrieveByParams('id', $temp[$i]['paddock_plan_task_id'], 'due_date'))->copy()->tz($this->response['timezone'])->format('d/m/Y');
                     $temp[$i]['category'] = $this->retrieveByParams('id', $temp[$i]['paddock_plan_task_id'], 'category');
                     $temp[$i]['nickname'] = $this->retrieveByParams('id', $temp[$i]['paddock_plan_task_id'], 'nickname');
                     $temp[$i]['paddock_plan_id'] = $this->retrieveByParams('id', $temp[$i]['paddock_plan_task_id'], 'paddock_plan_id');
@@ -230,11 +246,9 @@ class PaddockPlanTaskController extends APIController
                 ->leftJoin('spray_mixes as T5', 'T5.id', '=', 'T1.spray_mix_id')
                 ->where('T1.spray_mix_id', '=', $data['spray_mix_id'])
                 ->where('T1.status', '=', 'approved')
-                ->where('T2.deleted_at', '=', null)
                 ->where('T1.deleted_at', '=', null)
-                ->whereNull('T2.deleted_at')
                 ->where('T2.merchant_id', $data['merchant_id'])
-                ->groupBy('T2.id')
+                ->groupBy('T1.paddock_plan_id')
                 ->get(['T1.*', 'T2.*', 'T3.start_date', 'T3.end_date', 'T4.name as crop_name', 'T5.name as mix_name', 'T5.application_rate', 'T5.minimum_rate', 'T5.maximum_rate', 'T1.id as plan_task_id', 'T1.deleted_at']);
         if(sizeof($result) > 0){
             $tempRes = json_decode(json_encode($result), true);
@@ -244,17 +258,20 @@ class PaddockPlanTaskController extends APIController
                 if($tempRes[$i]['start_date'] <= $currDate && $currDate <= $tempRes[$i]['end_date']){
                     $totalBatchArea = $this->getTotalBatchPaddockPlanTask($tempRes[$i]['plan_task_id']);
                     $tempRes[$i]['area'] = (float)$tempRes[$i]['area'];
-                    $tempRes[$i]['remaining_area'] = $totalBatchArea != null ? ((float)$tempRes[$i]['area'] - (float)$totalBatchArea) : (float)$tempRes[$i]['area'];
+                    $totalArea =  $totalBatchArea != null ? ((float)$tempRes[$i]['spray_area'] - (float)$totalBatchArea) : (float)$tempRes[$i]['spray_area'];
+                    $tempRes[$i]['remaining_spray_area'] = $this->numberConvention($totalArea);
                     $tempRes[$i]['units'] = "Ha";
                     $tempRes[$i]['spray_mix_units'] = "L/Ha";
                     $tempRes[$i]['partial'] = false;
                     $tempRes[$i]['partial_flag'] = false;
-                    if($tempRes[$i]['remaining_area'] > 0){
+                    $tempRes[$i]['rate_per_hectar'] = app('Increment\Marketplace\Paddock\Http\SprayMixProductController')->retrieveDetailsWithParams('spray_mix_id', $tempRes[$i]['spray_mix_id'], ['rate']);
+                    if($tempRes[$i]['remaining_spray_area'] > 0){
                         $available[] = $tempRes[$i];
                     }
                 }
                 $i++;
             }
+            // dd($tempRes);
             $this->response['data'] = $available;
         }else{
             return $this->response['data'] = [];

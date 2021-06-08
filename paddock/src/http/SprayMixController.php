@@ -78,6 +78,7 @@ class SprayMixController extends APIController
       $con = $data['condition'];
       $sortKey = null;
       $sortValue = null;
+      $size = null;
       foreach ($data['sort'] as $key) {
           $sortKey = array_keys($data['sort'])[0];
           $sortValue = $key;
@@ -95,6 +96,12 @@ class SprayMixController extends APIController
                         ->orderBy($sortKey, $sortValue)
                         ->get();
       }
+
+      $size = SprayMix::where($con[1]['column'], $con[1]['clause'], $con[1]['value'])
+          ->where($con[0]['column'], $con[0]['clause'], $con[0]['value'])
+          ->orderBy($sortKey, $sortValue)
+          ->get();
+
       $res = array();
       if(sizeof($tempData) > 0){
         $i = 0;
@@ -106,9 +113,9 @@ class SprayMixController extends APIController
           $temp[$i]['name'] = $key['name'];
           $temp[$i]['id'] = $key['id'];
           $temp[$i]['status'] = in_array($key['status'], $array) ? 'draft' : 'approved';
-          $temp[$i]['max_rate'] = (float)$key['maximum_rate'];
-          $temp[$i]['min_rate'] = (float)$key['minimum_rate'];
-          $temp[$i]['application_rate'] = (float)$key['application_rate'];
+          $temp[$i]['max_rate'] = $this->numberConvention($key['maximum_rate']);
+          $temp[$i]['min_rate'] = $this->numberConvention($key['minimum_rate']);
+          $temp[$i]['application_rate'] = $this->numberConvention($key['application_rate']);
           $temp[$i]['short_description'] = $key['short_description'];
           $temp[$i]['units'] = 'L/ha';
           $temp[$i]['types'] = $getCropName;
@@ -116,6 +123,7 @@ class SprayMixController extends APIController
 
         }
         $this->response['data'] = $temp;
+        $this->response['size'] = sizeof($size);
       }
       return $this->response();
   }
@@ -124,9 +132,9 @@ class SprayMixController extends APIController
     $res = SprayMix::where('id', '=', $data['id'])->get();
     $getCropName = app($this->cropClass)->retrieveCrops($res[0]['crops']);
     $res[0]['type'] = $getCropName;
-    $res[0]['minimum_rate'] = (float)$res[0]['minimum_rate'];
-    $res[0]['application_rate'] = (float)$res[0]['application_rate'];
-    $res[0]['maximum_rate'] = (float)$res[0]['maximum_rate'];
+    $res[0]['minimum_rate'] = $this->numberConvention($res[0]['minimum_rate']);
+    $res[0]['application_rate'] = $this->numberConvention($res[0]['application_rate']);
+    $res[0]['maximum_rate'] = $this->numberConvention($res[0]['maximum_rate']);
     $res[0]['units'] = 'L/ha';
     return response()->json(compact('res'));
   }
@@ -138,9 +146,9 @@ class SprayMixController extends APIController
 
   public function getByParamsDefault($column, $value){
     $result = SprayMix::where($column, '=', $value)->get();
-    $result[0]['application_rate'] = (float)$result[0]['application_rate'];
-    $result[0]['minimum_rate'] = (float)$result[0]['minimum_rate'];
-    $result[0]['maximum_rate'] = (float)$result[0]['maximum_rate'];
+    $result[0]['application_rate'] = $this->numberConvention($result[0]['application_rate']);
+    $result[0]['minimum_rate'] = $this->numberConvention($result[0]['minimum_rate']);
+    $result[0]['maximum_rate'] = $this->numberConvention($result[0]['maximum_rate']);
     $result[0]['units'] ='L/ha';
     return sizeof($result) > 0 ? $result[0] : null;
   }

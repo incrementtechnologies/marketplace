@@ -433,4 +433,25 @@ class CustomerController extends APIController
       return $code;
     }
   }
+
+  public function retrieveAccount(Request $request){
+    $data = $request->all();
+    $result = Customer::where('merchant', '=', $data['merchant'])->get();
+    $temp = false;
+    if(sizeof($result) > 0){
+      $i=0;
+      foreach ($result as $key) {
+        if($data['user_type']  === 'USER'){
+          $exist = app('Increment\Marketplace\Http\TransferController')->retrieveTransferredByParams($key['merchant_id'], $data['merchant_id']);
+          $temp = $exist;
+        }else if($data['user_type']  === 'DISTRIBUTOR'){
+          $exist = app('Increment\Marketplace\Http\TransferController')->retrieveTransferredByParams($data['merchant'], $data['merchant_id']);
+          $temp = $exist;
+        }
+        $i++;
+      }
+    }
+    $this->response['data'] = $temp;
+    return $this->response();
+  }
 }
