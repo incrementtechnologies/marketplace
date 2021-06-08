@@ -54,7 +54,12 @@ class PaddockPlanTaskController extends APIController
     public function retrieveMobileByParams(Request $request){
         $data = $request->all();
         $con = $data['condition'];
-        $result = PaddockPlanTask::where($con[0]['column'], '=', $con[0]['value'])->where($con[1]['column'], '=', $con[1]['value'])->skip($data['offset'])->orderBy('created_at', 'desc')->take($data['limit'])->get();
+        $result = null;
+        if(isset($data['limit'])){
+            $result = PaddockPlanTask::where($con[0]['column'], '=', $con[0]['value'])->where($con[1]['column'], '=', $con[1]['value'])->skip($data['offset'])->orderBy('created_at', 'desc')->take($data['limit'])->get();
+        }else{
+            $result = PaddockPlanTask::where($con[0]['column'], '=', $con[0]['value'])->where($con[1]['column'], '=', $con[1]['value'])->get();
+        }
         $temp = $result;
         $finalResult = array();
         $date =  Carbon::now();
@@ -64,6 +69,7 @@ class PaddockPlanTaskController extends APIController
             $j = 1;
             foreach ($temp as $key) {
                 $paddockPlan = app($this->paddockPlanClass)->retrievePlanByParams('id', $key['paddock_plan_id'], ['start_date', 'end_date']);
+                
                 if($paddockPlan[0]['start_date'] <= $currDate && $currDate <= $paddockPlan[0]['end_date']){
                     $paddocks = app($this->paddockPlanClass)->retrievePlanByParams('id', $key['paddock_plan_id'], ['crop_id', 'paddock_id']);
                     $existInBatch = app($this->batchPaddockTaskClass)->retrieveByParams('paddock_plan_task_id', $temp[$i]['id'], ['id']);
@@ -267,6 +273,7 @@ class PaddockPlanTaskController extends APIController
                 }
                 $i++;
             }
+            dd($tempRes);
             $this->response['data'] = $available;
         }else{
             return $this->response['data'] = [];
