@@ -273,7 +273,7 @@ class PaddockPlanTaskController extends APIController
                 }
                 $i++;
             }
-            dd($tempRes);
+            // dd($tempRes);
             $this->response['data'] = $available;
         }else{
             return $this->response['data'] = [];
