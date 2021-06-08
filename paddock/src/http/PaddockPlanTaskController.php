@@ -248,6 +248,7 @@ class PaddockPlanTaskController extends APIController
                 ->where('T1.status', '=', 'approved')
                 ->where('T1.deleted_at', '=', null)
                 ->where('T2.merchant_id', $data['merchant_id'])
+                ->groupBy('T1.paddock_plan_id')
                 ->get(['T1.*', 'T2.*', 'T3.start_date', 'T3.end_date', 'T4.name as crop_name', 'T5.name as mix_name', 'T5.application_rate', 'T5.minimum_rate', 'T5.maximum_rate', 'T1.id as plan_task_id', 'T1.deleted_at']);
         if(sizeof($result) > 0){
             $tempRes = json_decode(json_encode($result), true);
