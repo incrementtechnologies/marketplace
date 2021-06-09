@@ -16,6 +16,7 @@ class TransferredProductController extends APIController
     function __construct(){
       $this->model = new TransferredProduct();
       $this->localization();
+      $this->notRequired = array('bundled');
     }
 
     public function create(Request $request){
