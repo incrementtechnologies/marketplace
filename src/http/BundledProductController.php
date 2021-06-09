@@ -74,6 +74,11 @@ class BundledProductController extends APIController
     return $qty;
   }
 
+  public function getBundledByTrace($bundledTrace, $productOnSettings){
+    $result = BundledProduct::where('bundled_trace', '=', $bundledTrace)->where('product_on_settings', '=', $productOnSettings)->where('deleted_at', '=', null)->get();
+    return $result;
+  }
+
   public function checkIfExist($bundledTrace, $productTrace){
     $result = BundledProduct::where('bundled_trace', '=', $bundledTrace)->where('product_trace', '=', $productTrace)->where('deleted_at', '=', null)->get();
     return sizeof($result) > 0 ? true : false;
