@@ -145,15 +145,26 @@ class TransferredProductController extends APIController
     }
 
     public function getRemainingProductQty($productId, $merchantId, $productAtributeId){
-      $result = DB::table('transferred_products as T1')
+      $regular = DB::table('transferred_products as T1')
       ->leftJoin('product_traces as T2', 'T1.payload_value', '=', 'T2.id')
-      // ->leftJoin('transfers as T3', 'T1.transfer_id', '=', 'T3.id')
       ->where('T1.status', '=', 'active')
+      ->where('T1.payload', '=', 'product_trace')
       ->where('T1.deleted_at', '=', null)
       ->where('T1.merchant_id', '=', $merchantId)
-      // ->where('T1.product_id', '=', $productId)
       ->where('T1.product_attribute_id', '=', $productAtributeId)
       ->count();
+
+      $bundled = DB::table('transferred_products as T1')
+      ->leftJoin('product_traces as T2', 'T1.payload_value', '=', 'T2.id')
+      ->where('T1.status', '=', 'active')
+      ->where('T1.payload', '=', 'bundled_trace')
+      ->where('T1.deleted_at', '=', null)
+      ->where('T1.merchant_id', '=', $merchantId)
+      ->where('T1.product_attribute_id', '=', $productAtributeId)
+      ->sum('T1.bundled_setting_qty');
+
+      $result = $regular + $bundled;
+
       return $result;
     }
 
