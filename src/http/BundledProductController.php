@@ -74,6 +74,11 @@ class BundledProductController extends APIController
     return $qty;
   }
 
+  public function getBundledProductsByParams($conditions){
+    $result = BundledProduct::where($conditions)->get();
+    return sizeof($result);
+  }
+
   public function getBundledByTrace($bundledTrace, $productOnSettings){
     $result = BundledProduct::where('bundled_trace', '=', $bundledTrace)->where('product_on_settings', '=', $productOnSettings)->where('deleted_at', '=', null)->get();
     return $result;
