@@ -53,6 +53,7 @@ class PaddockController extends APIController
         }
         $result = Paddock::where($data['condition'][1]['column'], $data['condition'][1]['clause'], $data['condition'][1]['value'])
           ->where($data['condition'][2]['column'], $data['condition'][2]['clause'], $data['condition'][2]['value'])
+          ->where('deleted_at', '=', null)
           ->skip($data['offset'])
           ->take($data['limit'])
           ->get();
@@ -64,11 +65,12 @@ class PaddockController extends APIController
             $paddock_data = PaddockPlan::select()
               ->where('paddock_id', '=', $paddock_id)
               ->where('start_date', '<=', $this->date)
+              ->where('deleted_at', '=', null)
               ->limit(1)
               ->get();
               // dd($paddock_data);
             for ($x = 0; $x < count($paddock_data); $x++){
-              $paddock_plan_tasks = PaddockPlanTask::select()->where("paddock_plan_id", "=", $paddock_data[$x]['id'])->get();
+              $paddock_plan_tasks = PaddockPlanTask::select()->where("paddock_plan_id", "=", $paddock_data[$x]['id'])->where('deleted_at', '=', null)->get();
               for ($p = 0; $p < count($paddock_plan_tasks); $p++){
                 if($paddock_plan_tasks[$p]['status'] === 'approved' || $paddock_plan_tasks[$p]['status'] === 'completed'){
                   $this->response['data'][$i]['status'] = 'approved';
@@ -79,7 +81,7 @@ class PaddockController extends APIController
                 if (count($paddock_plan_tasks) > 0){
                     $paddock_data[$x]['paddock_tasks_data'] = $paddock_plan_tasks;
                 }
-                $crop_name = Crop::select('name')->where('id', '=', $paddock_data[$x]['crop_id'])->get();
+                $crop_name = Crop::select('name')->where('id', '=', $paddock_data[$x]['crop_id'])->where('deleted_at', '=', null)->get();
                 if (count($crop_name)>0){
                     $paddock_data[$x]['crop_name'] = $crop_name[0]['name'];
                 }
@@ -99,11 +101,12 @@ class PaddockController extends APIController
           $paddock_data = PaddockPlan::select()
           ->where('paddock_id', '=', $paddock_id)
           ->where('start_date', '<=', count($data['condition']) === 1 ? date($data['date']) : Carbon::now()->format('Y-m-d'))
+          ->where('deleted_at', '=', null)
           ->orderBy('start_date','desc')
           ->limit(1)
           ->get();
           if(count($paddock_data) > 0 && date($paddock_data[0]['end_date']) >= Carbon::now()->format('Y-m-d')) {
-            $paddock_plan_tasks = PaddockPlanTask::select()->where("paddock_plan_id", "=", $paddock_data[0]['id'])->get();
+            $paddock_plan_tasks = PaddockPlanTask::select()->where("paddock_plan_id", "=", $paddock_data[0]['id'])->where('deleted_at', '=', null)->get();
             for ($p = 0; $p < count($paddock_plan_tasks); $p++){
               if($paddock_plan_tasks[$p]['status'] === 'approved'){
                 $this->response['data'][$i]['status'] = 'approved';
@@ -114,7 +117,7 @@ class PaddockController extends APIController
             if (count($paddock_plan_tasks) > 0){
                 $paddock_data[0]['paddock_tasks_data'] = $paddock_plan_tasks;
             }
-            $crop_name = Crop::select('name')->where('id', '=', $paddock_data[0]['crop_id'])->get();
+            $crop_name = Crop::select('name')->where('id', '=', $paddock_data[0]['crop_id'])->where('deleted_at', '=', null)->get();
             if (count($crop_name)>0){
                 $paddock_data[0]['crop_name'] = $crop_name[0]['name'];
             }

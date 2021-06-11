@@ -573,7 +573,8 @@ class ProductTraceController extends APIController
     }
     return array(
       'qty'             => $counter,
-      'qty_in_bundled'  => $bundledQty
+      'qty_in_bundled'  => $bundledQty,
+      'hasActive' => sizeof($result) > 0 ? true : false
     );
   }
 
