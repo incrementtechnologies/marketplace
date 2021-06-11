@@ -6,7 +6,6 @@ namespace Increment\Marketplace\Http;
 use Illuminate\Http\Request;
 use App\Http\Controllers\APIController;
 use Increment\Marketplace\Models\BundledProduct;
-use Increment\Marketplace\Models\BundledSetting;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 class BundledProductController extends APIController
@@ -166,7 +165,6 @@ class BundledProductController extends APIController
         'deleted_at' => Carbon::now()
       )
     );
-
     app($this->productTraceController)->deleteByParams($data['bundled_trace']);
     $this->response['data'] = true;
     return $this->response();
