@@ -508,6 +508,7 @@ class ProductController extends APIController
             // $result[$i]['product_traces'] =  app($this->productTraceController)->getByParams('product_id', $result[$i]['id']);
             $qty = app($this->productTraceController)->getBalanceQtyOnManufacturer('product_id', $result[$i]['id']);
             $result[$i]['qty'] = $qty['qty'];
+            $result[$i]['hasActive'] = $qty['hasActive'];
             $result[$i]['qty_in_bundled'] = $qty['qty_in_bundled'];
           }
           $i++;
