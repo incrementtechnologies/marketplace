@@ -74,8 +74,9 @@ class BundledProductController extends APIController
     return $qty;
   }
 
-  public function getBundledProductsByParams($conditions){
-    $result = BundledProduct::where($conditions)->get();
+  public function getBundledProductsByParams($condition){
+    $result = DB::table('bundled_products')
+          ->where($condition)->get();
     return sizeof($result);
   }
 
