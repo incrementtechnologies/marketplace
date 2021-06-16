@@ -153,11 +153,13 @@ class TransferredProductController extends APIController
   public function getRemainingProductQty($productId, $merchantId, $productAtributeId)
   {
     $remainingProductInBundled = null;
-    $regular = DB::table('product_traces as T2')
-      ->where('T2.status', '=', 'active')
-      ->where('T2.deleted_at', '=', null)
-      ->where('T2.product_id', '=', $productId)
-      ->where('T2.product_attribute_id', '=', $productAtributeId)
+    $regular = DB::table('transferred_products as T1')
+      ->leftJoin('product_traces as T2', 'T1.payload_value', '=', 'T2.id')
+      ->where('T1.status', '=', 'active')
+      ->where('T1.payload', '=', 'product_trace')
+      ->where('T1.deleted_at', '=', null)
+      ->where('T1.merchant_id', '=', $merchantId)
+      ->where('T1.product_attribute_id', '=', $productAtributeId)
       ->count();
 
     $bundled = DB::table('transferred_products as T1')
@@ -167,8 +169,7 @@ class TransferredProductController extends APIController
       ->where('T1.deleted_at', '=', null)
       ->where('T1.merchant_id', '=', $merchantId)
       ->where('T1.product_attribute_id', '=', $productAtributeId)
-      ->sum('T1.bundled_setting_qty');
-
+      ->count('T1.bundled');
     if ($bundled !== 0) {
       $temp = DB::table('transferred_products as T1')
         ->leftJoin('product_traces as T2', 'T1.payload_value', '=', 'T2.id')
@@ -178,15 +179,16 @@ class TransferredProductController extends APIController
         ->where('T1.merchant_id', '=', $merchantId)
         ->where('T1.product_attribute_id', '=', $productAtributeId)->get();
 
-      $remainingBundled = app($this->bundledProductController)->getBundledProductsByParams(array(
-        array('product_attribute_id', '=', $temp[0]->product_attribute_id),
-        array('product_id', '=', $temp[0]->bundled),
-        array('deleted_at', '=', null)
-      ));
+        $remainingBundled = app($this->bundledProductController)->getBundledProductsByParams(array(
+          array('product_attribute_id', '=', $temp[0]->product_attribute_id),
+          array('product_id', '=', $temp[0]->bundled),
+          array('deleted_at', '=', null)
+        ));
       $remainingProductInBundled = (int)$bundled - (int)$remainingBundled;
     }
 
-    $result = $regular - $remainingProductInBundled;
+    $result = $regular + $remainingProductInBundled;
+  
 
     return $result;
   }
