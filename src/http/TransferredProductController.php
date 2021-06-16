@@ -183,7 +183,7 @@ class TransferredProductController extends APIController
       $remainingBundled = app($this->bundledProductController)->getBundledProductsByParams(array(
         array('product_attribute_id', '=', $temp[0]->product_attribute_id),
         array('product_id', '=', $temp[0]->bundled),
-        array('deleted_at', '=', null)
+        array('deleted_at', '!=', null)
       ));
       $remainingProductInBundled = (int)$bundled - (int)$remainingBundled;
     }
