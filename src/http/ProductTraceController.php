@@ -161,7 +161,7 @@ class ProductTraceController extends APIController
     $response[]['traces'] = [];
     foreach ($this->response['data'] as $key) {
       $item = $this->response['data'][$i];
-      $qty = $this->getProductQtyByStatus('batch_number' ,$item['batch_number'], 'active');
+      $qty = $this->getProductQtyByParameter($item['batch_number'], $item['product_id'], $item['product_attribute_id'],  'active');
       $this->response['data'][$i]['total_qty'] = $qty['total_qty'];
       $this->response['data'][$i]['active_qty'] = $qty['active_qty'];
       $this->response['data'][$i]['created_at_human'] = Carbon::createFromFormat('Y-m-d H:i:s', $item['created_at'])->copy()->tz($this->response['timezone'])->format('F j, Y h:i A');
@@ -683,7 +683,7 @@ class ProductTraceController extends APIController
         }
       }else{
         $qty = (int)$data['qty'];
-        $exist = ProductTrace::where('batch_number', '=', $data['batch_number'])->where('product_attribute_id', '=', $data['product_attribute_id'])->where('deleted_at', '=', null)->get();
+        $exist = ProductTrace::where('batch_number', '=', $data['batch_number'])->where('product_id', '=', $data['product_id'])->where('product_attribute_id', '=', $data['product_attribute_id'])->where('deleted_at', '=', null)->get();
         if(sizeof($exist) > 0){
           $this->response['error'] = 'Hold on, that batch number already exists. Update the batch number, or close to edit an existing batch.';
         }else{
@@ -811,6 +811,16 @@ class ProductTraceController extends APIController
   public function getProductQtyByStatus($column ,$value, $status){
     $all = ProductTrace::where($column, '=', $value)->where('deleted_at', '=', null)->count();
     $active = ProductTrace::where($column, '=', $value)->where('status', '=', $status)->where('deleted_at', '=', null)->count();
+    $result = array(
+      'total_qty' => $all,
+      'active_qty' => $active
+    );
+    return $result;
+  }
+
+  public function getProductQtyByParameter($batchNumber, $producId, $attrID, $status){
+    $all = ProductTrace::where('batch_number', '=', $batchNumber)->where('product_id', '=', $producId)->where('product_attribute_id', '=', $attrID)->where('deleted_at', '=', null)->count();
+    $active = ProductTrace::where('batch_number', '=', $batchNumber)->where('product_id', '=', $producId)->where('product_attribute_id', '=', $attrID)->where('status', '=', $status)->where('deleted_at', '=', null)->count();
     $result = array(
       'total_qty' => $all,
       'active_qty' => $active
