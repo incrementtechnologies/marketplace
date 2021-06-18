@@ -1088,6 +1088,7 @@ class TransferController extends APIController
 
         $item = array(
           'title'         => $trace[0]['product']['title'],
+          'type'  => $trace[0]['product']['type'],
           'batch_number'  => $trace[0]['batch_number'],
           'manufacturing_date' => $trace[0]['manufacturing_date'],
           'product_attribute' => $attributes
