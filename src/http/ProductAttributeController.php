@@ -120,7 +120,19 @@ class ProductAttributeController extends APIController
           }
           $result[$i]['payload_value'] = (int)$result[$i]['payload_value'];
           $productQtyPerVariation = app('Increment\Marketplace\Http\ProductTraceController')->getTotalAttributeByParamsWithProductId($result[$i]['product_id'], $result[$i]['id']);
-          $transferredProductQty = app('Increment\Marketplace\Http\TransferredProductController')->getTransferredProductInManufacturer($value, $result[$i]['id']);
+          $transferredProductQty = 0;
+          $transferredProduct = app('Increment\Marketplace\Http\TransferredProductController')->retrieveBundledTransferred($value, $result[$i]['id']);
+          if(sizeof($transferredProduct) > 0){
+            if($transferredProduct[0]['bundled_setting_qty'] !== null){
+              if(sizeof($transferredProduct) === 1){
+                $transferredProductQty = $transferredProduct[0]['bundled_setting_qty'];
+              }else{
+                $transferredProductQty = sizeof($transferredProduct);
+              }
+            }else{
+              $transferredProductQty = sizeof($transferredProduct);
+            }
+          }
           $result[$i]['total_active_variation'] = $productQtyPerVariation;
           $result[$i]['total_transferred_variation'] = $transferredProductQty;
           $result[$i]['total_bundled_product'] = $bundledProductsQty;
@@ -141,7 +153,7 @@ class ProductAttributeController extends APIController
         foreach ($result as $key) {
           $result[$i]['payload_value'] = (int)$result[$i]['payload_value'];
           $productQtyPerVariation = app('Increment\Marketplace\Http\ProductTraceController')->getTotalAttributeByParams($result[$i]['id']);
-          $transferredProductQty = app('Increment\Marketplace\Http\TransferredProductController')->retrieveBundledTransferred($value, $result[$i]['id']);
+          $transferredProductQty = app('Increment\Marketplace\Http\TransferredProductController')->getTransferredProductInManufacturer($value, $result[$i]['id']);
           $result[$i]['product_trace_qty'] = $productQtyPerVariation - $transferredProductQty;
           $i++;
         }
