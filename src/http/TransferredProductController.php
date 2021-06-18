@@ -179,18 +179,28 @@ class TransferredProductController extends APIController
         ->where('T1.merchant_id', '=', $merchantId)
         ->where('T1.product_attribute_id', '=', $productAtributeId)->get();
 
-        $remainingBundled = app($this->bundledProductController)->getBundledProductsByParams(array(
-          array('product_attribute_id', '=', $temp[0]->product_attribute_id),
-          array('product_id', '=', $temp[0]->bundled),
-          array('deleted_at', '=', null)
-        ));
+      $remainingBundled = app($this->bundledProductController)->getBundledProductsByParams(array(
+        array('product_attribute_id', '=', $temp[0]->product_attribute_id),
+        array('product_id', '=', $temp[0]->bundled),
+        array('deleted_at', '=', null)
+      ));
       $remainingProductInBundled = (int)$bundled - (int)$remainingBundled;
     }
 
     $result = $regular + $remainingProductInBundled;
-  
+
 
     return $result;
+  }
+
+  public function getRemainingProductQtyDistributor($productId, $merchantId, $productAtributeId)
+  {
+    $temp = TransferredProduct::where('merchant_id', '=', $merchantId)->where('product_attribute_id', '=', $productAtributeId)->where('payload', '=', 'bundled_trace')->where('status', '=', 'active')->get();
+    $count = TransferredProduct::where('merchant_id', '=', $merchantId)->where('product_attribute_id', '=', $productAtributeId)->where('payload', '=', 'product_trace')->where('status', '=', 'active')->count();
+    if (sizeof($temp) > 0) {
+      $count += $temp[0]['bundled_setting_qty'];
+    }
+    return $count;
   }
 
   public function functionGEtTransferredQtyDisTributor($productId, $merchantId, $productAtributeId)
@@ -241,7 +251,8 @@ class TransferredProductController extends APIController
     return $result;
   }
 
-  public function retrieveBundledTransferred($productId, $attrId, $returns){
+  public function retrieveBundledTransferred($productId, $attrId, $returns)
+  {
     $result = TransferredProduct::where('product_id', '=', $productId)->where('product_attribute_id', '=', $attrId)->orderBy('bundled_setting_qty', 'desc')->get($returns);
     return $result;
   }
