@@ -121,16 +121,22 @@ class ProductAttributeController extends APIController
           $result[$i]['payload_value'] = (int)$result[$i]['payload_value'];
           $productQtyPerVariation = app('Increment\Marketplace\Http\ProductTraceController')->getTotalAttributeByParamsWithProductId($result[$i]['product_id'], $result[$i]['id']);
           $transferredProductQty = 0;
-          $transferredProduct = app('Increment\Marketplace\Http\TransferredProductController')->retrieveBundledTransferred($value, $result[$i]['id']);
+          $transferredProduct = app('Increment\Marketplace\Http\TransferredProductController')->retrieveBundledTransferred($value, $result[$i]['id'], ['bundled_setting_qty']);
           if(sizeof($transferredProduct) > 0){
-            if($transferredProduct[0]['bundled_setting_qty'] !== null){
-              if(sizeof($transferredProduct) === 1){
+            if(sizeof($transferredProduct) === 1){
+              if($transferredProduct[0]['bundled_setting_qty'] !== null){
                 $transferredProductQty = $transferredProduct[0]['bundled_setting_qty'];
-              }else{
-                $transferredProductQty = sizeof($transferredProduct);
               }
             }else{
-              $transferredProductQty = sizeof($transferredProduct);
+              $j=0;
+              foreach ($transferredProduct as $value) {
+                if($value['bundled_setting_qty'] !== null){
+                  $transferredProductQty = $value['bundled_setting_qty'];
+                }else{
+                  $transferredProductQty += 1;
+                }
+                $j++;
+              }
             }
           }
           $result[$i]['total_active_variation'] = $productQtyPerVariation;
