@@ -130,7 +130,7 @@ class BundledSettingController extends APIController
       $i = 0;
       foreach ($result as $key) {
         $traceQty = app($this->productTraceController)->getProductQtyByParams($result[$i]['bundled'], $result[$i]['product_attribute_id']);
-        $isTransferred = app('Increment\Marketplace\Http\TransferredProductController')->retrieveBundledTransferred($result[$i]['product_id'], $result[$i]['product_attribute_id']);
+        $isTransferred = app('Increment\Marketplace\Http\TransferredProductController')->retrieveBundledTransferred($result[$i]['product_id'], $result[$i]['product_attribute_id'], ['bundled_setting_qty']);
         // dd($isTransferred);
         // $result[$i]['product'] = app($this->productController)->getByParamsWithReturn('id', $result[$i]['product_id'], ['title', 'id', 'tags']);
         $result[$i]['variation'] = app($this->productAttrController)->getByParamsWithMerchant('id', $result[$i]['product_attribute_id'], $merchantId);
