@@ -138,15 +138,6 @@ class ProductAttributeController extends APIController
                 $j++;
               }
             }
-            // if($transferredProduct[0]['bundled_setting_qty'] !== null){
-            //   if(sizeof($transferredProduct) === 1){
-            //     $transferredProductQty = $transferredProduct[0]['bundled_setting_qty'];
-            //   }else{
-            //     $transferredProductQty = sizeof($transferredProduct);
-            //   }
-            // }else{
-            //   $transferredProductQty = sizeof($transferredProduct);
-            // }
           }
           $result[$i]['total_active_variation'] = $productQtyPerVariation;
           $result[$i]['total_transferred_variation'] = $transferredProductQty;
