@@ -230,19 +230,18 @@ class ProductTraceController extends APIController
       $this->response['data'][$i]['product'] = app($this->productController)->getProductByParamsWithVariationId('id', $item['product_id'], $item['product_attribute_id']);
       $this->response['data'][$i]['volume'] = app($this->productAttrClass)->getProductUnits('id', $item['product_attribute_id']);
       $item = $this->response['data'][$i];
-      
-      if(isset($data['nfc']) && ($item['nfc'] == null || $item['nfc'] == '')){
+      // dd($item['nfc'], $item['status']);
+      if(isset($data['nfc']) && $item['nfc'] && $item['status']){
+          $this->response['data'] = null;
+          $this->response['error'] = 'Tag is already active';
+          return $this->response();
+      }else if(isset($data['nfc']) && ($item['nfc'] == null || $item['nfc'] == '')){
         $nfcResult = ProductTrace::where('nfc', '=', $data['nfc'])->where('deleted_at', '=', null)->get();
-        $isActive = ProductTrace::where('nfc', '=', $data['nfc'])->where('status', '=', 'active')->where('deleted_at', '=', null)->get();
         if(sizeof($nfcResult) > 0){
           $this->response['data'] = null;
           $this->response['error'] = 'Tag is already taken!';
           return $this->response();
-        }else if(sizeof($isActive) > 0){
-          $this->response['data'] = null;
-          $this->response['error'] = 'Tag is already active';
-          return $this->response();
-        }else{
+        }else{  
           ProductTrace::where('id', '=', $item['id'])->update(array(
             'nfc' => $data['nfc'],
             'updated_at' => Carbon::now(),
