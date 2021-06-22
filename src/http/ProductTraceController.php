@@ -233,9 +233,14 @@ class ProductTraceController extends APIController
       
       if(isset($data['nfc']) && ($item['nfc'] == null || $item['nfc'] == '')){
         $nfcResult = ProductTrace::where('nfc', '=', $data['nfc'])->where('deleted_at', '=', null)->get();
+        $isActive = ProductTrace::where('nfc', '=', $data['nfc'])->where('status', '=', 'active')->where('deleted_at', '=', null)->get();
         if(sizeof($nfcResult) > 0){
           $this->response['data'] = null;
           $this->response['error'] = 'Tag is already taken!';
+          return $this->response();
+        }else if(sizeof($isActive) > 0){
+          $this->response['data'] = null;
+          $this->response['error'] = 'Tag is already active';
           return $this->response();
         }else{
           ProductTrace::where('id', '=', $item['id'])->update(array(
