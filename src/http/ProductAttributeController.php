@@ -168,6 +168,23 @@ class ProductAttributeController extends APIController
       return $result;
     }
 
+    public function create(Request $request){
+      $data = $request->all();
+      $exist = ProductAttribute::where('product_id', '=', $data['product_id'])
+        ->where('payload', '=', $data['payload'])
+        ->where('payload_value', '=', $data['payload_value'])
+        ->where('deleted_at', '=', null)
+        ->get();
+      if(sizeof($exist) > 0){
+        $this->response['data'] = [];
+        $this->response['error'] = 'This variation is already existed!';
+      }else{
+        $temp = ProductAttribute::create($data);
+        $this->response['data'] = $temp;
+      }
+      return $this->response();
+    }
+
     public function convertVariation($payload, $payloadValue){
       if((float)$payloadValue % 10000 == 0){
         $result = null;
