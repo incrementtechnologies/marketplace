@@ -230,12 +230,15 @@ class ProductTraceController extends APIController
       $this->response['data'][$i]['product'] = app($this->productController)->getProductByParamsWithVariationId('id', $item['product_id'], $item['product_attribute_id']);
       $this->response['data'][$i]['volume'] = app($this->productAttrClass)->getProductUnits('id', $item['product_attribute_id']);
       $item = $this->response['data'][$i];
-      // dd($item['nfc'], $item['status']);
-      if(isset($data['nfc']) && $item['nfc'] && $item['status']){
-          $this->response['data'] = null;
-          $this->response['error'] = 'Tag is already active';
-          return $this->response();
-      }else if(isset($data['nfc']) && ($item['nfc'] == null || $item['nfc'] == '')){
+      // dd(isset($data['nfc']), $item['nfc'] !== null, $item['status'] === 'active');
+      if(isset($data['activation'])){
+        if(isset($data['nfc']) && $item['nfc'] !== null && $item['status'] === 'active'){
+            $this->response['data'] = null;
+            $this->response['error'] = 'Tag is already active';
+            return $this->response();
+        }
+      }
+      if(isset($data['nfc']) && ($item['nfc'] == null || $item['nfc'] == '')){
         $nfcResult = ProductTrace::where('nfc', '=', $data['nfc'])->where('deleted_at', '=', null)->get();
         if(sizeof($nfcResult) > 0){
           $this->response['data'] = null;
