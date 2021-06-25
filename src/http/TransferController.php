@@ -83,10 +83,11 @@ class TransferController extends APIController
           );
         }
         $productTrace = app($this->productTraceClass)->getDetailsByParams('id', $key['product_trace'], ['id', 'code', 'product_attribute_id']);
+        $existInbundledProducts = app($this->bundledProductController)->getByParamsNoDetails('product_trace', $key['product_trace']);
         if ($productTrace) {
           $item = array(
             'transfer_id' => $this->response['data'],
-            'payload'     => $key['bundled_id'] !== NULL ? 'bundled_trace' : 'product_traces',
+            'payload'     => $existInbundledProducts !== null ? 'bundled_trace' : 'product_trace',
             'payload_value' => $key['product_trace'],
             'product_id'  => $key['product_id'],
             'merchant_id'  => $data['to'],
@@ -640,13 +641,12 @@ class TransferController extends APIController
       // array('T2.status', '=', 'active'),
       array('T2.merchant_id', '=', $data['merchant_id'])
     );
-
     $result = DB::table('products as T1')
       ->leftJoin('transferred_products as T2', 'T2.product_id', '=', 'T1.id')
       ->where($whereArray)
       ->groupBy('T2.product_attribute_id')
       ->skip($data['offset'])->take($data['limit'])
-      ->orderBy($con['column'], $data['sort'][$con['column']])
+      ->orderBy($con['column'],  array_values($data['sort'])[0])
       ->select('T1.id', 'T1.code', 'T1.title',  'T2.product_attribute_id', 'T1.tags', 'T1.merchant_id as from', 'T2.merchant_id as to', 'T1.type', 'T1.tags', 'T1.description')
       ->get();
 
@@ -654,7 +654,7 @@ class TransferController extends APIController
       ->leftJoin('transferred_products as T2', 'T2.product_id', '=', 'T1.id')
       ->where($whereArray)
       ->groupBy('T2.product_attribute_id')
-      ->orderBy($con['column'], $data['sort'][$con['column']])
+      ->orderBy($con['column'],  array_values($data['sort'])[0])
       ->select('T1.id', 'T1.code', 'T1.title',  'T2.product_attribute_id', 'T1.tags', 'T1.merchant_id as from', 'T2.merchant_id as to', 'T1.type', 'T1.tags', 'T1.description')
       ->get();
 
