@@ -176,6 +176,6 @@ class BundledSettingController extends APIController
 
   public function getByParamsDetails($column, $value){
     $result = BundledSetting::where($column, '=', $value)->where('deleted_at', '=', null)->get();
-    return sizeof($result) > 0 ? $result : null;
+    return sizeof($result) > 0 ? $result : [];
   }
 }
