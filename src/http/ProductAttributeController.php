@@ -145,7 +145,7 @@ class ProductAttributeController extends APIController
           $result[$i]['qty_in_bundled'] = sizeof($exist) > 0 ? $exist[0]['qty'] : null;
           $result[$i]['scanned_bundled_qty'] = $bundledProductsQty;
           $result[$i]['product_trace_qty'] = ($productQtyPerVariation - $transferredProductQty);
-          $result[$i]['is_used'] = $exist !== null ? true : false;
+          $result[$i]['is_used'] = sizeof($exist) > 0 ? true : false;
           $i++;
         }
       }
