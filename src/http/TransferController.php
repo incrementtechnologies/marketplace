@@ -62,7 +62,7 @@ class TransferController extends APIController
       $products = $data['products'];
       $i=0;
       foreach ($products as $key) {
-        $existInBundled = app($this->bundledSettingsController)->getByParamsDetails('bundled', $key['product_id']);
+        $existInBundled = app($this->bundledSettingsController)->getByParamsDetails('product_id', $key['product_id']);
         if(sizeof($existInBundled) > 0){
           $key['bundled_id'] = $existInBundled[0]['bundled'];
           $key['bundled_setting_qty'] = $existInBundled[0]['qty'];
