@@ -106,22 +106,22 @@ class ProductAttributeController extends APIController
 
     public function getByParamsWithMerchant($column, $value, $merchantId){
       $result = ProductAttribute::where($column, '=', $value)->where('deleted_at', '=', null)->orderBy('payload_value', 'asc')->select(['id', 'payload', 'payload_value', 'product_id'])->get();
-      $bundledProductsQty = null;
       if(sizeof($result) > 0){
         $i = 0;
         foreach ($result as $key) {
-          $exist = app('Increment\Marketplace\Http\BundledSettingController')->getByParamsDetails('product_attribute_id', $result[$i]['id']);
+          $bundledProductsQty = null;
+          $exist = app('Increment\Marketplace\Http\BundledSettingController')->getByParamsDetails('product_attribute_id', $key['id']);
           if(sizeof($exist) > 0){
-            $bundledTrace = app('Increment\Marketplace\Http\ProductTraceController')->retrieveBundledTrace($exist[0]['product_attribute_id'], $exist[0]['bundled'], ['id', 'code']);
+            $bundledTrace = app('Increment\Marketplace\Http\ProductTraceController')->retrieveBundledTrace($key['id'], $exist[0]['bundled'], ['id', 'code']);
             if(sizeof($bundledTrace) > 0){
               $bundledProducts = app('Increment\Marketplace\Http\BundledProductController')->retrieveDataWithBundledSetting($bundledTrace[0]['id']);
               $bundledProductsQty = $bundledProducts;
             }
           }
-          $result[$i]['payload_value'] = (int)$result[$i]['payload_value'];
-          $productQtyPerVariation = app('Increment\Marketplace\Http\ProductTraceController')->getTotalAttributeByParamsWithProductId($result[$i]['product_id'], $result[$i]['id']);
+          $result[$i]['payload_value'] = (int)$key['payload_value'];
+          $productQtyPerVariation = app('Increment\Marketplace\Http\ProductTraceController')->getTotalAttributeByParamsWithProductId($key['product_id'], $key['id']);
           $transferredProductQty = 0;
-          $transferredProduct = app('Increment\Marketplace\Http\TransferredProductController')->retrieveBundledTransferred($value, $result[$i]['id'], ['bundled_setting_qty']);
+          $transferredProduct = app('Increment\Marketplace\Http\TransferredProductController')->retrieveBundledTransferred($value, $key['id'], ['bundled_setting_qty']);
           if(sizeof($transferredProduct) > 0){
             if(sizeof($transferredProduct) === 1){
               if($transferredProduct[0]['bundled_setting_qty'] !== null){
