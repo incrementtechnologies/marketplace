@@ -111,7 +111,7 @@ class ProductAttributeController extends APIController
         $i = 0;
         foreach ($result as $key) {
           $exist = app('Increment\Marketplace\Http\BundledSettingController')->getByParamsDetails('product_attribute_id', $result[$i]['id']);
-          if($exist !== null){
+          if(sizeof($exist) > 0){
             $bundledTrace = app('Increment\Marketplace\Http\ProductTraceController')->retrieveBundledTrace($exist[0]['product_attribute_id'], $exist[0]['bundled'], ['id', 'code']);
             if(sizeof($bundledTrace) > 0){
               $bundledProducts = app('Increment\Marketplace\Http\BundledProductController')->retrieveDataWithBundledSetting($bundledTrace[0]['id']);
@@ -142,7 +142,7 @@ class ProductAttributeController extends APIController
           $result[$i]['total_active_variation'] = $productQtyPerVariation;
           $result[$i]['total_transferred_variation'] = $transferredProductQty;
           $result[$i]['total_bundled_product'] = $bundledProductsQty;
-          $result[$i]['qty_in_bundled'] = $exist[0]['qty'];
+          $result[$i]['qty_in_bundled'] = sizeof($exist) > 0 ? $exist[0]['qty'] : null;
           $result[$i]['scanned_bundled_qty'] = $bundledProductsQty;
           $result[$i]['product_trace_qty'] = ($productQtyPerVariation - $transferredProductQty);
           $result[$i]['is_used'] = $exist !== null ? true : false;
