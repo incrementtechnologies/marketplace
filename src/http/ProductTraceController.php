@@ -277,13 +277,13 @@ class ProductTraceController extends APIController
           $qty = $this->getBalanceQtyWithInBundled('product_id', $item['product_id'], 'active', $data['merchant_id'], $item['product_attribute_id']);
           $this->response['data'][$i]['product']['qty'] = $qty['qty'];
           $this->response['data'][$i]['product']['qty_in_bundled'] = $qty['qty_in_bundled'];
-          $this->response['data'][$i]['product']['setting_qty'] = sizeof($bundledSettingQty) > 0 ? $bundledSettingQty[0]['qty'] : 0;
+          $this->response['data'][$i]['product']['setting_qty'] = sizeof($bundledSettingQty) > 0 ? sizeof($bundledSettingQty) : 0;
           $this->response['data'][$i]['product']['trace_qty'] = 1;
         }else if($data['account_type'] == 'DISTRIBUTOR' && $type != 'regular'){
           $qty = $this->getBalanceQtyWithInBundled('product_id', $item['product_id'], 'active', $data['merchant_id'], $item['product_attribute_id']);
           $this->response['data'][$i]['product']['qty'] = $qty['qty'];
           $this->response['data'][$i]['product']['qty_in_bundled'] = $qty['qty_in_bundled'];
-          $this->response['data'][$i]['product']['setting_qty'] = sizeof($bundledSettingQty) > 0 ? $bundledSettingQty[0]['qty'] : 0;
+          $this->response['data'][$i]['product']['setting_qty'] = sizeof($bundledSettingQty) > 0 ? sizeof($bundledSettingQty) : 0;
           $this->response['data'][$i]['product']['trace_qty'] = 1;
         }else{
           $bundled = $this->response['data'][$i]['bundled_product'];
