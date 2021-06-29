@@ -267,6 +267,11 @@ class TransferredProductController extends APIController
     return $result;
   }
 
+  public function getTotalTransferredBundledProducts($productId)
+  {
+    return TransferredProduct::where('bundled', '=', $productId)->count();
+  }
+
   public function getActiveProductQtyInAttribute($productId, $productAtributeId, $merchantId)
   {
     $result = TransferredProduct::where('product_id', '=', $productId)->where('product_attribute_id', '=', $productAtributeId)->where('merchant_id', '=', $merchantId)->where('status', '=', 'active')->count();
