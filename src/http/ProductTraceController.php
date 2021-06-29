@@ -268,6 +268,8 @@ class ProductTraceController extends APIController
 
       $this->response['data'][$i]['created_at_human'] = Carbon::createFromFormat('Y-m-d H:i:s', $item['created_at'])->copy()->tz($this->response['timezone'])->format('F j, Y h:i A');
       $this->response['data'][$i]['bundled_product'] = app($this->bundledProductController)->getByParams('product_trace', $item['id']);
+      // dd($item);
+      $bundledSettingQty = app($this->bundledSettingController)->getQtyByParams($item['product_id'], $item['product_attribute_id']);
       if($this->response['data'][$i]['product'] != null){
         $type = $this->response['data'][$i]['product']['type'];
         $this->response['data'][$i]['product']['qty'] = null;
@@ -275,11 +277,13 @@ class ProductTraceController extends APIController
           $qty = $this->getBalanceQtyWithInBundled('product_id', $item['product_id'], 'active', $data['merchant_id'], $item['product_attribute_id']);
           $this->response['data'][$i]['product']['qty'] = $qty['qty'];
           $this->response['data'][$i]['product']['qty_in_bundled'] = $qty['qty_in_bundled'];
+          $this->response['data'][$i]['product']['setting_qty'] = sizeof($bundledSettingQty) > 0 ? $bundledSettingQty[0]['qty'] : 0;
           $this->response['data'][$i]['product']['trace_qty'] = 1;
         }else if($data['account_type'] == 'DISTRIBUTOR' && $type != 'regular'){
           $qty = $this->getBalanceQtyWithInBundled('product_id', $item['product_id'], 'active', $data['merchant_id'], $item['product_attribute_id']);
           $this->response['data'][$i]['product']['qty'] = $qty['qty'];
           $this->response['data'][$i]['product']['qty_in_bundled'] = $qty['qty_in_bundled'];
+          $this->response['data'][$i]['product']['setting_qty'] = sizeof($bundledSettingQty) > 0 ? $bundledSettingQty[0]['qty'] : 0;
           $this->response['data'][$i]['product']['trace_qty'] = 1;
         }else{
           $bundled = $this->response['data'][$i]['bundled_product'];
