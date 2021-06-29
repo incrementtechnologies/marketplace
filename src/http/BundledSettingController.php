@@ -178,4 +178,10 @@ class BundledSettingController extends APIController
     $result = BundledSetting::where($column, '=', $value)->where('deleted_at', '=', null)->get();
     return sizeof($result) > 0 ? $result : [];
   }
+
+  public function getQtyByParams($productID, $AttrId){
+    $result = BundledSetting::where('product_id', '=', $productID)->where('product_attribute_id', '=', $AttrId)->where('deleted_at', '=', null)->get();
+    return sizeof($result) > 0 ? $result : [];
+  }
+
 }
