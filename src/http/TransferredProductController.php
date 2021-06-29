@@ -257,7 +257,7 @@ class TransferredProductController extends APIController
 
   public function retrieveBundledTransferred($productId, $attrId, $returns)
   {
-    $result = TransferredProduct::where('product_id', '=', $productId)->where('product_attribute_id', '=', $attrId)->orderBy('bundled_setting_qty', 'desc')->get($returns);
+    $result = TransferredProduct::where('product_id', '=', $productId)->where('product_attribute_id', '=', $attrId)->where('deleted_at', '=', null)->orderBy('bundled_setting_qty', 'desc')->get($returns);
     return $result;
   }
 
