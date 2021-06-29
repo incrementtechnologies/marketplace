@@ -138,8 +138,6 @@ class BundledSettingController extends APIController
         $result[$i]['created_at_human'] = Carbon::createFromFormat('Y-m-d H:i:s', $result[$i]['created_at'])->copy()->tz($this->response['timezone'])->format('F j, Y H:i A');
         $result[$i]['qty'] = (int)$result[$i]['qty'];
         $result[$i]['scanned_qty'] = $traceQty - $totalTransferredBundled;
-        $result[$i]['traceQty'] = $traceQty;
-        $result[$i]['totalTransferredBundled'] = $totalTransferredBundled;
         $result[$i]['is_transferred'] = false;
         $i++;
       }
