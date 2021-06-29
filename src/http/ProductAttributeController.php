@@ -119,7 +119,7 @@ class ProductAttributeController extends APIController
             }
           }
           $result[$i]['payload_value'] = (int)$key['payload_value'];
-          $productQtyPerVariation = app('Increment\Marketplace\Http\ProductTraceController')->getTotalAttributeByParamsWithProductId($key['product_id'], $key['id']);
+          $productQtyPerVariation = app('Increment\Marketplace\Http\ProductTraceController')->getTotalAttributeByParamsWithProductId(null, $key['id']);
           $transferredProductQty = 0;
           $transferredProduct = app('Increment\Marketplace\Http\TransferredProductController')->retrieveBundledTransferred($value, $key['id'], ['bundled_setting_qty']);
           if(sizeof($transferredProduct) > 0){
