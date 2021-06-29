@@ -247,8 +247,12 @@ class TransferredProductController extends APIController
 
   public function getSizeNoDate($column, $value)
   {
-    $result = TransferredProduct::where($column, '=', $value)->count();
-    return $result;
+    $productTrace = TransferredProduct::where($column, '=', $value)->where('payload', '=', 'product_trace')->count();
+    $bundled = TransferredProduct::where($column, '=', $value)->where('payload', '=', 'bundled_trace')->get();
+    if(sizeof($bundled) > 0){
+      $productTrace += $bundled[0]['qty'];
+    }
+    return $productTrace;
   }
 
   public function retrieveBundledTransferred($productId, $attrId, $returns)
