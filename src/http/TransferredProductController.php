@@ -250,7 +250,7 @@ class TransferredProductController extends APIController
     $productTrace = TransferredProduct::where($column, '=', $value)->where('payload', '=', 'product_trace')->count();
     $bundled = TransferredProduct::where($column, '=', $value)->where('payload', '=', 'bundled_trace')->get();
     if(sizeof($bundled) > 0){
-      $productTrace += $bundled[0]['qty'];
+      $productTrace += $bundled[0]['bundled_setting_qty'];
     }
     return $productTrace;
   }
