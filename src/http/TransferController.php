@@ -60,19 +60,27 @@ class TransferController extends APIController
       ));
 
       $products = $data['products'];
-      $i=0;
+      $i = 0;
       foreach ($products as $key) {
-        $existInBundled = app($this->bundledSettingsController)->getByParamsDetails('product_id', $key['product_id']);
-        if(sizeof($existInBundled) > 0){
-          $key['bundled_id'] = $existInBundled[0]['bundled'];
-          $key['bundled_setting_qty'] = $existInBundled[0]['qty'];
-        }else{
+        $existInbundledProducts = app($this->bundledProductController)->getByParamsNoDetails('bundled_trace', $key['product_trace']);
+        if ($existInbundledProducts !== null) {
+          $existInBundled = app($this->bundledSettingsController)->getByParamsByCondition(array(
+            array('product_id', '=', $existInbundledProducts['product_on_settings']),
+            array('bundled', '=', $existInbundledProducts['product_id'])
+          ));
+          if (sizeof($existInBundled) > 0) {
+            $key['bundled_id'] = $existInBundled[0]['bundled'];
+            $key['bundled_setting_qty'] = $existInBundled[0]['qty'];
+          } else {
+            $key['bundled_id'] = NULL;
+            $key['bundled_setting_qty'] = NULL;
+          }
+        } else {
           $key['bundled_id'] = NULL;
           $key['bundled_setting_qty'] = NULL;
         }
 
         $existTrace = TransferredProduct::where('payload_value', '=', $key['product_trace'])->orderBy('created_at', 'desc')->limit(1)->get();
-
         if (sizeof($existTrace) > 0) {
           TransferredProduct::where('id', '=', $existTrace[0]['id'])->update(
             array(
@@ -82,7 +90,6 @@ class TransferController extends APIController
           );
         }
         $productTrace = app($this->productTraceClass)->getDetailsByParams('id', $key['product_trace'], ['id', 'code', 'product_attribute_id']);
-        $existInbundledProducts = app($this->bundledProductController)->getByParamsNoDetails('bundled_trace', $key['product_trace']);
         // dd($existInBundled);
         if ($productTrace) {
           $item = array(
