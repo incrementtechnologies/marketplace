@@ -195,8 +195,18 @@ class TransferredProductController extends APIController
 
   public function getRemainingProductQtyDistributor($productId, $merchantId, $productAtributeId)
   {
-    $temp = TransferredProduct::where('merchant_id', '=', $merchantId)->where('product_attribute_id', '=', $productAtributeId)->where('payload', '=', 'bundled_trace')->where('status', '=', 'active')->get();
-    $count = TransferredProduct::where('merchant_id', '=', $merchantId)->where('product_attribute_id', '=', $productAtributeId)->where('payload', '=', 'product_trace')->where('status', '=', 'active')->count();
+    $temp = TransferredProduct::where('merchant_id', '=', $merchantId)
+      ->where('product_attribute_id', '=', $productAtributeId)
+      ->where('payload', '=', 'bundled_trace')
+      ->where('status', '=', 'active')
+      ->where('deleted_at', '=', null)
+      ->get();
+    $count = TransferredProduct::where('merchant_id', '=', $merchantId)
+      ->where('product_attribute_id', '=', $productAtributeId)
+      ->where('payload', '=', 'product_trace')
+      ->where('status', '=', 'active')
+      ->where('deleted_at', '=', null)
+      ->count();
     if (sizeof($temp) > 0) {
       $count += $temp[0]['bundled_setting_qty'];
     }
@@ -247,9 +257,29 @@ class TransferredProductController extends APIController
 
   public function getSizeNoDate($column, $value)
   {
-    $productTrace = TransferredProduct::where($column, '=', $value)->where('payload', '=', 'product_trace')->count();
-    $bundled = TransferredProduct::where($column, '=', $value)->where('payload', '=', 'bundled_trace')->get();
-    if(sizeof($bundled) > 0){
+    $productTrace = TransferredProduct::where($column, '=', $value)->where('payload', '=', 'product_trace')->where('deleted_at', '=', null)->count();
+    $bundled = TransferredProduct::where($column, '=', $value)->where('payload', '=', 'bundled_trace')->where('deleted_at', '=', null)->get();
+    if (sizeof($bundled) > 0) {
+      $productTrace += $bundled[0]['bundled_setting_qty'];
+    }
+    return $productTrace;
+  }
+
+  public function getTranferredProduct($AttrId, $merchantId)
+  {
+    $condition = array(
+      array('product_attribute_id', '=', $AttrId),
+      array('deleted_at', '=', null)
+    );
+    if ($merchantId !== null) {
+      array_push($condition, array('merchant_id', '=', $merchantId));
+    }
+
+    $productTrace = TransferredProduct::where($condition)->where('payload', '=', 'product_trace')->count();
+    $bundled = TransferredProduct::where(($condition))->where('payload', '=', 'bundled_trace')->get();
+
+
+    if (sizeof($bundled) > 0) {
       $productTrace += $bundled[0]['bundled_setting_qty'];
     }
     return $productTrace;

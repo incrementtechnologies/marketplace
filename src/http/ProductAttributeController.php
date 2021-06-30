@@ -120,31 +120,32 @@ class ProductAttributeController extends APIController
           }
           $result[$i]['payload_value'] = (int)$key['payload_value'];
           $productQtyPerVariation = app('Increment\Marketplace\Http\ProductTraceController')->getTotalAttributeByParamsWithProductId(null, $key['id']);
-          $transferredProductQty = 0;
-          $transferredProduct = app('Increment\Marketplace\Http\TransferredProductController')->retrieveBundledTransferred($value, $key['id'], ['bundled_setting_qty']);
-          if(sizeof($transferredProduct) > 0){
-            if(sizeof($transferredProduct) === 1){
-              if($transferredProduct[0]['bundled_setting_qty'] !== null){
-                $transferredProductQty = $transferredProduct[0]['bundled_setting_qty'];
-              }
-            }else{
-              $j=0;
-              foreach ($transferredProduct as $value) {
-                if($value['bundled_setting_qty'] !== null){
-                  $transferredProductQty = $value['bundled_setting_qty'];
-                }else{
-                  $transferredProductQty += 1;
-                }
-                $j++;
-              }
-            }
-          }
+          // $transferredProductQty = 0;
+          $transferredProduct = app('Increment\Marketplace\Http\TransferredProductController')->getTranferredProduct($key['id'], $merchantId);
+          // $transferredProduct = app('Increment\Marketplace\Http\TransferredProductController')->retrieveBundledTransferred($value, $key['id'], ['bundled_setting_qty']);
+          // if(sizeof($transferredProduct) > 0){
+          //   if(sizeof($transferredProduct) === 1){
+          //     if($transferredProduct[0]['bundled_setting_qty'] !== null){
+          //       $transferredProductQty = $transferredProduct[0]['bundled_setting_qty'];
+          //     }
+          //   }else{
+          //     $j=0;
+          //     foreach ($transferredProduct as $value) {
+          //       if($value['bundled_setting_qty'] !== null){
+          //         $transferredProductQty = $value['bundled_setting_qty'];
+          //       }else{
+          //         $transferredProductQty += 1;
+          //       }
+          //       $j++;
+          //     }
+          //   }
+          // }
           $result[$i]['total_active_variation'] = $productQtyPerVariation;
-          $result[$i]['total_transferred_variation'] = $transferredProductQty;
+          $result[$i]['total_transferred_variation'] = $transferredProduct;
           $result[$i]['total_bundled_product'] = $bundledProductsQty;
           $result[$i]['qty_in_bundled'] = sizeof($exist) > 0 ? $exist[0]['qty'] : null;
           $result[$i]['scanned_bundled_qty'] = $bundledProductsQty;
-          $result[$i]['product_trace_qty'] = ($productQtyPerVariation - $transferredProductQty);
+          $result[$i]['product_trace_qty'] = ($productQtyPerVariation - $transferredProduct);
           $result[$i]['is_used'] = sizeof($exist) > 0 ? true : false;
           $i++;
         }
