@@ -10,6 +10,7 @@ use Increment\Marketplace\Models\TransferredProduct;
 use Illuminate\Support\Facades\Hash;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+
 class ProductTraceController extends APIController
 {
 
@@ -22,8 +23,9 @@ class ProductTraceController extends APIController
   public $landBlockProductClass = 'App\Http\Controllers\LandBlockProductController';
   public $batchProductClass = 'Increment\Marketplace\Paddock\Http\BatchProductController';
 
-  function __construct(){
-  	$this->model = new ProductTrace();
+  function __construct()
+  {
+    $this->model = new ProductTrace();
 
     $this->notRequired = array(
       'rf', 'nfc', 'manufacturing_date', 'batch_number'
@@ -32,9 +34,10 @@ class ProductTraceController extends APIController
     $this->localization();
   }
 
-  public function getByParams($column, $value){
+  public function getByParams($column, $value)
+  {
     $result  = ProductTrace::where($column, '=', $value)->orderBy('created_at', 'desc')->limit(5)->get();
-    if(sizeof($result) > 0){
+    if (sizeof($result) > 0) {
       $i = 0;
       foreach ($result as $key) {
         $result[$i]['created_at_human'] = Carbon::createFromFormat('Y-m-d H:i:s', $result[$i]['created_at'])->copy()->tz($this->response['timezone'])->format('F j, Y h:i A');
@@ -44,7 +47,8 @@ class ProductTraceController extends APIController
     return sizeof($result) > 0 ? $result : null;
   }
 
-  public function updateTrace(Request $request){
+  public function updateTrace(Request $request)
+  {
     $data = $request->all();
     ProductTrace::where('id', '=', $data['id'])->update(array(
       'qty' => $data['qty']
@@ -52,33 +56,37 @@ class ProductTraceController extends APIController
     return $this->response();
   }
 
-  public function getTotalAttributeByParams($attrID){
+  public function getTotalAttributeByParams($attrID)
+  {
     $result = ProductTrace::where('product_attribute_id', '=', $attrID)->where('status', '=', 'active')->orderBy('created_at', 'desc')->count();
-    
+
     return $result;
   }
-  public function retrieveBundledTrace($attrID, $productId, $returns){
+  public function retrieveBundledTrace($attrID, $productId, $returns)
+  {
     $whereArray = array(
       array('product_attribute_id', '=', $attrID),
       array('product_id', '=', $productId),
       array('status', '=', 'active'),
       array('nfc', '!=', null)
     );
-    $result = ProductTrace::where($whereArray)->orderBy('created_at', 'desc')->get($returns); 
+    $result = ProductTrace::where($whereArray)->orderBy('created_at', 'desc')->get($returns);
     return $result;
   }
 
-  public function getTotalAttributeByParamsWithProductId($productId, $attrID){
-    if($productId !== null){
+  public function getTotalAttributeByParamsWithProductId($productId, $attrID)
+  {
+    if ($productId !== null) {
       $result = ProductTrace::where('product_id', '=', $productId)->where('product_attribute_id', '=', $attrID)->where('status', '=', 'active')->orderBy('created_at', 'desc')->count();
-    }else{
+    } else {
       $result = ProductTrace::where('product_attribute_id', '=', $attrID)->where('status', '=', 'active')->orderBy('created_at', 'desc')->count();
     }
     return $result;
   }
-  public function getByParamsLimitOne($column, $value){
+  public function getByParamsLimitOne($column, $value)
+  {
     $result  = ProductTrace::where($column, '=', $value)->orderBy('created_at', 'desc')->get();
-    if(sizeof($result) > 0){
+    if (sizeof($result) > 0) {
       $i = 0;
       foreach ($result as $key) {
         $result[$i]['created_at_human'] = Carbon::createFromFormat('Y-m-d H:i:s', $result[$i]['created_at'])->copy()->tz($this->response['timezone'])->format('F j, Y h:i A');
@@ -88,10 +96,11 @@ class ProductTraceController extends APIController
     return sizeof($result) > 0 ? $result[0] : null;
   }
 
-  public function retrieve(Request $request){
+  public function retrieve(Request $request)
+  {
     $data = $request->all();
     $product = app($this->productController)->getProductByParams('code', $data['code']);
-    if($product != null){
+    if ($product != null) {
       $data['condition'][] = array(
         'column'  => 'product_id',
         'clause'  => '=',
@@ -111,7 +120,7 @@ class ProductTraceController extends APIController
       $this->response['data'][$i]['created_at_human'] = Carbon::createFromFormat('Y-m-d H:i:s', $item['created_at'])->copy()->tz($this->response['timezone'])->format('F j, Y h:i A');
       $bundled = BundledProduct::where('product_trace', '=', $item['id'])->where('deleted_at', '=', null)->get();
       $transferred = TransferredProduct::where('payload_value', '=', $item['id'])->where('deleted_at', '=', null)->get();
-      if(sizeof($bundled) <= 0 && sizeof($transferred) <= 0){
+      if (sizeof($bundled) <= 0 && sizeof($transferred) <= 0) {
         $response[] = $this->response['data'][$i];
       }
       $i++;
@@ -121,25 +130,27 @@ class ProductTraceController extends APIController
     return $this->response();
   }
 
-  public function retrieveProductTraceAsInventory(Request $request){
+  public function retrieveProductTraceAsInventory(Request $request)
+  {
     $data = $request->all();
-    if(isset($data['status'])){
+    if (isset($data['status'])) {
       $result = ProductTrace::where('product_attribute_id', '=', $data['product_attribute_id'])->where('status', '=', $data['status'])->where('batch_number', '=', $data['batch_number'])->where('deleted_at', '=', null)->get();
-    }else{
+    } else {
       $result = ProductTrace::where('product_attribute_id', '=', $data['product_attribute_id'])->where('batch_number', '=', $data['batch_number'])->where('deleted_at', '=', null)->get();
     }
-    if(sizeof($result) > 0){
-      $i=0;
+    if (sizeof($result) > 0) {
+      $i = 0;
       foreach ($result as $key) {
         $result[$i]['created_at_human'] =  Carbon::createFromFormat('Y-m-d H:i:s', $result[$i]['created_at'])->copy()->tz($this->response['timezone'])->format('F j, Y H:i A');
-      $i++;
+        $i++;
       }
     }
     $this->response['data'] = $result;
     return $this->response();
   }
 
-  public function retrieveWithAttribute(Request $request){
+  public function retrieveWithAttribute(Request $request)
+  {
     $data = $request->all();
     $con = $data['condition'];
     $product = app($this->productController)->getProductByParamsWithAttribute('code', $data['code'], $data['product_attribute_id']);
@@ -151,7 +162,7 @@ class ProductTraceController extends APIController
       array($con[0]['column'], $con[0]['clause'], $con[0]['value']),
       array('product_attribute_id', '=', $data['product_attribute_id'])
     );
-    if($product != null){
+    if ($product != null) {
       array_push($whereArray, array('product_id', '=', $product['id']));
     }
     $this->response['data'] = ProductTrace::where($whereArray)->groupBy('batch_number')->orderBy(array_keys($data['sort'])[0], $data['sort'][array_keys($data['sort'])[0]])->where('deleted_at', '=', null)->get();
@@ -177,7 +188,8 @@ class ProductTraceController extends APIController
     return $this->response();
   }
 
-  public function retrieveWithAttributeMobile(Request $request){
+  public function retrieveWithAttributeMobile(Request $request)
+  {
     $data = $request->all();
     $con = $data['condition'];
     $product = app($this->productController)->getProductByParamsWithAttribute('product_id', $data['product_id'], $data['product_attribute_id']);
@@ -189,7 +201,7 @@ class ProductTraceController extends APIController
       array($con[0]['column'], $con[0]['clause'], $con[0]['value']),
       array('product_attribute_id', '=', $data['product_attribute_id'])
     );
-    if($product != null){
+    if ($product != null) {
       array_push($whereArray, array('product_id', '=', $product['id']));
     }
     $this->response['data'] = ProductTrace::where($whereArray)->groupBy('batch_number')->orderBy(array_keys($data['sort'])[0], $data['sort'][array_keys($data['sort'])[0]])->where('deleted_at', '=', null)->get();
@@ -215,16 +227,17 @@ class ProductTraceController extends APIController
     return $this->response();
   }
 
-  public function retrieveNFC(Request $request){{
-    $data = $request->all();
-    $this->model = new ProductTrace();
-    $this->retrieveDB($data);
-    return $this->response();
+  public function retrieveNFC(Request $request)
+  { {
+      $data = $request->all();
+      $this->model = new ProductTrace();
+      $this->retrieveDB($data);
+      return $this->response();
+    }
   }
 
-  }
-
-  public function retrieveByParams(Request $request){
+  public function retrieveByParams(Request $request)
+  {
     $data = $request->all();
     $this->model = new ProductTrace();
     $this->retrieveDB($data);
@@ -235,20 +248,20 @@ class ProductTraceController extends APIController
       $this->response['data'][$i]['volume'] = app($this->productAttrClass)->getProductUnits('id', $item['product_attribute_id']);
       $item = $this->response['data'][$i];
       // dd(isset($data['nfc']), $item['nfc'] !== null, $item['status'] === 'active');
-      if(isset($data['activation'])){
-        if(isset($data['nfc']) && $item['nfc'] !== null && $item['status'] === 'active'){
-            $this->response['data'] = null;
-            $this->response['error'] = 'Tag is already active';
-            return $this->response();
+      if (isset($data['activation'])) {
+        if (isset($data['nfc']) && $item['nfc'] !== null && $item['status'] === 'active') {
+          $this->response['data'] = null;
+          $this->response['error'] = 'Tag is already active';
+          return $this->response();
         }
       }
-      if(isset($data['nfc']) && ($item['nfc'] == null || $item['nfc'] == '')){
+      if (isset($data['nfc']) && ($item['nfc'] == null || $item['nfc'] == '')) {
         $nfcResult = ProductTrace::where('nfc', '=', $data['nfc'])->where('deleted_at', '=', null)->get();
-        if(sizeof($nfcResult) > 0){
+        if (sizeof($nfcResult) > 0) {
           $this->response['data'] = null;
           $this->response['error'] = 'Tag is already taken!';
           return $this->response();
-        }else{  
+        } else {
           ProductTrace::where('id', '=', $item['id'])->update(array(
             'nfc' => $data['nfc'],
             'updated_at' => Carbon::now(),
@@ -258,13 +271,13 @@ class ProductTraceController extends APIController
         }
       }
 
-      if(isset($data['nfc']) && $item['nfc'] != null && $item['nfc'] != $data['nfc']){
+      if (isset($data['nfc']) && $item['nfc'] != null && $item['nfc'] != $data['nfc']) {
         $this->response['data'] = null;
         $this->response['error'] = 'Duplicate tag!';
         return $this->response();
       }
 
-      if($this->checkOwnProduct($item, $data['merchant_id']) == false){
+      if ($this->checkOwnProduct($item, $data['merchant_id']) == false) {
         $this->response['data'] = null;
         $this->response['error'] = 'You don\'t own this product!';
         return $this->response();
@@ -273,41 +286,45 @@ class ProductTraceController extends APIController
       $this->response['data'][$i]['created_at_human'] = Carbon::createFromFormat('Y-m-d H:i:s', $item['created_at'])->copy()->tz($this->response['timezone'])->format('F j, Y h:i A');
       $this->response['data'][$i]['bundled_product'] = app($this->bundledProductController)->getByParams('product_trace', $item['id']);
       // dd($item);
-      $bundledSettingQty = app($this->bundledSettingController)->getQtyByParams($item['product_id'], $item['product_attribute_id']);
-      if($this->response['data'][$i]['product'] != null){
+      if ($item['batch_number'] == null && $item['status'] == 'active') {
+        $bundledSettingQty = app($this->bundledSettingController)->getQtyByParamsBundled($item['product_id'], $item['product_attribute_id']);
+      }else{
+        $bundledSettingQty = app($this->bundledSettingController)->getQtyByParams($item['product_id'], $item['product_attribute_id']);
+      }
+      if ($this->response['data'][$i]['product'] != null) {
         $type = $this->response['data'][$i]['product']['type'];
         $this->response['data'][$i]['product']['qty'] = null;
-        if($data['account_type'] == 'MANUFACTURER'){
+        if ($data['account_type'] == 'MANUFACTURER') {
           $qty = $this->getBalanceQtyWithInBundled('product_id', $item['product_id'], 'active', $data['merchant_id'], $item['product_attribute_id']);
           $this->response['data'][$i]['product']['qty'] = $qty['qty'];
           $this->response['data'][$i]['product']['qty_in_bundled'] = $qty['qty_in_bundled'];
-          $this->response['data'][$i]['product']['setting_qty'] = sizeof($bundledSettingQty) > 0 ? sizeof($bundledSettingQty) : 0; //$bundledSettingQty[0]['qty'] 
+          $this->response['data'][$i]['product']['setting_qty'] = sizeof($bundledSettingQty) > 0 ? $bundledSettingQty[0]['qty'] : 0; //$bundledSettingQty[0]['qty'] 
           $this->response['data'][$i]['product']['trace_qty'] = 1;
-        }else if($data['account_type'] == 'DISTRIBUTOR' && $type != 'regular'){
+        } else if ($data['account_type'] == 'DISTRIBUTOR' && $type != 'regular') {
           $qty = $this->getBalanceQtyWithInBundled('product_id', $item['product_id'], 'active', $data['merchant_id'], $item['product_attribute_id']);
           $this->response['data'][$i]['product']['qty'] = $qty['qty'];
           $this->response['data'][$i]['product']['qty_in_bundled'] = $qty['qty_in_bundled'];
-          $this->response['data'][$i]['product']['setting_qty'] = sizeof($bundledSettingQty) > 0 ? sizeof($bundledSettingQty) : 0; //$bundledSettingQty[0]['qty']
+          $this->response['data'][$i]['product']['setting_qty'] = sizeof($bundledSettingQty) > 0 ? $bundledSettingQty[0]['qty'] : 0; //$bundledSettingQty[0]['qty']
           $this->response['data'][$i]['product']['trace_qty'] = 1;
-        }else{
+        } else {
           $bundled = $this->response['data'][$i]['bundled_product'];
-          if($bundled != null){
+          if ($bundled != null) {
             $this->response['data'][$i]['product']['qty'] = 0; // what about if existing item
-            $this->response['data'][$i]['product']['qty_in_bundled'] = $bundled[0]['size'];   
+            $this->response['data'][$i]['product']['qty_in_bundled'] = $bundled[0]['size'];
             $this->response['data'][$i]['product']['trace_qty'] = app($this->landBlockProductClass)->getRemainingByTrace($data['merchant_id'], $item['id'], $item['product_id']);
-          }else{
+          } else {
             $qty = $this->getBalanceQtyOtherUser($item['product_id'], $data['merchant_id'], $item['id'], $item['product_attribute_id']);
             $this->response['data'][$i]['product']['qty'] = $qty['qty'];
-            $this->response['data'][$i]['product']['qty_in_bundled'] = $qty['qty_in_bundled'];   
-            $this->response['data'][$i]['product']['trace_qty'] = $qty['trace_qty'];   
-          }    
+            $this->response['data'][$i]['product']['qty_in_bundled'] = $qty['qty_in_bundled'];
+            $this->response['data'][$i]['product']['trace_qty'] = $qty['trace_qty'];
+          }
         }
         // if($data['account_type'] == 'MANUFACTURER' || $type == 'bundled'){
         //   $this->response['data'][$i]['product']['qty'] = $this->getBalanceQty('product_id', $item['product_id'], 'active');  
         // }else{
         //   $this->response['data'][$i]['product']['qty'] = app($this->transferController)->getQtyTransferred($data['merchant_id'], $item['product_id']);
         // }
-        if($type == 'bundled'){
+        if ($type == 'bundled') {
           $bundled = $this->response['data'][$i]['product']['id'];
           $this->response['data'][$i]['product']['bundled_status'] = app($this->bundledSettingController)->getStatusByProductTrace($bundled, $item['id']);
         }
@@ -317,7 +334,8 @@ class ProductTraceController extends APIController
     return $this->response();
   }
 
-  public function retrieveByParamsEndUser(Request $request){
+  public function retrieveByParamsEndUser(Request $request)
+  {
     $data = $request->all();
     $this->model = new ProductTrace();
     $this->retrieveDB($data);
@@ -326,33 +344,33 @@ class ProductTraceController extends APIController
       $item = $this->response['data'][$i];
       $this->response['data'][$i]['product'] = app($this->productController)->getProductByParamsEndUser('id', $item['product_id']);
       $attributes = app($this->productAttrClass)->getProductUnitsByColumns($item['product_id']);
-      
+
       $this->response['data'][$i]['volume'] = null;
       $this->response['data'][$i]['units'] = null;
       $volume = 0;
-      if($attributes){
+      if ($attributes) {
         $this->response['data'][$i]['volume'] = $attributes['payload_value'];
         $this->response['data'][$i]['units'] = $attributes['payload'];
         $volume = floatval($attributes['payload_value']);
       }
 
       $item = $this->response['data'][$i];
-      
+
       // if(isset($data['nfc']) && ($item['nfc'] == null || $item['nfc'] == '')){
-        // no need to update on end user
-        // $nfcResult = ProductTrace::where('nfc', '=', $data['nfc'])->get();
-        // if(sizeof($nfcResult) > 0){
-        //   $this->response['data'] = null;
-        //   $this->response['error'] = 'Tag is already taken!';
-        //   return $this->response();
-        // }else{
-        //   ProductTrace::where('id', '=', $item['id'])->update(array(
-        //     'nfc' => $data['nfc'],
-        //     'updated_at' => Carbon::now(),
-        //     'status' => 'active'
-        //   ));
-        //   $this->response['data'][$i]['nfc'] = $data['nfc'];
-        // }
+      // no need to update on end user
+      // $nfcResult = ProductTrace::where('nfc', '=', $data['nfc'])->get();
+      // if(sizeof($nfcResult) > 0){
+      //   $this->response['data'] = null;
+      //   $this->response['error'] = 'Tag is already taken!';
+      //   return $this->response();
+      // }else{
+      //   ProductTrace::where('id', '=', $item['id'])->update(array(
+      //     'nfc' => $data['nfc'],
+      //     'updated_at' => Carbon::now(),
+      //     'status' => 'active'
+      //   ));
+      //   $this->response['data'][$i]['nfc'] = $data['nfc'];
+      // }
       // }
 
       // if(isset($data['nfc']) && $item['nfc'] != null && $item['nfc'] != $data['nfc']){
@@ -361,7 +379,7 @@ class ProductTraceController extends APIController
       //   return $this->response();
       // }
 
-      if($this->checkOwnProduct($item, $data['merchant_id']) == false){
+      if ($this->checkOwnProduct($item, $data['merchant_id']) == false) {
         $this->response['data'] = null;
         $this->response['error'] = 'You don\'t own this product!';
         return $this->response();
@@ -370,14 +388,14 @@ class ProductTraceController extends APIController
       $this->response['data'][$i]['created_at_human'] = Carbon::createFromFormat('Y-m-d H:i:s', $item['created_at'])->copy()->tz($this->response['timezone'])->format('F j, Y h:i A');
       $this->response['data'][$i]['bundled_product'] = app($this->bundledProductController)->getByParams('product_trace', $item['id']);
 
-      if($this->response['data'][$i]['product'] != null){
+      if ($this->response['data'][$i]['product'] != null) {
         $type = $this->response['data'][$i]['product']['type'];
         $this->response['data'][$i]['product']['qty'] = null;
         // $qty = $this->getBalanceQtyOtherUser($item['product_id'], $data['merchant_id'], $item['id']);
         // $this->response['data'][$i]['product']['qty'] = app($this->batchProductClass)->getProductTraceQty($item['id'], $this->response['data'][$i]['product']['variation'], $qty['qty']);
         $consumed = app('Increment\Marketplace\Paddock\Http\BatchProductController')->getTotalAppliedRateByParams('product_trace_id', $item['id']);
         $remainingQty = 0;
-        if($volume > $consumed){
+        if ($volume > $consumed) {
           $remainingQty = $volume - $consumed;
         }
         $this->response['data'][$i]['qty'] = $remainingQty;
@@ -388,7 +406,8 @@ class ProductTraceController extends APIController
   }
 
 
-  public function retrieveWithTransfer(Request $request){
+  public function retrieveWithTransfer(Request $request)
+  {
     $data = $request->all();
     $this->model = new ProductTrace();
     $this->retrieveDB($data);
@@ -401,7 +420,7 @@ class ProductTraceController extends APIController
       $item = $result[$i];
       $result[$i]['created_at_human'] = Carbon::createFromFormat('Y-m-d H:i:s', $item['created_at'])->copy()->tz($this->response['timezone'])->format('F j, Y h:i A');
       $result[$i]['bundled_product'] = app($this->bundledProductController)->getByParams('product_trace', $item['id']);
-      if($result[$i]['product'] != null){
+      if ($result[$i]['product'] != null) {
         $type = $result[$i]['product']['type'];
         $result[$i]['product']['qty'] = null;
         // if($data['account_type'] == 'MANUFACTURER' || $type == 'bundled'){
@@ -412,13 +431,13 @@ class ProductTraceController extends APIController
         $qty = $this->getBalanceQtyWithInBundled('product_id', $item['product_id'], 'active', $result[$i]['product']['merchant_id'], null);
         $result[$i]['product']['qty'] = $qty['qty'];
         $result[$i]['product']['qty_in_bundled'] = $qty['qty_in_bundled'];
-        if($type == 'bundled'){
+        if ($type == 'bundled') {
           $bundled = $result[$i]['product']['id'];
           $result[$i]['product']['bundled_status'] = app($this->bundledSettingController)->getStatusByProductTrace($bundled, $item['id']);
         }
       }
       $transfer = app($this->transferredProductController)->getByParams('payload_value', $item['id']);
-      if($transfer == null){
+      if ($transfer == null) {
         $this->response['data'][] = $result[$i];
       }
       $i++;
@@ -426,34 +445,36 @@ class ProductTraceController extends APIController
     return $this->response();
   }
 
-  public function checkOwnProduct($trace, $merchantId){
+  public function checkOwnProduct($trace, $merchantId)
+  {
     $result = app($this->transferController)->getOwn($trace['id']);
-    if($trace['product']['type'] == 'regular'){
+    if ($trace['product']['type'] == 'regular') {
       $bundled = app($this->bundledProductController)->getByParamsNoDetails('product_trace', $trace['id']);
-      if($bundled != null){
+      if ($bundled != null) {
         $bundledTransfer = app($this->transferController)->getOwn($bundled['bundled_trace']);
-        if(!$bundledTransfer){
+        if (!$bundledTransfer) {
           return true;
-        }else if(intval($bundledTransfer->to) == intval($merchantId)){
+        } else if (intval($bundledTransfer->to) == intval($merchantId)) {
           return true;
-        }else{
+        } else {
           return false;
         }
       }
     }
-    if($result){
-      if(intval($result->to) == intval($merchantId)){
+    if ($result) {
+      if (intval($result->to) == intval($merchantId)) {
         return true;
       }
-    }else{
-      if(intval($trace['product']['merchant_id']) == intval($merchantId)){
+    } else {
+      if (intval($trace['product']['merchant_id']) == intval($merchantId)) {
         return true;
       }
     }
     return false;
   }
 
-  public function retrieveByBundled(Request $request){
+  public function retrieveByBundled(Request $request)
+  {
     $data = $request->all();
     $this->model = new ProductTrace();
     $this->retrieveDB($data);
@@ -463,13 +484,13 @@ class ProductTraceController extends APIController
       $this->response['data'][$i]['product'] = app($this->productController)->getByParams('id', $item['product_id']);
       $item = $this->response['data'][$i];
       $productTrace = $item['id'];
-      if($this->checkOwnProduct($item, $data['merchant_id']) == false){
+      if ($this->checkOwnProduct($item, $data['merchant_id']) == false) {
         $this->response['data'] = null;
         $this->response['error'] = 'You don\'t own this product!';
         return $this->response();
       }
       $this->response['data'][$i]['bundled_product'] = app($this->bundledProductController)->getByParams('product_trace', $item['id']);
-      if($this->response['data'][$i]['product'] != null){
+      if ($this->response['data'][$i]['product'] != null) {
         // $this->response['data'][$i]['product']['qty'] = $this->getBalanceQty('product_id', $item['product_id']);
         $merchant = intval($item['product']['merchant_id']);
         $qty = $this->getBalanceQtyWithInBundled('product_id', $item['product_id'], 'active', $item['product']['merchant_id'],  $item['product_attribute_id']);
@@ -483,12 +504,13 @@ class ProductTraceController extends APIController
       }
       $i++;
     }
-    
+
     return $this->response();
   }
 
 
-  public function retrieveByBundledAgrisend(Request $request){
+  public function retrieveByBundledAgrisend(Request $request)
+  {
     $data = $request->all();
     // $con = $data['condition'];
     $this->model = new ProductTrace();
@@ -501,13 +523,13 @@ class ProductTraceController extends APIController
       $this->response['data'][$i]['product'] = app($this->productController)->getByParams('id', $item['product_id']);
       $item = $this->response['data'][$i];
       $productTrace = $item['id'];
-      if($this->checkOwnProduct($item, $data['merchant_id']) == false){
+      if ($this->checkOwnProduct($item, $data['merchant_id']) == false) {
         $this->response['data'] = null;
         $this->response['error'] = 'You don\'t own this product!';
         return $this->response();
       }
       $this->response['data'][$i]['bundled_product'] = app($this->bundledProductController)->getByParams('product_trace', $item['id']);
-      if($this->response['data'][$i]['product'] != null){
+      if ($this->response['data'][$i]['product'] != null) {
         // $this->response['data'][$i]['product']['qty'] = $this->getBalanceQty('product_id', $item['product_id']);
         $merchant = intval($item['product']['merchant_id']);
         $qty = $this->getBalanceQtyWithInBundled('product_id', $item['product_id'], 'active', $item['product']['merchant_id'],  $item['product_attribute_id']);
@@ -519,16 +541,17 @@ class ProductTraceController extends APIController
         //   $this->response['data'][$i]['product']['qty'] = app($this->transferController)->getQtyTransferred($data['merchant_id'], $item['product_id']);
         // }
       }
-      
+
       $i++;
     }
-    
+
     return $this->response();
   }
 
-  public function getByParamsDetails($column, $value){
+  public function getByParamsDetails($column, $value)
+  {
     $result  = ProductTrace::where($column, '=', $value)->get();
-    if(sizeof($result) > 0){
+    if (sizeof($result) > 0) {
       $i = 0;
       foreach ($result as $key) {
         $item = $result[$i];
@@ -540,10 +563,11 @@ class ProductTraceController extends APIController
     return sizeof($result) > 0 ? $result : null;
   }
 
-  public function getBalanceQty($column, $value, $flag = 'active'){
+  public function getBalanceQty($column, $value, $flag = 'active')
+  {
     $result  = ProductTrace::where($column, '=', $value)->where('status', '=', $flag)->get();
     $counter = 0;
-    if(sizeof($result) > 0){
+    if (sizeof($result) > 0) {
       $i = 0;
       foreach ($result as $key) {
         $item = $result[$i];
@@ -551,7 +575,7 @@ class ProductTraceController extends APIController
 
         $transferred = TransferredProduct::where('payload_value', '=', $item['id'])->where('deleted_at', '=', null)->get();
 
-        if(sizeof($bundled) == 0 && sizeof($transferred) == 0){
+        if (sizeof($bundled) == 0 && sizeof($transferred) == 0) {
           $counter++;
         }
         $i++;
@@ -560,11 +584,12 @@ class ProductTraceController extends APIController
     return $counter;
   }
 
-  public function getBalanceQtyOnManufacturer($column, $value){
+  public function getBalanceQtyOnManufacturer($column, $value)
+  {
     $result  = ProductTrace::where($column, '=', $value)->where('status', '=', 'active')->get();
     $counter = 0;
     $bundledQty = 0;
-    if(sizeof($result) > 0){
+    if (sizeof($result) > 0) {
       $i = 0;
       foreach ($result as $key) {
         $item = $result[$i];
@@ -572,17 +597,17 @@ class ProductTraceController extends APIController
 
         $transferred = TransferredProduct::where('payload_value', '=', $item['id'])->get();
 
-        if(sizeof($bundled) == 0 && sizeof($transferred) == 0){
+        if (sizeof($bundled) == 0 && sizeof($transferred) == 0) {
           $counter++;
         }
 
-        if(sizeof($bundled) > 0){
+        if (sizeof($bundled) > 0) {
           $bundledTransferred = TransferredProduct::where('payload_value', '=', $bundled[0]['bundled_trace'])->where('deleted_at', '=', null)->get();
-          if(sizeof($bundledTransferred) == 0){
+          if (sizeof($bundledTransferred) == 0) {
             $bundledQty++;
           }
         }
-        
+
         $i++;
       }
     }
@@ -593,34 +618,34 @@ class ProductTraceController extends APIController
     );
   }
 
-  public function getBalanceQtyWithInBundled($column, $value, $flag = 'active', $merchantId = null, $productAttrId){
-    if($productAttrId !== null){
+  public function getBalanceQtyWithInBundled($column, $value, $flag = 'active', $merchantId = null, $productAttrId)
+  {
+    if ($productAttrId !== null) {
       $result  = ProductTrace::where($column, '=', $value)->where('status', '=', $flag)->where('product_attribute_id', '=', $productAttrId)->get();
-    }else{
+    } else {
       $result  = ProductTrace::where($column, '=', $value)->where('status', '=', $flag)->get();
     }
     $counter = 0;
     $bundledQty = 0;
-    if(sizeof($result) > 0){
+    if (sizeof($result) > 0) {
       $i = 0;
       foreach ($result as $key) {
         $item = $result[$i];
         $bundled = BundledProduct::where('product_trace', '=', $item['id'])->where('deleted_at', '=', null)->get();
-        
+
         $transferred = TransferredProduct::where('payload_value', '=', $item['id'])->where('deleted_at', '=', null)->get();
-        if(sizeof($bundled) == 0 && sizeof($transferred) == 0){
-          if($merchantId == null){
+        if (sizeof($bundled) == 0 && sizeof($transferred) == 0) {
+          if ($merchantId == null) {
             $counter++;
-          }else{
+          } else {
             $comsumed = 0;
             $comsumed = app($this->landBlockProductClass)->getTotalConsumedByTrace($merchantId, $item['id']);
             $counter += (1 - $comsumed);
-
           }
         }
-        if(sizeof($bundled) > 0){
+        if (sizeof($bundled) > 0) {
           $bundledTransferred = TransferredProduct::where('payload_value', '=', $bundled[0]['bundled_trace'])->where('deleted_at', '=', null)->get();
-          if(sizeof($bundledTransferred) == 0){
+          if (sizeof($bundledTransferred) == 0) {
             $bundledQty++;
           }
         }
@@ -633,15 +658,16 @@ class ProductTraceController extends APIController
     );
   }
 
-  public function getBalanceQtyOtherUser($productId, $merchantId, $productTraceId = null, $productAttrId){
+  public function getBalanceQtyOtherUser($productId, $merchantId, $productTraceId = null, $productAttrId)
+  {
     $result = DB::table('transfers as T1')
-    ->join('transferred_products as T2', 'T2.transfer_id', '=', 'T1.id')
-    ->where('T1.to', '=', $merchantId)
-    ->where('T2.product_id', '=', $productId)
-    ->where('product_attribute_id', '=', $productAttrId)
-    ->where('T2.deleted_at', '=', null)
-    ->where('T1.deleted_at', '=', null)
-    ->get(['T2.*']);
+      ->join('transferred_products as T2', 'T2.transfer_id', '=', 'T1.id')
+      ->where('T1.to', '=', $merchantId)
+      ->where('T2.product_id', '=', $productId)
+      ->where('product_attribute_id', '=', $productAttrId)
+      ->where('T2.deleted_at', '=', null)
+      ->where('T1.deleted_at', '=', null)
+      ->get(['T2.*']);
     $size = 0;
     $bundledQty = 0;
     $i = 0;
@@ -651,17 +677,17 @@ class ProductTraceController extends APIController
       $item = $result[$i];
       $tSize = app($this->transferredProductController)->getSize('payload_value', $item['payload_value'], $item['created_at']);
       $bundled = app($this->bundledProductController)->getByParamsNoDetails('product_trace', $item['payload_value']);
-      if($tSize == 0 && $bundled == null){
+      if ($tSize == 0 && $bundled == null) {
         $consumed = 0;
         $consumed = app($this->landBlockProductClass)->getTotalConsumedByTrace($merchantId, $item['payload_value'], $item['product_id']);
         $size += (1 - $consumed);
-        if(intval($item['payload_value']) == intval($productTraceId)){
+        if (intval($item['payload_value']) == intval($productTraceId)) {
           $traceQty =  app($this->landBlockProductClass)->getRemainingByTrace($merchantId, $item['payload_value'], $item['product_id']);
         }
       }
-      if($bundled != null){
+      if ($bundled != null) {
         $bundledTransferred = TransferredProduct::where('payload_value', '=', $bundled['bundled_trace'])->where('deleted_at', '=', null)->get();
-        if(sizeof($bundledTransferred) == 0){
+        if (sizeof($bundledTransferred) == 0) {
           $bundledQty++;
         }
       }
@@ -674,35 +700,36 @@ class ProductTraceController extends APIController
     );
   }
 
-  public function create(Request $request){
+  public function create(Request $request)
+  {
     $data = $request->all();
 
 
-    if($data['inventory_type'] === 'bundled_trace'){
+    if ($data['inventory_type'] === 'bundled_trace') {
       $qty = (int)$data['qty'];
-      for ($i=0; $i < $qty; $i++) {
+      for ($i = 0; $i < $qty; $i++) {
         $data['code'] = $this->generateCode();
         $temp = ProductTrace::create($data);
         $this->response['data'] = $temp;
       }
-    }else{
+    } else {
       $currQty = ProductTrace::where('batch_number', '=', $data['batch_number'])->where('deleted_at', '=', null)->count();
       $qty = null;
-      if(isset($data['isEdit'])){
+      if (isset($data['isEdit'])) {
         $qty = ((int)$data['qty'] - (int)$currQty);
-        for ($i=0; $i < $qty; $i++) {
+        for ($i = 0; $i < $qty; $i++) {
           $data['code'] = $this->generateCode();
           $data['status'] = 'inactive';
           $this->model = new ProductTrace();
           $this->insertDB($data);
         }
-      }else{
+      } else {
         $qty = (int)$data['qty'];
         $exist = ProductTrace::where('batch_number', '=', $data['batch_number'])->where('product_attribute_id', '=', $data['product_attribute_id'])->where('deleted_at', '=', null)->get();
-        if(sizeof($exist) > 0){
+        if (sizeof($exist) > 0) {
           $this->response['error'] = 'Hold on, that batch number already exists. Update the batch number, or close to edit an existing batch.';
-        }else{
-          for ($i=0; $i < $qty; $i++) {
+        } else {
+          for ($i = 0; $i < $qty; $i++) {
             $data['code'] = $this->generateCode();
             $data['status'] = 'inactive';
             $this->model = new ProductTrace();
@@ -714,16 +741,17 @@ class ProductTraceController extends APIController
     return $this->response();
   }
 
-  public function createBundled(Request $request){
+  public function createBundled(Request $request)
+  {
     $data = $request->all();
     $data['code'] = $this->generateCode();
     $data['status'] = 'inactive';
     $this->model = new ProductTrace();
     $this->insertDB($data);
-    if($this->response['data'] > 0){
+    if ($this->response['data'] > 0) {
       // add product to bundled
       $result = app($this->bundledProductController)->insertData($data['products'], $this->response['data']);
-      if($result == false){
+      if ($result == false) {
         $this->response['data'] = null;
         $this->repsonse['error'] = 'Unable to manage the request!';
       }
@@ -731,16 +759,17 @@ class ProductTraceController extends APIController
     return $this->response();
   }
 
-  public function generateNFC($productId, $data){
+  public function generateNFC($productId, $data)
+  {
     $product = app($this->productController)->retrieveProductById($productId, $data['account_id'], $data['inventory_type']);
     // product trace code
-    $id = $product['code'].'/0/';
+    $id = $product['code'] . '/0/';
     // $merchantName = $product['merchant']['name'].'/0/';
     // $title = $product['title'].'/0/';
-    $batchNumber = $data['batch_number'].'/0/';
-    $manufacturingDate = $data['manufacturing_date'].'/0/';
+    $batchNumber = $data['batch_number'] . '/0/';
+    $manufacturingDate = $data['manufacturing_date'] . '/0/';
     // $link = 'https://www.traceag.com.au/product/'.$product['code'].'/0/';
-    return Hash::make($id.$batchNumber.$manufacturingDate);
+    return Hash::make($id . $batchNumber . $manufacturingDate);
     // product id
     // trace id
     // merchant name
@@ -753,27 +782,30 @@ class ProductTraceController extends APIController
     // generate code for nfc
   }
 
-  public function generateCode(){
+  public function generateCode()
+  {
     $code = substr(str_shuffle("0123456789012345678901234567890123456789"), 0, 32);
     $codeExist = ProductTrace::where('code', '=', $code)->get();
-    if(sizeof($codeExist) > 0){
+    if (sizeof($codeExist) > 0) {
       $this->generateCode();
-    }else{
+    } else {
       return $code;
     }
   }
-  
-  public function linkTags(Request $request){
+
+  public function linkTags(Request $request)
+  {
     //
   }
 
-  public function update(Request $request){
+  public function update(Request $request)
+  {
     $data = $request->all();
     $result = ProductTrace::where('rf', '=', $data['rf'])->get();
-    if(sizeof($result) > 0){
+    if (sizeof($result) > 0) {
       $this->response['data'] = null;
       $this->response['error'] = 'Drum tag is already used!';
-    }else{
+    } else {
       $this->model = new ProductTrace();
       $this->updateDB($data);
       $this->response['data'] = $data['id'];
@@ -781,49 +813,58 @@ class ProductTraceController extends APIController
     return $this->response();
   }
 
-  public function getByParamsByFlag($column, $value){
+  public function getByParamsByFlag($column, $value)
+  {
     $result = ProductTrace::where($column, '=', $value)->where('deleted_at', '=', null)->get();
     return sizeof($result) > 0 ? true : false;
   }
 
-  public function getByParamsWithoutLimit($column, $value){
+  public function getByParamsWithoutLimit($column, $value)
+  {
     $result = ProductTrace::where($column, '=', $value)->where('deleted_at', '=', null)->get();
     return sizeof($result) > 0 ? $result[0] : null;
   }
 
-  public function getDetailsByParams($column, $value, $columns){
+  public function getDetailsByParams($column, $value, $columns)
+  {
     $result = ProductTrace::where($column, '=', $value)->where('deleted_at', '=', null)->get($columns);
     return sizeof($result) > 0 ? $result[0] : null;
   }
 
-  public function countTraceByParams($column, $value, $status){
+  public function countTraceByParams($column, $value, $status)
+  {
     $result = ProductTrace::where($column, '=', $value)->where('batch_number', '!=', null)->where('status', '=', $status)->where('deleted_at', '=', null)->count();
     return $result;
   }
 
-  public function deleteByParams($id){
+  public function deleteByParams($id)
+  {
     ProductTrace::where('id', '=', $id)->update(array(
       'deleted_at' => Carbon::now()
     ));
     return true;
   }
 
-  public function getTraceByParams($whereArray, $returns){
+  public function getTraceByParams($whereArray, $returns)
+  {
     $result = ProductTrace::where($whereArray)->where('deleted_at', '=', null)->get($returns);
     return sizeof($result) > 0 ? $result[0] : null;
   }
 
-  public function retrieveBatchNumber($productId){
+  public function retrieveBatchNumber($productId)
+  {
     $result = ProductTrace::where('product_id', '=', $productId)->select('batch_number')->groupBy('batch_number')->get();
     return $result;
   }
 
-  public function getProductQtyByParams($producId, $attrID){
+  public function getProductQtyByParams($producId, $attrID)
+  {
     $result = ProductTrace::where('product_id', '=', $producId)->where('status', '=', 'active')->where('product_attribute_id', '=', $attrID)->count();
     return $result;
   }
 
-  public function getProductQtyByStatus($column ,$value, $status){
+  public function getProductQtyByStatus($column, $value, $status)
+  {
     $all = ProductTrace::where($column, '=', $value)->where('deleted_at', '=', null)->count();
     $active = ProductTrace::where($column, '=', $value)->where('status', '=', $status)->where('deleted_at', '=', null)->count();
     $result = array(
@@ -833,7 +874,8 @@ class ProductTraceController extends APIController
     return $result;
   }
 
-  public function getProductQtyByParameter($batchNumber, $producId, $attrID, $status){
+  public function getProductQtyByParameter($batchNumber, $producId, $attrID, $status)
+  {
     $all = ProductTrace::where('batch_number', '=', $batchNumber)->where('product_id', '=', $producId)->where('product_attribute_id', '=', $attrID)->where('deleted_at', '=', null)->count();
     $active = ProductTrace::where('batch_number', '=', $batchNumber)->where('product_id', '=', $producId)->where('product_attribute_id', '=', $attrID)->where('status', '=', $status)->where('deleted_at', '=', null)->count();
     $result = array(
@@ -843,7 +885,8 @@ class ProductTraceController extends APIController
     return $result;
   }
 
-  public function deleteAll(Request $request){
+  public function deleteAll(Request $request)
+  {
     $data = $request->all();
     $result = ProductTrace::where('batch_number', '=', $data['batch_number'])
       ->where('status', '=', 'inactive')
