@@ -12,6 +12,8 @@ class OrderRequestItemController extends APIController
   public $productClass = 'Increment\Marketplace\Http\ProductController';
   public $merchantClass = 'Increment\Marketplace\Http\MerchantController';
   public $productAttrController = 'Increment\Marketplace\Http\ProductAttributeController';
+  public $bundledProductController = 'Increment\Marketplace\Http\BundledProductController';
+  public $bundledSettingsController = 'Increment\Marketplace\Http\BundledSettingController';
 
   function __construct(){
     $this->model = new OrderRequestItem();
@@ -49,6 +51,7 @@ class OrderRequestItemController extends APIController
       $array = array();
       foreach ($result as $key) {
         $product = app($this->productClass)->getByParams('id', $key['product_id']);
+        $hasBundled = app($this->bundledSettingsController)->getQtyByParams($key['product_id'], $key['product_attribute_id']);
         $item = array(
           'title'   => $product ? $product['title'] : null,
           'id'      => $key['id'],
@@ -59,7 +62,8 @@ class OrderRequestItemController extends APIController
           'type'    => $product['type'],
           'order_request_id'     => $key['order_request_id'],
           'product_attribute_id' =>$key['product_attribute_id'],
-          'merchant'     => $product ? app($this->merchantClass)->getColumnValueByParams('id', $product['merchant_id'], 'name') : null
+          'merchant'     => $product ? app($this->merchantClass)->getColumnValueByParams('id', $product['merchant_id'], 'name') : null,
+          'bundled_product' => sizeof($hasBundled) > 0 ? app($this->productClass)->getByParams('id', $hasBundled[0]['bundled']) : null
         );
         $array[] = $item;
       }
