@@ -92,18 +92,52 @@ class TransferController extends APIController
         $productTrace = app($this->productTraceClass)->getDetailsByParams('id', $key['product_trace'], ['id', 'code', 'product_attribute_id']);
         // dd($existInBundled);
         if ($productTrace) {
-          $item = array(
-            'transfer_id' => $this->response['data'],
-            'payload'     => $existInbundledProducts !== null ? 'bundled_trace' : 'product_trace',
-            'payload_value' => $key['product_trace'],
-            'product_id'  => $key['product_id'],
-            'merchant_id'  => $data['to'],
-            'bundled' => $key['bundled_id'],
-            'bundled_setting_qty' => $key['bundled_setting_qty'],
-            'product_attribute_id' => $productTrace['product_attribute_id'],
-            'status'      => 'active',
-            'created_at'  => Carbon::now()
-          );
+          if($data['account_type'] === 'DISTRIBUTOR'){
+            if($existInbundledProducts !== null){
+              // dd('==============', $key['bundled_setting_qty']);
+              for ($a=0; $a <= (int)$key['bundled_setting_qty']; $a++) {
+                $item = array(
+                  'transfer_id' => $this->response['data'],
+                  'payload'     => 'product_trace',
+                  'payload_value' => $key['product_trace'],
+                  'product_id'  => $key['product_id'],
+                  'merchant_id'  => $data['to'],
+                  'bundled' => $key['bundled_id'],
+                  'bundled_setting_qty' => $key['bundled_setting_qty'],
+                  'product_attribute_id' => $productTrace['product_attribute_id'],
+                  'status'      => 'active',
+                  'created_at'  => Carbon::now()
+                );
+              }
+              TransferredProduct::insert($item);
+            }else{
+              $item = array(
+                'transfer_id' => $this->response['data'],
+                'payload'     => 'product_trace',
+                'payload_value' => $key['product_trace'],
+                'product_id'  => $key['product_id'],
+                'merchant_id'  => $data['to'],
+                'bundled' => $key['bundled_id'],
+                'bundled_setting_qty' => $key['bundled_setting_qty'],
+                'product_attribute_id' => $productTrace['product_attribute_id'],
+                'status'      => 'active',
+                'created_at'  => Carbon::now()
+              );
+            }
+          }else{
+            $item = array(
+              'transfer_id' => $this->response['data'],
+              'payload'     => $existInbundledProducts !== null ? 'bundled_trace' : 'product_trace',
+              'payload_value' => $key['product_trace'],
+              'product_id'  => $key['product_id'],
+              'merchant_id'  => $data['to'],
+              'bundled' => $key['bundled_id'],
+              'bundled_setting_qty' => $key['bundled_setting_qty'],
+              'product_attribute_id' => $productTrace['product_attribute_id'],
+              'status'      => 'active',
+              'created_at'  => Carbon::now()
+            );
+          }
 
           TransferredProduct::insert($item);
         } else {
