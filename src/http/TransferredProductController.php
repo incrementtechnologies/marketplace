@@ -269,7 +269,8 @@ class TransferredProductController extends APIController
   {
     $condition = array(
       array('product_attribute_id', '=', $AttrId),
-      array('deleted_at', '=', null)
+      array('deleted_at', '=', null),
+      array('status', '=', 'active')
     );
     if ($merchantId !== null) {
       array_push($condition, array('merchant_id', '=', $merchantId));
@@ -300,7 +301,8 @@ class TransferredProductController extends APIController
 
   public function getTotalTransferredBundledProducts($productId)
   {
-    return TransferredProduct::where('bundled', '=', $productId)->where('status', '=', 'active')->count();
+    $temp = TransferredProduct::where('bundled', '=', $productId)->where('status', '=', 'active')->groupBy('bundled')->get();
+    return sizeOf($temp);
   }
 
   public function getActiveProductQtyInAttribute($productId, $productAtributeId, $merchantId)
