@@ -542,10 +542,25 @@ class TransferController extends APIController
     $i = 0;
     foreach ($products as $key) {
       $productId = $products[$i]->id;
+      $productTitle = $products[$i]->title;
+      if($key->type === 'bundled'){
+        $setting = app($this->bundledSettingsController)->getQtyByParamsBundled($productId,  $products[$i]->product_attribute_id);
+        if(sizeof($setting) > 0){
+          $parentProduct = app($this->productClass)->getProductColumnWithReturns('id', $setting[0]['product_id'], ['code', 'title']);
+          $productTitle = $parentProduct['title'];
+          $products[$i]->code = $parentProduct['code'];
+          $products[$i]->type = 'regular';
+          $attributes = app($this->productAttrClass)->getByParams('id', $setting[0]['product_attribute_id']);
+        }else{
+          $products[$i]->code =  $products[$i]->code;
+          $products[$i]->type = $products[$i]->type;
+        }
+      }else{
+        $attributes = app($this->productAttrClass)->getByParams('id', $products[$i]->product_attribute_id);
+      }
       $productQty = app($this->transferredProductsClass)->getTransferredProduct($productId, $data['merchant_id'], $products[$i]->product_attribute_id);
       // $consumed = app('Increment\Marketplace\Paddock\Http\BatchProductController')->getTotalAppliedRateBySpecifiedParams($productId, $data['merchant_id']);
       // $qty = app($this->productTraceClass)->getBalanceQtyOnManufacturer('product_id', $products[$i]->product_id);
-      $attributes = app($this->productAttrClass)->getByParams('id', $products[$i]->product_attribute_id);
       if ($productQty->qty > 0) {
         $merchantFrom = app($this->merchantClass)->getColumnValueByParams('id', $products[$i]->from, 'name');
         $merchant =  app($this->merchantClass)->getColumnValueByParams('id', $products[$i]->to, 'name');
@@ -566,7 +581,7 @@ class TransferController extends APIController
         $this->response['data'][$i]['volume'] = sizeof($attributes) > 0 ? app($this->productAttrClass)->convertVariation($attributes[0]['payload'], $attributes[0]['payload_value']) : null;
         $this->response['data'][$i]['merchant'] = array('name' => $merchant);
         $this->response['data'][$i]['type'] = $products[$i]->type;
-        $this->response['data'][$i]['title'] = $products[$i]->title;
+        $this->response['data'][$i]['title'] = $productTitle;
         $this->response['data'][$i]['tags'] = $products[$i]->tags;
         $this->response['data'][$i]['code'] = $products[$i]->code;
         $this->response['data'][$i]['product_id'] = $products[$i]->id;
@@ -628,9 +643,27 @@ class TransferController extends APIController
     foreach ($products as $key) {
       $products = json_decode(json_encode($products), true);
       $productId = $products[$i]['product_id'];
-      $productData = app($this->productClass)->getProductByParams('id', $products[$i]['product_id'], ['title', 'type', 'merchant_id', 'id']);
+      $productData = app($this->productClass)->getProductByParams('id', $products[$i]['product_id'], ['title', 'type', 'merchant_id', 'id', 'code']);
+      // dd($productData);
+      $productTitle = $productData['title'];
+      if($productData['type'] === 'bundled'){
+        $setting = app($this->bundledSettingsController)->getQtyByParamsBundled($productId,  $products[$i]['product_attribute_id']);
+        if(sizeof($setting) > 0){
+          $parentProduct = app($this->productClass)->getProductColumnWithReturns('id', $setting[0]['product_id'], ['code', 'title']);
+          $productTitle = $parentProduct['title'];
+          $productData['code'] = $parentProduct['code'];
+          $productData['type'] = 'regular';
+          $attributes = app($this->productAttrClass)->getByParams('id', $setting[0]['product_attribute_id']);
+        }else{
+          $productData['code'] =  $productData['code'];
+          $productData['type'] = $productData['type'];
+        }
+      }else{
+        $attributes = app($this->productAttrClass)->getByParams('id',$products[$i]['product_attribute_id']);
+      }
+
       $productQty = app($this->transferredProductsClass)->getTransferredProduct($productId, $data['merchant_id'], $products[$i]['product_attribute_id']);
-      $attributes = app($this->productAttrClass)->getByParams('id', $products[$i]['product_attribute_id']);
+      // $attributes = app($this->productAttrClass)->getByParams('id', $products[$i]['product_attribute_id']);
       if ($productQty->qty > 0) {
         $merchantFrom = app($this->merchantClass)->getColumnValueByParams('id', $productData['merchant_id'], 'name');
         $merchant =  app($this->merchantClass)->getColumnValueByParams('id', $products[$i]['merchant_id'], 'name');
@@ -651,7 +684,8 @@ class TransferController extends APIController
         $products[$i]['volume'] = sizeof($attributes) > 0 ? app($this->productAttrClass)->convertVariation($attributes[0]['payload'], $attributes[0]['payload_value']) : null;
         $products[$i]['merchant'] = array('name' => $merchant);
         $products[$i]['type'] = $productData['type'];
-        $products[$i]['title'] = $productData['title'];
+        $products[$i]['code'] = $productData['code'];
+        $products[$i]['title'] = $productTitle;
         $products[$i]['product_attribute_id'] = $products[$i]['product_attribute_id'];
         $products[$i]['merchant_from'] = $merchantFrom;
         $products[$i]['manufacturing_date'] = $productQty != null ? $productQty->manufacturing_date : null;
