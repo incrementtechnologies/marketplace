@@ -307,7 +307,7 @@ class TransferredProductController extends APIController
 
   public function getActiveProductQtyInAttribute($productId, $productAtributeId, $merchantId)
   {
-    $result = TransferredProduct::where('product_id', '=', $productId)->where('product_attribute_id', '=', $productAtributeId)->where('merchant_id', '=', $merchantId)->where('status', '=', 'active')->count();
+    $result = TransferredProduct::where('product_attribute_id', '=', $productAtributeId)->where('merchant_id', '=', $merchantId)->where('status', '=', 'active')->count();
     return $result;
   }
 
