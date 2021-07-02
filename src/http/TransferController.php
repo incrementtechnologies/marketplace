@@ -1188,6 +1188,19 @@ class TransferController extends APIController
       foreach ($result as $key) {
         $trace = app($this->productTraceClass)->getByParamsDetails('id', $key['payload_value']);
         $attributes = app($this->productAttrClass)->getProductUnits('id', $trace[0]['product_attribute_id']);
+        if(isset($data['user'])){
+          if($trace[0]['product']['type'] == 'bundled'){
+            $setting = app($this->bundledSettingsController)->getQtyByParamsBundled($trace[0]['product_id'],   $trace[0]['product_attribute_id']);
+            if(sizeof($setting) > 0){
+              $parentProduct = app($this->productClass)->getProductColumnWithReturns('id', $setting[0]['product_id'], ['code', 'title']);
+              $trace[0]['product']['title'] = $parentProduct['title'];
+              $trace[0]['product']['type'] = 'regular';
+            }else{
+              $trace[0]['product']['title'] = $trace[0]['product']['title'];
+              $trace[0]['product']['type'] = $trace[0]['product']['type'];
+            }
+          }
+        }
 
         $item = array(
           'title'         => $trace[0]['product']['title'],
