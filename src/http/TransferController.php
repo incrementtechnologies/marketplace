@@ -9,6 +9,7 @@ use Increment\Marketplace\Models\Transfer;
 use Increment\Marketplace\Models\TransferredProduct;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use phpDocumentor\Reflection\Types\Null_;
 
 class TransferController extends APIController
 {
@@ -62,11 +63,11 @@ class TransferController extends APIController
       $products = $data['products'];
       $i = 0;
       foreach ($products as $key) {
-        $existInbundledProducts = app($this->bundledProductController)->getByParamsNoDetails('bundled_trace', $key['product_trace']);
-        if ($existInbundledProducts !== null) {
-          $existInBundled = app($this->bundledSettingsController)->getByParamsByCondition(array(
-            array('product_id', '=', $existInbundledProducts['product_on_settings']),
-            array('bundled', '=', $existInbundledProducts['product_id'])
+        $existInbundledProducts = app($this->bundledProductController)->getByParamsWithDelete('bundled_trace', $key['product_trace']);
+        if (sizeOf($existInbundledProducts) > 0) {
+          $existInBundled = app($this->bundledSettingsController)->getByParamsByConditionWithDelete(array(
+            array('product_id', '=', $existInbundledProducts[0]['product_on_settings']),
+            array('bundled', '=', $existInbundledProducts[0]['product_id'])
           ));
           if (sizeof($existInBundled) > 0) {
             $key['bundled_id'] = $existInBundled[0]['bundled'];
@@ -90,44 +91,35 @@ class TransferController extends APIController
           );
         }
         $productTrace = app($this->productTraceClass)->getDetailsByParams('id', $key['product_trace'], ['id', 'code', 'product_attribute_id']);
-        // dd($existInBundled);
-        if ($productTrace) {
-          if($data['account_type'] === 'DISTRIBUTOR'){
-            if($existInbundledProducts !== null){
-              // dd('==============', $key['bundled_setting_qty']);
-              for ($a=0; $a <= (int)$key['bundled_setting_qty']; $a++) {
+        if($data['account_type'] === 'DISTRIBUTOR'){
+          if(sizeof($existInbundledProducts) > 0){
+            for ($a=0; $a <= sizeof($existInbundledProducts)-1; $a++) {
+              $bundled = $existInbundledProducts[$a];
+              $productTrace = app($this->productTraceClass)->getDetailsByParams('id', $bundled['product_trace'], ['id', 'code', 'product_attribute_id']);
+              if($productTrace){
                 $item = array(
                   'transfer_id' => $this->response['data'],
                   'payload'     => 'product_trace',
-                  'payload_value' => $key['product_trace'],
-                  'product_id'  => $key['product_id'],
+                  'payload_value' => $bundled['product_trace'],
+                  'product_id'  => sizeof($existInBundled) > 0 ? $existInBundled[0]['product_id'] : $key['product_id'],
                   'merchant_id'  => $data['to'],
-                  'bundled' => $key['bundled_id'],
-                  'bundled_setting_qty' => $key['bundled_setting_qty'],
+                  'bundled' => Null,
+                  'bundled_setting_qty' => NULL,
                   'product_attribute_id' => $productTrace['product_attribute_id'],
                   'status'      => 'active',
                   'created_at'  => Carbon::now()
                 );
+                TransferredProduct::insert($item);
+              }else{
+                $this->response['data'] = null;
+                $this->response['error'] = 'Invalid product trace.';
+                return $this->response();
               }
-              TransferredProduct::insert($item);
-            }else{
-              $item = array(
-                'transfer_id' => $this->response['data'],
-                'payload'     => 'product_trace',
-                'payload_value' => $key['product_trace'],
-                'product_id'  => $key['product_id'],
-                'merchant_id'  => $data['to'],
-                'bundled' => $key['bundled_id'],
-                'bundled_setting_qty' => $key['bundled_setting_qty'],
-                'product_attribute_id' => $productTrace['product_attribute_id'],
-                'status'      => 'active',
-                'created_at'  => Carbon::now()
-              );
             }
           }else{
             $item = array(
               'transfer_id' => $this->response['data'],
-              'payload'     => $existInbundledProducts !== null ? 'bundled_trace' : 'product_trace',
+              'payload'     => 'product_trace',
               'payload_value' => $key['product_trace'],
               'product_id'  => $key['product_id'],
               'merchant_id'  => $data['to'],
@@ -137,18 +129,32 @@ class TransferController extends APIController
               'status'      => 'active',
               'created_at'  => Carbon::now()
             );
+            TransferredProduct::insert($item);
           }
-
-          TransferredProduct::insert($item);
-        } else {
-          $this->response['data'] = null;
-          $this->response['error'] = 'Invalid product trace.';
-          return $this->response();
+        }else{
+          if ($productTrace) {
+              $item = array(
+                'transfer_id' => $this->response['data'],
+                'payload'     => sizeOf($existInbundledProducts) > 0 ? 'bundled_trace' : 'product_trace',
+                'payload_value' => $key['product_trace'],
+                'product_id'  => $key['product_id'],
+                'merchant_id'  => $data['to'],
+                'bundled' => $key['bundled_id'],
+                'bundled_setting_qty' => $key['bundled_setting_qty'],
+                'product_attribute_id' => $productTrace['product_attribute_id'],
+                'status'      => 'active',
+                'created_at'  => Carbon::now()
+              );
+            TransferredProduct::insert($item);
+          } else {
+            $this->response['data'] = null;
+            $this->response['error'] = 'Invalid product trace.';
+            return $this->response();
+          }
         }
         $i++;
       }
     }
-
     return $this->response();
   }
 
@@ -543,21 +549,7 @@ class TransferController extends APIController
     foreach ($products as $key) {
       $productId = $products[$i]->id;
       $productTitle = $products[$i]->title;
-      if($key->type === 'bundled'){
-        $setting = app($this->bundledSettingsController)->getQtyByParamsBundled($productId,  $products[$i]->product_attribute_id);
-        if(sizeof($setting) > 0){
-          $parentProduct = app($this->productClass)->getProductColumnWithReturns('id', $setting[0]['product_id'], ['code', 'title']);
-          $productTitle = $parentProduct['title'];
-          $products[$i]->code = $parentProduct['code'];
-          $products[$i]->type = 'regular';
-          $attributes = app($this->productAttrClass)->getByParams('id', $setting[0]['product_attribute_id']);
-        }else{
-          $products[$i]->code =  $products[$i]->code;
-          $products[$i]->type = $products[$i]->type;
-        }
-      }else{
-        $attributes = app($this->productAttrClass)->getByParams('id', $products[$i]->product_attribute_id);
-      }
+      $attributes = app($this->productAttrClass)->getByParams('id', $products[$i]->product_attribute_id);
       $productQty = app($this->transferredProductsClass)->getTransferredProduct($productId, $data['merchant_id'], $products[$i]->product_attribute_id);
       // $consumed = app('Increment\Marketplace\Paddock\Http\BatchProductController')->getTotalAppliedRateBySpecifiedParams($productId, $data['merchant_id']);
       // $qty = app($this->productTraceClass)->getBalanceQtyOnManufacturer('product_id', $products[$i]->product_id);
@@ -581,7 +573,7 @@ class TransferController extends APIController
         $this->response['data'][$i]['volume'] = sizeof($attributes) > 0 ? app($this->productAttrClass)->convertVariation($attributes[0]['payload'], $attributes[0]['payload_value']) : null;
         $this->response['data'][$i]['merchant'] = array('name' => $merchant);
         $this->response['data'][$i]['type'] = $products[$i]->type;
-        $this->response['data'][$i]['title'] = $productTitle;
+        $this->response['data'][$i]['title'] = $products[$i]->title;
         $this->response['data'][$i]['tags'] = $products[$i]->tags;
         $this->response['data'][$i]['code'] = $products[$i]->code;
         $this->response['data'][$i]['product_id'] = $products[$i]->id;
@@ -646,21 +638,7 @@ class TransferController extends APIController
       $productData = app($this->productClass)->getProductByParams('id', $products[$i]['product_id'], ['title', 'type', 'merchant_id', 'id', 'code']);
       // dd($productData);
       $productTitle = $productData['title'];
-      if($productData['type'] === 'bundled'){
-        $setting = app($this->bundledSettingsController)->getQtyByParamsBundled($productId,  $products[$i]['product_attribute_id']);
-        if(sizeof($setting) > 0){
-          $parentProduct = app($this->productClass)->getProductColumnWithReturns('id', $setting[0]['product_id'], ['code', 'title']);
-          $productTitle = $parentProduct['title'];
-          $productData['code'] = $parentProduct['code'];
-          $productData['type'] = 'regular';
-          $attributes = app($this->productAttrClass)->getByParams('id', $setting[0]['product_attribute_id']);
-        }else{
-          $productData['code'] =  $productData['code'];
-          $productData['type'] = $productData['type'];
-        }
-      }else{
-        $attributes = app($this->productAttrClass)->getByParams('id',$products[$i]['product_attribute_id']);
-      }
+      $attributes = app($this->productAttrClass)->getByParams('id',$products[$i]['product_attribute_id']);
 
       $productQty = app($this->transferredProductsClass)->getTransferredProduct($productId, $data['merchant_id'], $products[$i]['product_attribute_id']);
       // $attributes = app($this->productAttrClass)->getByParams('id', $products[$i]['product_attribute_id']);
@@ -1188,19 +1166,19 @@ class TransferController extends APIController
       foreach ($result as $key) {
         $trace = app($this->productTraceClass)->getByParamsDetails('id', $key['payload_value']);
         $attributes = app($this->productAttrClass)->getProductUnits('id', $trace[0]['product_attribute_id']);
-        if(isset($data['user'])){
-          if($trace[0]['product']['type'] == 'bundled'){
-            $setting = app($this->bundledSettingsController)->getQtyByParamsBundled($trace[0]['product_id'],   $trace[0]['product_attribute_id']);
-            if(sizeof($setting) > 0){
-              $parentProduct = app($this->productClass)->getProductColumnWithReturns('id', $setting[0]['product_id'], ['code', 'title']);
-              $trace[0]['product']['title'] = $parentProduct['title'];
-              $trace[0]['product']['type'] = 'regular';
-            }else{
-              $trace[0]['product']['title'] = $trace[0]['product']['title'];
-              $trace[0]['product']['type'] = $trace[0]['product']['type'];
-            }
-          }
-        }
+        // if(isset($data['user'])){
+        //   if($trace[0]['product']['type'] == 'bundled'){
+        //     $setting = app($this->bundledSettingsController)->getQtyByParamsBundled($trace[0]['product_id'],   $trace[0]['product_attribute_id']);
+        //     if(sizeof($setting) > 0){
+        //       $parentProduct = app($this->productClass)->getProductColumnWithReturns('id', $setting[0]['product_id'], ['code', 'title']);
+        //       $trace[0]['product']['title'] = $parentProduct['title'];
+        //       $trace[0]['product']['type'] = 'regular';
+        //     }else{
+        //       $trace[0]['product']['title'] = $trace[0]['product']['title'];
+        //       $trace[0]['product']['type'] = $trace[0]['product']['type'];
+        //     }
+        //   }
+        // }
 
         $item = array(
           'title'         => $trace[0]['product']['title'],

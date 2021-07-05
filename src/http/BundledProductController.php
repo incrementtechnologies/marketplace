@@ -111,6 +111,16 @@ class BundledProductController extends APIController
     return sizeof($result) > 0 ? $result[0] : null;
   }
 
+  public function getByParamsWithDelete($column, $value){
+    $result = BundledProduct::where($column, '=', $value)->where('deleted_at', '=', null)->get();
+    if(sizeof($result) > 0){
+      BundledProduct::where($column, '=', $value)->update(array(
+        'deleted_at' => Carbon::now()
+      ));
+    }
+    return sizeof($result) > 0 ? $result : [];
+  }
+
   public function getByParamsNoDetailsWithLimit($column, $value, $limit){
     $result = BundledProduct::where($column, '=', $value)->where('deleted_at', '=', null)->limit($limit)->get(['bundled_trace']);
     return sizeof($result) > 0 ? $result[0] : null;

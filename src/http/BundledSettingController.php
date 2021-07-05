@@ -197,4 +197,12 @@ class BundledSettingController extends APIController
     return sizeof($result) > 0 ? $result : [];
   }
 
+  public function getByParamsByConditionWithDelete($condition){
+    $result = BundledSetting::where($condition)->where('deleted_at', '=', null)->get();
+    if(sizeof($result) > 0){
+      BundledSetting::where($condition)->update(array('deleted_at' => Carbon::now()));
+    }
+    return sizeof($result) > 0 ? $result : [];
+  }
+
 }
