@@ -65,6 +65,11 @@ class ProductAttributeController extends APIController
       return (sizeof($result) > 0) ? $result[0] : null;
     }
 
+    public function getProductUnitsByParams($condition){
+      $result = ProductAttribute::where($condition)->where('deleted_at', '=', null)->select('id', 'payload', 'payload_value')->get();
+      return (sizeof($result) > 0) ? $result[0] : null;
+    }
+
     public function getByParams($column, $value){
       $result = ProductAttribute::where($column, '=', $value)->where('deleted_at', '=', null)->orderBy('created_at', 'desc')->select(['id', 'payload', 'payload_value'])->get();
       if(sizeof($result) > 0){
