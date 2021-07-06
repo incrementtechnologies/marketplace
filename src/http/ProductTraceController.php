@@ -343,8 +343,12 @@ class ProductTraceController extends APIController
     $i = 0;
     foreach ($this->response['data'] as $key) {
       $item = $this->response['data'][$i];
+      // dd($item['product_attribute_id']);
       $this->response['data'][$i]['product'] = app($this->productController)->getProductByParamsEndUser('id', $item['product_id']);
-      $attributes = app($this->productAttrClass)->getProductUnitsByColumns($item['product_id']);
+      $attributes = app($this->productAttrClass)->getProductUnitsByParams(array(
+        array('id', '=', $item['product_attribute_id']),
+        array('product_id', '=', $item['product_id'])
+      ));
 
       $this->response['data'][$i]['volume'] = null;
       $this->response['data'][$i]['units'] = null;
