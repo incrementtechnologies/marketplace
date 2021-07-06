@@ -245,7 +245,7 @@ class PaddockPlanTaskController extends APIController
                 ->leftJoin('crops as T4', 'T4.id', '=', 'T3.crop_id')
                 ->leftJoin('spray_mixes as T5', 'T5.id', '=', 'T1.spray_mix_id')
                 ->where('T1.spray_mix_id', '=', $data['spray_mix_id'])
-                ->where('T1.status', '=', 'approved')
+                ->where('T1.status', '!=', 'pending')
                 ->where('T1.deleted_at', '=', null)
                 ->where('T2.merchant_id', $data['merchant_id'])
                 ->groupBy('T1.paddock_plan_id')
@@ -261,6 +261,8 @@ class PaddockPlanTaskController extends APIController
                     $totalArea =  $totalBatchArea != null ? ((float)$tempRes[$i]['spray_area'] - (float)$totalBatchArea) : (float)$tempRes[$i]['spray_area'];
                     $tempRes[$i]['remaining_spray_area'] = $this->numberConvention($totalArea);
                     $tempRes[$i]['units'] = "Ha";
+                    $tempRes[$i]['spray_area'] = $tempRes[$i]['spray_area'];
+                    $tempRes[$i]['batch_area'] = $totalBatchArea;
                     $tempRes[$i]['spray_mix_units'] = "L/Ha";
                     $tempRes[$i]['partial'] = false;
                     $tempRes[$i]['partial_flag'] = false;
@@ -290,7 +292,7 @@ class PaddockPlanTaskController extends APIController
                 ->leftJoin('batch_products as T2', 'T2.batch_id', '=', 'T1.batch_id')
                 ->where('T1.paddock_plan_task_id', '=', $paddockPlanTaskId)
                 ->groupBy('T1.paddock_plan_task_id')
-                ->select(DB::raw('SUM(T2.applied_rate) as total_area'))
+                ->select(DB::raw('SUM(T1.area) as total_area'))
                 ->get();
         return sizeof($result) > 0 ? $result[0]->total_area : null;
     }
