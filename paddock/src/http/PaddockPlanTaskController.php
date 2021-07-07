@@ -255,14 +255,15 @@ class PaddockPlanTaskController extends APIController
             $i = 0;
             $available = array();
             foreach ($tempRes as $key) {
+                // dd($key['paddock_id']);
                 if($tempRes[$i]['start_date'] <= $currDate && $currDate <= $tempRes[$i]['end_date']){
-                    $totalBatchArea = $this->getTotalBatchPaddockPlanTask($tempRes[$i]['plan_task_id']);
+                    $totalBatchArea = app($this->batchPaddockTaskClass)->getTotalBatchPaddockPlanTask($tempRes[$i]['plan_task_id']);
                     $tempRes[$i]['area'] = (float)$tempRes[$i]['area'];
-                    $totalArea =  $totalBatchArea != null ? ((float)$tempRes[$i]['spray_area'] - (float)$totalBatchArea) : (float)$tempRes[$i]['spray_area'];
+                    $totalArea =  $totalBatchArea != null ? (doubleval($tempRes[$i]['spray_area']) - doubleval($totalBatchArea)) : doubleval($tempRes[$i]['spray_area']);
                     $tempRes[$i]['remaining_spray_area'] = $this->numberConvention($totalArea);
                     $tempRes[$i]['units'] = "Ha";
-                    $tempRes[$i]['spray_area'] = $tempRes[$i]['spray_area'];
-                    $tempRes[$i]['batch_area'] = $totalBatchArea;
+                    $tempRes[$i]['spray_areas'] = $tempRes[$i]['spray_area'];
+                    $tempRes[$i]['batch_areas'] = $totalBatchArea;
                     $tempRes[$i]['spray_mix_units'] = "L/Ha";
                     $tempRes[$i]['partial'] = false;
                     $tempRes[$i]['partial_flag'] = false;
@@ -287,13 +288,4 @@ class PaddockPlanTaskController extends APIController
         return sizeof($result) > 0 ? $result[0][$returns] : null;  
     }
 
-    public function getTotalBatchPaddockPlanTask($paddockPlanTaskId){
-        $result = DB::table('batch_paddock_tasks as T1')
-                ->leftJoin('batch_products as T2', 'T2.batch_id', '=', 'T1.batch_id')
-                ->where('T1.paddock_plan_task_id', '=', $paddockPlanTaskId)
-                ->groupBy('T1.paddock_plan_task_id')
-                ->select(DB::raw('SUM(T1.area) as total_area'))
-                ->get();
-        return sizeof($result) > 0 ? $result[0]->total_area : null;
-    }
 }
