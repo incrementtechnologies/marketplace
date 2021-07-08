@@ -262,7 +262,7 @@ class PaddockPlanTaskController extends APIController
                     $totalArea =  $totalBatchArea != null ? (doubleval($tempRes[$i]['spray_area']) - doubleval($totalBatchArea)) : doubleval($tempRes[$i]['spray_area']);
                     $tempRes[$i]['remaining_spray_area'] = $this->numberConvention($totalArea);
                     $tempRes[$i]['units'] = "Ha";
-                    $tempRes[$i]['spray_areas'] = $tempRes[$i]['spray_area'];
+                    $tempRes[$i]['spray_areas'] = $tempRes[$i]['remaining_spray_area'];
                     $tempRes[$i]['batch_areas'] = $totalBatchArea;
                     $tempRes[$i]['spray_mix_units'] = "L/Ha";
                     $tempRes[$i]['partial'] = false;
