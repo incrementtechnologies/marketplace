@@ -776,6 +776,7 @@ class TransferController extends APIController
       ->where($con['column'], 'like', $con['value'])
       ->where('T2.merchant_id', '=', $data['merchant_id'])
       ->where('T2.deleted_at', '=', null)
+      ->where('T2.bundled', '=', null)
       ->groupBy('T2.product_attribute_id')
       ->select('T2.product_id', 'T2.product_attribute_id', 'T2.merchant_id')
       ->skip($data['offset'])->take($data['limit'])
@@ -787,31 +788,21 @@ class TransferController extends APIController
       ->where($con['column'], 'like', $con['value'])
       ->where('T2.merchant_id', '=', $data['merchant_id'])
       ->where('T2.deleted_at', '=', null)
+      ->where('T2.bundled', '=', null)
       ->groupBy('T2.product_attribute_id')
       ->orderBy($con['column'], $data['sort'][$con['column']])
       ->get();
 
     $testArray = array();
+    $products = [];
     if (sizeof($result) > 0) {
       $temp =  json_decode(json_encode($result), true);
       $i = 0;
       foreach ($temp as $key) {
         $productId = $temp[$i]['product_id'];
         $productData = app($this->productClass)->getProductByParams('id', $temp[$i]['product_id'], ['title', 'type', 'merchant_id', 'id', 'code']);
-        if($productData['type'] == 'bundled'){
-          $setting = app($this->bundledSettingsController)->getQtyByParamsBundled($productId,  $key['product_attribute_id']);
-          // dd($setting);
-          if(sizeof($setting) > 0){
-            $parentProduct = app($this->productClass)->getProductColumnWithReturns('id', $setting[0]['product_id'], ['code', 'title']);
-            $productData['title'] = $parentProduct['title'];
-            $productData['code'] = $parentProduct['code'];
-            $productData['type'] = 'regular';
-          }else{
-            $productData['code'] = $productData['code'];
-            $productData['type'] = $productData['type'];
-          }
-        }
-        
+
+        // new implementation: no more bundled products
         $merchantFrom = app($this->merchantClass)->getColumnValueByParams('id', $productData['merchant_id'], 'name');
         $merchant =  app($this->merchantClass)->getColumnValueByParams('id', $temp[$i]['merchant_id'], 'name');
         $temp[$i]['title']     = $productData['title'];
@@ -824,15 +815,45 @@ class TransferController extends APIController
         $temp[$i]['volume'] = app($this->productAttrClass)->getProductUnits('id', $key['product_attribute_id']);
         $temp[$i]['type']    = $productData['type'];
         $temp[$i]['details'] = $this->retrieveProductDetailsByParams('id', $key['product_id']);
+        $products[] = $temp[$i];
+
+        // old implementation
+        // if($productData['type'] == 'bundled'){
+        //   $setting = app($this->bundledSettingsController)->getQtyByParamsBundled($productId,  $key['product_attribute_id']);
+        //   // dd($setting);
+        //   if(sizeof($setting) > 0){
+        //     $parentProduct = app($this->productClass)->getProductColumnWithReturns('id', $setting[0]['product_id'], ['code', 'title']);
+        //     $productData['title'] = $parentProduct['title'];
+        //     $productData['code'] = $parentProduct['code'];
+        //     $productData['type'] = 'regular';
+        //   }else{
+        //     $productData['code'] = $productData['code'];
+        //     $productData['type'] = $productData['type'];
+        //   }
+        // }else{
+        //   $merchantFrom = app($this->merchantClass)->getColumnValueByParams('id', $productData['merchant_id'], 'name');
+        //   $merchant =  app($this->merchantClass)->getColumnValueByParams('id', $temp[$i]['merchant_id'], 'name');
+        //   $temp[$i]['title']     = $productData['title'];
+        //   $temp[$i]['id']        = $productData['id'];
+        //   $temp[$i]['code'] = $productData['code'];
+        //   $temp[$i]['merchant']  = array('name' => $merchant);
+        //   $temp[$i]['merchant_from'] = $merchantFrom;
+        //   $temp[$i]['qty']  =  app($this->transferredProductsClass)->getRemainingProductQtyDistributor($temp[$i]['id'], $data['merchant_id'], $temp[$i]['product_attribute_id']);
+        //   $temp[$i]['qty_in_bundled'] = $this->getBundledProducts($data['merchant_id'], $temp[$i]['product_id']);
+        //   $temp[$i]['volume'] = app($this->productAttrClass)->getProductUnits('id', $key['product_attribute_id']);
+        //   $temp[$i]['type']    = $productData['type'];
+        //   $temp[$i]['details'] = $this->retrieveProductDetailsByParams('id', $key['product_id']);
+        //   $products[] = $temp[$i];
+        // }
 
         $i++;
       }
-      $this->response['data'] = $temp;
-      $this->response['size'] = sizeOf($size);
+      $this->response['data'] = $products;
+      $this->response['size'] = sizeOf($products);
       return $this->response();
     } else {
       $this->response['data'] = [];
-      $this->response['size'] = sizeOf($size);
+      $this->response['size'] = sizeOf($products);
       return $this->response();
     }
   }
