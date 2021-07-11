@@ -694,10 +694,10 @@ class TransferController extends APIController
       // array('T2.status', '=', 'active'),
       array('T2.merchant_id', '=', $data['merchant_id'])
     );
-    
+
     if($data['type'] != 'MANUFACTURER'){
       $whereArray[] = array(
-        'T1.type', '!=', 'regular'
+        'T1.type', '!=', 'bundled'
       );
     }
 
