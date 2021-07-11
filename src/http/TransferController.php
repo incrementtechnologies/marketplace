@@ -694,6 +694,13 @@ class TransferController extends APIController
       // array('T2.status', '=', 'active'),
       array('T2.merchant_id', '=', $data['merchant_id'])
     );
+    
+    if($data['type'] != 'MANUFACTURER'){
+      $whereArray[] = array(
+        'T1.type', '!=', 'regular'
+      );
+    }
+
     $result = DB::table('products as T1')
       ->leftJoin('transferred_products as T2', 'T2.product_id', '=', 'T1.id')
       ->where($whereArray)
