@@ -9,12 +9,14 @@ use Increment\Marketplace\Paddock\Models\Machine;
 use Increment\Marketplace\Paddock\Models\SprayMix;
 use Increment\Marketplace\Paddock\Models\BatchPaddockTask;
 use Increment\Marketplace\Paddock\Models\BatchProduct;
+use Increment\Marketplace\Paddock\Models\PaddockPlanTask;
 use Carbon\Carbon;
 
 class BatchController extends APIController
 {
     public $sprayMixClass = 'Increment\Marketplace\Paddock\Http\SprayMixController';
     public $machineClass = 'Increment\Marketplace\Paddock\Http\MachineController';
+    public $batchPaddockTaskClass = 'Increment\Marketplace\Paddock\Http\BatchPaddockTaskController';
 
     function __construct(){
         // $this->model = new Batch();
@@ -70,6 +72,11 @@ class BatchController extends APIController
       $result = Batch::where('id', '=', $data['id'])->update(array(
         'status' => $data['status'],
         'updated_at' => Carbon::now()
+      ));
+      $batchTask = app($this->batchPaddockTaskClass)->retrieveByParams('batch_id', $data['id'], ['paddock_plan_task_id']);
+      PaddockPlanTask::where('id', '=', $batchTask[0]['paddock_plan_task_id'])->update(array(
+        'status' => $data['status'],
+        'update_at' => Carbon::now(),
       ));
 
       $this->response['data'] = $result;

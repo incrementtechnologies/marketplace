@@ -93,7 +93,16 @@ class PaddockPlanTaskController extends APIController
                                 $temp[$i]['paddock']['crop_name'] = app($this->cropClass)->retrieveCropById($paddocks[0]['crop_id'])[0]->name;
                             }
                             if($temp[$i]['remaining_spray_area'] > 0){
-                                $finalResult[] = $temp[$i];
+                                if(sizeof($finalResult) > 0){
+                                    for ($a=0; $a <= sizeof($finalResult)-1 ; $a++) { 
+                                        $each = $finalResult[$a];
+                                        if($each['paddock_id'] !== $key['paddock_id']){
+                                            $finalResult[] = $temp[$i];
+                                        }
+                                    }
+                                }else{
+                                    $finalResult[] = $temp[$i];
+                                }
                             }
                         }
                     }
