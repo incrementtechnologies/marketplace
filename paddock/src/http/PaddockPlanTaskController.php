@@ -76,7 +76,7 @@ class PaddockPlanTaskController extends APIController
                     if(sizeof($existInBatch) <= 0) {
                         $temp[$i]['paddock'] = app($this->paddockClass)->getByParams('id', $paddocks[0]['paddock_id'], ['id', 'name', 'spray_area']);
                         if($temp[$i]['paddock'] !== null){
-                            $totalBatchArea = $this->getTotalBatchPaddockPlanTask($temp[$i]['id']);
+                            $totalBatchArea = app($this->batchPaddockTaskClass)->getTotalBatchPaddockPlanTask($temp[$i]['id']);
                             $temp[$i]['area'] = (float)$temp[$i]['area'];
                             $totalArea =  $totalBatchArea != null ? ((float)$temp[$i]['paddock']['spray_area'] - (float)$totalBatchArea) : (float)$temp[$i]['paddock']['spray_area'];
                             $temp[$i]['remaining_spray_area'] = $this->numberConvention($totalArea);
@@ -93,7 +93,16 @@ class PaddockPlanTaskController extends APIController
                                 $temp[$i]['paddock']['crop_name'] = app($this->cropClass)->retrieveCropById($paddocks[0]['crop_id'])[0]->name;
                             }
                             if($temp[$i]['remaining_spray_area'] > 0){
-                                $finalResult[] = $temp[$i];
+                                if(sizeof($finalResult) > 0){
+                                    for ($a=0; $a <= sizeof($finalResult)-1 ; $a++) { 
+                                        $each = $finalResult[$a];
+                                        if($each['paddock_id'] !== $key['paddock_id']){
+                                            $finalResult[] = $temp[$i];
+                                        }
+                                    }
+                                }else{
+                                    $finalResult[] = $temp[$i];
+                                }
                             }
                         }
                     }
