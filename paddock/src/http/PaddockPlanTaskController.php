@@ -76,7 +76,7 @@ class PaddockPlanTaskController extends APIController
                     if(sizeof($existInBatch) <= 0) {
                         $temp[$i]['paddock'] = app($this->paddockClass)->getByParams('id', $paddocks[0]['paddock_id'], ['id', 'name', 'spray_area']);
                         if($temp[$i]['paddock'] !== null){
-                            $totalBatchArea = $this->getTotalBatchPaddockPlanTask($temp[$i]['id']);
+                            $totalBatchArea = app($this->batchPaddockTaskClass)->getTotalBatchPaddockPlanTask($temp[$i]['id']);
                             $temp[$i]['area'] = (float)$temp[$i]['area'];
                             $totalArea =  $totalBatchArea != null ? ((float)$temp[$i]['paddock']['spray_area'] - (float)$totalBatchArea) : (float)$temp[$i]['paddock']['spray_area'];
                             $temp[$i]['remaining_spray_area'] = $this->numberConvention($totalArea);
@@ -124,7 +124,8 @@ class PaddockPlanTaskController extends APIController
                     ->where('T1.'.$con[0]['column'], '=', $con[0]['value'])
                     ->where('T1.'.$con[1]['column'], '=', $con[1]['value'])
                     ->where('T1.deleted_at', '=', null)
-                    ->skip($data['offset'])->take($data['limit'])->orderBy('T1.created_at', 'desc')->get();
+                    ->skip($data['offset'])->take($data['limit'])->orderBy('T1.created_at', 'desc')
+                    ->get();
         }
         $obj = $result;
         if(sizeof($obj) > 0){
@@ -148,6 +149,7 @@ class PaddockPlanTaskController extends APIController
                     $temp[$i]['spray_mix_id'] = $this->retrieveByParams('id', $temp[$i]['paddock_plan_task_id'], 'spray_mix_id');
                     $temp[$i]['spray_mix'] = app($this->sprayMixClass)->getByParams('id', $temp[$i]['spray_mix_id'], ['id', 'name']);
                     $temp[$i]['machine'] = app($this->machineClass)->getMachineNameByParams('id', $temp[$i]['machine_id']);
+                    // $temp[$i]['id'] = $paddockId;
                 }
                 $i++;
             }
