@@ -134,41 +134,44 @@ class PaddockController extends APIController
   public function retrieveWithSprayMix(Request $request){
     $data = $request->all();
     $task = PaddockPlanTask::where('id', '=', $data['id'])->get();
-    $result = Paddock::where('id', '=', $task[0]['paddock_id'])->where('deleted_at', '=', null)->get();
-    $this->response['data'] = $result;
-    for ($i = 0; $i < count($this->response['data']); $i++){
-      $item = $this->response['data'][$i];
-      // dd($paddock_plan_tasks);
-      $this->response['data'][$i]['spray_mix'] = null;
-      $this->response['data'][$i]['due_date'] = null;
-      $this->response['data'][$i]['machine'] = null; // get the used machine
-      $this->response['data'][$i]['start_date'] = null;
-      $this->response['data'][$i]['end_date'] = null;
-      $this->response['data'][$i]['crop_name'] = null;
-      $this->response['data'][$i]['area'] = $this->numberConvention($this->response['data'][$i]['area']);
-      $this->response['data'][$i]['arable_area'] = $this->numberConvention($this->response['data'][$i]['arable_area']);
-      $this->response['data'][$i]['units'] = 'Ha';
-      $this->response['data'][$i]['spray_area'] = $this->numberConvention($this->response['data'][$i]['spray_area']);
-      $paddockPlan = PaddockPlan::select()->where("paddock_id", "=",  $task[0]['paddock_id'])->orderBy('start_date','desc')->limit(1)->get();
-      if(sizeof($paddockPlan) > 0){
-        $this->response['data'][$i]['started'] = $paddockPlan[0]['start_date'];
-        $crop = Crop::where("id", "=", $paddockPlan[0]['crop_id'])->get();
-        $this->response['data'][$i]['crop_name'] = sizeof($crop) > 0 ? $crop[0]['name'] : null;
-        // $paddockPlanTask = PaddockPlanTask::where("paddock_plan_id", "=", $paddockPlan[0]['id'])->where('id', '=', $data['id'])->get();
-        // if(sizeof($paddockPlanTask) > 0){
-          $temp = app($this->batchPaddockTaskClass)->retrieveBatchByPaddockPlanTask($data['id']);
-          $this->response['data'][$i]['spray_mix'] = app($this->sprayMixClass)->getByParamsDefault('id', $task[0]['spray_mix_id']);
-          $this->response['data'][$i]['due_date'] = $task[0]['due_date'];
-          $this->response['data'][$i]['start_date'] = $temp !== null ? Carbon::createFromFormat('Y-m-d H:i:s', $temp['created_at'])->copy()->tz($this->response['timezone'])->format('F j, Y H:i A') : null;
-        // Carbon::createFromFormat('Y-m-d H:i:s', $result[$i]['created_at'])->copy()->tz($this->response['timezone'])->format('F j, Y h:i A');$paddockPlan[0]['start_date'];
-          $this->response['data'][$i]['end_date'] = $temp !== null ? Carbon::createFromFormat('Y-m-d H:i:s', $temp['updated_at'])->copy()->tz($this->response['timezone'])->format('F j, Y H:i A') : null;
-        // }
+    if(sizeof($task) > 0){
+      $result = Paddock::where('id', '=', $task[0]['paddock_id'])->where('deleted_at', '=', null)->get();
+      $this->response['data'] = $result;
+      for ($i = 0; $i < count($this->response['data']); $i++){
+        $item = $this->response['data'][$i];
+        // dd($paddock_plan_tasks);
+        $this->response['data'][$i]['spray_mix'] = null;
+        $this->response['data'][$i]['due_date'] = null;
+        $this->response['data'][$i]['machine'] = null; // get the used machine
+        $this->response['data'][$i]['start_date'] = null;
+        $this->response['data'][$i]['end_date'] = null;
+        $this->response['data'][$i]['crop_name'] = null;
+        $this->response['data'][$i]['area'] = $this->numberConvention($this->response['data'][$i]['area']);
+        $this->response['data'][$i]['arable_area'] = $this->numberConvention($this->response['data'][$i]['arable_area']);
+        $this->response['data'][$i]['units'] = 'Ha';
+        $this->response['data'][$i]['spray_area'] = $this->numberConvention($this->response['data'][$i]['spray_area']);
+        $paddockPlan = PaddockPlan::select()->where("paddock_id", "=",  $task[0]['paddock_id'])->orderBy('start_date','desc')->limit(1)->get();
+        if(sizeof($paddockPlan) > 0){
+          $this->response['data'][$i]['started'] = $paddockPlan[0]['start_date'];
+          $crop = Crop::where("id", "=", $paddockPlan[0]['crop_id'])->get();
+          $this->response['data'][$i]['crop_name'] = sizeof($crop) > 0 ? $crop[0]['name'] : null;
+          // $paddockPlanTask = PaddockPlanTask::where("paddock_plan_id", "=", $paddockPlan[0]['id'])->where('id', '=', $data['id'])->get();
+          // if(sizeof($paddockPlanTask) > 0){
+            $temp = app($this->batchPaddockTaskClass)->retrieveBatchByPaddockPlanTask($data['id']);
+            $this->response['data'][$i]['spray_mix'] = app($this->sprayMixClass)->getByParamsDefault('id', $task[0]['spray_mix_id']);
+            $this->response['data'][$i]['due_date'] = $task[0]['due_date'];
+            $this->response['data'][$i]['start_date'] = $temp !== null ? Carbon::createFromFormat('Y-m-d H:i:s', $temp['created_at'])->copy()->tz($this->response['timezone'])->format('F j, Y H:i A') : null;
+          // Carbon::createFromFormat('Y-m-d H:i:s', $result[$i]['created_at'])->copy()->tz($this->response['timezone'])->format('F j, Y h:i A');$paddockPlan[0]['start_date'];
+            $this->response['data'][$i]['end_date'] = $temp !== null ? Carbon::createFromFormat('Y-m-d H:i:s', $temp['updated_at'])->copy()->tz($this->response['timezone'])->format('F j, Y H:i A') : null;
+          // }
+        }
+        
+        
+        $this->response['data'][$i]['operator'] = $this->retrieveName($item['account_id']); // needs to be verified
+        $this->response['data'][$i]['creator'] = $this->retrieveName($item['account_id']); // needs to be verified
       }
-      
-      
-      $this->response['data'][$i]['operator'] = $this->retrieveName($item['account_id']); // needs to be verified
-      $this->response['data'][$i]['creator'] = $this->retrieveName($item['account_id']); // needs to be verified
     }
+
 
     return $this->response();
   }
