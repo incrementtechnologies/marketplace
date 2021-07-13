@@ -66,7 +66,7 @@ class TransferController extends APIController
         if($data['account_type'] === 'DISTRIBUTOR'){
           $existInbundledProducts = app($this->bundledProductController)->getByParamsWithDelete('bundled_trace', $key['product_trace']);
         }else{
-          $existInbundledProducts = app($this->bundledProductController)->getByParamsNoDetails('bundled_trace', $key['product_trace']);
+          $existInbundledProducts = app($this->bundledProductController)->getByParamsBundled('bundled_trace', $key['product_trace']);
         }
         if (sizeOf($existInbundledProducts) > 0) {
           if($data['account_type'] === 'DISTRIBUTOR'){

@@ -119,7 +119,7 @@ class DailyLoadingListController extends APIController
 
   public function approved(Request $request){
     $data = $request->all();
-    DailyLoadingList::where('merchant_id', '=', $data['merchant_id'])->where('account_id', '=', $data['account_id'])->Where('order_request_id', '=', $data['order_request_id'])->update(array(
+    DailyLoadingList::where('merchant_id', '=', $data['merchant_id'])->where('account_id', '=', $data['account_id'])->Where('status', '=', 'pending')->update(array(
       'status'  => 'approved',
       'updated_at' => Carbon::now()
     ));
