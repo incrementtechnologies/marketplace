@@ -63,12 +63,23 @@ class TransferController extends APIController
       $products = $data['products'];
       $i = 0;
       foreach ($products as $key) {
-        $existInbundledProducts = app($this->bundledProductController)->getByParamsWithDelete('bundled_trace', $key['product_trace']);
+        if($data['account_type'] === 'DISTRIBUTOR'){
+          $existInbundledProducts = app($this->bundledProductController)->getByParamsWithDelete('bundled_trace', $key['product_trace']);
+        }else{
+          $existInbundledProducts = app($this->bundledProductController)->getByParamsNoDetails('bundled_trace', $key['product_trace']);
+        }
         if (sizeOf($existInbundledProducts) > 0) {
-          $existInBundled = app($this->bundledSettingsController)->getByParamsByConditionWithDelete(array(
-            array('product_id', '=', $existInbundledProducts[0]['product_on_settings']),
-            array('bundled', '=', $existInbundledProducts[0]['product_id'])
-          ));
+          if($data['account_type'] === 'DISTRIBUTOR'){
+            $existInBundled = app($this->bundledSettingsController)->getByParamsByConditionWithDelete(array(
+              array('product_id', '=', $existInbundledProducts[0]['product_on_settings']),
+              array('bundled', '=', $existInbundledProducts[0]['product_id'])
+            ));
+          }else{
+            $existInBundled = app($this->bundledSettingsController)->getByParamsByCondition(array(
+              array('product_id', '=', $existInbundledProducts[0]['product_on_settings']),
+              array('bundled', '=', $existInbundledProducts[0]['product_id'])
+            ));
+          }
           if (sizeof($existInBundled) > 0) {
             $key['bundled_id'] = $existInBundled[0]['bundled'];
             $key['bundled_setting_qty'] = $existInBundled[0]['qty'];

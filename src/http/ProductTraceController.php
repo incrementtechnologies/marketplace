@@ -285,7 +285,6 @@ class ProductTraceController extends APIController
 
       $this->response['data'][$i]['created_at_human'] = Carbon::createFromFormat('Y-m-d H:i:s', $item['created_at'])->copy()->tz($this->response['timezone'])->format('F j, Y h:i A');
       $this->response['data'][$i]['bundled_product'] = app($this->bundledProductController)->getByParams('product_trace', $item['id']);
-      // dd($item);
       if ($item['batch_number'] == null && $item['status'] == 'active') {
         $bundledSettingQty = app($this->bundledSettingController)->getQtyByParamsBundled($item['product_id'], $item['product_attribute_id']);
       }else{
@@ -293,7 +292,6 @@ class ProductTraceController extends APIController
       }
       if ($this->response['data'][$i]['product'] != null) {
         $type = $this->response['data'][$i]['product']['type'];
-        // dd($data['account_type'] == 'DISTRIBUTOR', $type);
         $this->response['data'][$i]['product']['qty'] = null;
         if ($data['account_type'] == 'MANUFACTURER') {
           $qty = $this->getBalanceQtyWithInBundled('product_id', $item['product_id'], 'active', $data['merchant_id'], $item['product_attribute_id']);
