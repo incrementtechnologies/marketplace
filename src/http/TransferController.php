@@ -24,6 +24,7 @@ class TransferController extends APIController
   public $orderRequestClass = 'Increment\Marketplace\Http\OrderRequestController';
   public $dailyLoadingListClass = 'Increment\Marketplace\Http\DailyLoadingListController';
   public $batcProductClass = 'Increment\Marketplace\Paddock\Http\BatchProductController';
+  public $merchantProductClass = 'Increment\Marketplace\Http\MerchantProductController';
   function __construct()
   {
     $this->model = new Transfer();
@@ -63,18 +64,15 @@ class TransferController extends APIController
       $products = $data['products'];
       $i = 0;
       foreach ($products as $key) {
-        if($data['account_type'] === 'DISTRIBUTOR'){
-          $existInbundledProducts = app($this->bundledProductController)->getByParamsWithDelete('bundled_trace', $key['product_trace']);
-        }else{
-          $existInbundledProducts = app($this->bundledProductController)->getByParamsBundled('bundled_trace', $key['product_trace']);
-        }
+        $existInBundled = [];
+        $existInbundledProducts = app($this->bundledProductController)->getByParamsWithDelete('bundled_trace', $key['product_trace'], $data['account_type']);
         if (sizeOf($existInbundledProducts) > 0) {
-          if($data['account_type'] === 'DISTRIBUTOR'){
+          if ($data['account_type'] === 'DISTRIBUTOR') {
             $existInBundled = app($this->bundledSettingsController)->getByParamsByConditionWithDelete(array(
               array('product_id', '=', $existInbundledProducts[0]['product_on_settings']),
               array('bundled', '=', $existInbundledProducts[0]['product_id'])
             ));
-          }else{
+          } else {
             $existInBundled = app($this->bundledSettingsController)->getByParamsByCondition(array(
               array('product_id', '=', $existInbundledProducts[0]['product_on_settings']),
               array('bundled', '=', $existInbundledProducts[0]['product_id'])
@@ -102,61 +100,25 @@ class TransferController extends APIController
           );
         }
         $productTrace = app($this->productTraceClass)->getDetailsByParams('id', $key['product_trace'], ['id', 'code', 'product_attribute_id']);
-        if($data['account_type'] === 'DISTRIBUTOR'){
-          if(sizeof($existInbundledProducts) > 0){
-            for ($a=0; $a <= sizeof($existInbundledProducts)-1; $a++) {
+        if ($data['account_type'] === 'DISTRIBUTOR') {
+          if (sizeof($existInbundledProducts) > 0) {
+            for ($a = 0; $a <= sizeof($existInbundledProducts) - 1; $a++) {
               $bundled = $existInbundledProducts[$a];
               $productTrace = app($this->productTraceClass)->getDetailsByParams('id', $bundled['product_trace'], ['id', 'code', 'product_attribute_id']);
-              if($productTrace){
-                $item = array(
-                  'transfer_id' => $this->response['data'],
-                  'payload'     => 'product_trace',
-                  'payload_value' => $bundled['product_trace'],
-                  'product_id'  => sizeof($existInBundled) > 0 ? $existInBundled[0]['product_id'] : $key['product_id'],
-                  'merchant_id'  => $data['to'],
-                  'bundled' => Null,
-                  'bundled_setting_qty' => NULL,
-                  'product_attribute_id' => $productTrace['product_attribute_id'],
-                  'status'      => 'active',
-                  'created_at'  => Carbon::now()
-                );
-                TransferredProduct::insert($item);
-              }else{
+              if ($productTrace) {
+                $this->manageCreatedeliveries($data, $existInBundled, $key, $existInbundledProducts, $productTrace);
+              } else {
                 $this->response['data'] = null;
                 $this->response['error'] = 'Invalid product trace.';
                 return $this->response();
               }
             }
-          }else{
-            $item = array(
-              'transfer_id' => $this->response['data'],
-              'payload'     => 'product_trace',
-              'payload_value' => $key['product_trace'],
-              'product_id'  => $key['product_id'],
-              'merchant_id'  => $data['to'],
-              'bundled' => $key['bundled_id'],
-              'bundled_setting_qty' => $key['bundled_setting_qty'],
-              'product_attribute_id' => $productTrace['product_attribute_id'],
-              'status'      => 'active',
-              'created_at'  => Carbon::now()
-            );
-            TransferredProduct::insert($item);
+          } else {
+            $this->manageCreatedeliveries($data, $existInBundled, $key, $existInbundledProducts, $productTrace);
           }
-        }else{
+        } else {
           if ($productTrace) {
-              $item = array(
-                'transfer_id' => $this->response['data'],
-                'payload'     => sizeOf($existInbundledProducts) > 0 ? 'bundled_trace' : 'product_trace',
-                'payload_value' => $key['product_trace'],
-                'product_id'  => $key['product_id'],
-                'merchant_id'  => $data['to'],
-                'bundled' => $key['bundled_id'],
-                'bundled_setting_qty' => $key['bundled_setting_qty'],
-                'product_attribute_id' => $productTrace['product_attribute_id'],
-                'status'      => 'active',
-                'created_at'  => Carbon::now()
-              );
-            TransferredProduct::insert($item);
+            $this->manageCreatedeliveries($data, $existInBundled, $key, $existInbundledProducts, $productTrace);
           } else {
             $this->response['data'] = null;
             $this->response['error'] = 'Invalid product trace.';
@@ -167,6 +129,44 @@ class TransferController extends APIController
       }
     }
     return $this->response();
+  }
+
+  public function manageCreatedeliveries($data, $existInBundled, $key, $existInbundledProducts, $productTrace)
+  {
+    $productId = sizeof($existInBundled) > 0 ? $existInBundled[0]['product_id'] : $key['product_id'];
+    $item = array(
+      'transfer_id' => $this->response['data'],
+      'payload'     => sizeOf($existInbundledProducts) > 0 ? 'bundled_trace' : 'product_trace',
+      'payload_value' => $key['product_trace'],
+      'product_id'  => $productId,
+      'merchant_id'  => $data['to'],
+      'bundled' => sizeof($existInbundledProducts) > 0 ? $key['bundled_id'] : null,
+      'bundled_setting_qty' => sizeof($existInbundledProducts) > 0 ? $key['bundled_setting_qty'] : null,
+      'product_attribute_id' => $productTrace['product_attribute_id'],
+      'status'      => 'active',
+      'created_at'  => Carbon::now()
+    );
+    if($data['account_type'] === 'DISTRIBUTOR'){
+      $item['payload'] = 'product_trace';
+      $item['bundled'] = null;
+      $item['bundled_setting_qty'] = null;
+    }
+
+    TransferredProduct::insert($item);
+
+    $merchant_products = array(
+      'merchant_id' => $data['to'],
+      'product_id'  => $productId,
+      'product_attribute_id' => $productTrace['product_attribute_id'],
+      'created_at' => Carbon::now(),
+    );
+    $merchantExist = app($this->merchantProductClass)->checkIfExist('merchant_id', $data['to']);
+    $productExist =  app($this->merchantProductClass)->checkIfExist('product_id', sizeof($existInBundled) > 0 ? $existInBundled[0]['product_id'] : $key['product_id']);
+
+    if ($merchantExist == true && $productExist == true) {
+    } else {
+      app($this->merchantProductClass)->insertToDB($merchant_products);
+    }
   }
 
   public function generateCode()
@@ -649,7 +649,7 @@ class TransferController extends APIController
       $productData = app($this->productClass)->getProductByParams('id', $products[$i]['product_id'], ['title', 'type', 'merchant_id', 'id', 'code']);
       // dd($productData);
       $productTitle = $productData['title'];
-      $attributes = app($this->productAttrClass)->getByParams('id',$products[$i]['product_attribute_id']);
+      $attributes = app($this->productAttrClass)->getByParams('id', $products[$i]['product_attribute_id']);
 
       $productQty = app($this->transferredProductsClass)->getTransferredProduct($productId, $data['merchant_id'], $products[$i]['product_attribute_id']);
       // $attributes = app($this->productAttrClass)->getByParams('id', $products[$i]['product_attribute_id']);
@@ -702,18 +702,16 @@ class TransferController extends APIController
     $whereArray = array(
       array($con['column'], 'like', $con['value']),
       array('T1.deleted_at', '=', null),
-      // array('T2.status', '=', 'active'),
       array('T2.merchant_id', '=', $data['merchant_id'])
     );
 
-    if($data['type'] != 'MANUFACTURER'){
-      $whereArray[] = array(
-        'T1.type', '!=', 'bundled'
-      );
-    }
-
+    // if($data['type'] != 'MANUFACTURER'){
+    //   $whereArray[] = array(
+    //     'T2.bundled', '=', null
+    //   );
+    // }
     $result = DB::table('products as T1')
-      ->leftJoin('transferred_products as T2', 'T2.product_id', '=', 'T1.id')
+      ->leftJoin('merchant_products as T2', 'T2.product_id', '=', 'T1.id')
       ->where($whereArray)
       ->groupBy('T2.product_attribute_id')
       ->skip($data['offset'])->take($data['limit'])
@@ -722,31 +720,18 @@ class TransferController extends APIController
       ->get();
 
     $size = DB::table('products as T1')
-      ->leftJoin('transferred_products as T2', 'T2.product_id', '=', 'T1.id')
+      ->leftJoin('merchant_products as T2', 'T2.product_id', '=', 'T1.id')
       ->where($whereArray)
       ->groupBy('T2.product_attribute_id')
       ->orderBy($con['column'],  array_values($data['sort'])[0])
       ->select('T1.id', 'T1.code', 'T1.title',  'T2.product_attribute_id', 'T1.tags', 'T1.merchant_id as from', 'T2.merchant_id as to', 'T1.type', 'T1.tags', 'T1.description')
       ->get();
 
-    // dd($result);
     if (sizeof($result)) {
       $temp =  json_decode(json_encode($result), true);
       $i = 0;
       foreach ($temp as $key) {
-        if($key['type'] == 'bundled'){
-          $setting = app($this->bundledSettingsController)->getQtyByParamsBundled($key['id'],  $key['product_attribute_id']);
-          // dd($setting);
-          if(sizeof($setting) > 0){
-            $parentProduct = app($this->productClass)->getProductColumnWithReturns('id', $setting[0]['product_id'], ['code', 'title']);
-            $temp[$i]['title'] = $parentProduct['title'];
-            $temp[$i]['code'] = $parentProduct['code'];
-            $temp[$i]['type'] = 'regular';
-          }else{
-            $temp[$i]['code'] = $temp[$i]['code'];
-            $temp[$i]['type'] = $key['type'];
-          }
-        }
+
         $merchantFrom = app($this->merchantClass)->getColumnValueByParams('id', $temp[$i]['from'], 'name');
         $merchant =  app($this->merchantClass)->getColumnValueByParams('id', $temp[$i]['to'], 'name');
         $temp[$i]['title']     =  $temp[$i]['title'];
@@ -784,7 +769,7 @@ class TransferController extends APIController
     $size = null;
 
     $result = DB::table('merchants as T1')
-      ->leftJoin('transferred_products as T2', 'T2.merchant_id', '=', 'T1.id')
+      ->leftJoin('merchant_products as T2', 'T2.merchant_id', '=', 'T1.id')
       ->where($con['column'], 'like', $con['value'])
       ->where('T2.merchant_id', '=', $data['merchant_id'])
       ->where('T2.deleted_at', '=', null)
@@ -796,7 +781,7 @@ class TransferController extends APIController
       ->get();
 
     $size =  DB::table('merchants as T1')
-      ->leftJoin('transferred_products as T2', 'T2.merchant_id', '=', 'T1.id')
+      ->leftJoin('merchant_products as T2', 'T2.merchant_id', '=', 'T1.id')
       ->where($con['column'], 'like', $con['value'])
       ->where('T2.merchant_id', '=', $data['merchant_id'])
       ->where('T2.deleted_at', '=', null)
