@@ -729,6 +729,7 @@ class TransferController extends APIController
       ->select('T1.id', 'T1.code', 'T1.title',  'T2.product_attribute_id', 'T1.tags', 'T1.merchant_id as from', 'T2.merchant_id as to', 'T1.type', 'T1.tags', 'T1.description')
       ->get();
 
+    // dd($result);
     if (sizeof($result)) {
       $temp =  json_decode(json_encode($result), true);
       $i = 0;
