@@ -162,8 +162,9 @@ class TransferController extends APIController
     );
     $merchantExist = app($this->merchantProductClass)->checkIfExist('merchant_id', $data['to']);
     $productExist =  app($this->merchantProductClass)->checkIfExist('product_id', sizeof($existInBundled) > 0 ? $existInBundled[0]['product_id'] : $key['product_id']);
+    $attrID =  app($this->merchantProductClass)->checkIfExist('product_attribute_id', $productTrace['product_attribute_id']);
 
-    if ($merchantExist == true && $productExist == true) {
+    if ($merchantExist == true && $productExist == true && $attrID == true) {
     } else {
       app($this->merchantProductClass)->insertToDB($merchant_products);
     }
