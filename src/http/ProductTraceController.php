@@ -248,6 +248,7 @@ class ProductTraceController extends APIController
       $this->response['data'][$i]['volume'] = app($this->productAttrClass)->getProductUnits('id', $item['product_attribute_id']);
       $item = $this->response['data'][$i];
       // dd(isset($data['nfc']), $item['nfc'] !== null, $item['status'] === 'active');
+      // dd($this->response['data']);
       if (isset($data['activation'])) {
         if (isset($data['nfc']) && $item['nfc'] !== null && $item['status'] === 'active') {
           $this->response['data'] = null;
@@ -270,7 +271,6 @@ class ProductTraceController extends APIController
           $this->response['data'][$i]['nfc'] = $data['nfc'];
         }
       }
-
       if (isset($data['nfc']) && $item['nfc'] != null && $item['nfc'] != $data['nfc']) {
         $this->response['data'] = null;
         $this->response['error'] = 'Duplicate tag!';
