@@ -68,6 +68,7 @@ class TransferController extends APIController
         $existInbundledProducts = app($this->bundledProductController)->getByParamsWithDelete('bundled_trace', $key['product_trace'], $data['account_type']);
         if (sizeOf($existInbundledProducts) > 0) {
           if ($data['account_type'] === 'DISTRIBUTOR') {
+            $key['product_trace'] = $existInbundledProducts[0]['product_trace'];
             $existInBundled = app($this->bundledSettingsController)->getByParamsByConditionWithDelete(array(
               array('product_id', '=', $existInbundledProducts[0]['product_on_settings']),
               array('bundled', '=', $existInbundledProducts[0]['product_id'])
@@ -160,11 +161,13 @@ class TransferController extends APIController
       'product_attribute_id' => $productTrace['product_attribute_id'],
       'created_at' => Carbon::now(),
     );
-    $merchantExist = app($this->merchantProductClass)->checkIEfxist('merchant_id', $data['to']);
-    $productExist =  app($this->merchantProductClass)->checkIfExist('product_id', sizeof($existInBundled) > 0 ? $existInBundled[0]['product_id'] : $key['product_id']);
-    $attrID =  app($this->merchantProductClass)->checkIfExist('product_attribute_id', $productTrace['product_attribute_id']);
+    $exist = app($this->merchantProductClass)->checkIfExist(array(
+      array('merchant_id', '=', $data['to']),
+      array('product_id', '=', sizeof($existInBundled) > 0 ? $existInBundled[0]['product_id'] : $key['product_id']),
+      array('product_attribute_id', '=',  $productTrace['product_attribute_id'])
+    ));
 
-    if ($merchantExist == true && $productExist == true && $attrID == true) {
+    if ($exist == true) {
     } else {
       app($this->merchantProductClass)->insertToDB($merchant_products);
     }
@@ -1187,6 +1190,7 @@ class TransferController extends APIController
       return $this->response();
     }
     $result = app($this->transferredProductsClass)->getAllByParamsOnly('transfer_id', $this->response['data'][0]['id']);
+    // return $result;
     if (sizeof($result) > 0) {
       $array = array();
       foreach ($result as $key) {
