@@ -160,7 +160,7 @@ class TransferController extends APIController
       'product_attribute_id' => $productTrace['product_attribute_id'],
       'created_at' => Carbon::now(),
     );
-    $merchantExist = app($this->merchantProductClass)->checkIfExist('merchant_id', $data['to']);
+    $merchantExist = app($this->merchantProductClass)->checkIEfxist('merchant_id', $data['to']);
     $productExist =  app($this->merchantProductClass)->checkIfExist('product_id', sizeof($existInBundled) > 0 ? $existInBundled[0]['product_id'] : $key['product_id']);
     $attrID =  app($this->merchantProductClass)->checkIfExist('product_attribute_id', $productTrace['product_attribute_id']);
 
@@ -516,7 +516,7 @@ class TransferController extends APIController
           array('T1.tags', 'not like', 'insecticide')
         );
         $result = DB::table('products as T1')
-          ->leftJoin('transferred_products as T2', 'T2.product_id', '=', 'T1.id')
+          ->leftJoin('merchant_products as T2', 'T2.product_id', '=', 'T1.id')
           ->where($whereArray)
           ->groupBy('T2.product_attribute_id')
           ->skip($data['offset'])->take($data['limit'])
@@ -526,7 +526,7 @@ class TransferController extends APIController
       } else {
         array_push($whereArray, array('T1.tags', 'like', $data['tags']));
         $result = DB::table('products as T1')
-          ->leftJoin('transferred_products as T2', 'T2.product_id', '=', 'T1.id')
+          ->leftJoin('merchant_products as T2', 'T2.product_id', '=', 'T1.id')
           ->where($whereArray)
           ->groupBy('T2.product_attribute_id')
           ->skip($data['offset'])->take($data['limit'])
@@ -536,7 +536,7 @@ class TransferController extends APIController
       }
     } else {
       $result = DB::table('products as T1')
-        ->leftJoin('transferred_products as T2', 'T2.product_id', '=', 'T1.id')
+        ->leftJoin('merchant_products as T2', 'T2.product_id', '=', 'T1.id')
         ->where($whereArray)
         ->groupBy('T2.product_attribute_id')
         ->skip($data['offset'])->take($data['limit'])
@@ -611,7 +611,7 @@ class TransferController extends APIController
     $result = null;
     $size = null;
     $result = DB::table('merchants as T1')
-      ->leftJoin('transferred_products as T2', 'T2.merchant_id', '=', 'T1.id')
+      ->leftJoin('merchant_products as T2', 'T2.merchant_id', '=', 'T1.id')
       ->where($con['column'], 'like', $con['value'])
       ->where('T2.merchant_id', '=', $data['merchant_id'])
       ->where('T2.deleted_at', '=', null)
@@ -622,7 +622,7 @@ class TransferController extends APIController
       ->get();
 
     $size =  DB::table('merchants as T1')
-      ->leftJoin('transferred_products as T2', 'T2.merchant_id', '=', 'T1.id')
+      ->leftJoin('merchant_products as T2', 'T2.merchant_id', '=', 'T1.id')
       ->where($con['column'], 'like', $con['value'])
       ->where('T2.merchant_id', '=', $data['merchant_id'])
       ->where('T2.deleted_at', '=', null)
