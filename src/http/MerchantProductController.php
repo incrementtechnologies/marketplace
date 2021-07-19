@@ -10,8 +10,8 @@ use Carbon\Carbon;
 class MerchantProductController extends APIController
 {
     //
-    public function checkIfExist($column, $value){
-        $res = MerchantProduct::where($column, '=', $value)->get();
+    public function checkIfExist($condition){
+        $res = MerchantProduct::where($condition)->get();
         return sizeof($res) > 0 ? true : false;
     }
 
