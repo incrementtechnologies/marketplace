@@ -25,6 +25,7 @@ $route = env('PACKAGE_ROUTE', '').'/paddock_plan_tasks/';
 $controller = 'Increment\Marketplace\Paddock\Http\PaddockPlanTaskController@';
 Route::post($route.'create', $controller."create");
 Route::post($route.'retrieve', $controller."retrieve");
+Route::post($route.'check_if_available', $controller."checkIfAvailable");
 Route::post($route.'retrieve_available_paddocks', $controller."retrieveAvailablePaddocks");
 Route::post($route.'retrieve_mobile_by_params', $controller."retrieveMobileByParams");
 Route::post($route.'retrieve_mobile_due_task', $controller."retrieveMobileDueTask");

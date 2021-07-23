@@ -1138,14 +1138,14 @@ class TransferController extends APIController
     //   ->get();
     $result = DB::table('product_attributes as T1')
       ->leftJoin('products as T3', 'T3.id', '=', 'T1.product_id')
-      ->where('T3.status', '=', 'Published')
+      ->where('T3.status', '=', 'published')
       ->select(['T3.*', 'T1.id as product_attribute_id'])
       ->where('T1.deleted_at', '=', null)
       ->get();
     $result = $result->groupBy('id');
+    $testArray = [];
     $i = 1;
     if (sizeof($result) > 0) {
-      // dd($result);
       $i = 0;
       // print_r($result);
       foreach ($result as $key => $value) {
@@ -1174,8 +1174,8 @@ class TransferController extends APIController
           'id' => $product ? $product->id : null,
           'variation' => $variation
         );
-        $i++;
         $testArray[] = $item;
+        $i++;
       }
     }
     $this->response['data'] = $testArray;

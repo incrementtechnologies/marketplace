@@ -352,4 +352,22 @@ class PaddockPlanTaskController extends APIController
         $result = PaddockPlanTask::where($column, '=', $value)->where('deleted_at', '=', null)->select($returns)->get();
         return sizeof($result) > 0 ? $result[0][$returns] : null;
     }
+
+    public function checkIfAvailable(Request $request){
+        $data = $request->all();
+        $i=0;
+        foreach ($data['selectedPaddocks'] as $key => $value) {
+            $paddocks = app($this->paddockClass)->getByParams('id', $value['paddock_id'], ['id', 'name', 'spray_area']);
+            $totalBatchArea = app($this->batchPaddockTaskClass)->getTotalBatchPaddockPlanTask($value['plan_task_id']);
+            if(((int)$totalBatchArea + (int)$key['remaining_spray_area']) > $paddocks['spray_area']){
+                $this->response['error'] = 'Unavailable paddocks';
+                $this->response['data'] = [];
+            }else{
+                $this->response['error'] = null;
+                $this->response['data'] = 'Available';
+            }
+            $i++;
+        }
+        return $this->response();
+    }
 }
