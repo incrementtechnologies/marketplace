@@ -80,10 +80,10 @@ class PaddockPlanTaskController extends APIController
                             $result[$i]['area'] = (float)$key['area'];
                             $totalArea =  $totalBatchArea != null ? ((float)$key['spray_area'] - (float)$totalBatchArea) : (float)$key['spray_area'];
                             $result[$i]['remaining_spray_area'] = $this->numberConvention($totalArea);
-                            $result[$i]['spray_mix'] = app($this->sprayMixClass)->getByParams('id', $key['id'], ['id', 'name']);
                             $result[$i]['due_date'] = $this->retrieveByParams('id', $task[0]['id'], 'due_date');
                             $result[$i]['category'] = $this->retrieveByParams('id', $task[0]['id'], 'category');
                             $result[$i]['id'] =  $task[0]['id'];
+                            $result[$i]['paddock_plan_task_id'] =  $task[0]['id'];
                             $result[$i]['nickname'] = $this->retrieveByParams('id', $task[0]['id'], 'nickname');
                             $result[$i]['machine'] = app($this->batchPaddockTaskClass)->getMachinedByBatches('paddock_plan_task_id', $task[0]['id']);
                             $result[$i]['spray_mix_id'] = $this->retrieveByParams('id', $task[0]['id'], 'spray_mix_id');
@@ -133,7 +133,7 @@ class PaddockPlanTaskController extends APIController
 
                 if ($paddockPlan[0]['start_date'] <= $currDate && $currDate <= $paddockPlan[0]['end_date']) {
                     $paddocks = app($this->paddockPlanClass)->retrievePlanByParams('id', $key['paddock_plan_id'], ['crop_id', 'paddock_id']);
-                    $existInBatch = app($this->batchPaddockTaskClass)->retrieveByParams('paddock_plan_task_id', $temp[$i]['id'], ['id']);
+                    $existInBatch = app($this->batchPaddockTaskClass)->retrieveByParams('paddock_plan_task_id', $temp[$i]['id'], ['id', 'spray_mix_id']);
                     if (sizeof($existInBatch) <= 0) {
                         $temp[$i]['paddock'] = app($this->paddockClass)->getByParams('id', $paddocks[0]['paddock_id'], ['id', 'name', 'spray_area']);
                         if ($temp[$i]['paddock'] !== null) {
@@ -147,9 +147,10 @@ class PaddockPlanTaskController extends APIController
                             $temp[$i]['nickname'] = $this->retrieveByParams('id', $temp[$i]['id'], 'nickname');
                             $temp[$i]['machine'] = app($this->batchPaddockTaskClass)->getMachinedByBatches('paddock_plan_task_id', $temp[$i]['id']);
                             $temp[$i]['spray_mix_id'] = $this->retrieveByParams('id', $temp[$i]['id'], 'spray_mix_id');
-                            $temp[$i]['spray_mix'] = app($this->sprayMixClass)->getByParams('id', $temp[$i]['spray_mix_id'], ['id', 'name']);
+                            $temp[$i]['spray_mix'] = app($this->sprayMixClass)->getByParams('id', $existInBatch[0]['spray_mix_id'], ['id', 'name']);
                             $temp[$i]['paddock_plan_id'] = $this->retrieveByParams('id', $temp[$i]['id'], 'paddock_plan_id');
                             $temp[$i]['paddock_id'] = $this->retrieveByParams('id', $temp[$i]['id'], 'paddock_id');
+                            $temp[$i]['paddock_plan_task_id'] = $key['id'];
                             if (isset($temp[$i]['paddock']['crop_name'])) {
                                 $temp[$i]['paddock']['crop_name'] = app($this->cropClass)->retrieveCropById($paddocks[0]['crop_id'])[0]->name;
                             }
@@ -185,6 +186,7 @@ class PaddockPlanTaskController extends APIController
                 ->where('T1.' . $con[0]['column'], '=', $con[0]['value'])
                 ->where('T1.' . $con[1]['column'], '=', $con[1]['value'])
                 ->where('T1.deleted_at', '=', null)
+                ->select('T1.updated_at as dateCompleted', 'T1.spray_mix_id as batch_spray_mix', 'T1.*', 'T2.*')
                 ->skip($data['offset'])->take($data['limit'])->orderBy('T1.created_at', 'desc')->get();
         }
         $obj = $result;
@@ -192,22 +194,27 @@ class PaddockPlanTaskController extends APIController
             $i = 0;
             $temp = json_decode(json_encode($obj), true);
             foreach ($temp as $key) {
-                // dd($temp);
                 $paddockId = $this->retrieveByParams('id', $temp[$i]['paddock_plan_task_id'], 'paddock_id');
                 $temp[$i]['paddock'] = $paddockId != null ? app($this->paddockClass)->getByParams('id', $paddockId, ['id', 'name']) : null;
                 if ($temp[$i]['paddock'] == null) {
                     $temp = null;
                 } else {
                     $paddoctId = $this->retrieveByParams('id', $temp[$i]['paddock_plan_task_id'], 'paddock_plan_id');
-                    $paddockPlanDate = app($this->paddockPlanClass)->retrievePlanByParams('id', $paddoctId, ['start_date']);
-                    $paddockPlanDate[0]['start_date'] = Carbon::createFromFormat('Y-m-d', $paddockPlanDate[0]['start_date'])->copy()->tz($this->response['timezone'])->format('d/m/Y');
-                    $temp[$i]['due_date'] = $paddockPlanDate !== null ? $paddockPlanDate[0]['start_date'] : Carbon::createFromFormat('Y-m-d',  $this->retrieveByParams('id', $temp[$i]['paddock_plan_task_id'], 'due_date'))->copy()->tz($this->response['timezone'])->format('d/m/Y');
+                    $paddockPlanDate = app($this->paddockPlanClass)->retrievePlanByParams('id', $paddoctId, ['start_date', 'end_date']);
+                    if($con[1]['value'] == 'inprogress'){
+                        $paddockPlanDate[0]['start_date'] = Carbon::createFromFormat('Y-m-d', $paddockPlanDate[0]['start_date'])->copy()->tz($this->response['timezone'])->format('d/m/Y');
+                        $temp[$i]['due_date'] = $paddockPlanDate !== null ? $paddockPlanDate[0]['start_date'] : Carbon::createFromFormat('Y-m-d',  $this->retrieveByParams('id', $temp[$i]['paddock_plan_task_id'], 'due_date'))->copy()->tz($this->response['timezone'])->format('d/m/Y');
+                    }else{
+                        $temp[$i]['due_date'] = Carbon::createFromFormat('Y-m-d H:i:s', $key['dateCompleted'])->copy()->tz($this->response['timezone'])->format('d/m/Y');
+                    }
                     $temp[$i]['category'] = $this->retrieveByParams('id', $temp[$i]['paddock_plan_task_id'], 'category');
+                    $temp[$i]['start_date'] = $paddockPlanDate !== null ? $paddockPlanDate[0]['start_date'] : null;
+                    $temp[$i]['end_date'] = $paddockPlanDate !== null ? $paddockPlanDate[0]['end_date'] : null;
                     $temp[$i]['nickname'] = $this->retrieveByParams('id', $temp[$i]['paddock_plan_task_id'], 'nickname');
                     $temp[$i]['paddock_plan_id'] = $this->retrieveByParams('id', $temp[$i]['paddock_plan_task_id'], 'paddock_plan_id');
                     $temp[$i]['paddock_id'] = $this->retrieveByParams('id', $temp[$i]['paddock_plan_task_id'], 'paddock_id');
                     $temp[$i]['spray_mix_id'] = $this->retrieveByParams('id', $temp[$i]['paddock_plan_task_id'], 'spray_mix_id');
-                    $temp[$i]['spray_mix'] = app($this->sprayMixClass)->getByParams('id', $temp[$i]['spray_mix_id'], ['id', 'name']);
+                    $temp[$i]['spray_mix'] = app($this->sprayMixClass)->getByParams('id', $temp[$i]['batch_spray_mix'], ['id', 'name']);
                     $temp[$i]['machine'] = app($this->machineClass)->getMachineNameByParams('id', $temp[$i]['machine_id']);
                 }
                 $i++;
