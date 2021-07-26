@@ -61,7 +61,7 @@ class MachineController extends APIController
     }
     
     public function getByMerchantId($merchantId){
-      $result = Machine::where('merchant_id', '=', $merchantId)->orderBy('name', 'asc')->get();
+      $result = Machine::where('merchant_id', '=', $merchantId)->orderBy('updated_at', 'asc')->get();
       return $result;
     }
 

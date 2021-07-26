@@ -74,10 +74,15 @@ class BatchController extends APIController
         'updated_at' => Carbon::now()
       ));
       $batchTask = app($this->batchPaddockTaskClass)->retrieveByParams('batch_id', $data['id'], ['paddock_plan_task_id']);
-      PaddockPlanTask::where('id', '=', $batchTask[0]['paddock_plan_task_id'])->update(array(
-        'status' => $data['status'],
-        'updated_at' => Carbon::now(),
-      ));
+      if(sizeOf($batchTask) > 0){
+        $i=0;
+        foreach ($batchTask as $key => $value) {
+          PaddockPlanTask::where('id', '=', $batchTask[$i]['paddock_plan_task_id'])->update(array(
+            'status' => $data['status'],
+            'updated_at' => Carbon::now(),
+          ));
+        }
+      }
 
       $this->response['data'] = $result;
 
