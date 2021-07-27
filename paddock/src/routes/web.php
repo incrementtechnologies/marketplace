@@ -75,6 +75,7 @@ $route = env('PACKAGE_ROUTE', '').'/batches/';
 $controller = 'Increment\Marketplace\Paddock\Http\BatchController@';
 Route::post($route.'create', $controller."create");
 Route::post($route.'retrieve', $controller."retrieve");
+Route::post($route.'retrieve_by_session', $controller."retrieveBySession");
 Route::post($route.'retrieve_apply_tasks', $controller."retrieveApplyTasksRecents");
 Route::post($route.'retrieve_unapply_tasks', $controller."retrieveUnApplyTasks");
 Route::post($route.'update', $controller."update");

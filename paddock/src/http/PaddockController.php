@@ -16,6 +16,7 @@ use Carbon\Carbon;
 class PaddockController extends APIController
 {
   public $batchPaddockTaskClass = 'Increment\Marketplace\Paddock\Http\BatchPaddockTaskController';
+  public $batchClass = 'Increment\Marketplace\Paddock\Http\BatchController';
   public $sprayMixClass = 'Increment\Marketplace\Paddock\Http\SprayMixController';
   //
   function __construct(){
@@ -151,7 +152,8 @@ class PaddockController extends APIController
         $this->response['data'][$i]['spray_area'] = $this->numberConvention($this->response['data'][$i]['spray_area']);
         $paddockPlan = PaddockPlan::select()->where("paddock_id", "=",  $task[0]['paddock_id'])->orderBy('start_date','desc')->limit(1)->get();
         if(sizeof($paddockPlan) > 0){
-          $this->response['data'][$i]['started'] = $paddockPlan[0]['start_date'];;
+          $this->response['data'][$i]['started'] = $paddockPlan[0]['start_date'];
+          $this->response['data'][$i]['actual_tasks'] = app($this->batchClass)->retrieveAppliedTask($data['id']);
           $crop = Crop::where("id", "=", $paddockPlan[0]['crop_id'])->get();
           $this->response['data'][$i]['crop_name'] = sizeof($crop) > 0 ? $crop[0]['name'] : null;
           $this->response['data'][$i]['spray_mix'] = app($this->sprayMixClass)->getByParamsDefault('id', $task[0]['spray_mix_id']);

@@ -10,95 +10,153 @@ use Increment\Marketplace\Paddock\Models\SprayMix;
 use Increment\Marketplace\Paddock\Models\BatchPaddockTask;
 use Increment\Marketplace\Paddock\Models\BatchProduct;
 use Increment\Marketplace\Paddock\Models\PaddockPlanTask;
+use Increment\Marketplace\Paddock\Models\PaddockPlan;
+use Increment\Marketplace\Paddock\Models\Paddock;
+use Increment\Marketplace\Paddock\Models\Crop;
+use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
 class BatchController extends APIController
 {
-    public $sprayMixClass = 'Increment\Marketplace\Paddock\Http\SprayMixController';
-    public $machineClass = 'Increment\Marketplace\Paddock\Http\MachineController';
-    public $batchPaddockTaskClass = 'Increment\Marketplace\Paddock\Http\BatchPaddockTaskController';
+  public $sprayMixClass = 'Increment\Marketplace\Paddock\Http\SprayMixController';
+  public $machineClass = 'Increment\Marketplace\Paddock\Http\MachineController';
+  public $batchPaddockTaskClass = 'Increment\Marketplace\Paddock\Http\BatchPaddockTaskController';
 
-    function __construct(){
-        // $this->model = new Batch();
-        $this->notRequired = array(
-            'spray_mix_id','machine_id','notes'
-        );
+  function __construct()
+  {
+    // $this->model = new Batch();
+    $this->notRequired = array(
+      'spray_mix_id', 'machine_id', 'notes'
+    );
+  }
+
+  public function create(Request $request)
+  {
+    $data = $request->all();
+    $batchData = $data['batch'];
+    $taskData = $data['tasks'];
+    $batchProduct = $data['batch_products'];
+    $batch = Batch::create($batchData);
+    $batchId = 0;
+    $this->response['data']['batch'] = $batch;
+    $i = 0;
+    foreach ($batchProduct as $key) {
+      $batchProduct[$i]['batch_id'] = $this->response['data']['batch']['id'];
+      $batchId = $this->response['data']['batch']['id'];
+      BatchProduct::create($batchProduct[$i]);
+      $i++;
+    }
+    $j = 0;
+    foreach ($data['tasks']['paddock_plan_task_id'] as $key) {
+      $taskData['paddock_plan_task_id'] = (int)$key;
+      $taskData['batch_id'] = $batchId;
+      $taskData['spray_mix_id'] = $batchData['spray_mix_id'];
+      $taskData['machine_id'] = $batchData['machine_id'];
+      foreach ($data['tasks']['area'] as $key) {
+        $taskData['area'] = (int)$key;
+      }
+      $j++;
+      $tasks = BatchPaddockTask::create($taskData);
+    };
+    $result = Batch::where('id', '=', $this->response['data']['batch']['id'])->get();
+    $this->response['data']['batch'] = $result;
+    return $this->response();
+  }
+
+
+  public function retrieveUnApplyTasks(Request $request)
+  {
+    $data = $request->all();
+    $result = Batch::where('status', $data['status'])->where('merchant_id', '=', $data['merchant_id'])->get();
+
+    $this->response['data'] = $result;
+
+    return $this->response();
+  }
+
+  public function update(Request $request)
+  {
+    $data = $request->all();
+    $result = Batch::where('id', '=', $data['id'])->update(array(
+      'status' => $data['status'],
+      'updated_at' => Carbon::now()
+    ));
+    $batchTask = app($this->batchPaddockTaskClass)->retrieveByParams('batch_id', $data['id'], ['paddock_plan_task_id']);
+    if (sizeOf($batchTask) > 0) {
+      $i = 0;
+      foreach ($batchTask as $key => $value) {
+        PaddockPlanTask::where('id', '=', $batchTask[$i]['paddock_plan_task_id'])->update(array(
+          'status' => $data['status'],
+          'updated_at' => Carbon::now(),
+        ));
+      }
     }
 
-    public function create(Request $request){
-      $data = $request->all();
-      $batchData = $data['batch'];
-      $taskData = $data['tasks'];
-      $batchProduct = $data['batch_products'];
-      $batch = Batch::create($batchData);
-      $batchId = 0;
-      $this->response['data']['batch'] = $batch;
+    $this->response['data'] = $result;
+
+    return $this->response();
+  }
+
+  public function retrieveApplyTasksRecents(Request $request)
+  {
+    $data = $request->all();
+
+    $this->response['data'] = array(
+      'spray_mixes' => app($this->sprayMixClass)->getByMerchantId($data['merchant_id']),
+      'machines'    => app($this->machineClass)->getByMerchantId($data['merchant_id']),
+      'recent_spray_mixes' => app($this->sprayMixClass)->getByMerchantId($data['merchant_id']),
+      'recent_machines'    => app($this->machineClass)->getByMerchantId($data['merchant_id'])
+    );
+
+    return $this->response();
+  }
+
+  public function retrieveAppliedTask($paddock_plan_task_id)
+  {
+    $result = DB::table('batches as T1')
+      ->leftJoin('batch_paddock_tasks as T2', 'T1.id', '=', 'T2.batch_id')
+      ->where('T2.paddock_plan_task_id', '=', $paddock_plan_task_id)
+      ->where('T1.deleted_at', '=', null)
+      ->get();
+    if (sizeof($result) > 0) {
+      $result = json_decode(json_encode($result), true);
       $i = 0;
-      foreach ($batchProduct as $key) {
-        $batchProduct[$i]['batch_id'] = $this->response['data']['batch']['id'];
-        $batchId = $this->response['data']['batch']['id'];
-        BatchProduct::create($batchProduct[$i]);
+      foreach ($result as $key) {
+        $totalBatchArea = app($this->batchPaddockTaskClass)->getTotalBatchPaddockPlanTask($key['paddock_plan_task_id']);
+        $task = PaddockPlanTask::where('id', '=', $key['paddock_plan_task_id'])->get();
+        if(sizeof($task) > 0) {
+          $paddocks = Paddock::where('id', $task[0]['paddock_id'])->get();
+        }
+        $remaining = $totalBatchArea != null ? ((double)$paddocks[0]['spray_area'] - (double)$totalBatchArea) : $paddocks[0]['spray_area'];
+        $result[$i]['spray_area'] = sizeof($paddocks) > 0 ? $paddocks[0]['spray_area'] : null;
+        $result[$i]['total_batch']  = $totalBatchArea != null ? $totalBatchArea : null;
+        $result[$i]['remaining_spray_area'] = $remaining <= 0 ? 0 : $remaining;
+        if ($key['updated_at'] !== null) {
+          $result[$i]['date'] = Carbon::createFromFormat('Y-m-d H:i:s', $key['updated_at'])->copy()->tz($this->response['timezone'])->format('d M');
+
+        } else {
+          $result[$i]['date'] = Carbon::createFromFormat('Y-m-d H:i:s', $key['created_at'])->copy()->tz($this->response['timezone'])->format('d M');
+        }
         $i++;
       }
-      $j = 0;
-      foreach ($data['tasks']['paddock_plan_task_id'] as $key) {
-        $taskData['paddock_plan_task_id'] = (int)$key;
-        $taskData['batch_id'] = $batchId;
-        $taskData['spray_mix_id'] = $batchData['spray_mix_id'];
-        $taskData['machine_id'] = $batchData['machine_id'];
-        foreach ($data['tasks']['area'] as $key) {
-          $taskData['area'] = (int)$key;
-        }
-        $j++;
-        $tasks = BatchPaddockTask::create($taskData);
-      };
-      $result = Batch::where('id', '=', $this->response['data']['batch']['id'])->get();
-      $this->response['data']['batch'] = $result;
-      return $this->response();
+      return json_decode(json_encode($result), true);
+    } else {
+      return [];
     }
+  }
 
-
-    public function retrieveUnApplyTasks(Request $request){
-      $data = $request->all();
-      $result = Batch::where('status', $data['status'])->where('merchant_id', '=', $data['merchant_id'])->get();
-      
-      $this->response['data'] = $result;
-
-      return $this->response();
-    }
-
-    public function update(Request $request){
-      $data = $request->all();
-      $result = Batch::where('id', '=', $data['id'])->update(array(
-        'status' => $data['status'],
-        'updated_at' => Carbon::now()
-      ));
-      $batchTask = app($this->batchPaddockTaskClass)->retrieveByParams('batch_id', $data['id'], ['paddock_plan_task_id']);
-      if(sizeOf($batchTask) > 0){
-        $i=0;
-        foreach ($batchTask as $key => $value) {
-          PaddockPlanTask::where('id', '=', $batchTask[$i]['paddock_plan_task_id'])->update(array(
-            'status' => $data['status'],
-            'updated_at' => Carbon::now(),
-          ));
-        }
+  public function retrieveBySession(Request $request)
+  {
+    $data = $request->all();
+    $result = DB::table('batches as T1')
+      ->leftJoin('batch_paddock_tasks as T2', 'T1.id', '=', 'T2.batch_id')->where('session', '=', $data['session'])->groupBy('T1.id')->get();
+    if (sizeof($result) > 0) {
+      $result = json_decode(json_encode($result), true);
+      $i = 0;
+      foreach ($result as $key) {
+        $task = PaddockPlanTask::where('id', '=', $key['paddock_plan_task_id'])->get();
+        $paddockPlan = PaddockPlan::select()->where("paddock_id", "=",  $task[0]['paddock_id'])->orderBy('start_date','desc')->limit(1)->get();
       }
-
-      $this->response['data'] = $result;
-
-      return $this->response();
     }
-
-    public function retrieveApplyTasksRecents(Request $request){
-      $data = $request->all();
-
-      $this->response['data'] = array(
-        'spray_mixes' => app($this->sprayMixClass)->getByMerchantId($data['merchant_id']),
-        'machines'    => app($this->machineClass)->getByMerchantId($data['merchant_id']),
-        'recent_spray_mixes' => app($this->sprayMixClass)->getByMerchantId($data['merchant_id']),
-        'recent_machines'    => app($this->machineClass)->getByMerchantId($data['merchant_id'])
-      );
-
-      return $this->response();
-    }
+  }
 }
