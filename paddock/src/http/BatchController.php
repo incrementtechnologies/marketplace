@@ -20,6 +20,7 @@ class BatchController extends APIController
 {
   public $sprayMixClass = 'Increment\Marketplace\Paddock\Http\SprayMixController';
   public $machineClass = 'Increment\Marketplace\Paddock\Http\MachineController';
+  public $merchantClass = 'Increment\Marketplace\Http\MerchantController';
   public $batchPaddockTaskClass = 'Increment\Marketplace\Paddock\Http\BatchPaddockTaskController';
 
   function __construct()
@@ -33,10 +34,15 @@ class BatchController extends APIController
   public function create(Request $request)
   {
     $data = $request->all();
+
     $batchData = $data['batch'];
-    $taskData = $data['tasks'];
+    $merchant = app($this->merchantClass)->getColumnByParams('id', $batchData['merchant_id'], 'prefix');
+    $counter = Batch::where('merchant_id', '=', $batchData['merchant_id'])->count();
+    $batchData['session'] = $merchant ? $merchant['prefix'].$this->toCode($counter): $this->toCode($counter);
+
     $batchProduct = $data['batch_products'];
     $batch = Batch::create($batchData);
+    dd();
     $batchId = 0;
     $this->response['data']['batch'] = $batch;
     $i = 0;
@@ -61,6 +67,12 @@ class BatchController extends APIController
     $result = Batch::where('id', '=', $this->response['data']['batch']['id'])->get();
     $this->response['data']['batch'] = $result;
     return $this->response();
+  }
+
+  public function toCode($size){
+    $length = strlen((string)$size);
+    $code = '00000000';
+    return substr_replace($code, $size, intval(7 - $length));
   }
 
 
