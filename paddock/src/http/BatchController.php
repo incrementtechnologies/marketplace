@@ -42,7 +42,6 @@ class BatchController extends APIController
 
     $batchProduct = $data['batch_products'];
     $batch = Batch::create($batchData);
-    dd();
     $batchId = 0;
     $this->response['data']['batch'] = $batch;
     $i = 0;
