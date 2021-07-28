@@ -60,7 +60,7 @@ class BatchController extends APIController
       $taskData['merchant_id'] = $data['tasks']['merchant_id'];
       $taskData['account_id'] =  $data['tasks']['account_id'];
       $taskData['area'] =  $key['area'];
-      BatchPaddockTask::insert($taskData);
+      BatchPaddockTask::create($taskData);
       $j++;
     };
     $result = Batch::where('id', '=', $this->response['data']['batch']['id'])->get();
@@ -144,7 +144,6 @@ class BatchController extends APIController
         $result[$i]['remaining_spray_area'] = $remaining <= 0 ? 0 : $remaining;
         if ($key['updated_at'] !== null) {
           $result[$i]['date'] = Carbon::createFromFormat('Y-m-d H:i:s', $key['updated_at'])->copy()->tz($this->response['timezone'])->format('d M');
-
         } else {
           $result[$i]['date'] = Carbon::createFromFormat('Y-m-d H:i:s', $key['created_at'])->copy()->tz($this->response['timezone'])->format('d M');
         }
