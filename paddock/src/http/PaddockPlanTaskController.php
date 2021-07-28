@@ -265,10 +265,8 @@ class PaddockPlanTaskController extends APIController
             ->leftJoin('batch_paddock_tasks as T2', 'T1.id', '=', 'T2.batch_id')
             ->where('T1.' . $column, '=', $value)
             ->where('T1.deleted_at', '=', null)
-            ->where(function ($query) {
-                $query->where('T1.status', '=', 'inprogress')
-                    ->orWhere('T1.status', '=', 'ongoing');
-            })->take(5)->orderBy('T1.created_at', 'desc')->get();
+            ->where('T1.status', '=', 'inprogress')
+            ->take(5)->orderBy('T1.created_at', 'desc')->get();
         $obj = $result;
         $finalResult = [];
         if (sizeof($obj) > 0) {
