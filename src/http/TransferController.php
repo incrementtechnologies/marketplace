@@ -64,6 +64,15 @@ class TransferController extends APIController
       $products = $data['products'];
       $i = 0;
       foreach ($products as $key) {
+        $existTrace = TransferredProduct::where('payload_value', '=', $key['product_trace'])->orderBy('created_at', 'desc')->limit(1)->get();
+        if (sizeof($existTrace) > 0) {
+          TransferredProduct::where('id', '=', $existTrace[0]['id'])->update(
+            array(
+              'status' => 'inactive',
+              'updated_at'  => Carbon::now()
+            )
+          );
+        }
         $existInBundled = [];
         $existInbundledProducts = app($this->bundledProductController)->getByParamsWithDelete('bundled_trace', $key['product_trace'], $data['account_type']);
         if (sizeOf($existInbundledProducts) > 0) {
@@ -89,16 +98,6 @@ class TransferController extends APIController
         } else {
           $key['bundled_id'] = NULL;
           $key['bundled_setting_qty'] = NULL;
-        }
-
-        $existTrace = TransferredProduct::where('payload_value', '=', $key['product_trace'])->orderBy('created_at', 'desc')->limit(1)->get();
-        if (sizeof($existTrace) > 0) {
-          TransferredProduct::where('id', '=', $existTrace[0]['id'])->update(
-            array(
-              'status' => 'inactive',
-              'updated_at'  => Carbon::now()
-            )
-          );
         }
         $productTrace = app($this->productTraceClass)->getDetailsByParams('id', $key['product_trace'], ['id', 'code', 'product_attribute_id']);
         if ($data['account_type'] === 'DISTRIBUTOR') {
@@ -147,7 +146,7 @@ class TransferController extends APIController
       'status'      => 'active',
       'created_at'  => Carbon::now()
     );
-    if($data['account_type'] === 'DISTRIBUTOR'){
+    if ($data['account_type'] === 'DISTRIBUTOR') {
       $item['payload'] = 'product_trace';
       $item['bundled'] = null;
       $item['bundled_setting_qty'] = null;
