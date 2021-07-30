@@ -59,6 +59,16 @@ class PaddockPlanTaskController extends APIController
         $data = $request->all();
         $con = $data['condition'];
         $result = null;
+        // $res = DB::table('batches as T1')
+        //     ->leftJoin('batch_paddock_tasks as T2', 'T1.id', '=', 'T2.batch_id')
+        //     ->where('T1.' . $con[0]['column'], '=', $con[0]['value'])
+        //     ->where('T1.deleted_at', '=', null)
+        //     ->where('T1.status', '=', 'inprogress')
+        //     ->select('T1.updated_at as dateCompleted', 'T1.spray_mix_id as batch_spray_mix', 'T1.*', 'T2.*')
+        //     ->skip($data['offset'])->take($data['limit'])->orderBy('T1.created_at', 'desc')->get();
+        // if(sizeof($res) > 0){
+        //     $result = $res
+        // }
         $result = Paddock::where($con[0]['column'], '=', $con[0]['value'])->skip($data['offset'])->take($data['limit'])->get();
         $currDate = Carbon::now()->toDateString();
         $finalResult = array();
@@ -155,7 +165,7 @@ class PaddockPlanTaskController extends APIController
                                 $temp[$i]['paddock']['crop_name'] = app($this->cropClass)->retrieveCropById($paddocks[0]['crop_id'])[0]->name;
                             }
                             if ($temp[$i]['remaining_spray_area'] > 0) {
-                                    array_push($finalResult, $temp[$i]);
+                                array_push($finalResult, $temp[$i]);
                             }
                         }
                     }
@@ -192,33 +202,40 @@ class PaddockPlanTaskController extends APIController
         if (sizeof($obj) > 0) {
             $i = 0;
             $temp = json_decode(json_encode($obj), true);
+            $res = [];
             foreach ($temp as $key) {
                 $paddockId = $this->retrieveByParams('id', $temp[$i]['paddock_plan_task_id'], 'paddock_id');
-                $temp[$i]['paddock'] = $paddockId != null ? app($this->paddockClass)->getByParams('id', $paddockId, ['id', 'name']) : null;
-                if ($temp[$i]['paddock'] == null) {
-                    $temp = null;
+                $temp[$i]['paddock'] = $paddockId != null ? app($this->paddockClass)->getByParams('id', $paddockId, ['id', 'name', 'spray_area']) : null;
+                $paddoctId = $this->retrieveByParams('id', $temp[$i]['paddock_plan_task_id'], 'paddock_plan_id');
+                $paddockPlanDate = app($this->paddockPlanClass)->retrievePlanByParams('id', $paddoctId, ['start_date', 'end_date']);
+                if ($con[1]['value'] == 'inprogress') {
+                    $paddockPlanDate[0]['start_date'] = Carbon::createFromFormat('Y-m-d', $paddockPlanDate[0]['start_date'])->copy()->tz($this->response['timezone'])->format('d/m/Y');
+                    $temp[$i]['due_date'] = $paddockPlanDate !== null ? $paddockPlanDate[0]['start_date'] : Carbon::createFromFormat('Y-m-d',  $this->retrieveByParams('id', $temp[$i]['paddock_plan_task_id'], 'due_date'))->copy()->tz($this->response['timezone'])->format('d/m/Y');
                 } else {
-                    $paddoctId = $this->retrieveByParams('id', $temp[$i]['paddock_plan_task_id'], 'paddock_plan_id');
-                    $paddockPlanDate = app($this->paddockPlanClass)->retrievePlanByParams('id', $paddoctId, ['start_date', 'end_date']);
-                    if($con[1]['value'] == 'inprogress'){
-                        $paddockPlanDate[0]['start_date'] = Carbon::createFromFormat('Y-m-d', $paddockPlanDate[0]['start_date'])->copy()->tz($this->response['timezone'])->format('d/m/Y');
-                        $temp[$i]['due_date'] = $paddockPlanDate !== null ? $paddockPlanDate[0]['start_date'] : Carbon::createFromFormat('Y-m-d',  $this->retrieveByParams('id', $temp[$i]['paddock_plan_task_id'], 'due_date'))->copy()->tz($this->response['timezone'])->format('d/m/Y');
-                    }else{
-                        $temp[$i]['due_date'] = Carbon::createFromFormat('Y-m-d H:i:s', $key['dateCompleted'])->copy()->tz($this->response['timezone'])->format('d/m/Y');
+                    $temp[$i]['due_date'] = Carbon::createFromFormat('Y-m-d H:i:s', $key['dateCompleted'])->copy()->tz($this->response['timezone'])->format('d/m/Y');
+                }
+                $temp[$i]['category'] = $this->retrieveByParams('id', $temp[$i]['paddock_plan_task_id'], 'category');
+                $temp[$i]['start_date'] = $paddockPlanDate !== null ? $paddockPlanDate[0]['start_date'] : null;
+                $temp[$i]['end_date'] = $paddockPlanDate !== null ? $paddockPlanDate[0]['end_date'] : null;
+                $temp[$i]['nickname'] = $this->retrieveByParams('id', $temp[$i]['paddock_plan_task_id'], 'nickname');
+                $temp[$i]['paddock_plan_id'] = $this->retrieveByParams('id', $temp[$i]['paddock_plan_task_id'], 'paddock_plan_id');
+                $temp[$i]['paddock_id'] = $this->retrieveByParams('id', $temp[$i]['paddock_plan_task_id'], 'paddock_id');
+                $temp[$i]['spray_mix_id'] = $this->retrieveByParams('id', $temp[$i]['paddock_plan_task_id'], 'spray_mix_id');
+                $temp[$i]['spray_mix'] = app($this->sprayMixClass)->getByParams('id', $temp[$i]['batch_spray_mix'], ['id', 'name']);
+                $temp[$i]['machine'] = app($this->machineClass)->getMachineNameByParams('id', $temp[$i]['machine_id']);
+                $paddockArea = $temp[$i]['paddock']['spray_area'];
+                $totalBatchArea = app($this->batchPaddockTaskClass)->getTotalBatchPaddockPlanTask($temp[$i]['paddock_plan_task_id']);
+
+                if ($temp[$i]['paddock'] != null) {
+                    if ($con[1]['value'] == 'inprogress') {
+                        $res[] = $temp[$i];
+                    } else if ($con[1]['value'] == 'completed' && ((doubleval($paddockArea) - $totalBatchArea) > 0)) {
+                        $res[] = $temp[$i];
                     }
-                    $temp[$i]['category'] = $this->retrieveByParams('id', $temp[$i]['paddock_plan_task_id'], 'category');
-                    $temp[$i]['start_date'] = $paddockPlanDate !== null ? $paddockPlanDate[0]['start_date'] : null;
-                    $temp[$i]['end_date'] = $paddockPlanDate !== null ? $paddockPlanDate[0]['end_date'] : null;
-                    $temp[$i]['nickname'] = $this->retrieveByParams('id', $temp[$i]['paddock_plan_task_id'], 'nickname');
-                    $temp[$i]['paddock_plan_id'] = $this->retrieveByParams('id', $temp[$i]['paddock_plan_task_id'], 'paddock_plan_id');
-                    $temp[$i]['paddock_id'] = $this->retrieveByParams('id', $temp[$i]['paddock_plan_task_id'], 'paddock_id');
-                    $temp[$i]['spray_mix_id'] = $this->retrieveByParams('id', $temp[$i]['paddock_plan_task_id'], 'spray_mix_id');
-                    $temp[$i]['spray_mix'] = app($this->sprayMixClass)->getByParams('id', $temp[$i]['batch_spray_mix'], ['id', 'name']);
-                    $temp[$i]['machine'] = app($this->machineClass)->getMachineNameByParams('id', $temp[$i]['machine_id']);
                 }
                 $i++;
             }
-            $this->response['data'] = $temp;
+            $this->response['data'] = $res;
         }
         return $this->response();
     }
@@ -357,16 +374,17 @@ class PaddockPlanTaskController extends APIController
         return sizeof($result) > 0 ? $result[0][$returns] : null;
     }
 
-    public function checkIfAvailable(Request $request){
+    public function checkIfAvailable(Request $request)
+    {
         $data = $request->all();
-        $i=0;
+        $i = 0;
         foreach ($data['selectedPaddocks'] as $key => $value) {
             $paddocks = app($this->paddockClass)->getByParams('id', $value['paddock_id'], ['id', 'name', 'spray_area']);
             $totalBatchArea = app($this->batchPaddockTaskClass)->getTotalBatchPaddockPlanTask($value['plan_task_id']);
-            if(((int)$totalBatchArea + (int)$key['remaining_spray_area']) > $paddocks['spray_area']){
+            if (((int)$totalBatchArea + (int)$key['remaining_spray_area']) > $paddocks['spray_area']) {
                 $this->response['error'] = 'Unavailable paddocks';
                 $this->response['data'] = [];
-            }else{
+            } else {
                 $this->response['error'] = null;
                 $this->response['data'] = 'Available';
             }

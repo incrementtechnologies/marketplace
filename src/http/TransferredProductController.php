@@ -268,18 +268,17 @@ class TransferredProductController extends APIController
   public function getTranferredProduct($AttrId, $merchantId)
   {
     $condition = array(
-      array('product_attribute_id', '=', $AttrId),
-      array('deleted_at', '=', null),
-      array('status', '=', 'active')
+      array('transferred_products.product_attribute_id', '=', $AttrId),
+      array('transferred_products.deleted_at', '=', null),
+      // array('transferred_products.status', '=', 'active')
     );
     if ($merchantId !== null) {
-      array_push($condition, array('merchant_id', '=', $merchantId));
+      array_push($condition, array('transfers.from', '=', $merchantId['id']));
     }
-
-    $productTrace = TransferredProduct::where($condition)->where('payload', '=', 'product_trace')->count();
-    $bundled = TransferredProduct::where(($condition))->where('payload', '=', 'bundled_trace')->get();
-    // dd($bundled);
-
+    $productTrace = TransferredProduct::leftJoin('transfers', 'transfers.id', '=', 'transferred_products.transfer_id')
+      ->where($condition)->where('transferred_products.payload', '=', 'product_trace')->count();
+    $bundled = TransferredProduct::leftJoin('transfers', 'transfers.id', '=', 'transferred_products.transfer_id')
+      ->where($condition)->where('transferred_products.payload',  '=', 'bundled_trace')->get();
 
     if (sizeof($bundled) > 0) {
       $productTrace += $bundled[0]['bundled_setting_qty'];
