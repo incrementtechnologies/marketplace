@@ -92,7 +92,8 @@ class BatchController extends APIController
     if (sizeOf($batchTask) > 0) {
       $i = 0;
       foreach ($batchTask as $key => $value) {
-        $paddock = PaddockPlanTask::where('id', '=', $batchTask[$i]['paddock_plan_task_id'])->get('paddock_id');
+        $task = PaddockPlanTask::where('id', '=', $batchTask[$i]['paddock_plan_task_id'])->get();
+        $paddock = Paddock::where('id', '=', $task[0]['paddock_id'])->get(['spray_area']);
         $paddockArea = sizeof($paddock) > 0 ? $paddock[0]['spray_area'] : 0;
         $totalBatchArea = app($this->batchPaddockTaskClass)->getTotalBatchPaddockPlanTask($batchTask[$i]['paddock_plan_task_id']);
         $result = Batch::where('id', '=', $data['id'])->update(array(
