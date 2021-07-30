@@ -161,6 +161,7 @@ class PaddockController extends APIController
           $temp = app($this->batchPaddockTaskClass)->retrieveBatchByPaddockPlanTask($data['id']);
           $this->response['data'][$i]['start_date'] = $temp !== null ? Carbon::createFromFormat('Y-m-d H:i:s', $temp['created_at'])->copy()->tz($this->response['timezone'])->format('m/d/Y H:i') : null;
           $this->response['data'][$i]['end_date'] = $temp !== null ? Carbon::createFromFormat('Y-m-d H:i:s', $temp['updated_at'])->copy()->tz($this->response['timezone'])->format('m/d/Y H:i') : null;
+          $this->response['data'][$i]['updated_date'] = $temp !== null ? Carbon::createFromFormat('Y-m-d H:i:s', $temp['updated_at'])->copy()->tz($this->response['timezone'])->format('m/d/Y') : null;
         }
         
         

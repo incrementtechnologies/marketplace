@@ -88,16 +88,19 @@ class BatchController extends APIController
   public function update(Request $request)
   {
     $data = $request->all();
-    $result = Batch::where('id', '=', $data['id'])->update(array(
-      'status' => $data['status'],
-      'updated_at' => Carbon::now()
-    ));
     $batchTask = app($this->batchPaddockTaskClass)->retrieveByParams('batch_id', $data['id'], ['paddock_plan_task_id']);
     if (sizeOf($batchTask) > 0) {
       $i = 0;
       foreach ($batchTask as $key => $value) {
+        $paddock = PaddockPlanTask::where('id', '=', $batchTask[$i]['paddock_plan_task_id'])->get('paddock_id');
+        $paddockArea = sizeof($paddock) > 0 ? $paddock[0]['spray_area'] : 0;
+        $totalBatchArea = app($this->batchPaddockTaskClass)->getTotalBatchPaddockPlanTask($batchTask[$i]['paddock_plan_task_id']);
+        $result = Batch::where('id', '=', $data['id'])->update(array(
+          'status' => (doubleval($paddockArea) - $totalBatchArea) > 0 ? 'partially_completed' : $data['status'],
+          'updated_at' => Carbon::now()
+        ));
         PaddockPlanTask::where('id', '=', $batchTask[$i]['paddock_plan_task_id'])->update(array(
-          'status' => $data['status'],
+          'status' => (doubleval($paddockArea) - $totalBatchArea) > 0 ? 'partially_completed' : $data['status'],
           'updated_at' => Carbon::now(),
         ));
       }
