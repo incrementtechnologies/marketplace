@@ -8,6 +8,7 @@ use App\Http\Controllers\APIController;
 use Increment\Marketplace\Models\BundledSetting;
 use Increment\Marketplace\Models\BundledProduct;
 use Increment\Marketplace\Models\Product;
+use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 class BundledSettingController extends APIController
 {
@@ -126,8 +127,10 @@ class BundledSettingController extends APIController
 
   public function getByParams($column, $value, $merchantId){
     $this->localization();
-    $result = BundledSetting::where($column, '=', $value)->get();
+    $result =  DB::table('bundled_settings')->where($column, '=', $value)->get();
+    // BundledSetting::where($column, '=', $value)->where('deleted_at', '=', null)->orWhere('deleted_at', '!=', null)->get();
     if(sizeof($result) > 0){
+      $result = json_decode(json_encode($result), true);
       $i = 0;
       foreach ($result as $key) {
         $traceQty = app($this->productTraceController)->getProductQtyByParams($result[$i]['bundled'], $result[$i]['product_attribute_id']);
