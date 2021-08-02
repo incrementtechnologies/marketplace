@@ -126,7 +126,7 @@ class BundledSettingController extends APIController
 
   public function getByParams($column, $value, $merchantId){
     $this->localization();
-    $result = BundledSetting::where($column, '=', $value)->where('deleted_at', '=', null)->get();
+    $result = BundledSetting::where($column, '=', $value)->get();
     if(sizeof($result) > 0){
       $i = 0;
       foreach ($result as $key) {
