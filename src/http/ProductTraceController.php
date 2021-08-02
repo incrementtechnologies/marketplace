@@ -179,6 +179,7 @@ class ProductTraceController extends APIController
       $qty = $this->getProductQtyByParameter($item['batch_number'], $item['product_id'], $item['product_attribute_id'],  'active');
       $this->response['data'][$i]['total_qty'] = $qty['total_qty'];
       $this->response['data'][$i]['active_qty'] = $qty['active_qty'];
+      $this->response['data'][$i]['manufacturing_date'] = Carbon::createFromFormat('Y-m-d', $this->response['data'][$i]['manufacturing_date'])->copy()->tz($this->response['timezone'])->format('d/m/Y');
       $this->response['data'][$i]['created_at_human'] = Carbon::createFromFormat('Y-m-d H:i:s', $item['created_at'])->copy()->tz($this->response['timezone'])->format('F j, Y h:i A');
       array_push($response[1]['traces'], $this->response['data'][$i]);
       $i++;
@@ -390,7 +391,7 @@ class ProductTraceController extends APIController
       $this->response['data'][$i]['details'] = $this->retrieveProductDetailsByParams('id', $item['product_id']);;
       $this->response['data'][$i]['created_at_human'] = Carbon::createFromFormat('Y-m-d H:i:s', $item['created_at'])->copy()->tz($this->response['timezone'])->format('F j, Y h:i A');
       $this->response['data'][$i]['bundled_product'] = app($this->bundledProductController)->getByParams('product_trace', $item['id']);
-
+      $this->response['data'][$i]['manufacturing_date'] = Carbon::createFromFormat('Y-m-d', $item['manufacturing_date'])->copy()->tz($this->response['timezone'])->format('d/m/Y');
       if ($this->response['data'][$i]['product'] != null) {
         $type = $this->response['data'][$i]['product']['type'];
         $this->response['data'][$i]['product']['qty'] = null;

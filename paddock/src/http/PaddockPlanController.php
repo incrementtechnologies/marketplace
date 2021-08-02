@@ -26,6 +26,8 @@ class PaddockPlanController extends APIController
             if (count($crop_data) != 0){
                 $this->response['data'][$i]['crop_name'] = $crop_data[0]['name'];
             }
+            $this->response['data'][$i]['start_date'] = Carbon::createFromFormat('Y-m-d', $this->response['data'][$i]['start_date'])->copy()->tz($this->response['timezone'])->format('d/m/Y');
+            $this->response['data'][$i]['end_date'] = Carbon::createFromFormat('Y-m-d', $this->response['data'][$i]['end_date'])->copy()->tz($this->response['timezone'])->format('d/m/Y');
         }
         return $this->response();
     }
