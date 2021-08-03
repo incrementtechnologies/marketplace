@@ -136,7 +136,7 @@ class SprayMixController extends APIController
   {
     $data = $request->all();
     $result = Batch::leftJoin('spray_mixes as T2', 'T2.id', '=', 'batches.spray_mix_id')
-      ->where('T2.id', '=', $data['id'])->get();
+      ->where('T2.id', '=', $data['id'])->where('session', '=', $data['session'])->get();
 
     if (sizeof($result) > 0) {
       $i = 0;
