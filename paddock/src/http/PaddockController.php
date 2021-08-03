@@ -40,13 +40,13 @@ class PaddockController extends APIController
       $result['area'] = $result['area'];
       $result['unit'] = 'Ha';
       $paddockplan = PaddockPlan::select()->where("paddock_id", "=", $data['id'])->orderBy('start_date', 'desc')->limit(2)->get();
-      if (sizeof($paddockplan) > 0) {
-        for ($i = 0; $i <= sizeof($paddockplan) - 1; $i++) {
-          $item = $paddockplan[$i];
-          $paddockplan[$i]['start_date'] = Carbon::createFromFormat('Y-m-d', $item['start_date'])->copy()->tz($this->response['timezone'])->format('d/m/Y');
-          $paddockplan[$i]['end_date'] = Carbon::createFromFormat('Y-m-d', $item['end_date'])->copy()->tz($this->response['timezone'])->format('d/m/Y');
-        }
-      }
+      // if (sizeof($paddockplan) > 0) {
+      //   for ($i = 0; $i <= sizeof($paddockplan) - 1; $i++) {
+      //     $item = $paddockplan[$i];
+      //     $paddockplan[$i]['start_date'] = Carbon::createFromFormat('Y-m-d', $item['start_date'])->copy()->tz($this->response['timezone'])->format('d/m/Y');
+      //     $paddockplan[$i]['end_date'] = Carbon::createFromFormat('Y-m-d', $item['end_date'])->copy()->tz($this->response['timezone'])->format('d/m/Y');
+      //   }
+      // }
       $result['paddock_data'] = $paddockplan;
       $paddock_plan_tasks = PaddockPlanTask::select()->where("paddock_plan_id", "=", $result['paddock_data'][0]['id'])->get();
       if (sizeof($paddock_plan_tasks) > 0) {
