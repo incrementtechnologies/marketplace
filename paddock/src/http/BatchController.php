@@ -39,6 +39,7 @@ class BatchController extends APIController
     $merchant = app($this->merchantClass)->getColumnByParams('id', $batchData['merchant_id'], 'prefix');
     $counter = Batch::where('merchant_id', '=', $batchData['merchant_id'])->count();
     $batchData['session'] = $merchant ? $merchant['prefix'].$this->toCode($counter): $this->toCode($counter);
+    $batchData['applied_rate'] = $batchData['application_rate'];
 
     $batchProduct = $data['batch_products'];
     $batch = Batch::create($batchData);
