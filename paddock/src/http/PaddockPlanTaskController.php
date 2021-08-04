@@ -83,7 +83,9 @@ class PaddockPlanTaskController extends APIController
                 'T4.area',
                 'T4.note',
                 'T4.id as paddock_id',
-                'T3.due_date'
+                'T3.due_date',
+                'T3.status',
+                'T3.id as task_id'
             )
             ->skip($data['offset'])->take($data['limit'])->orderBy('T1.created_at', 'desc')->get();
         // $result = Paddock::where($con[0]['column'], '=', $con[0]['value'])->skip($data['offset'])->take($data['limit'])->get();
@@ -115,7 +117,7 @@ class PaddockPlanTaskController extends APIController
                         $result[$i]['due_date'] = Carbon::createFromFormat('Y-m-d', $key['due_date'])->copy()->tz($this->response['timezone'])->format('d/m/Y');
                         $result[$i]['category'] = $this->retrieveByParams('id', $task[0]['id'], 'category');
                         $result[$i]['id'] =  $task[0]['id'];
-                        $result[$i]['paddock_plan_task_id'] =  $task[0]['id'];
+                        $result[$i]['paddock_plan_task_id'] =  $key['task_id'];
                         $result[$i]['nickname'] = $this->retrieveByParams('id', $task[0]['id'], 'nickname');
                         $result[$i]['machine'] = app($this->batchPaddockTaskClass)->getMachinedByBatches('paddock_plan_task_id', $task[0]['id']);
                         $result[$i]['spray_mix_id'] = $this->retrieveByParams('id', $task[0]['id'], 'spray_mix_id');
@@ -248,9 +250,9 @@ class PaddockPlanTaskController extends APIController
                 $totalBatchArea = app($this->batchPaddockTaskClass)->getTotalBatchPaddockPlanTask($temp[$i]['paddock_plan_task_id']);
 
                 if ($temp[$i]['paddock'] != null) {
-                    if ($con[1]['value'] == 'inprogress') {
+                    if ($con[1]['value'] == 'approved') {
                         $res[] = $temp[$i];
-                    } else if ($con[1]['value'] == 'completed' && ((doubleval($paddockArea) - $totalBatchArea) > 0)) {
+                    } else if ($con[1]['value'] == 'completed' && ((double)$paddockArea - $totalBatchArea) <= 0) {
                         $res[] = $temp[$i];
                     }
                 }
