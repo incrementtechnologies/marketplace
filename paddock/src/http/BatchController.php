@@ -140,13 +140,18 @@ class BatchController extends APIController
       foreach ($result as $key) {
         $totalBatchArea = app($this->batchPaddockTaskClass)->getTotalBatchPaddockPlanTask($key['paddock_plan_task_id']);
         $task = PaddockPlanTask::where('id', '=', $key['paddock_plan_task_id'])->get();
+        // dd($task);
         if(sizeof($task) > 0) {
           $paddocks = Paddock::where('id', $task[0]['paddock_id'])->get();
+          $result[$i]['status'] = $task[0]['status'];
         }
+        $remaining = $totalBatchArea != null ? (double)$totalBatchArea : $paddocks[0]['spray_area'];
         $remaining = $totalBatchArea != null ? ((double)$paddocks[0]['spray_area'] - (double)$totalBatchArea) : $paddocks[0]['spray_area'];
         $result[$i]['spray_area'] = sizeof($paddocks) > 0 ? $paddocks[0]['spray_area'] : null;
+        $result[$i]['machine'] =  app($this->machineClass)->getMachineNameByParams('id', $key['machine_id']);
         $result[$i]['total_batch']  = $totalBatchArea != null ? $totalBatchArea : null;
-        $result[$i]['remaining_spray_area'] = $remaining <= 0 ? 0 : $remaining;
+        $result[$i]['remaining_spray_area'] = $remaining <= 0 ? 0 :  $this->numberConvention($remaining);
+        $result[$i]['total_batch_area'] = app($this->batchPaddockTaskClass)->retrieveTotalAreaByBatch($key['batch_id']);
         if ($key['updated_at'] !== null) {
           $result[$i]['date'] = Carbon::createFromFormat('Y-m-d H:i:s', $key['updated_at'])->copy()->tz($this->response['timezone'])->format('d M');
         } else {

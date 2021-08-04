@@ -172,6 +172,7 @@ class PaddockController extends APIController
         $this->response['data'][$i]['area'] = (float)$item['area'];
         $totalArea =  $totalBatchArea != null ? ((float)$item['spray_area'] - (float)$totalBatchArea) : (float)$item['spray_area'];
         $this->response['data'][$i]['remaining_spray_area'] = $this->numberConvention($totalArea);
+        $this->response['data'][$i]['batch_area'] = $totalBatchArea;
         $paddockPlan = PaddockPlan::select()->where("paddock_id", "=",  $task[0]['paddock_id'])->orderBy('start_date', 'desc')->limit(1)->get();
         if (sizeof($paddockPlan) > 0) {
           $this->response['data'][$i]['started'] = $paddockPlan[0]['start_date'];
