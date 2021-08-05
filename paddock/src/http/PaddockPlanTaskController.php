@@ -70,10 +70,7 @@ class PaddockPlanTaskController extends APIController
             foreach ($result as $key) {
                 $task = PaddockPlanTask::where($con[0]['column'], '=', $con[0]['value'])
                     ->where('paddock_id', '=', $key['id'])
-                    ->where(function ($query) use ($con) {
-                        $query->where($con[1]['column'], '=', $con[1]['value'])
-                            ->orWhere($con[1]['column'], '=', 'partially_completed');
-                    })
+                    ->where($con[1]['column'], '=', $con[1]['value'])
                     ->orderBy('due_date', 'asc')
                     ->first();
                 if ($task != null) {
@@ -176,21 +173,18 @@ class PaddockPlanTaskController extends APIController
         $data = $request->all();
         $con = $data['condition'];
         if ($con[1]['value'] == 'inprogress') {
-            $result = DB::table('batches as T1')
-                ->leftJoin('batch_paddock_tasks as T2', 'T1.id', '=', 'T2.batch_id')
-                ->where('T1.' . $con[0]['column'], '=', $con[0]['value'])
-                ->where('T1.deleted_at', '=', null)
-                ->where('T1.status', '=', 'inprogress')
-                ->select('T1.updated_at as dateCompleted', 'T1.spray_mix_id as batch_spray_mix', 'T1.*', 'T2.*')
-                ->skip($data['offset'])->take($data['limit'])->orderBy('T1.created_at', 'desc')->get();
+            $result = PaddockPlanTask::where($con[0]['column'], '=', $con[0]['value'])
+                ->where('deleted_at', '=', null)
+                ->where(function ($query) {
+                    $query->where('status', '=', 'inprogress')
+                        ->orWhere('status', '=', 'partially_completed');
+                })
+                ->skip($data['offset'])->take($data['limit'])->orderBy('created_at', 'desc')->get();
         } else {
-            $result = DB::table('batches as T1')
-                ->leftJoin('batch_paddock_tasks as T2', 'T1.id', '=', 'T2.batch_id')
-                ->where('T1.' . $con[0]['column'], '=', $con[0]['value'])
-                ->where('T1.' . $con[1]['column'], '=', $con[1]['value'])
-                ->where('T1.deleted_at', '=', null)
-                ->select('T1.updated_at as dateCompleted', 'T1.spray_mix_id as batch_spray_mix', 'T1.*', 'T2.*')
-                ->skip($data['offset'])->take($data['limit'])->orderBy('T1.created_at', 'desc')->get();
+            $result = PaddockPlanTask::where($con[0]['column'], '=', $con[0]['value'])
+                ->where('deleted_at', '=', null)
+                ->where($con[1]['column'], '=', $con[1]['value'])
+                ->skip($data['offset'])->take($data['limit'])->orderBy('created_at', 'desc')->get();
         }
         $obj = $result;
         if (sizeof($obj) > 0) {
@@ -198,30 +192,25 @@ class PaddockPlanTaskController extends APIController
             $temp = json_decode(json_encode($obj), true);
             $res = [];
             foreach ($temp as $key) {
-                $paddockId = $this->retrieveByParams('id', $temp[$i]['paddock_plan_task_id'], 'paddock_id');
+                $paddockId = $this->retrieveByParams('id', $temp[$i]['id'], 'paddock_id');
                 $temp[$i]['paddock'] = $paddockId != null ? app($this->paddockClass)->getByParams('id', $paddockId, ['id', 'name', 'spray_area']) : null;
-                $paddoctId = $this->retrieveByParams('id', $temp[$i]['paddock_plan_task_id'], 'paddock_plan_id');
+                $paddoctId = $this->retrieveByParams('id', $temp[$i]['id'], 'paddock_plan_id');
                 $paddockPlanDate = app($this->paddockPlanClass)->retrievePlanByParams('id', $paddoctId, ['start_date', 'end_date']);
                 if ($con[1]['value'] == 'inprogress') {
                     $paddockPlanDate[0]['start_date'] = Carbon::createFromFormat('Y-m-d', $paddockPlanDate[0]['start_date'])->copy()->tz($this->response['timezone'])->format('d/m/Y');
                     $temp[$i]['due_date'] = $paddockPlanDate !== null ? $paddockPlanDate[0]['start_date'] : Carbon::createFromFormat('Y-m-d',  $this->retrieveByParams('id', $temp[$i]['paddock_plan_task_id'], 'due_date'))->copy()->tz($this->response['timezone'])->format('d/m/Y');
                 } else {
-                    $temp[$i]['due_date'] = Carbon::createFromFormat('Y-m-d H:i:s', $key['dateCompleted'])->copy()->tz($this->response['timezone'])->format('d/m/Y');
+                    $temp[$i]['due_date'] = Carbon::createFromFormat('Y-m-d H:i:s', $key['updated_at'])->copy()->tz($this->response['timezone'])->format('d/m/Y');
                 }
-                $temp[$i]['category'] = $this->retrieveByParams('id', $temp[$i]['paddock_plan_task_id'], 'category');
                 $temp[$i]['start_date'] = $paddockPlanDate !== null ? $paddockPlanDate[0]['start_date'] : null;
                 $temp[$i]['end_date'] = $paddockPlanDate !== null ? $paddockPlanDate[0]['end_date'] : null;
-                $temp[$i]['nickname'] = $this->retrieveByParams('id', $temp[$i]['paddock_plan_task_id'], 'nickname');
-                $temp[$i]['paddock_plan_id'] = $this->retrieveByParams('id', $temp[$i]['paddock_plan_task_id'], 'paddock_plan_id');
-                $temp[$i]['paddock_id'] = $this->retrieveByParams('id', $temp[$i]['paddock_plan_task_id'], 'paddock_id');
-                $temp[$i]['spray_mix_id'] = $this->retrieveByParams('id', $temp[$i]['paddock_plan_task_id'], 'spray_mix_id');
-                $temp[$i]['spray_mix'] = app($this->sprayMixClass)->getByParams('id', $temp[$i]['batch_spray_mix'], ['id', 'name']);
-                $temp[$i]['machine'] = app($this->machineClass)->getMachineNameByParams('id', $temp[$i]['machine_id']);
+                $temp[$i]['paddock_plan_task_id'] = $temp[$i]['id'];
+                $temp[$i]['spray_mix'] = app($this->sprayMixClass)->getByParams('id', $temp[$i]['spray_mix_id'], ['id', 'name']);
                 $paddockArea = $temp[$i]['paddock']['spray_area'];
-                $totalBatchArea = app($this->batchPaddockTaskClass)->getTotalBatchPaddockPlanTask($temp[$i]['paddock_plan_task_id']);
+                $totalBatchArea = app($this->batchPaddockTaskClass)->getTotalBatchPaddockPlanTask($temp[$i]['id']);
 
                 if ($temp[$i]['paddock'] != null) {
-                    if ($con[1]['value'] == 'approved') {
+                    if ($con[1]['value'] == 'inprogress') {
                         $res[] = $temp[$i];
                     } else if ($con[1]['value'] == 'completed' && ((float)$paddockArea - $totalBatchArea) <= 0) {
                         $res[] = $temp[$i];
