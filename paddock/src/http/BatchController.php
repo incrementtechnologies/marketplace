@@ -54,6 +54,11 @@ class BatchController extends APIController
     }
     $j = 0;
     foreach ($data['tasks']['paddock_plan_task_id'] as $key) {
+      PaddockPlanTask::where('id', '=', $key['task_id'])->update(array(
+        'status' => 'inprogress',
+        'updated_at' => Carbon::now(),
+      ));
+      
       $taskData['paddock_plan_task_id'] = (int)$key['task_id'];
       $taskData['batch_id'] = $batchId;
       $taskData['spray_mix_id'] = $batchData['spray_mix_id'];
@@ -61,12 +66,6 @@ class BatchController extends APIController
       $taskData['merchant_id'] = $data['tasks']['merchant_id'];
       $taskData['account_id'] =  $data['tasks']['account_id'];
       $taskData['area'] =  $key['area'];
-      
-      PaddockPlanTask::where('id', '=', $key['task_id'])->update(array(
-        'status' => 'inprogress',
-        'updated_at' => Carbon::now(),
-      ));
-
       BatchPaddockTask::create($taskData);
       $j++;
     };
