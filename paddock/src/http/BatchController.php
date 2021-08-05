@@ -61,6 +61,12 @@ class BatchController extends APIController
       $taskData['merchant_id'] = $data['tasks']['merchant_id'];
       $taskData['account_id'] =  $data['tasks']['account_id'];
       $taskData['area'] =  $key['area'];
+      
+      PaddockPlanTask::where('id', '=', $key['task_id'])->update(array(
+        'status' => 'inprogress',
+        'updated_at' => Carbon::now(),
+      ));
+
       BatchPaddockTask::create($taskData);
       $j++;
     };
