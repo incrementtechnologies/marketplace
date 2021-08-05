@@ -60,35 +60,7 @@ class PaddockPlanTaskController extends APIController
         $data = $request->all();
         $con = $data['condition'];
         $result = [];
-        $result = DB::table('batches as T1')
-            ->rightJoin('batch_paddock_tasks as T2', 'T1.id', '=', 'T2.batch_id')
-            ->rightJoin('paddock_plans_tasks as T3', 'T2.paddock_plan_task_id', '=', 'T3.id')
-            ->rightJoin('paddocks as T4', 'T3.paddock_id', '=', 'T4.id')
-            ->where(function ($query) use ($con) {
-                $query->where('T1.' . $con[1]['column'], '=', 'partially_completed')
-                    ->orWhere('T3.' . $con[1]['column'], '=', $con[1]['value'])
-                    ->orWhere('T3.' . $con[1]['column'], '=', 'partially_completed');
-            })
-            ->where('T1.deleted_at', '=', null)
-            // ->where('T4.' . $con[0]['column'], '=', $con[0]['value'])
-            ->select(
-                'T1.updated_at as dateCompleted',
-                'T1.spray_mix_id as batch_spray_mix',
-                'T1.*',
-                'T2.*',
-                'T4.spray_area',
-                'T4.arable_area',
-                'T4.short_description',
-                'T4.name',
-                'T4.area',
-                'T4.note',
-                'T4.id as paddock_id',
-                'T3.due_date',
-                'T3.status',
-                'T3.id as task_id'
-            )
-            ->skip($data['offset'])->take($data['limit'])->orderBy('T1.created_at', 'desc')->get();
-        // $result = Paddock::where($con[0]['column'], '=', $con[0]['value'])->skip($data['offset'])->take($data['limit'])->get();
+        $result = Paddock::where($con[0]['column'], '=', $con[0]['value'])->skip($data['offset'])->take($data['limit'])->get();
         $currDate = Carbon::now()->toDateString();
         $finalResult = array();
         if (sizeof($result) > 0) {
@@ -96,34 +68,33 @@ class PaddockPlanTaskController extends APIController
             // dd($result);
             $i = 0;
             foreach ($result as $key) {
-                // dd($result);
                 $task = PaddockPlanTask::where($con[0]['column'], '=', $con[0]['value'])
-                    ->where('paddock_id', '=', $key['paddock_id'])
+                    ->where('paddock_id', '=', $key['id'])
                     ->where(function ($query) use ($con) {
                         $query->where($con[1]['column'], '=', $con[1]['value'])
                             ->orWhere($con[1]['column'], '=', 'partially_completed');
                     })
                     ->orderBy('due_date', 'asc')
-                    ->limit(1)
-                    ->get();
-                if (sizeof($task) > 0) {
-                    $paddockPlan = app($this->paddockPlanClass)->retrievePlanByParams('id', $task[0]['paddock_plan_id'], ['start_date', 'end_date', 'crop_id', 'paddock_id']);
+                    ->first();
+                if ($task != null) {
+                    $taskId = $task['id'];
+                    $paddockPlan = app($this->paddockPlanClass)->retrievePlanByParams('id', $task['paddock_plan_id'], ['start_date', 'end_date', 'crop_id', 'paddock_id']);
                     if (sizeof($paddockPlan) > 0 && ($paddockPlan[0]['start_date'] <= $currDate && $currDate <= $paddockPlan[0]['end_date'])) {
-                        // dd($paddockPlan);
-                        $totalBatchArea = app($this->batchPaddockTaskClass)->getTotalBatchPaddockPlanTask($task[0]['id']);
+                        $totalBatchArea = app($this->batchPaddockTaskClass)->getTotalBatchPaddockPlanTask($taskId);
                         $result[$i]['area'] = (float)$key['area'];
                         $totalArea =  $totalBatchArea != null ? ((float)$key['spray_area'] - (float)$totalBatchArea) : (float)$key['spray_area'];
                         $result[$i]['remaining_spray_area'] = $this->numberConvention($totalArea);
-                        $result[$i]['due_date'] = Carbon::createFromFormat('Y-m-d', $key['due_date'])->copy()->tz($this->response['timezone'])->format('d/m/Y');
-                        $result[$i]['category'] = $this->retrieveByParams('id', $task[0]['id'], 'category');
-                        $result[$i]['id'] =  $task[0]['id'];
-                        $result[$i]['paddock_plan_task_id'] =  $key['task_id'];
-                        $result[$i]['nickname'] = $this->retrieveByParams('id', $task[0]['id'], 'nickname');
-                        $result[$i]['machine'] = app($this->batchPaddockTaskClass)->getMachinedByBatches('paddock_plan_task_id', $task[0]['id']);
-                        $result[$i]['spray_mix_id'] = $this->retrieveByParams('id', $task[0]['id'], 'spray_mix_id');
-                        $result[$i]['spray_mix'] = app($this->sprayMixClass)->getByParams('id', $task[0]['spray_mix_id'], ['id', 'name']);
-                        $result[$i]['paddock_plan_id'] = $this->retrieveByParams('id', $task[0]['id'], 'paddock_plan_id');
-                        $result[$i]['paddock_id'] = $this->retrieveByParams('id', $task[0]['id'], 'paddock_id');
+                        $result[$i]['due_date'] = Carbon::createFromFormat('Y-m-d', $task['due_date'])->copy()->tz($this->response['timezone'])->format('d/m/Y');
+                        $result[$i]['category'] = $this->retrieveByParams('id', $taskId, 'category');
+                        $result[$i]['id'] =  $taskId;
+                        $result[$i]['status'] = $task['status'] !== 'partially_completed' ? 'Due' : 'Partially complete';
+                        $result[$i]['paddock_plan_task_id'] =  $taskId;
+                        $result[$i]['nickname'] = $this->retrieveByParams('id', $taskId, 'nickname');
+                        $result[$i]['machine'] = app($this->batchPaddockTaskClass)->getMachinedByBatches('paddock_plan_task_id', $taskId);
+                        $result[$i]['spray_mix_id'] = $this->retrieveByParams('id', $taskId, 'spray_mix_id');
+                        $result[$i]['spray_mix'] = app($this->sprayMixClass)->getByParams('id', $task['spray_mix_id'], ['id', 'name']);
+                        $result[$i]['paddock_plan_id'] = $this->retrieveByParams('id', $taskId, 'paddock_plan_id');
+                        $result[$i]['paddock_id'] = $this->retrieveByParams('id', $taskId, 'paddock_id');
                         $result[$i]['paddock'] = array(
                             'name' => $key['name'],
                             'spray_area' => $key['spray_area'],
@@ -252,7 +223,7 @@ class PaddockPlanTaskController extends APIController
                 if ($temp[$i]['paddock'] != null) {
                     if ($con[1]['value'] == 'approved') {
                         $res[] = $temp[$i];
-                    } else if ($con[1]['value'] == 'completed' && ((double)$paddockArea - $totalBatchArea) <= 0) {
+                    } else if ($con[1]['value'] == 'completed' && ((float)$paddockArea - $totalBatchArea) <= 0) {
                         $res[] = $temp[$i];
                     }
                 }
@@ -347,38 +318,36 @@ class PaddockPlanTaskController extends APIController
         $returnResult = array();
         $date =  Carbon::now();
         $currDate = $date->toDateString();
-        // dd($currDate);
-        $result = DB::table('paddock_plans_tasks as T1')
-            ->leftJoin('paddocks as T2', 'T1.paddock_id', '=', 'T2.id')
-            ->leftJoin('paddock_plans as T3', 'T3.id', '=', 'T1.paddock_plan_id')
-            ->leftJoin('crops as T4', 'T4.id', '=', 'T3.crop_id')
-            ->leftJoin('spray_mixes as T5', 'T5.id', '=', 'T1.spray_mix_id')
-            ->where('T1.spray_mix_id', '=', $data['spray_mix_id'])
-            ->where('T1.status', '!=', 'pending')
-            ->where('T1.deleted_at', '=', null)
-            ->where('T2.merchant_id', $data['merchant_id'])
-            ->groupBy('T1.paddock_plan_id')
-            ->get(['T1.*', 'T2.*', 'T3.start_date', 'T3.end_date', 'T4.name as crop_name', 'T5.name as mix_name', 'T5.application_rate', 'T5.minimum_rate', 'T5.maximum_rate', 'T1.id as plan_task_id', 'T1.deleted_at']);
+        $result = Paddock::where('merchant_id', '=', $data['merchant_id'])->get();
+
         if (sizeof($result) > 0) {
             $tempRes = json_decode(json_encode($result), true);
             $i = 0;
             $available = array();
             foreach ($tempRes as $key) {
-                // dd($key['paddock_id']);
-                if ($tempRes[$i]['start_date'] <= $currDate && $currDate <= $tempRes[$i]['end_date']) {
-                    $totalBatchArea = app($this->batchPaddockTaskClass)->getTotalBatchPaddockPlanTask($tempRes[$i]['plan_task_id']);
-                    $tempRes[$i]['area'] = (float)$tempRes[$i]['area'];
-                    $totalArea =  $totalBatchArea != null ? (doubleval($tempRes[$i]['spray_area']) - doubleval($totalBatchArea)) : doubleval($tempRes[$i]['spray_area']);
-                    $tempRes[$i]['remaining_spray_area'] = $this->numberConvention($totalArea);
-                    $tempRes[$i]['units'] = "Ha";
-                    $tempRes[$i]['spray_areas'] = $tempRes[$i]['remaining_spray_area'];
-                    $tempRes[$i]['batch_areas'] = $totalBatchArea;
-                    $tempRes[$i]['spray_mix_units'] = "L/Ha";
-                    $tempRes[$i]['partial'] = false;
-                    $tempRes[$i]['partial_flag'] = false;
-                    $tempRes[$i]['rate_per_hectar'] = app('Increment\Marketplace\Paddock\Http\SprayMixProductController')->retrieveDetailsWithParams('spray_mix_id', $tempRes[$i]['spray_mix_id'], ['rate']);
-                    if ($tempRes[$i]['remaining_spray_area'] > 0) {
-                        $available[] = $tempRes[$i];
+                $task = PaddockPlanTask::where('spray_mix_id', '=', $data['spray_mix_id'])
+                    ->where('paddock_id', '=', $key['id'])
+                    ->where('status', '!=', 'completed')
+                    ->orderBy('due_date', 'asc')
+                    ->first();
+                if ($task != null) {
+                    $paddockPlan = app($this->paddockPlanClass)->retrievePlanByParams('id', $task['paddock_plan_id'], ['start_date', 'end_date', 'crop_id', 'paddock_id']);
+                    if (sizeof($paddockPlan) > 0 && ($paddockPlan[0]['start_date'] <= $currDate && $currDate <= $paddockPlan[0]['end_date'])) {
+                        $totalBatchArea = app($this->batchPaddockTaskClass)->getTotalBatchPaddockPlanTask($task['id']);
+                        $tempRes[$i]['area'] = (float)$tempRes[$i]['area'];
+                        $totalArea =  $totalBatchArea != null ? (doubleval($tempRes[$i]['spray_area']) - doubleval($totalBatchArea)) : doubleval($tempRes[$i]['spray_area']);
+                        $tempRes[$i]['remaining_spray_area'] = $this->numberConvention($totalArea);
+                        $tempRes[$i]['units'] = "Ha";
+                        $tempRes[$i]['spray_areas'] = $tempRes[$i]['remaining_spray_area'];
+                        $tempRes[$i]['batch_areas'] = $totalBatchArea;
+                        $tempRes[$i]['spray_mix_units'] = "L/Ha";
+                        $tempRes[$i]['partial'] = false;
+                        $tempRes[$i]['partial_flag'] = false;
+                        $tempRes[$i]['due_date'] = $task['due_date'];
+                        $tempRes[$i]['rate_per_hectar'] = app('Increment\Marketplace\Paddock\Http\SprayMixProductController')->retrieveDetailsWithParams('spray_mix_id', $task['spray_mix_id'], ['rate']);
+                        if ($tempRes[$i]['remaining_spray_area'] > 0) {
+                            $available[] = $tempRes[$i];
+                        }
                     }
                 }
                 $i++;
