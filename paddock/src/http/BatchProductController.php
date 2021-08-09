@@ -62,4 +62,8 @@ class BatchProductController extends APIController
     $result = BatchProduct::where('product_id', '=', $productId)->where('merchant_id', '=', $merchantId)->sum('applied_rate');
     return floatval($result); 
   }
+
+  public function getByParams($column, $value, $return){
+    return BatchProduct::where($column, '=', $value)->get($return);
+  }
 }
