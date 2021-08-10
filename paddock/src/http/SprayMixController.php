@@ -137,7 +137,9 @@ class SprayMixController extends APIController
     $data = $request->all();
     $result = Batch::leftJoin('spray_mixes as T2', 'T2.id', '=', 'batches.spray_mix_id')
       ->where('session', '=', $data['session'])->get();
-
+    if(sizeof($result) <= 0){
+      $result = SprayMix::where('id', '=', $data['id'])->get();
+    }
     if (sizeof($result) > 0) {
       $i = 0;
       foreach ($result as $key) {
@@ -147,7 +149,7 @@ class SprayMixController extends APIController
         $result[$i]['application_rate'] = $this->numberConvention($result[$i]['application_rate']);
         $result[$i]['maximum_rate'] = $this->numberConvention($result[$i]['maximum_rate']);
         $result[$i]['units'] = 'L/ha';
-        $result[$i]['applied_rate'] = $this->numberConvention($key['applied_rate']);
+        $result[$i]['applied_rate'] = $this->numberConvention(isset($key['applied_rate']) ? $key['applied_rate'] : $key['application_rate']);
         $i++;
       }
     }
