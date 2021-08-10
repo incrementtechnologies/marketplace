@@ -167,6 +167,7 @@ class PaddockController extends APIController
         $this->response['data'][$i]['arable_area'] = $this->numberConvention($this->response['data'][$i]['arable_area']);
         $this->response['data'][$i]['units'] = 'Ha';
         $this->response['data'][$i]['nickname'] = $task[0]['nickname'];
+        $this->response['data'][$i]['status'] = $task[0]['status'];
         $this->response['data'][$i]['spray_area'] = $this->numberConvention($this->response['data'][$i]['spray_area']);
         $totalBatchArea = app($this->batchPaddockTaskClass)->getTotalBatchPaddockPlanTask($task[0]['id']);
         $this->response['data'][$i]['area'] = (float)$item['area'];
