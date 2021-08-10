@@ -40,11 +40,7 @@ class BatchController extends APIController
     $counter = Batch::where('merchant_id', '=', $batchData['merchant_id'])->count();  
     $batchData['session'] = $merchant ? $merchant['prefix'] . $this->toCode($counter) : $this->toCode($counter);
     $batchData['applied_rate'] = $batchData['application_rate'];
-    if($this->checkIfHasRemainingArea($data['tasks']['paddock_plan_task_id']) > 0){
-      $batchData['status'] = 'partially_completed';
-    }else{
-      $batchData['status'] = 'completed';
-    }
+    $batchData['status'] = 'partially_completed';
     $batchProduct = $data['batch_products'];
     $exist = $this->checkIfExistBatch($data['tasks']['paddock_plan_task_id'], $batchData['spray_mix_id']);
     if(sizeOf($exist) <= 0){
