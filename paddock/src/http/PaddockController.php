@@ -89,8 +89,11 @@ class PaddockController extends APIController
           for ($x = 0; $x < count($paddock_data); $x++) {
             $paddock_plan_tasks = PaddockPlanTask::select()->where("paddock_plan_id", "=", $paddock_data[$x]['id'])->where('deleted_at', '=', null)->get();
             for ($p = 0; $p < count($paddock_plan_tasks); $p++) {
-              if ($paddock_plan_tasks[$p]['status'] === 'approved' || $paddock_plan_tasks[$p]['status'] === 'completed') {
+              if ($paddock_plan_tasks[$p]['status'] === 'pending') {
                 $this->response['data'][$i]['status'] = $paddock_plan_tasks[$p]['status'];
+              } else {
+                $this->response['data'][$i]['status'] = 'completed';
+                break;
               }
             }
             $this->response['data'][$x]['area'] = $this->response['data'][$x]['area'];
@@ -125,8 +128,11 @@ class PaddockController extends APIController
           if (count($paddock_data) > 0 && date($paddock_data[0]['end_date']) >= Carbon::now()->format('Y-m-d')) {
             $paddock_plan_tasks = PaddockPlanTask::select()->where("paddock_plan_id", "=", $paddock_data[0]['id'])->where('deleted_at', '=', null)->get();
             for ($p = 0; $p < count($paddock_plan_tasks); $p++) {
-              if ($paddock_plan_tasks[$p]['status'] === 'approved' || $paddock_plan_tasks[$p]['status'] === 'completed') {
+              if ($paddock_plan_tasks[$p]['status'] === 'pending') {
                 $this->response['data'][$i]['status'] = $paddock_plan_tasks[$p]['status'];
+              } else {
+                $this->response['data'][$i]['status'] = 'completed';
+                break;
               }
             }
             $this->response['data'][$i]['area'] = $this->response['data'][$i]['area'];
