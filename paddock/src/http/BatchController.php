@@ -37,20 +37,20 @@ class BatchController extends APIController
     $data = $request->all();
     $batchData = $data['batch'];
     $merchant = app($this->merchantClass)->getColumnByParams('id', $batchData['merchant_id'], 'prefix');
-    $counter = Batch::where('merchant_id', '=', $batchData['merchant_id'])->count();  
+    $counter = Batch::where('merchant_id', '=', $batchData['merchant_id'])->count();
     $batchData['session'] = $merchant ? $merchant['prefix'] . $this->toCode($counter) : $this->toCode($counter);
     $batchData['applied_rate'] = $batchData['application_rate'];
-    if($this->checkIfHasRemainingArea($data['tasks']['paddock_plan_task_id']) > 0){
+    if ($this->checkIfHasRemainingArea($data['tasks']['paddock_plan_task_id']) > 0) {
       $batchData['status'] = 'partially_completed';
-    }else{
+    } else {
       $batchData['status'] = 'inprogress';
     }
     $batchProduct = $data['batch_products'];
     $exist = $this->checkIfExistBatch($data['tasks']['paddock_plan_task_id'], $batchData['spray_mix_id']);
-    if(sizeOf($exist) <= 0){
+    if (sizeOf($exist) <= 0) {
       $batch = Batch::create($batchData);
       $this->response['data']['batch'] = $batch;
-    }else{
+    } else {
       $this->response['data']['batch'] = $exist[0];
     }
     $batchId = 0;
@@ -59,7 +59,7 @@ class BatchController extends APIController
       $batchProduct[$i]['batch_id'] = $this->response['data']['batch']['id'];
       $batchId = $this->response['data']['batch']['id'];
       $exist = app($this->batchProductClass)->getByParams('product_attribute_id', $key['product_attribute_id'], ['batch_id']);
-      if(sizeof($exist) > 0){
+      if (sizeof($exist) > 0) {
         $batchProduct[$i]['batch_id'] = $exist[0]['batch_id'];
       }
       BatchProduct::create($batchProduct[$i]);
@@ -72,9 +72,9 @@ class BatchController extends APIController
         'updated_at' => Carbon::now(),
       ));
       $exist = $this->checkIfExist($batchData['spray_mix_id'], (int)$key['task_id']);
-      if($exist !== null){
+      if ($exist !== null) {
         $taskData['batch_id'] = $exist['batch_id'];
-      }else{
+      } else {
         $taskData['batch_id'] = $batchId;
       }
       $taskData['status'] = 'inprogress';
@@ -103,7 +103,10 @@ class BatchController extends APIController
   public function retrieveUnApplyTasks(Request $request)
   {
     $data = $request->all();
-    $result = Batch::where('status', $data['status'])->where('merchant_id', '=', $data['merchant_id'])->get();
+    $result = Batch::leftJoin('batch_paddock_tasks as T3', 'T3.batch_id', '=', 'batches.id')
+      ->leftJoin('paddock_plans_tasks as T2', 'T2.id', '=', 'T3.paddock_plan_task_id')->where(function ($query) {
+        $query->where('T2.status', '=', 'inprogress');
+      })->where('T2.merchant_id', '=', $data['merchant_id'])->select('batches.id as id')->get();
 
     $this->response['data'] = $result;
 
@@ -146,19 +149,21 @@ class BatchController extends APIController
       $paddock = Paddock::where('id', '=', $task[0]['paddock_id'])->get(['spray_area']);
       $paddockArea = sizeof($paddock) > 0 ? $paddock[0]['spray_area'] : 0;
       $totalBatchArea = app($this->batchPaddockTaskClass)->getTotalBatchPaddockPlanTask($key['task_id']);
-      if((doubleval($paddockArea) - ($totalBatchArea + $key['area'])) > 0){
-        $counter ++;
+      if ((doubleval($paddockArea) - ($totalBatchArea + $key['area'])) > 0) {
+        $counter++;
       }
       $i++;
     }
     return $counter;
   }
 
-  public function checkIfExist($sprayMix, $taskId){
+  public function checkIfExist($sprayMix, $taskId)
+  {
     return BatchPaddockTask::where('spray_mix_id', '=', $sprayMix)->where('paddock_plan_task_id', '=', $taskId)->first();
   }
 
-  public function checkIfExistBatch($tasks, $sprayMix){
+  public function checkIfExistBatch($tasks, $sprayMix)
+  {
     $i = 0;
     $batchId = 0;
     foreach ($tasks as $key) {
