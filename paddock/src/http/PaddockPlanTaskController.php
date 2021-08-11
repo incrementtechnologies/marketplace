@@ -70,7 +70,10 @@ class PaddockPlanTaskController extends APIController
             foreach ($result as $key) {
                 $task = PaddockPlanTask::where($con[0]['column'], '=', $con[0]['value'])
                     ->where('paddock_id', '=', $key['id'])
-                    ->where('status', '!=', 'completed')
+                    ->where(function ($query) {
+                        $query->where('status', '!=', 'completed')
+                            ->orWhere('status', '!=', 'pending');
+                    })
                     ->orderBy('due_date', 'asc')
                     ->first();
                 if ($task != null) {
@@ -310,38 +313,39 @@ class PaddockPlanTaskController extends APIController
     public function retrieveAvailablePaddocks(Request $request)
     {
         $data = $request->all();
-        $returnResult = array();
         $date =  Carbon::now();
         $currDate = $date->toDateString();
-        $result = Paddock::where('merchant_id', '=', $data['merchant_id'])->get();
-
-        if (sizeof($result) > 0) {
-            $tempRes = json_decode(json_encode($result), true);
+        $tempRes  = PaddockPlanTask::where(function ($query) {
+            $query->where('status', '!=', 'completed')
+                ->orWhere('status', '!=', 'pending');
+        })
+            ->orderBy('due_date', 'asc')
+            ->get();
+        if (sizeof($tempRes) > 0) {
             $i = 0;
             $available = array();
             foreach ($tempRes as $key) {
-                $task = PaddockPlanTask::where('spray_mix_id', '=', $data['spray_mix_id'])
-                    ->where('paddock_id', '=', $key['id'])
-                    ->where('status', '!=', 'completed')
-                    ->orderBy('due_date', 'asc')
-                    ->first();
-                if ($task != null) {
-                    $paddockPlan = app($this->paddockPlanClass)->retrievePlanByParams('id', $task['paddock_plan_id'], ['start_date', 'end_date', 'crop_id', 'paddock_id']);
+                $paddock = Paddock::where('id', '=', $key['paddock_id'])->first();
+                if ($key['spray_mix_id'] == $data['spray_mix_id']) {
+                    $paddockPlan = app($this->paddockPlanClass)->retrievePlanByParams('id', $key['paddock_plan_id'], ['start_date', 'end_date', 'crop_id', 'paddock_id']);
                     if (sizeof($paddockPlan) > 0 && ($paddockPlan[0]['start_date'] <= $currDate && $currDate <= $paddockPlan[0]['end_date'])) {
-                        $totalBatchArea = app($this->batchPaddockTaskClass)->getTotalBatchPaddockPlanTask($task['id']);
-                        $tempRes[$i]['area'] = (float)$tempRes[$i]['area'];
-                        $totalArea =  $totalBatchArea != null ? (doubleval($tempRes[$i]['spray_area']) - doubleval($totalBatchArea)) : doubleval($tempRes[$i]['spray_area']);
+                        $totalBatchArea = app($this->batchPaddockTaskClass)->getTotalBatchPaddockPlanTask($key['id']);
+                        $tempRes[$i]['area'] = (float)$paddock['area'];
+                        $totalArea =  $totalBatchArea != null ? (doubleval($paddock['spray_area']) - doubleval($totalBatchArea)) : doubleval($paddock['spray_area']);
                         $tempRes[$i]['remaining_spray_area'] = $this->numberConvention($totalArea);
                         $tempRes[$i]['units'] = "Ha";
                         $tempRes[$i]['spray_areas'] = $tempRes[$i]['remaining_spray_area'];
                         $tempRes[$i]['batch_areas'] = $totalBatchArea;
                         $tempRes[$i]['spray_mix_units'] = "L/Ha";
                         $tempRes[$i]['partial'] = false;
-                        $tempRes[$i]['paddock_id'] = $key['id'];
-                        $tempRes[$i]['plan_task_id'] = $task['id'];
+                        $tempRes[$i]['paddock_id'] = $key['paddock_id'];
+                        $tempRes[$i]['name'] = $paddock['name'];
+                        $tempRes[$i]['spray_area'] = $paddock['spray_area'];
+                        $tempRes[$i]['plan_task_id'] = $key['id'];
                         $tempRes[$i]['partial_flag'] = false;
-                        $tempRes[$i]['due_date'] = $task['due_date'];
-                        $tempRes[$i]['rate_per_hectar'] = app('Increment\Marketplace\Paddock\Http\SprayMixProductController')->retrieveDetailsWithParams('spray_mix_id', $task['spray_mix_id'], ['rate']);
+                        $tempRes[$i]['due_date'] = $key['due_date'];
+                        $tempRes[$i]['arable_area'] = $key['arable_area'];
+                        $tempRes[$i]['rate_per_hectar'] = app('Increment\Marketplace\Paddock\Http\SprayMixProductController')->retrieveDetailsWithParams('spray_mix_id', $key['spray_mix_id'], ['rate']);
                         if ($tempRes[$i]['remaining_spray_area'] > 0) {
                             $available[] = $tempRes[$i];
                         }
