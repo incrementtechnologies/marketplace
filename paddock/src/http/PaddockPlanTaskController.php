@@ -70,7 +70,7 @@ class PaddockPlanTaskController extends APIController
             foreach ($result as $key) {
                 $task = PaddockPlanTask::where($con[0]['column'], '=', $con[0]['value'])
                     ->where('paddock_id', '=', $key['id'])
-                    ->where($con[1]['column'], '=', $con[1]['value'])
+                    ->where('status', '!=', 'completed')
                     ->orderBy('due_date', 'asc')
                     ->first();
                 if ($task != null) {
@@ -179,8 +179,7 @@ class PaddockPlanTaskController extends APIController
             $result = PaddockPlanTask::where($con[0]['column'], '=', $con[0]['value'])
                 ->where('deleted_at', '=', null)
                 ->where(function ($query) {
-                    $query->where('status', '=', 'inprogress')
-                        ->orWhere('status', '=', 'partially_completed');
+                    $query->where('status', '=', 'inprogress');
                 })
                 ->skip($data['offset'])->take($data['limit'])->orderBy('created_at', 'desc')->get();
         } else {
@@ -268,29 +267,29 @@ class PaddockPlanTaskController extends APIController
 
     public function retrievePaddockPlanTaskByParamsDue($column, $value)
     {
-        $result = DB::table('batches as T1')
-            ->leftJoin('batch_paddock_tasks as T2', 'T1.id', '=', 'T2.batch_id')
-            ->where('T1.' . $column, '=', $value)
-            ->where('T1.deleted_at', '=', null)
-            ->where('T1.status', '=', 'inprogress')
-            ->take(5)->orderBy('T1.created_at', 'desc')->get();
-        $obj = $result;
+        $temp = PaddockPlanTask::where($column, '=', $value)
+            ->where('deleted_at', '=', null)
+            ->where(function ($query) {
+                $query->where('status', '=', 'inprogress');
+            })
+            ->take(5)->orderBy('created_at', 'desc')->get();
         $finalResult = [];
-        if (sizeof($obj) > 0) {
+        if (sizeof($temp) > 0) {
             $i = 0;
-            $temp = json_decode(json_encode($obj), true);
             foreach ($temp as $key) {
-                $paddockId = $this->retrieveByParams('id', $temp[$i]['paddock_plan_task_id'], 'paddock_id');
+                $paddockId = $this->retrieveByParams('id', $temp[$i]['id'], 'paddock_id');
+                $batchPaddock = app($this->batchPaddockTaskClass)->retrieveByParams('paddock_plan_task_id', $temp[$i]['id'], ['batch_id']);
+                $batchStatus = sizeof($batchPaddock) > 0 ? Batch::where('id', '=', $batchPaddock[0]['batch_id'])->first() : null;
                 $temp[$i]['paddock'] = $paddockId != null ? app($this->paddockClass)->getByParams('id', $paddockId, ['id', 'name']) : null;
-                $temp[$i]['category'] = $this->retrieveByParams('id', $temp[$i]['paddock_plan_task_id'], 'category');
-                $temp[$i]['nickname'] = $this->retrieveByParams('id', $temp[$i]['paddock_plan_task_id'], 'nickname');
-                $temp[$i]['paddock_plan_id'] = $this->retrieveByParams('id', $temp[$i]['paddock_plan_task_id'], 'paddock_plan_id');
-                $temp[$i]['paddock_id'] = $this->retrieveByParams('id', $temp[$i]['paddock_plan_task_id'], 'paddock_id');
-                $temp[$i]['spray_mix_id'] = $this->retrieveByParams('id', $temp[$i]['paddock_plan_task_id'], 'spray_mix_id');
-                $temp[$i]['due_date'] = $this->retrieveByParams('id', $temp[$i]['paddock_plan_task_id'], 'due_date');
+                $temp[$i]['category'] = $this->retrieveByParams('id', $temp[$i]['id'], 'category');
+                $temp[$i]['nickname'] = $this->retrieveByParams('id', $temp[$i]['id'], 'nickname');
+                $temp[$i]['paddock_plan_id'] = $this->retrieveByParams('id', $temp[$i]['id'], 'paddock_plan_id');
+                $temp[$i]['paddock_id'] = $this->retrieveByParams('id', $temp[$i]['id'], 'paddock_id');
+                $temp[$i]['spray_mix_id'] = $this->retrieveByParams('id', $temp[$i]['id'], 'spray_mix_id');
+                $temp[$i]['batch_status'] = $batchStatus != null ? $batchStatus['status'] : null;
+                $temp[$i]['due_date'] = $this->retrieveByParams('id', $temp[$i]['id'], 'due_date');
                 $temp[$i]['due_date_format'] = isset($temp[$i]['due_date']) ? Carbon::createFromFormat('Y-m-d', $temp[$i]['due_date'])->copy()->tz($this->response['timezone'])->format('d M') : null;
                 $temp[$i]['spray_mix'] = app($this->sprayMixClass)->getByParams('id', $temp[$i]['spray_mix_id'], ['id', 'name']);
-                $temp[$i]['machine'] = app($this->machineClass)->getMachineNameByParams('id', $temp[$i]['machine_id']);
                 $i++;
             }
             $finalResult =  $temp;
