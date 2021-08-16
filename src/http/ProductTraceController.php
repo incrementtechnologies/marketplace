@@ -179,7 +179,7 @@ class ProductTraceController extends APIController
       $qty = $this->getProductQtyByParameter($item['batch_number'], $item['product_id'], $item['product_attribute_id'],  'active');
       $this->response['data'][$i]['total_qty'] = $qty['total_qty'];
       $this->response['data'][$i]['active_qty'] = $qty['active_qty'];
-      $this->response['data'][$i]['manufacturing_date'] = Carbon::createFromFormat('Y-m-d', $this->response['data'][$i]['manufacturing_date'])->copy()->tz($this->response['timezone'])->format('d/m/Y');
+      $this->response['data'][$i]['manufacturing_date'] = strlen($item['manufacturing_date']) <= 7 ? Carbon::parse($this->response['data'][$i]['manufacturing_date'])->copy()->tz($this->response['timezone'])->format('m/Y') : Carbon::parse($this->response['data'][$i]['manufacturing_date'])->copy()->tz($this->response['timezone'])->format('d/m/Y');
       $this->response['data'][$i]['created_at_human'] = Carbon::createFromFormat('Y-m-d H:i:s', $item['created_at'])->copy()->tz($this->response['timezone'])->format('F j, Y h:i A');
       array_push($response[1]['traces'], $this->response['data'][$i]);
       $i++;
