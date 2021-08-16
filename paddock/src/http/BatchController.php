@@ -53,7 +53,7 @@ class BatchController extends APIController
     } else {
       $this->response['data']['batch'] = $exist[0];
     }
-    $batchId = 0;
+    $batchId = $this->response['data']['batch']['id'];
     $i = 0;
     foreach ($batchProduct as $key) {
       $batchProduct[$i]['batch_id'] = $this->response['data']['batch']['id'];
@@ -72,11 +72,7 @@ class BatchController extends APIController
         'updated_at' => Carbon::now(),
       ));
       $exist = $this->checkIfExist($batchData['spray_mix_id'], (int)$key['task_id']);
-      if ($exist !== null) {
-        $taskData['batch_id'] = $exist['batch_id'];
-      } else {
-        $taskData['batch_id'] = $batchId;
-      }
+      $taskData['batch_id'] = $batchId;
       $taskData['status'] = 'inprogress';
       $taskData['paddock_plan_task_id'] = (int)$key['task_id'];
       $taskData['spray_mix_id'] = $batchData['spray_mix_id'];
