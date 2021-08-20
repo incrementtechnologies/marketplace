@@ -153,6 +153,7 @@ class BundledSettingController extends APIController
     $result = DB::table('bundled_settings')->where($column, '=', $value)->get();
     if(sizeof($result) > 0){
       $i = 0;
+      $result = json_decode(json_encode($result), true);
       foreach ($result as $key) {
         $traceQty = app($this->productTraceController)->getProductQtyByParams($result[$i]['bundled'], $result[$i]['product_attribute_id']);
         $totalTransferredBundled = app($this->transferredProductController)->getTotalTransferredBundledProducts($result[$i]['bundled']);
