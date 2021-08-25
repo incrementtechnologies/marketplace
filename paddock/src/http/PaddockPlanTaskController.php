@@ -71,7 +71,7 @@ class PaddockPlanTaskController extends APIController
                 $task = PaddockPlanTask::where($con[0]['column'], '=', $con[0]['value'])
                     ->where('paddock_id', '=', $key['id'])
                     ->where(function ($query) {
-                        $query->where('status', '!=', 'completed')
+                        $query->where('status', '!=', 'inprogress')
                             ->orWhere('status', '!=', 'pending');
                     })
                     ->orderBy('due_date', 'asc')
