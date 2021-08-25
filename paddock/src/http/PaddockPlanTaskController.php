@@ -347,14 +347,30 @@ class PaddockPlanTaskController extends APIController
                         $tempRes[$i]['arable_area'] = $key['arable_area'];
                         $tempRes[$i]['rate_per_hectar'] = app('Increment\Marketplace\Paddock\Http\SprayMixProductController')->retrieveDetailsWithParams('spray_mix_id', $key['spray_mix_id'], ['rate']);
                         if ($tempRes[$i]['remaining_spray_area'] > 0) {
-                            $available[] = $tempRes[$i];
+                            if(sizeof($available) <= 0){
+                                $available[] = $tempRes[$i];
+                            }else{
+                                $a=0;
+                                foreach ($available as $value) {
+                                    if($value['paddock_id'] === $key['paddock_id']){
+                                        unset($available[$a]);
+                                    }else{
+                                        $available[] = $tempRes[$i]; 
+                                    }
+                                    $a++;
+                                }
+                            }
                         }
                     }
                 }
                 $i++;
             }
-            // dd($tempRes);
-            $this->response['data'] = $available;
+            if(sizeof($available) > 0){
+                $fin = json_decode(json_encode($available), true);
+                $this->response['data'] = array_values($fin);
+            }else{
+                $this->response['data'] = [];
+            }
         } else {
             return $this->response['data'] = [];
         }
