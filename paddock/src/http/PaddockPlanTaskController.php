@@ -72,7 +72,7 @@ class PaddockPlanTaskController extends APIController
                     ->where('paddock_id', '=', $key['id'])
                     ->where(function ($query) {
                         $query->where('status', '!=', 'inprogress')
-                            ->orWhere('status', '!=', 'pending');
+                            ->where('status', '!=', 'pending');
                     })
                     ->orderBy('due_date', 'asc')
                     ->first();
