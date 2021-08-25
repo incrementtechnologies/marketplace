@@ -205,7 +205,7 @@ class PaddockPlanTaskController extends APIController
                 $paddockPlanDate = app($this->paddockPlanClass)->retrievePlanByParams('id', $paddoctId, ['start_date', 'end_date']);
                 if ($con[1]['value'] == 'inprogress') {
                     $paddockPlanDate[0]['start_date'] = Carbon::createFromFormat('Y-m-d', $paddockPlanDate[0]['start_date'])->copy()->tz($this->response['timezone'])->format('d/m/Y');
-                    $temp[$i]['due_date'] = Carbon::createFromFormat('Y-m-d',  $this->retrieveByParams('id', $temp[$i]['paddock_plan_task_id'], 'due_date'))->copy()->tz($this->response['timezone'])->format('d/m/Y');
+                    $temp[$i]['due_date'] = Carbon::createFromFormat('Y-m-d',  $this->retrieveByParams('id', $temp[$i]['id'], 'due_date'))->copy()->tz($this->response['timezone'])->format('d/m/Y');
                 } else {
                     $temp[$i]['due_date'] = Carbon::createFromFormat('Y-m-d H:i:s', $key['updated_at'])->copy()->tz($this->response['timezone'])->format('d/m/Y');
                 }
