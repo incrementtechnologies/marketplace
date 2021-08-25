@@ -60,7 +60,7 @@ class PaddockPlanTaskController extends APIController
         $data = $request->all();
         $con = $data['condition'];
         $result = [];
-        $result = Paddock::where($con[0]['column'], '=', $con[0]['value'])->skip($data['offset'])->take($data['limit'])->get();
+        $result = Paddock::where($con[0]['column'], '=', $con[0]['value'])->get();
         $currDate = Carbon::now()->toDateString();
         $finalResult = array();
         if (sizeof($result) > 0) {
@@ -74,6 +74,7 @@ class PaddockPlanTaskController extends APIController
                         $query->where('status', '!=', 'inprogress')
                             ->where('status', '!=', 'pending');
                     })
+                    ->skip($data['offset'])->take($data['limit'])
                     ->orderBy('due_date', 'asc')
                     ->first();
                 if ($task != null) {
