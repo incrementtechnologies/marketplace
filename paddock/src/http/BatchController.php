@@ -203,6 +203,7 @@ class BatchController extends APIController
           $paddocks = Paddock::where('id', $task[0]['paddock_id'])->get();
           $result[$i]['status'] = $task[0]['status'];
         }
+        $result[$i]['status'] = $key['status'];
         $remaining = $totalBatchArea != null ? (float)$totalBatchArea : $paddocks[0]['spray_area'];
         $remaining = $totalBatchArea != null ? ((float)$paddocks[0]['spray_area'] - (float)$totalBatchArea) : $paddocks[0]['spray_area'];
         $result[$i]['spray_area'] = sizeof($paddocks) > 0 ? $paddocks[0]['spray_area'] : null;
