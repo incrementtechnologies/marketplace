@@ -29,6 +29,7 @@ Route::post($route.'check_if_available', $controller."checkIfAvailable");
 Route::post($route.'retrieve_available_paddocks', $controller."retrieveAvailablePaddocks");
 Route::post($route.'retrieve_mobile_by_params', $controller."retrieveMobileByParams");
 Route::post($route.'retrieve_mobile_due_task', $controller."retrieveMobileDueTask");
+Route::post($route.'retrieve_from_batch', $controller."retrieveFromBatch");
 Route::post($route.'retrieve_mobile_by_params_end_user', $controller."retrieveMobileByParamsEndUser");
 Route::post($route.'update', $controller."update");
 Route::post($route.'delete', $controller."delete");

@@ -167,7 +167,6 @@ class PaddockController extends APIController
         $this->response['data'][$i]['arable_area'] = $this->numberConvention($this->response['data'][$i]['arable_area']);
         $this->response['data'][$i]['units'] = 'Ha';
         $this->response['data'][$i]['nickname'] = $task[0]['nickname'];
-        $this->response['data'][$i]['status'] = $task[0]['status'];
         $this->response['data'][$i]['spray_area'] = $this->numberConvention($this->response['data'][$i]['spray_area']);
         $totalBatchArea = app($this->batchPaddockTaskClass)->getTotalBatchPaddockPlanTask($task[0]['id']);
         $this->response['data'][$i]['area'] = (float)$item['area'];
@@ -188,6 +187,15 @@ class PaddockController extends APIController
           $this->response['data'][$i]['start_date'] = $temp !== null ? Carbon::createFromFormat('Y-m-d H:i:s', $temp['created_at'])->copy()->tz($this->response['timezone'])->format('m/d/Y H:i') : null;
           $this->response['data'][$i]['end_date'] = $temp !== null ? Carbon::createFromFormat('Y-m-d H:i:s', $temp['updated_at'])->copy()->tz($this->response['timezone'])->format('m/d/Y H:i') : null;
           $this->response['data'][$i]['updated_date'] = $temp !== null ? Carbon::createFromFormat('Y-m-d H:i:s', $temp['updated_at'])->copy()->tz($this->response['timezone'])->format('m/d/Y') : null;
+        }
+        if($totalBatchArea > 0){
+          if((float)$totalBatchArea >= (float)$item['spray_area']){
+            $this->response['data'][$i]['status'] = 'completed';
+          }else if((float)$totalBatchArea < (float)$item['spray_area']){
+            $this->response['data'][$i]['status'] = 'partially_completed';
+          }
+        }else{
+          $this->response['data'][$i]['status'] = 'pending';
         }
 
 

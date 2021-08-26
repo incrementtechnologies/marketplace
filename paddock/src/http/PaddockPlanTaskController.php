@@ -71,7 +71,7 @@ class PaddockPlanTaskController extends APIController
                 $task = PaddockPlanTask::where($con[0]['column'], '=', $con[0]['value'])
                     ->where('paddock_id', '=', $key['id'])
                     ->where(function ($query) {
-                        $query->where('status', '!=', 'inprogress')
+                        $query->where('status', '!=', 'completed')
                             ->where('status', '!=', 'pending');
                     })
                     ->skip($data['offset'])->take($data['limit'])
@@ -178,6 +178,38 @@ class PaddockPlanTaskController extends APIController
             }
             $this->response['data'] = $finalResult;
         }
+        return $this->response();
+    }
+
+    public function retrieveFromBatch(Request $request){
+        $data = $request->all();
+        $con = $data['condition'];
+        $result = Batch::leftJoin('batch_paddock_tasks as T1', 'T1.batch_id', '=', 'batches.id')
+            ->where('batches.'.$con[0]['column'], '=', $con[0]['value'])
+            ->where('batches.deleted_at', '=', null)
+            ->where('status', '=', $con[1]['value'])
+            ->skip($data['offset'])->take($data['limit'])->orderBy('batches.created_at', 'desc')->get();
+        $final = array();
+        if(sizeof($result) > 0){
+            $i= 0;
+            foreach ($result as $key) {
+                $task = PaddockPlanTask::where('id', '=', $key['paddock_plan_task_id'])->first();
+                $result[$i]['paddock'] = app($this->paddockClass)->getByParams('id', $task['paddock_id'], ['id', 'name', 'spray_area']);
+                $result[$i]['batch_status'] = $key['status'];
+                $result[$i]['spray_mix'] = app($this->sprayMixClass)->getByParams('id', $result[$i]['spray_mix_id'], ['id', 'name']);
+                if ($con[1]['value'] == 'inprogress') {
+                    $result[$i]['due_date'] = Carbon::createFromFormat('Y-m-d',  $task['due_date'])->copy()->tz($this->response['timezone'])->format('d/m/Y');
+                    array_push($final, $result[$i]);
+                } else {
+                    $result[$i]['due_date'] = Carbon::createFromFormat('Y-m-d H:i:s', $key['updated_at'])->copy()->tz($this->response['timezone'])->format('d/m/Y');
+                    if($key['status'] === $task['status']){
+                        array_push($final, $result[$i]);
+                    }
+                }
+                $i++;
+            }
+        }
+        $this->response['data'] = $final;
         return $this->response();
     }
 
