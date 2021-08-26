@@ -316,62 +316,42 @@ class PaddockPlanTaskController extends APIController
         $data = $request->all();
         $date =  Carbon::now();
         $currDate = $date->toDateString();
-        $tempRes  = PaddockPlanTask::where(function ($query) {
-            $query->where('status', '!=', 'completed')
-                ->orWhere('status', '!=', 'pending');
-        })
-            ->orderBy('due_date', 'asc')
-            ->get();
+        $tempRes  = Paddock::where('deleted_at', '=', null)->get();
         if (sizeof($tempRes) > 0) {
             $i = 0;
             $available = array();
             foreach ($tempRes as $key) {
-                $paddock = Paddock::where('id', '=', $key['paddock_id'])->first();
-                if ($key['spray_mix_id'] == $data['spray_mix_id']) {
-                    $paddockPlan = app($this->paddockPlanClass)->retrievePlanByParams('id', $key['paddock_plan_id'], ['start_date', 'end_date', 'crop_id', 'paddock_id']);
+                $task = PaddockPlanTask::where('paddock_id', '=', $key['id'])
+                    ->orderBy('due_date', 'asc')
+                    ->first();
+                if ($task !== null && $task['spray_mix_id'] == $data['spray_mix_id']) {
+                    $paddockPlan = app($this->paddockPlanClass)->retrievePlanByParams('id', $task['paddock_plan_id'], ['start_date', 'end_date', 'crop_id', 'paddock_id']);
                     if (sizeof($paddockPlan) > 0 && ($paddockPlan[0]['start_date'] <= $currDate && $currDate <= $paddockPlan[0]['end_date'])) {
-                        $totalBatchArea = app($this->batchPaddockTaskClass)->getTotalBatchPaddockPlanTask($key['id']);
-                        $tempRes[$i]['area'] = (float)$paddock['area'];
-                        $totalArea =  $totalBatchArea != null ? (doubleval($paddock['spray_area']) - doubleval($totalBatchArea)) : doubleval($paddock['spray_area']);
+                        $totalBatchArea = app($this->batchPaddockTaskClass)->getTotalBatchPaddockPlanTask($task['id']);
+                        $tempRes[$i]['area'] = (float)$key['area'];
+                        $totalArea =  $totalBatchArea != null ? (doubleval($key['spray_area']) - doubleval($totalBatchArea)) : doubleval($key['spray_area']);
                         $tempRes[$i]['remaining_spray_area'] = $this->numberConvention($totalArea);
                         $tempRes[$i]['units'] = "Ha";
                         $tempRes[$i]['spray_areas'] = $tempRes[$i]['remaining_spray_area'];
                         $tempRes[$i]['batch_areas'] = $totalBatchArea;
                         $tempRes[$i]['spray_mix_units'] = "L/Ha";
                         $tempRes[$i]['partial'] = false;
-                        $tempRes[$i]['paddock_id'] = $key['paddock_id'];
-                        $tempRes[$i]['name'] = $paddock['name'];
-                        $tempRes[$i]['spray_area'] = $paddock['spray_area'];
-                        $tempRes[$i]['plan_task_id'] = $key['id'];
+                        $tempRes[$i]['paddock_id'] = $task['paddock_id'];
+                        $tempRes[$i]['name'] = $key['name'];
+                        $tempRes[$i]['spray_area'] = $key['spray_area'];
+                        $tempRes[$i]['plan_task_id'] = $task['id'];
                         $tempRes[$i]['partial_flag'] = false;
-                        $tempRes[$i]['due_date'] = $key['due_date'];
-                        $tempRes[$i]['arable_area'] = $key['arable_area'];
+                        $tempRes[$i]['due_date'] = $task['due_date'];
+                        $tempRes[$i]['arable_area'] = $task['arable_area'];
                         $tempRes[$i]['rate_per_hectar'] = app('Increment\Marketplace\Paddock\Http\SprayMixProductController')->retrieveDetailsWithParams('spray_mix_id', $key['spray_mix_id'], ['rate']);
                         if ($tempRes[$i]['remaining_spray_area'] > 0) {
-                            if(sizeof($available) <= 0){
-                                $available[] = $tempRes[$i];
-                            }else{
-                                $a=0;
-                                foreach ($available as $value) {
-                                    if($value['paddock_id'] === $key['paddock_id']){
-                                        unset($available[$a]);
-                                    }else{
-                                        $available[] = $tempRes[$i]; 
-                                    }
-                                    $a++;
-                                }
-                            }
+                            $available[] = $tempRes[$i];    
                         }
                     }
                 }
                 $i++;
             }
-            if(sizeof($available) > 0){
-                $fin = json_decode(json_encode($available), true);
-                $this->response['data'] = array_values($fin);
-            }else{
-                $this->response['data'] = [];
-            }
+            $this->response['data'] = $available;
         } else {
             return $this->response['data'] = [];
         }
