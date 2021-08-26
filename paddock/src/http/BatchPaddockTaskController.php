@@ -50,4 +50,9 @@ class BatchPaddockTaskController extends APIController
     public function retrieveTotalAreaByBatch($batchId){
         return BatchPaddockTask::where('batch_id', '=', $batchId)->sum('area');
     }
+
+    public function retrieveBatchWithPaddock($column, $value){
+        return BatchPaddockTask::leftJoin('batches as T1', 'T1.id', '=', 'batch_paddock_tasks.batch_id')
+            ->where($column, '=',$value)->first();
+    }
 }

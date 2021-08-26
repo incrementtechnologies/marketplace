@@ -108,7 +108,13 @@ class PaddockPlanTaskController extends APIController
                             $temp[$i]['paddock']['crop_name'] = app($this->cropClass)->retrieveCropById($paddockPlan[0]['crop_id'])[0]->name;
                         }
                         if ($result[$i]['remaining_spray_area'] > 0) {
-                            array_push($finalResult, $result[$i]);
+                            if($batchStatus !== null){
+                                if($batchStatus !== 'completed'){
+                                    array_push($finalResult, $result[$i]);
+                                }
+                            }else{
+                                array_push($finalResult, $result[$i]);
+                            }
                         }
                     }
                 }
@@ -340,6 +346,7 @@ class PaddockPlanTaskController extends APIController
                         $tempRes[$i]['name'] = $key['name'];
                         $tempRes[$i]['spray_area'] = $key['spray_area'];
                         $tempRes[$i]['plan_task_id'] = $task['id'];
+                        $tempRes[$i]['crop_name'] = app($this->cropClass)->retrieveCropName($paddockPlan[0]['crop_id']);
                         $tempRes[$i]['partial_flag'] = false;
                         $tempRes[$i]['due_date'] = $task['due_date'];
                         $tempRes[$i]['arable_area'] = $task['arable_area'];

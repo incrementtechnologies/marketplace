@@ -70,4 +70,9 @@ class CropController extends APIController
         $result = Crop::where('merchant_id', '=', $merchantId)->where('name', '=', $cropName)->get();
         return sizeof($result) > 0 ? true : false;
     }
+
+    public function retrieveCropName($id){
+        $result = Crop::where('id', '=', $id)->first();
+        return $result['name'];
+    }
 }
