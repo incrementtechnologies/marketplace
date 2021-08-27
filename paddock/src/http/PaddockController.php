@@ -201,6 +201,8 @@ class PaddockController extends APIController
             $this->response['data'][$i]['status'] = 'inprogress';
           }else if((float)$totalBatchArea >= (float)$item['spray_area'] && $getBatchStatus === 'partially_completed'){
             $this->response['data'][$i]['status'] = 'partially_completed';
+          }else if((float)$totalBatchArea < (float)$item['spray_area'] && $getBatchStatus === 'completed'){
+            $this->response['data'][$i]['status'] = 'partially_completed';
           }else if((float)$totalBatchArea < (float)$item['spray_area'] && $getBatchStatus === 'inprogress'){
             $this->response['data'][$i]['status'] = 'inprogress';
           }else if((float)$totalBatchArea < (float)$item['spray_area'] && $getBatchStatus === 'partially_completed'){
