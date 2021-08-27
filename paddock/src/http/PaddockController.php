@@ -193,14 +193,18 @@ class PaddockController extends APIController
           $this->response['data'][$i]['end_date'] = $temp !== null ? Carbon::createFromFormat('Y-m-d H:i:s', $temp['updated_at'])->copy()->tz($this->response['timezone'])->format('m/d/Y H:i') : null;
           $this->response['data'][$i]['updated_date'] = $temp !== null ? Carbon::createFromFormat('Y-m-d H:i:s', $temp['updated_at'])->copy()->tz($this->response['timezone'])->format('m/d/Y') : null;
         }
-        $isInprogress = app($this->batchPaddockTaskClass)->retrieveBatchWithPaddock('batch_paddock_tasks.paddock_plan_task_id', $data['id']);
+        $getBatchStatus = app($this->batchPaddockTaskClass)->checkIfInProgress('batch_paddock_tasks.paddock_plan_task_id', $data['id']);
         if($totalBatchArea > 0){
-          if((float)$totalBatchArea >= (float)$item['spray_area'] && $isInprogress['status'] !== 'inprogress'){
+          if((float)$totalBatchArea >= (float)$item['spray_area'] && $getBatchStatus === 'completed'){
             $this->response['data'][$i]['status'] = 'completed';
-          }else if((float)$totalBatchArea < (float)$item['spray_area']){
-            $this->response['data'][$i]['status'] = 'partially_completed';
-          }else if((float)$totalBatchArea == (float)$item['spray_area']  && $isInprogress['status'] === 'inprogress'){
+          }else if((float)$totalBatchArea >= (float)$item['spray_area'] && $getBatchStatus === 'inprogress'){
             $this->response['data'][$i]['status'] = 'inprogress';
+          }else if((float)$totalBatchArea >= (float)$item['spray_area'] && $getBatchStatus === 'partially_completed'){
+            $this->response['data'][$i]['status'] = 'partially_completed';
+          }else if((float)$totalBatchArea < (float)$item['spray_area'] && $getBatchStatus === 'inprogress'){
+            $this->response['data'][$i]['status'] = 'inprogress';
+          }else if((float)$totalBatchArea < (float)$item['spray_area'] && $getBatchStatus === 'partially_completed'){
+            $this->response['data'][$i]['status'] = 'partially_completed';
           }
         }else{
           $this->response['data'][$i]['status'] = 'pending';

@@ -55,4 +55,22 @@ class BatchPaddockTaskController extends APIController
         return BatchPaddockTask::leftJoin('batches as T1', 'T1.id', '=', 'batch_paddock_tasks.batch_id')
             ->where($column, '=',$value)->first();
     }
+
+    public function checkIfInProgress($column, $value){
+        $inprogress = BatchPaddockTask::leftJoin('batches as T1', 'T1.id', '=', 'batch_paddock_tasks.batch_id')
+            ->where($column, '=',$value)->where('T1.status', '=', 'inprogress')->get();
+        $completed = BatchPaddockTask::leftJoin('batches as T1', 'T1.id', '=', 'batch_paddock_tasks.batch_id')
+            ->where($column, '=',$value)->where('T1.status', '=', 'completed')->get();
+
+        if(sizeof($inprogress) > 0 && sizeof($completed) <= 0){
+            return 'inprogress';
+        }else if(sizeof($inprogress) > 0 && sizeof($completed) > 0){
+            return 'partially_completed';
+        }else if(sizeof($inprogress) <= 0 && sizeof($completed) > 0){
+            return 'completed';
+        }else{
+            return 'pedning';
+        }
+    }
+
 }
