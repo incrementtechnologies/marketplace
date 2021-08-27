@@ -201,7 +201,7 @@ class PaddockController extends APIController
             $this->response['data'][$i]['status'] = 'partially_completed';
           }
         }else{
-          $this->response['data'][$i]['status'] = 'inprogress';
+          $this->response['data'][$i]['status'] = 'pending';
         }
 
 
