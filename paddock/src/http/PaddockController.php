@@ -183,19 +183,19 @@ class PaddockController extends APIController
           $this->response['data'][$i]['due_date'] = Carbon::createFromFormat('Y-m-d', $task[0]['due_date'])->copy()->tz($this->response['timezone'])->format('d/m/Y');
           $this->response['data'][$i]['due_date_formatted'] = Carbon::createFromFormat('Y-m-d', $task[0]['due_date'])->copy()->tz($this->response['timezone'])->format('d M');
           $temp = app($this->batchPaddockTaskClass)->retrieveBatchByPaddockPlanTask($data['id']);
-          // dd($temp);
           $this->response['data'][$i]['start_date'] = $temp !== null ? Carbon::createFromFormat('Y-m-d H:i:s', $temp['created_at'])->copy()->tz($this->response['timezone'])->format('m/d/Y H:i') : null;
           $this->response['data'][$i]['end_date'] = $temp !== null ? Carbon::createFromFormat('Y-m-d H:i:s', $temp['updated_at'])->copy()->tz($this->response['timezone'])->format('m/d/Y H:i') : null;
           $this->response['data'][$i]['updated_date'] = $temp !== null ? Carbon::createFromFormat('Y-m-d H:i:s', $temp['updated_at'])->copy()->tz($this->response['timezone'])->format('m/d/Y') : null;
         }
+        $isInprogress = app($this->batchPaddockTaskClass)->retrieveBatchWithPaddock('batch_paddock_tasks.paddock_plan_task_id', $data['id']);
         if($totalBatchArea > 0){
-          if((float)$totalBatchArea >= (float)$item['spray_area']){
+          if((float)$totalBatchArea >= (float)$item['spray_area'] && $isInprogress['status'] !== 'inprogress'){
             $this->response['data'][$i]['status'] = 'completed';
           }else if((float)$totalBatchArea < (float)$item['spray_area']){
             $this->response['data'][$i]['status'] = 'partially_completed';
           }
         }else{
-          $this->response['data'][$i]['status'] = 'pending';
+          $this->response['data'][$i]['status'] = 'inprogress';
         }
 
 
