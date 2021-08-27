@@ -89,7 +89,7 @@ class BatchController extends APIController
     $data = $request->all();
     $result = Batch::leftJoin('batch_paddock_tasks as T3', 'T3.batch_id', '=', 'batches.id')
       ->leftJoin('paddock_plans_tasks as T2', 'T2.id', '=', 'T3.paddock_plan_task_id')->where(function ($query) {
-        $query->where('T2.status', '=', 'inprogress');
+        $query->where('batches.status', '=', 'inprogress');
       })->where('T2.merchant_id', '=', $data['merchant_id'])->select('batches.id as id')->get();
 
     $this->response['data'] = $result;
@@ -108,7 +108,7 @@ class BatchController extends APIController
         $paddock = Paddock::where('id', '=', $task[0]['paddock_id'])->get(['spray_area']);
         $paddockArea = sizeof($paddock) > 0 ? $paddock[0]['spray_area'] : 0;
         $totalBatchArea = app($this->batchPaddockTaskClass)->getTotalBatchPaddockPlanTask($batchTask[$i]['paddock_plan_task_id']);
-        
+
         PaddockPlanTask::where('id', '=', $batchTask[$i]['paddock_plan_task_id'])->update(array(
           'status' => (doubleval($paddockArea) - $totalBatchArea) > 0 ? 'inprogress' : 'completed',
           'updated_at' => Carbon::now(),
@@ -186,7 +186,6 @@ class BatchController extends APIController
       foreach ($result as $key) {
         $totalBatchArea = app($this->batchPaddockTaskClass)->getTotalBatchPaddockPlanTask($key['paddock_plan_task_id']);
         $task = PaddockPlanTask::where('id', '=', $key['paddock_plan_task_id'])->get();
-        // dd($task);
         if (sizeof($task) > 0) {
           $paddocks = Paddock::where('id', $task[0]['paddock_id'])->get();
           $result[$i]['status'] = $task[0]['status'];
