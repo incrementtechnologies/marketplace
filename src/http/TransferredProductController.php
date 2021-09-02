@@ -258,9 +258,9 @@ class TransferredProductController extends APIController
   public function getSizeNoDate($column, $value)
   {
     $productTrace = TransferredProduct::where($column, '=', $value)->where('payload', '=', 'product_trace')->where('deleted_at', '=', null)->count();
-    $bundled = TransferredProduct::where($column, '=', $value)->where('payload', '=', 'bundled_trace')->where('deleted_at', '=', null)->get();
-    if (sizeof($bundled) > 0) {
-      $productTrace += $bundled[0]['bundled_setting_qty'];
+    $bundled = TransferredProduct::where($column, '=', $value)->where('payload', '=', 'bundled_trace')->where('deleted_at', '=', null)->sum('bundled_setting_qty');
+    if ($bundled > 0) {
+      $productTrace += $bundled;
     }
     return $productTrace;
   }
