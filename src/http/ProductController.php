@@ -179,13 +179,24 @@ class ProductController extends APIController
             ->where('type', '!=', 'bundled')
             ->get();  
       }else if(sizeof($con) == 2){
-        $result = Product::where($con[0]['column'], $con[0]['clause'], $con[0]['value'])
+        if(isset($data['mobile'])){
+          $result = Product::where($con[0]['column'], $con[0]['clause'], $con[0]['value'])
+              ->where($con[1]['column'], $con[1]['clause'], $con[1]['value'])
+              ->where('type', '!=', 'bundled')
+              ->where('status', '=', 'published')
+              ->orderBy(array_keys($data['sort'])[0], $data['sort'][array_keys($data['sort'])[0]])
+              ->skip($data['offset'])
+              ->take($data['limit'])
+              ->get();        
+        }else{
+          $result = Product::where($con[0]['column'], $con[0]['clause'], $con[0]['value'])
             ->where($con[1]['column'], $con[1]['clause'], $con[1]['value'])
             ->where('type', '!=', 'bundled')
             ->orderBy(array_keys($data['sort'])[0], $data['sort'][array_keys($data['sort'])[0]])
             ->skip($data['offset'])
             ->take($data['limit'])
-            ->get();        
+            ->get();  
+        }
       }
 
       $this->response['data'] = $result;
