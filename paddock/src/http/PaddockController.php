@@ -192,7 +192,7 @@ class PaddockController extends APIController
           $this->response['data'][$i]['start_date'] = $temp !== null ? Carbon::createFromFormat('Y-m-d H:i:s', $temp['created_at'])->copy()->tz($this->response['timezone'])->format('m/d/Y H:i') : null;
           $this->response['data'][$i]['end_date'] = $temp !== null ? Carbon::createFromFormat('Y-m-d H:i:s', $temp['updated_at'])->copy()->tz($this->response['timezone'])->format('m/d/Y H:i') : null;
           $this->response['data'][$i]['updated_date'] = $temp !== null ? Carbon::createFromFormat('Y-m-d H:i:s', $temp['updated_at'])->copy()->tz($this->response['timezone'])->format('m/d/Y') : 
-            Carbon::createFromFormat('Y-m-d H:i:s', $item['updated_at'])->copy()->tz($this->response['timezone'])->format('m/d/Y');
+            Carbon::createFromFormat('Y-m-d H:i:s', $task[0]['updated_at'])->copy()->tz($this->response['timezone'])->format('m/d/Y');
         }
         $getBatchStatus = app($this->batchPaddockTaskClass)->checkIfInProgress('batch_paddock_tasks.paddock_plan_task_id', $data['id']);
         if($totalBatchArea > 0){
