@@ -354,7 +354,6 @@ class TransferController extends APIController
     $this->response['size'] = $size;
     return $this->response();
   }
-
   public function retrieveConsignmentsImprove(Request $request)
   {
     // get all products ? as this is based on consigments ?
