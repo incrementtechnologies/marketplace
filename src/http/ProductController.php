@@ -347,7 +347,7 @@ class ProductController extends APIController
 
     public function getProductColumnWithReturns($column, $value, $returns){
       $result = Product::where($column, '=', $value)->where('deleted_at', '=', null)->get($returns);
-      return $result[0];
+      return sizeof($result) > 0 ? $result[0] : null;
     }
 
     public function getProductTitleWithTags($column, $value){
