@@ -129,10 +129,12 @@ class BundledSettingController extends APIController
     $this->localization();
     $result =  DB::table('bundled_settings')->where($column, '=', $value)->get();
     // BundledSetting::where($column, '=', $value)->where('deleted_at', '=', null)->orWhere('deleted_at', '!=', null)->get();
+    $res = array();
     if(sizeof($result) > 0){
       $result = json_decode(json_encode($result), true);
       $i = 0;
       foreach ($result as $key) {
+        $bundledProduct = DB::table('products as T1')->where('T1.id', '=', $key['bundled'])->where('T1.deleted_at' , '=', null)->get();
         $traceQty = app($this->productTraceController)->getProductQtyByParams($result[$i]['bundled'], $result[$i]['product_attribute_id']);
         $totalTransferredBundled = app($this->transferredProductController)->getTotalTransferredBundledProducts($result[$i]['bundled']);
         // dd($traceQty, $totalTransferredBundled);
@@ -142,19 +144,24 @@ class BundledSettingController extends APIController
         $result[$i]['qty'] = (int)$result[$i]['qty'];
         $result[$i]['scanned_qty'] = $traceQty - $totalTransferredBundled;
         $result[$i]['is_transferred'] = false;
+        if(sizeof($bundledProduct) > 0){
+          array_push($res, $result[$i]);
+        }
         $i++;
       }
     }
-    return sizeof($result) > 0 ? $result : [];
+    return sizeof($res) > 0 ? $res : [];
   }
 
   public function getByParamsWithProduct($column, $value, $merchantId){
     $this->localization();
     $result = DB::table('bundled_settings')->where($column, '=', $value)->get();
+    $res = array();
     if(sizeof($result) > 0){
       $i = 0;
       $result = json_decode(json_encode($result), true);
       foreach ($result as $key) {
+        $bundledProduct = DB::table('products as T1')->where('T1.id', '=', $key['bundled'])->where('T1.deleted_at' , '=', null)->get();
         $traceQty = app($this->productTraceController)->getProductQtyByParams($result[$i]['bundled'], $result[$i]['product_attribute_id']);
         $totalTransferredBundled = app($this->transferredProductController)->getTotalTransferredBundledProducts($result[$i]['bundled']);
         
@@ -175,10 +182,13 @@ class BundledSettingController extends APIController
         $result[$i]['component_product'] = app($this->productController)->getProductColumnWithReturns('id', $result[$i]['product_id'], ['title']);
         $result[$i]['component_qty'] = app($this->productTraceController)->getProductQtyByParams($result[$i]['product_id'], $result[$i]['product_attribute_id']);
         $result[$i]['available_stock'] = app($this->productTraceController)->getProductQtyByParams($result[$i]['bundled'], $result[$i]['product_attribute_id']);
+        if(sizeof($bundledProduct) > 0){
+          array_push($res, $result[$i]);
+        }
         $i++; 
       }
     }
-    return sizeof($result) > 0 ? $result : [];
+    return sizeof($res) > 0 ? $res : [];
   }
 
   public function getByParamsDetails($column, $value){
@@ -208,5 +218,4 @@ class BundledSettingController extends APIController
     }
     return sizeof($result) > 0 ? $result : [];
   }
-
 }
