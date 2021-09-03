@@ -331,4 +331,24 @@ class TransferredProductController extends APIController
     ));
     return true;
   }
+
+  public function retrieveProductQtyInDist($item, $data){
+    $regular = TransferredProduct::where('payload', '=', 'product_trace')
+      ->where('product_id', '=', $item['product_id'])
+      ->where('merchant_id', '=', $data['merchant_id'])
+      ->where('status', '=', 'active')
+      ->count();
+
+    $bundled  = TransferredProduct::where('payload', '=', 'bundled_trace')
+      ->where('product_id', '=', $item['product_id'])
+      ->where('merchant_id', '=', $data['merchant_id'])
+      ->where('status', '=', 'active')
+      ->where('product_attribute_id', '=', $item['product_attribute_id'])
+      ->sum('bundled_setting_qty');
+
+    return array(
+      'qty' => (int)$regular,
+      'qty_in_bundled' => (int)$bundled
+    );
+  }
 }
