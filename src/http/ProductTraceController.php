@@ -304,7 +304,11 @@ class ProductTraceController extends APIController
           $this->response['data'][$i]['product']['trace_qty'] = 1;
         } else if ($data['account_type'] == 'DISTRIBUTOR' || $this->response['data'][$i]['bundled_product'] !== null) {
           // $qty = $this->getBalanceQtyWithInBundled('product_id', $item['product_id'], 'active', $data['merchant_id'], $item['product_attribute_id']);
-          $qty = app($this->transferredProductController)->retrieveProductQtyInDist($item, $data);
+          if($key['batch_number'] == null && $key['manufacturing_date'] == null){
+            $qty = app($this->transferredProductController)->retrieveProductQtyInDist($item, $data, 'bundled');
+          }else{
+            $qty = app($this->transferredProductController)->retrieveProductQtyInDist($item, $data, 'regular');
+          }
           $this->response['data'][$i]['product']['qty'] = $qty['qty'];
           $this->response['data'][$i]['product']['qty_in_bundled'] = $qty['qty_in_bundled'];
           $this->response['data'][$i]['setting_qty'] = sizeof($bundledSettingQty) > 0 ? $bundledSettingQty[0]['qty'] : 0; //$bundledSettingQty[0]['qty']

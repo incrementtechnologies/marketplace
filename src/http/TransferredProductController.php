@@ -14,6 +14,7 @@ class TransferredProductController extends APIController
   public $productTraceController = 'Increment\Marketplace\Http\ProductTraceController';
   public $merchantClass = 'Increment\Marketplace\Http\MerchantController';
   public $bundledProductController = 'Increment\Marketplace\Http\BundledProductController';
+  public $bundledSettingController = 'Increment\Marketplace\Http\BundledSettingController';
   function __construct()
   {
     $this->model = new TransferredProduct();
@@ -332,19 +333,29 @@ class TransferredProductController extends APIController
     return true;
   }
 
-  public function retrieveProductQtyInDist($item, $data){
+  public function retrieveProductQtyInDist($item, $data, $type){
     $regular = TransferredProduct::where('payload', '=', 'product_trace')
       ->where('product_id', '=', $item['product_id'])
       ->where('merchant_id', '=', $data['merchant_id'])
       ->where('status', '=', 'active')
       ->count();
 
-    $bundled  = TransferredProduct::where('payload', '=', 'bundled_trace')
-      ->where('product_id', '=', $item['product_id'])
-      ->where('merchant_id', '=', $data['merchant_id'])
-      ->where('status', '=', 'active')
-      ->where('product_attribute_id', '=', $item['product_attribute_id'])
-      ->sum('bundled_setting_qty');
+    if($type == 'bundled'){
+      $product  = TransferredProduct::where('payload', '=', 'bundled_trace')
+        ->where('bundled', '=', $item['product_id'])
+        ->where('merchant_id', '=', $data['merchant_id'])
+        ->where('status', '=', 'active')
+        ->where('product_attribute_id', '=', $item['product_attribute_id'])
+        ->first();
+      $bundled = app($this->bundledSettingController)->countNumberOfBundledPerProd($product['product_id'], $product['product_attribute_id']);
+    }else{
+      $bundled  = TransferredProduct::where('payload', '=', 'bundled_trace')
+        ->where('product_id', '=', $item['product_id'])
+        ->where('merchant_id', '=', $data['merchant_id'])
+        ->where('status', '=', 'active')
+        ->where('product_attribute_id', '=', $item['product_attribute_id'])
+        ->sum('bundled_setting_qty');
+    }
 
     return array(
       'qty' => (int)$regular,
