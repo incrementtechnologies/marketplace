@@ -218,4 +218,8 @@ class BundledSettingController extends APIController
     }
     return sizeof($result) > 0 ? $result : [];
   }
+  
+  public function countNumberOfBundledPerProd($productId, $attrId){
+    return BundledSetting::where('product_id', '=', $productId)->where('product_attribute_id', '=', $attrId)->count();
+  }
 }
