@@ -145,10 +145,10 @@ class OrderRequestController extends APIController
           $item = array(
             'merchant' => app($this->merchantClass)->getColumnByParams('id', $key['merchant_to'], ['name', 'address', 'id']),
             'merchant_from' => app($this->merchantClass)->getColumnByParams('id', $key['merchant_id'], ['name', 'address', 'id']),
-            'date_of_delivery'  => Carbon::createFromFormat('Y-m-d H:i:s', $key['date_of_delivery'])->copy()->tz($this->response['timezone'])->format('d M'),
+            'date_of_delivery'  => Carbon::createFromFormat('Y-m-d H:i:s', $key['date_of_delivery'])->copy()->tz($this->response['timezone'])->format('d-m-Y H:i:s'),
             'status'        => $key['status'],
             'delivered_by'  => $key['delivered_by'] ? $this->retrieveName($key['delivered_by']) : null,
-            'delivered_date'=> $key['date_delivered'] ? Carbon::createFromFormat('Y-m-d H:i:s', $key['date_delivered'])->copy()->tz($this->response['timezone'])->format('d M') : null,
+            'delivered_date'=> $key['date_delivered'] ? Carbon::createFromFormat('Y-m-d H:i:s', $key['date_delivered'])->copy()->tz($this->response['timezone'])->format('d-m-Y H:i:s') : null,
             'code'          => $key['code'],
             'added_by'      => $key['code'],  
             'id'      => $key['id'],
