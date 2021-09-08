@@ -222,4 +222,10 @@ class BundledSettingController extends APIController
   public function countNumberOfBundledPerProd($productId, $attrId){
     return BundledSetting::where('product_id', '=', $productId)->where('product_attribute_id', '=', $attrId)->count();
   }
+
+  public function countNumberOfBundled($column, $value, $attrId){
+    return BundledSetting::where($column, '=', $value)->where('product_attribute_id', '=', $attrId)->count();
+  }
+
+
 }
