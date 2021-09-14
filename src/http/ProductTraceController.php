@@ -306,6 +306,8 @@ class ProductTraceController extends APIController
             }else{
               $this->response['data'][$i]['product']['qty_in_bundled'] = $qty['qty_in_bundled'];
             }
+          }else{
+            $this->response['data'][$i]['product']['qty_in_bundled'] = $qty['qty_in_bundled'];
           }
           $this->response['data'][$i]['setting_qty'] = sizeof($bundledSettingQty) > 0 ? $bundledSettingQty[0]['qty'] : 0; //$bundledSettingQty[0]['qty'] 
           $this->response['data'][$i]['product']['trace_qty'] = 1;
