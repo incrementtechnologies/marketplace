@@ -137,12 +137,12 @@ class BundledSettingController extends APIController
         $bundledProduct = DB::table('products as T1')->where('T1.id', '=', $key['bundled'])->where('T1.deleted_at' , '=', null)->get();
         $traceQty = app($this->productTraceController)->getProductQtyByParams($result[$i]['bundled'], $result[$i]['product_attribute_id']);
         $totalTransferredBundled = app($this->transferredProductController)->getTotalTransferredBundledProducts($result[$i]['bundled']);
-        // dd($traceQty, $totalTransferredBundled);
+        // dd($traceQty, sizeOf($totalTransferredBundled));
         // $result[$i]['product'] = app($this->productController)->getByParamsWithReturn('id', $result[$i]['product_id'], ['title', 'id', 'tags']);
         $result[$i]['variation'] = app($this->productAttrController)->getByParamsWithMerchant('id', $result[$i]['product_attribute_id'], $merchantId);
         $result[$i]['created_at_human'] = Carbon::createFromFormat('Y-m-d H:i:s', $result[$i]['created_at'])->copy()->tz($this->response['timezone'])->format('F j, Y H:i A');
         $result[$i]['qty'] = (int)$result[$i]['qty'];
-        $result[$i]['scanned_qty'] = $traceQty - $totalTransferredBundled[0]['bundled_setting_qty'];
+        $result[$i]['scanned_qty'] = $traceQty - sizeOf($totalTransferredBundled);
         $result[$i]['is_transferred'] = false;
         if(sizeof($bundledProduct) > 0){
           array_push($res, $result[$i]);
