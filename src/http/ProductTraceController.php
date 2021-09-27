@@ -407,7 +407,11 @@ class ProductTraceController extends APIController
       $this->response['data'][$i]['details'] = $this->retrieveProductDetailsByParams('id', $item['product_id']);;
       $this->response['data'][$i]['created_at_human'] = Carbon::createFromFormat('Y-m-d H:i:s', $item['created_at'])->copy()->tz($this->response['timezone'])->format('F j, Y h:i A');
       $this->response['data'][$i]['bundled_product'] = app($this->bundledProductController)->getByParams('product_trace', $item['id']);
-      $this->response['data'][$i]['manufacturing_date'] = Carbon::createFromFormat('Y-m-d', $item['manufacturing_date'])->copy()->tz($this->response['timezone'])->format('d/m/Y');
+      try {
+        $this->response['data'][$i]['manufacturing_date'] = Carbon::createFromFormat('Y-m-d', $item['manufacturing_date'])->copy()->tz($this->response['timezone'])->format('d/m/Y');
+      } catch(\Exception $e) {
+        $this->response['data'][$i]['manufacturing_date'] = Carbon::createFromFormat('Y-m', $item['manufacturing_date'])->copy()->tz($this->response['timezone'])->format('m/Y');
+      }
       if ($this->response['data'][$i]['product'] != null) {
         $type = $this->response['data'][$i]['product']['type'];
         $this->response['data'][$i]['product']['qty'] = null;
