@@ -5,6 +5,7 @@ namespace Increment\Marketplace\Paddock\Http;
 use Illuminate\Http\Request;
 use App\Http\Controllers\APIController;
 use Increment\Marketplace\Paddock\Models\PaddockPlan;
+use Increment\Marketplace\Paddock\Models\Paddock;
 use Increment\Marketplace\Paddock\Models\Crop;
 use Carbon\Carbon;
 
@@ -49,6 +50,10 @@ class PaddockPlanController extends APIController
       $paddockPlan->start_date = $data['start_date'];
       $paddockPlan->end_date = $data['end_date'];
       $paddockPlan->save();
+      Paddock::where('id', '=',  $data['paddock_id'])->update(array(
+        'status'	=> 'with_plan',
+        'updated_at' => Carbon::now()
+    ));
       $this->response['data'] = $paddockPlan;
       return $this->response();
     }
