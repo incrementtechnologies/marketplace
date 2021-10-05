@@ -60,7 +60,8 @@ class PaddockPlanTaskController extends APIController
         $data = $request->all();
         $con = $data['condition'];
         $result = [];
-        $result = Paddock::where($con[0]['column'], '=', $con[0]['value'])->get();
+        $result = Paddock::where($con[0]['column'], '=', $con[0]['value'])->skip($data['offset'])->take($data['limit'])->get();
+        $size = Paddock::where($con[0]['column'], '=', $con[0]['value'])->get();
         $currDate = Carbon::now()->toDateString();
         $finalResult = array();
         if (sizeof($result) > 0) {
@@ -70,14 +71,9 @@ class PaddockPlanTaskController extends APIController
             foreach ($result as $key) {
                 $task = PaddockPlanTask::where($con[0]['column'], '=', $con[0]['value'])
                     ->where('paddock_id', '=', $key['id'])
-                    ->where(function ($query) {
-                        $query->where('status', '!=', 'completed')
-                            ->where('status', '!=', 'pending');
-                    })
-                    ->skip($data['offset'])->take($data['limit'])
                     ->orderBy('due_date', 'asc')
                     ->first();
-                if ($task != null) {
+                if ($task != null && ($task['status'] !== 'pending' || $task['status'] !== 'completed')) {
                     $taskId = $task['id'];
                     $paddockPlan = app($this->paddockPlanClass)->retrievePlanByParams('id', $task['paddock_plan_id'], ['start_date', 'end_date', 'crop_id', 'paddock_id']);
                     if (sizeof($paddockPlan) > 0 && ($paddockPlan[0]['start_date'] <= $currDate && $currDate <= $paddockPlan[0]['end_date'])) {
@@ -87,7 +83,8 @@ class PaddockPlanTaskController extends APIController
                         $result[$i]['area'] = (float)$key['area'];
                         $totalArea =  $totalBatchArea != null ? ((float)$key['spray_area'] - (float)$totalBatchArea) : (float)$key['spray_area'];
                         $result[$i]['remaining_spray_area'] = $this->numberConvention($totalArea);
-                        $result[$i]['due_date'] = Carbon::createFromFormat('Y-m-d', $task['due_date'])->copy()->tz($this->response['timezone'])->format('d/m/Y');
+                        // $result[$i]['due_date'] = Carbon::createFromFormat('Y-m-d', $task['due_date'])->copy()->tz($this->response['timezone'])->format('d/m/Y');
+                        $result[$i]['due_date'] = $task['due_date'];
                         $result[$i]['category'] = $this->retrieveByParams('id', $taskId, 'category');
                         $result[$i]['id'] =  $taskId;
                         $result[$i]['task_status'] = $task['status'];
@@ -120,9 +117,27 @@ class PaddockPlanTaskController extends APIController
                 }
                 $i++;
             }
+            $fin = array();
+            $finalResult = collect($finalResult);
+            $finalResult = $finalResult->sortBy('due_date');
+            $finalResult =  json_decode(json_encode($finalResult), true);
+            $finalResult = array_values($finalResult);
+            for ($a=0; $a <= sizeof($finalResult)-1; $a++) { 
+                $items = $finalResult[$a];
+                $finalResult[$a]['due_date'] = Carbon::createFromFormat('Y-m-d', $items['due_date'])->copy()->tz($this->response['timezone'])->format('d/m/Y');
+            }
             $this->response['data'] = $finalResult;
+            $this->response['size'] = sizeOf($size);
             return $this->response();
         }
+    }
+
+    public function arraySort($data){
+        $data->map(function($item){
+            $item['due_date'] = Carbon::createFromFormat('Y-m-d', $item['due_date'])->copy()->tz($this->response['timezone'])->format('d/m/Y');
+            return $item;
+        });
+        return $data;
     }
 
     public function retrieveMobileByParams(Request $request)
