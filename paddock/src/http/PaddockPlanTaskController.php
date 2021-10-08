@@ -313,10 +313,10 @@ class PaddockPlanTaskController extends APIController
             $array = json_decode(json_encode($obj), true);
             foreach ($array as $key) {
                 if (!isset($array[$i]['code'])) {
-                    // dd($array);
                     $paddockId = $this->retrieveByParams('id', $array[$i]['paddock_plan_task_id'], 'paddock_id');
                     $array[$i]['paddock'] = $paddockId != null ? app($this->paddockClass)->getByParams('id', $paddockId, ['id', 'name']) : null;
                     if ($array[$i]['paddock'] != null) {
+                        $array[$i]['date_completed_orig'] = $key['updated_at'];
                         $array[$i]['date_completed'] = isset($key['updated_at']) ? Carbon::createFromFormat('Y-m-d H:i:s', $key['updated_at'])->copy()->tz($this->response['timezone'])->format('d M') : null;
                         $array[$i]['nickname'] = $this->retrieveByParams('id', $array[$i]['paddock_plan_task_id'], 'nickname');
                         $array[$i]['paddock_id'] = $this->retrieveByParams('id', $array[$i]['paddock_plan_task_id'], 'paddock_id');
@@ -329,7 +329,14 @@ class PaddockPlanTaskController extends APIController
                 }
                 $i++;
             }
-            $finalResult = $array;
+            $finalResult = collect($array);
+            $finalResult = $finalResult->sortBy('date_completed_orig');
+            $finalResult =  json_decode(json_encode($finalResult), true);
+            $finalResult = array_values($finalResult);
+            for ($a=0; $a <= sizeof($finalResult)-1; $a++) { 
+                $items = $finalResult[$a];
+                $finalResult[$a]['date_completed'] = Carbon::createFromFormat('Y-m-d H:i:s', $items['date_completed_orig'])->copy()->tz($this->response['timezone'])->format('d M');
+            }
         }
         return $finalResult;
     }
