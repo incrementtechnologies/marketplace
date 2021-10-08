@@ -146,6 +146,7 @@ class OrderRequestController extends APIController
             'merchant' => app($this->merchantClass)->getColumnByParams('id', $key['merchant_to'], ['name', 'address', 'id']),
             'name' => $this->retrieveName($key['account_id']),
             'merchant_from' => app($this->merchantClass)->getColumnByParams('id', $key['merchant_id'], ['name', 'address', 'id']),
+            'date_completed_orig' => $key['date_of_delivery'],
             'date_of_delivery'  => Carbon::parse($key['date_of_delivery'])->format('d/m/Y'),
             'date_of_delivery_formatted'  => Carbon::createFromFormat('Y-m-d H:i:s', $key['date_of_delivery'])->copy()->tz($this->response['timezone'])->format('d M'),
             'status'        => $key['status'],
