@@ -271,6 +271,7 @@ class BatchController extends APIController
     if($result !== null){
       $result['date_completed_formatted'] = Carbon::createFromFormat('Y-m-d H:i:s', $result['updated_at'])->copy()->tz($this->response['timezone'])->format('d/m/Y H:i');
       $result['products'] = app($this->batchProductClass)->getProductInfoByBatch('batch_id', $result['id']);
+      $result['operator'] = $this->retrieveName($result['account_id']);
     }
     $this->response['data'] = $result;
     return $this->response();
