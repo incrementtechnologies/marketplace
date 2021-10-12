@@ -250,6 +250,7 @@ class BatchController extends APIController
       for ($i=0; $i <= sizeof($result)-1 ; $i++) {
         $item = $result[$i];
         $result[$i]['name'] = $item['first_name'].' '.$item['last_name'];
+        $result[$i]['date_completed_formatted'] = Carbon::createFromFormat('Y-m-d H:i:s', $item['updated_at'])->copy()->tz($this->response['timezone'])->format('d/m/Y');
         if($con[0]['value'] !== null){
           if(str_contains($result[$i]['name'], $con[0]['value']) ||  str_contains($item['session'], $con[0]['value'])){
             array_push($res, $item);
