@@ -66,4 +66,16 @@ class BatchProductController extends APIController
   public function getByParams($column, $value, $return){
     return BatchProduct::where($column, '=', $value)->get($return);
   }
+
+  public function getProductInfoByBatch($column, $value){
+    $result = BatchProduct::where($column, '=', $value)->get(['product_id', 'applied_rate']);
+    if(sizeof($result)){
+      for ($i=0; $i <= sizeof($result)-1; $i++) { 
+        $item = $result[$i];
+        $product = app('Increment\Marketplace\Http\ProductController')->getByParamsWithReturn('id', $item['product_id'], ['title']);
+        $result[$i]['product_name'] = $product['title'];
+      }
+    }
+    return $result;
+  }
 }
