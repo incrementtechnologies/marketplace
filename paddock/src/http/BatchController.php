@@ -53,7 +53,7 @@ class BatchController extends APIController
       BatchProduct::create($batchProduct[$i]);
       $i++;
     }
-    if(sizeof($data['tasks']['paddock_plan_task_id']) > 0){
+    if(sizeof($data['tasks']) > 0){
       $j = 0;
       foreach ($data['tasks']['paddock_plan_task_id'] as $key) {
         PaddockPlanTask::where('id', '=', $key['task_id'])->update(array(
