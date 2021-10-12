@@ -53,24 +53,26 @@ class BatchController extends APIController
       BatchProduct::create($batchProduct[$i]);
       $i++;
     }
-    $j = 0;
-    foreach ($data['tasks']['paddock_plan_task_id'] as $key) {
-      PaddockPlanTask::where('id', '=', $key['task_id'])->update(array(
-        'status' =>  'inprogress',
-        'updated_at' => Carbon::now(),
-      ));
-      $exist = $this->checkIfExist($batchData['spray_mix_id'], (int)$key['task_id']);
-      $taskData['batch_id'] = $batchId;
-      $taskData['status'] = 'inprogress';
-      $taskData['paddock_plan_task_id'] = (int)$key['task_id'];
-      $taskData['spray_mix_id'] = $batchData['spray_mix_id'];
-      $taskData['machine_id'] = $batchData['machine_id'];
-      $taskData['merchant_id'] = $data['tasks']['merchant_id'];
-      $taskData['account_id'] =  $data['tasks']['account_id'];
-      $taskData['area'] =  $key['area'];
-      BatchPaddockTask::create($taskData);
-      $j++;
-    };
+    if(sizeof($data['tasks']['paddock_plan_task_id']) > 0){
+      $j = 0;
+      foreach ($data['tasks']['paddock_plan_task_id'] as $key) {
+        PaddockPlanTask::where('id', '=', $key['task_id'])->update(array(
+          'status' =>  'inprogress',
+          'updated_at' => Carbon::now(),
+        ));
+        $exist = $this->checkIfExist($batchData['spray_mix_id'], (int)$key['task_id']);
+        $taskData['batch_id'] = $batchId;
+        $taskData['status'] = 'inprogress';
+        $taskData['paddock_plan_task_id'] = (int)$key['task_id'];
+        $taskData['spray_mix_id'] = $batchData['spray_mix_id'];
+        $taskData['machine_id'] = $batchData['machine_id'];
+        $taskData['merchant_id'] = $data['tasks']['merchant_id'];
+        $taskData['account_id'] =  $data['tasks']['account_id'];
+        $taskData['area'] =  $key['area'];
+        BatchPaddockTask::create($taskData);
+        $j++;
+      };
+    }
     $result = Batch::where('id', '=', $this->response['data']['batch']['id'])->get();
     $this->response['data']['batch'] = $result;
     return $this->response();
@@ -224,5 +226,52 @@ class BatchController extends APIController
         $paddockPlan = PaddockPlan::select()->where("paddock_id", "=",  $task[0]['paddock_id'])->orderBy('start_date', 'desc')->limit(1)->get();
       }
     }
+  }
+
+  public function retrieveSessions(Request $request){
+    $data = $request->all();
+    $con = $data['condition'];
+    $result = Batch::leftJoin('batch_paddock_tasks as T1', 'T1.batch_id', '=', 'batches.id')
+        ->leftJoin('accounts as T2', 'T2.id', '=', 'batches.account_id')
+        ->leftJoin('account_informations as T3', 'T3.account_id', '=', 'T2.id')
+        ->where('T1.id', '=', null)
+        ->where('batches.status', '=', 'completed')
+        ->limit($data['limit'])
+        ->offset($data['offset'])
+        ->get(['batches.*', 'T2.username', 'T3.first_name', 'T3.last_name']);
+    $size = Batch::leftJoin('batch_paddock_tasks as T1', 'T1.batch_id', '=', 'batches.id')
+    ->leftJoin('accounts as T2', 'T2.id', '=', 'batches.account_id')
+    ->leftJoin('account_informations as T3', 'T3.account_id', '=', 'T2.id')
+    ->where('T1.id', '=', null)
+    ->where('batches.status', '=', 'completed')
+    ->get();
+    $res = array();
+    if(sizeof($result) > 0){
+      for ($i=0; $i <= sizeof($result)-1 ; $i++) {
+        $item = $result[$i];
+        $result[$i]['name'] = $item['first_name'].' '.$item['last_name'];
+        if($con[0]['value'] !== null){
+          if(str_contains($result[$i]['name'], $con[0]['value']) ||  str_contains($item['session'], $con[0]['value'])){
+            array_push($res, $item);
+          }
+        }else{
+          array_push($res, $item);
+        }
+      }
+      $this->response['data'] = $res;
+      $this->response['size'] = sizeof($size);
+    }
+    return $this->response();
+  }
+
+  public function retriveBatchBySession(Request $request){
+    $data = $request->all();
+    $result = Batch::where('session', '=', $data['session'])->first();
+    if($result !== null){
+      $result['date_completed_formatted'] = Carbon::createFromFormat('Y-m-d H:i:s', $result['updated_at'])->copy()->tz($this->response['timezone'])->format('d/m/Y H:i');
+      $result['products'] = app($this->batchProductClass)->getProductInfoByBatch('batch_id', $result['id']);
+    }
+    $this->response['data'] = $result;
+    return $this->response();
   }
 }
