@@ -40,7 +40,7 @@ class BatchController extends APIController
     $counter = Batch::where('merchant_id', '=', $batchData['merchant_id'])->count();
     $batchData['session'] = $merchant ? $merchant['prefix'] . $this->toCode($counter) : $this->toCode($counter);
     $batchData['applied_rate'] = $batchData['application_rate'];
-    $batchData['status'] = 'inprogress';
+    $batchData['status'] = sizeof($data['tasks']) > 0 ? 'inprogress' : $data['completed'];
     $batchProduct = $data['batch_products'];
     $batch = Batch::create($batchData);
     $this->response['data']['batch'] = $batch;
@@ -238,7 +238,7 @@ class BatchController extends APIController
         ->where('batches.status', '=', 'completed')
         ->limit($data['limit'])
         ->offset($data['offset'])
-        ->get(['batches.*', 'T2.username', 'T3.first_name', 'T3.last_name']);
+        ->get();
     $size = Batch::leftJoin('batch_paddock_tasks as T1', 'T1.batch_id', '=', 'batches.id')
     ->leftJoin('accounts as T2', 'T2.id', '=', 'batches.account_id')
     ->leftJoin('account_informations as T3', 'T3.account_id', '=', 'T2.id')
