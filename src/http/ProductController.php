@@ -478,7 +478,14 @@ class ProductController extends APIController
       }
     }
 
-    
+    public function retrieveProductWithAttribute($productId, $productAttribute){
+      $result = Product::leftJoin('product_attributes as T1', 'T1.product_id', '=', 'products.id')
+      ->where('products.id', '=', $productId)
+      ->where('T1.id', '=', $productAttribute)
+      ->select('title', 'payload', 'payload_value')->first();
+      return $result;
+    }
+
     public function manageResultBasic($result, $data, $inventoryType){
       if(sizeof($result) > 0){
         $i = 0;
