@@ -40,7 +40,7 @@ class BatchController extends APIController
     $counter = Batch::where('merchant_id', '=', $batchData['merchant_id'])->count();
     $batchData['session'] = $merchant ? $merchant['prefix'] . $this->toCode($counter) : $this->toCode($counter);
     $batchData['applied_rate'] = $batchData['application_rate'];
-    $batchData['status'] = sizeof($data['tasks']) > 0 ? 'inprogress' : $data['completed'];
+    $batchData['status'] = sizeof($data['tasks']) > 0 ? 'inprogress' : $data['status'];
     $batchProduct = $data['batch_products'];
     $batch = Batch::create($batchData);
     $this->response['data']['batch'] = $batch;
