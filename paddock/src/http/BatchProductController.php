@@ -68,7 +68,8 @@ class BatchProductController extends APIController
   }
 
   public function getProductInfoByBatch($column, $value){
-    $result = BatchProduct::where($column, '=', $value)->get(['product_id', 'applied_rate', 'product_attribute_id']);
+    $result = BatchProduct::where($column, '=', $value)->groupBy('product_attribute_id')->get(['product_id', 'applied_rate', 'product_attribute_id']);
+    $totalApplied = BatchProduct::where($column, '=', $value)->groupBy('product_attribute_id')->sum('applied_rate');
     if(sizeof($result)){
       for ($i=0; $i <= sizeof($result)-1; $i++) { 
         $item = $result[$i];
@@ -76,6 +77,7 @@ class BatchProductController extends APIController
         $result[$i]['product_name'] = $product['title'];
         $result[$i]['payload'] = $product['payload'];
         $result[$i]['payload_value'] = $product['payload_value'];
+        $result[$i]['total_applied_rate'] = floor($totalApplied*100)/100;
       }
     }
     return $result;
