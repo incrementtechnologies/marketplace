@@ -164,13 +164,31 @@ class BatchController extends APIController
   public function retrieveApplyTasksRecents(Request $request)
   {
     $data = $request->all();
-
-    $this->response['data'] = array(
-      'spray_mixes' => app($this->sprayMixClass)->getByMerchantId($data['merchant_id']),
-      'machines'    => app($this->machineClass)->getByMerchantId($data['merchant_id']),
-      'recent_spray_mixes' => app($this->sprayMixClass)->getByMerchantId($data['merchant_id']),
-      'recent_machines'    => app($this->machineClass)->getByMerchantId($data['merchant_id'])
-    );
+    $temp = Batch::where('merchant_id', '=', $data['merchant_id'])->orderBy('updated_at')->limit(3)->get();
+    if(sizeof($temp) > 0){
+      $tempSpray = array();
+      $tempMachine = array();
+      for ($i=0; $i <= sizeof($temp)-1; $i++) { 
+        $item = $temp[$i];
+        $recentSpray = app($this->sprayMixClass)->getByParams('id', $item['spray_mix_id'], ['name', 'id']);
+        array_push($tempSpray, $recentSpray);
+        $recentMachine = app($this->machineClass)->getMachineNameByParams('id', $item['machine_id'], ['name', 'id']);
+        array_push($tempMachine, $recentMachine[0]);
+      }
+      $this->response['data'] = array(
+        'spray_mixes' => app($this->sprayMixClass)->getByMerchantId($data['merchant_id']),
+        'machines'    => app($this->machineClass)->getByMerchantId($data['merchant_id']),
+        'recent_spray_mixes' => $tempSpray,
+        'recent_machines'    => $tempMachine
+      );
+    }else{
+      $this->response['data'] = array(
+        'spray_mixes' => app($this->sprayMixClass)->getByMerchantId($data['merchant_id']),
+        'machines'    => app($this->machineClass)->getByMerchantId($data['merchant_id']),
+        'recent_spray_mixes' => app($this->sprayMixClass)->getByMerchantId($data['merchant_id']),
+        'recent_machines'    => app($this->machineClass)->getByMerchantId($data['merchant_id'])
+      );
+    }
 
     return $this->response();
   }
