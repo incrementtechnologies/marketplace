@@ -164,14 +164,18 @@ class BatchController extends APIController
   public function retrieveApplyTasksRecents(Request $request)
   {
     $data = $request->all();
-    $temp = Batch::where('merchant_id', '=', $data['merchant_id'])->orderBy('updated_at')->limit(3)->get();
-    if(sizeof($temp) > 0){
+    $tempMix = Batch::where('merchant_id', '=', $data['merchant_id'])->groupBy('sray_mix_id')->orderBy('updated_at')->limit(3)->get();
+    $tempMac = Batch::where('merchant_id', '=', $data['merchant_id'])->groupBy('machine_id')->orderBy('updated_at')->limit(3)->get();
+    if(sizeof($tempMix) > 0 && sizeof($tempMac) > 0){
       $tempSpray = array();
       $tempMachine = array();
-      for ($i=0; $i <= sizeof($temp)-1; $i++) { 
-        $item = $temp[$i];
+      for ($i=0; $i <= sizeof($tempMix)-1; $i++) { 
+        $item = $tempMix[$i];
         $recentSpray = app($this->sprayMixClass)->getByParams('id', $item['spray_mix_id'], ['name', 'id']);
         array_push($tempSpray, $recentSpray);
+      }
+      for ($i=0; $i <= sizeof($tempMac)-1; $i++) { 
+        $item = $tempMac[$i];
         $recentMachine = app($this->machineClass)->getMachineNameByParams('id', $item['machine_id'], ['name', 'id']);
         array_push($tempMachine, $recentMachine[0]);
       }
