@@ -172,12 +172,16 @@ class BatchController extends APIController
       for ($i=0; $i <= sizeof($tempMix)-1; $i++) { 
         $item = $tempMix[$i];
         $recentSpray = app($this->sprayMixClass)->getByParams('id', $item['spray_mix_id'], ['name', 'id']);
-        array_push($tempSpray, $recentSpray);
+        if($recentSpray !== null){
+          array_push($tempSpray, $recentSpray);
+        }
       }
       for ($i=0; $i <= sizeof($tempMac)-1; $i++) { 
         $item = $tempMac[$i];
         $recentMachine = app($this->machineClass)->getMachineByParams('id', $item['machine_id']);
-        array_push($tempMachine, $recentMachine);
+        if($recentMachine !== null){
+          array_push($tempMachine, $recentMachine);
+        }
       }
       $this->response['data'] = array(
         'spray_mixes' => app($this->sprayMixClass)->getByMerchantId($data['merchant_id']),
