@@ -69,4 +69,8 @@ class MachineController extends APIController
         $result = Machine::where($column, '=', $value)->select('name')->get();
         return $result;
     }
+
+    public function getMachineByParams($column, $value){
+        return Machine::where($column, '=', $value)->first();
+    }
 }
