@@ -200,13 +200,13 @@ class PaddockPlanTaskController extends APIController
         $data = $request->all();
         $con = $data['condition'];
         if($con[0]['value'] === 'inprogress'){
-            $result = Batch::leftJoin('batch_paddock_tasks as T1', 'T1.batch_id', '=', 'batches.id')
+            $result = Batch::rightJoin('batch_paddock_tasks as T1', 'T1.batch_id', '=', 'batches.id')
                 ->where('batches.'.$con[0]['column'], '=', $con[0]['value'])
                 ->where('batches.deleted_at', '=', null)
                 ->where('status', '=', $con[1]['value'])
                 ->skip($data['offset'])->take($data['limit'])->orderBy('batches.created_at', 'desc')->get();
         }else{
-            $result = Batch::leftJoin('batch_paddock_tasks as T1', 'T1.batch_id', '=', 'batches.id')
+            $result = Batch::rightJoin('batch_paddock_tasks as T1', 'T1.batch_id', '=', 'batches.id')
                 ->where('batches.'.$con[0]['column'], '=', $con[0]['value'])
                 ->where('batches.deleted_at', '=', null)
                 ->where('status', '=', $con[1]['value'])
