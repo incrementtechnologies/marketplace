@@ -299,7 +299,7 @@ class PaddockPlanTaskController extends APIController
     public function retrievePaddockPlanTaskByParamsCompleted($column, $column2, $value)
     {
         $batch = DB::table('batches as T1')
-            ->leftJoin('batch_paddock_tasks as T2', 'T1.id', '=', 'T2.batch_id')
+            ->rightJoin('batch_paddock_tasks as T2', 'T1.id', '=', 'T2.batch_id')
             ->where('T1.' . $column, '=', $value)
             ->where('status', '=', 'completed')
             ->where('T1.deleted_at', '=', null)
@@ -315,7 +315,7 @@ class PaddockPlanTaskController extends APIController
                 if (!isset($array[$i]['code'])) {
                     $paddockId = $this->retrieveByParams('id', $array[$i]['paddock_plan_task_id'], 'paddock_id');
                     $array[$i]['paddock'] = $paddockId != null ? app($this->paddockClass)->getByParams('id', $paddockId, ['id', 'name']) : null;
-                    if ($array[$i]['paddock'] != null) {
+                    if($array[$i]['paddock'] != null) {
                         $array[$i]['date_completed_orig'] = $key['updated_at'];
                         $array[$i]['date_completed'] = isset($key['updated_at']) ? Carbon::createFromFormat('Y-m-d H:i:s', $key['updated_at'])->copy()->tz($this->response['timezone'])->format('d M') : null;
                         $array[$i]['nickname'] = $this->retrieveByParams('id', $array[$i]['paddock_plan_task_id'], 'nickname');
@@ -335,7 +335,7 @@ class PaddockPlanTaskController extends APIController
             $finalResult = array_values($finalResult);
             for ($a=0; $a <= sizeof($finalResult)-1; $a++) { 
                 $items = $finalResult[$a];
-                $finalResult[$a]['date_completed'] = Carbon::createFromFormat('Y-m-d H:i:s', $items['date_completed_orig'])->copy()->tz($this->response['timezone'])->format('d M');
+                $finalResult[$a]['date_completed'] = isset($items['date_completed_orig']) ? Carbon::createFromFormat('Y-m-d H:i:s', $items['date_completed_orig'])->copy()->tz($this->response['timezone'])->format('d M') : null;
             }
         }
         return $finalResult;
