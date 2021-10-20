@@ -66,7 +66,6 @@ class PaddockPlanTaskController extends APIController
         $finalResult = array();
         if (sizeof($result) > 0) {
             $result = json_decode(json_encode($result), true);
-            // dd($result);
             $i = 0;
             foreach ($result as $key) {
                 $task = PaddockPlanTask::where($con[0]['column'], '=', $con[0]['value'])
@@ -76,44 +75,44 @@ class PaddockPlanTaskController extends APIController
                 if ($task != null && ($task['status'] !== 'pending' || $task['status'] !== 'completed')) {
                     $taskId = $task['id'];
                     $paddockPlan = app($this->paddockPlanClass)->retrievePlanByParams('id', $task['paddock_plan_id'], ['start_date', 'end_date', 'crop_id', 'paddock_id']);
-                    if (sizeof($paddockPlan) > 0 && ($paddockPlan[0]['start_date'] <= $currDate && $currDate <= $paddockPlan[0]['end_date'])) {
-                        $batchPaddock = app($this->batchPaddockTaskClass)->retrieveByParams('paddock_plan_task_id', $taskId, ['batch_id']);
-                        $batchStatus = sizeof($batchPaddock) > 0 ? Batch::where('id', '=', $batchPaddock[0]['batch_id'])->first() : null;
-                        $totalBatchArea = app($this->batchPaddockTaskClass)->getTotalBatchPaddockPlanTask($taskId);
-                        $result[$i]['area'] = (float)$key['area'];
-                        $totalArea =  $totalBatchArea != null ? ((float)$key['spray_area'] - (float)$totalBatchArea) : (float)$key['spray_area'];
-                        $result[$i]['remaining_spray_area'] = $this->numberConvention($totalArea);
-                        // $result[$i]['due_date'] = Carbon::createFromFormat('Y-m-d', $task['due_date'])->copy()->tz($this->response['timezone'])->format('d/m/Y');
-                        $result[$i]['due_date'] = $task['due_date'];
-                        $result[$i]['category'] = $this->retrieveByParams('id', $taskId, 'category');
-                        $result[$i]['id'] =  $taskId;
-                        $result[$i]['task_status'] = $task['status'];
-                        $result[$i]['batch_status'] = $batchStatus != null ? $batchStatus['status'] : null;
-                        $result[$i]['paddock_plan_task_id'] =  $taskId;
-                        $result[$i]['nickname'] = $this->retrieveByParams('id', $taskId, 'nickname');
-                        $result[$i]['machine'] = app($this->batchPaddockTaskClass)->getMachinedByBatches('paddock_plan_task_id', $taskId);
-                        $result[$i]['spray_mix_id'] = $this->retrieveByParams('id', $taskId, 'spray_mix_id');
-                        $result[$i]['spray_mix'] = app($this->sprayMixClass)->getByParams('id', $task['spray_mix_id'], ['id', 'name']);
-                        $result[$i]['paddock_plan_id'] = $this->retrieveByParams('id', $taskId, 'paddock_plan_id');
-                        $result[$i]['paddock_id'] = $this->retrieveByParams('id', $taskId, 'paddock_id');
-                        $result[$i]['paddock'] = array(
-                            'name' => $key['name'],
-                            'spray_area' => $key['spray_area'],
-                            'id' => $key['id']
-                        );
-                        if (isset($temp[$i]['paddock']['crop_name'])) {
-                            $temp[$i]['paddock']['crop_name'] = app($this->cropClass)->retrieveCropById($paddockPlan[0]['crop_id'])[0]->name;
-                        }
-                        if ($result[$i]['remaining_spray_area'] > 0) {
-                            if($batchStatus !== null){
-                                if($batchStatus !== 'completed'){
-                                    array_push($finalResult, $result[$i]);
-                                }
-                            }else{
+                    // if (sizeof($paddockPlan) > 0 && ($paddockPlan[0]['start_date'] <= $currDate && $currDate <= $paddockPlan[0]['end_date'])) {
+                    $batchPaddock = app($this->batchPaddockTaskClass)->retrieveByParams('paddock_plan_task_id', $taskId, ['batch_id']);
+                    $batchStatus = sizeof($batchPaddock) > 0 ? Batch::where('id', '=', $batchPaddock[0]['batch_id'])->first() : null;
+                    $totalBatchArea = app($this->batchPaddockTaskClass)->getTotalBatchPaddockPlanTask($taskId);
+                    $result[$i]['area'] = (float)$key['area'];
+                    $totalArea =  $totalBatchArea != null ? ((float)$key['spray_area'] - (float)$totalBatchArea) : (float)$key['spray_area'];
+                    $result[$i]['remaining_spray_area'] = $this->numberConvention($totalArea);
+                    // $result[$i]['due_date'] = Carbon::createFromFormat('Y-m-d', $task['due_date'])->copy()->tz($this->response['timezone'])->format('d/m/Y');
+                    $result[$i]['due_date'] = $task['due_date'];
+                    $result[$i]['category'] = $this->retrieveByParams('id', $taskId, 'category');
+                    $result[$i]['id'] =  $taskId;
+                    $result[$i]['task_status'] = $task['status'];
+                    $result[$i]['batch_status'] = $batchStatus != null ? $batchStatus['status'] : null;
+                    $result[$i]['paddock_plan_task_id'] =  $taskId;
+                    $result[$i]['nickname'] = $this->retrieveByParams('id', $taskId, 'nickname');
+                    $result[$i]['machine'] = app($this->batchPaddockTaskClass)->getMachinedByBatches('paddock_plan_task_id', $taskId);
+                    $result[$i]['spray_mix_id'] = $this->retrieveByParams('id', $taskId, 'spray_mix_id');
+                    $result[$i]['spray_mix'] = app($this->sprayMixClass)->getByParams('id', $task['spray_mix_id'], ['id', 'name']);
+                    $result[$i]['paddock_plan_id'] = $this->retrieveByParams('id', $taskId, 'paddock_plan_id');
+                    $result[$i]['paddock_id'] = $this->retrieveByParams('id', $taskId, 'paddock_id');
+                    $result[$i]['paddock'] = array(
+                        'name' => $key['name'],
+                        'spray_area' => $key['spray_area'],
+                        'id' => $key['id']
+                    );
+                    if (isset($temp[$i]['paddock']['crop_name'])) {
+                        $temp[$i]['paddock']['crop_name'] = app($this->cropClass)->retrieveCropById($paddockPlan[0]['crop_id'])[0]->name;
+                    }
+                    if ($result[$i]['remaining_spray_area'] > 0) {
+                        if($batchStatus !== null){
+                            if($batchStatus !== 'completed'){
                                 array_push($finalResult, $result[$i]);
                             }
+                        }else{
+                            array_push($finalResult, $result[$i]);
                         }
                     }
+                    // }
                 }
                 $i++;
             }
