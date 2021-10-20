@@ -77,6 +77,8 @@ class SprayMixController extends APIController
     return $result;
   }
 
+  
+
   public function retrieve(Request $request)
   {
     $data = $request->all();
@@ -184,5 +186,15 @@ class SprayMixController extends APIController
     $result[0]['maximum_rate'] = $this->numberConvention($result[0]['maximum_rate']);
     $result[0]['units'] = 'L/ha';
     return sizeof($result) > 0 ? $result[0] : null;
+  }
+
+  public function delete(Request $request){
+    $data = $request->all();
+    $res = SprayMix::where('id', '=', $data['id'])->update(array(
+      'deleted_at' => Carbon::now(),
+      'status' => $data['status']
+    ));
+    $this->response['data'] = $res;
+    return $this->response();
   }
 }
