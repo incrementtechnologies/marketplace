@@ -30,125 +30,103 @@ class PaddockController extends APIController
   public function retrieve(Request $request)
   {
     $data = $request->all();
-    // dd($data);
-    if (isset($data['id'])) {
-      $result = Paddock::where("id", "=", $data['id'])
-        ->where("merchant_id", "=", $data['merchant_id'])
-        ->where("status", "=", $data['status'])
+    if ($data['condition'][0]['column'] === 'date') {
+      if ($data['condition'][0]['value'] == '%%') {
+        $this->date = Carbon::now()->format('Y-m-d');
+      } else {
+        $this->date = date(substr($data['condition'][0]['value'], 1, -1));
+      }
+      $result = Paddock::where($data['condition'][1]['column'], $data['condition'][1]['clause'], $data['condition'][1]['value'])
+        ->where($data['condition'][2]['column'], $data['condition'][2]['clause'], $data['condition'][2]['value'])
         ->where('deleted_at', '=', null)
+        ->skip($data['offset'])
+        ->take($data['limit'])
         ->get();
-      $result['area'] = $result['area'];
-      $result['unit'] = 'Ha';
-      $paddockplan = PaddockPlan::select()->where("paddock_id", "=", $data['id'])->orderBy('start_date', 'desc')->limit(2)->get();
-      // if (sizeof($paddockplan) > 0) {
-      //   for ($i = 0; $i <= sizeof($paddockplan) - 1; $i++) {
-      //     $item = $paddockplan[$i];
-      //     $paddockplan[$i]['start_date'] = Carbon::createFromFormat('Y-m-d', $item['start_date'])->copy()->tz($this->response['timezone'])->format('d/m/Y');
-      //     $paddockplan[$i]['end_date'] = Carbon::createFromFormat('Y-m-d', $item['end_date'])->copy()->tz($this->response['timezone'])->format('d/m/Y');
-      //   }
-      // }
-      $result['paddock_data'] = $paddockplan;
-      $paddock_plan_tasks = PaddockPlanTask::select()->where("paddock_plan_id", "=", $result['paddock_data'][0]['id'])->get();
-      if (sizeof($paddock_plan_tasks) > 0) {
-        for ($i = 0; $i <= sizeof($paddock_plan_tasks) - 1; $i++) {
-          $item = $paddock_plan_tasks[$i];
-          $paddock_plan_tasks[$i]['due_date'] = Carbon::createFromFormat('Y-m-d', $item['due_date'])->copy()->tz($this->response['timezone'])->format('d/m/Y');
-        }
-      }
-      $result['paddock_data'][0]['paddock_tasks_data'] = $paddock_plan_tasks;
-      for ($i = 0; $i < count($result['paddock_data']); $i++) {
-        $result['paddock_data'][$i]['crop_name'] =  Crop::select("name")->where("id", "=", $result['paddock_data'][$i]['crop_id'])->get();
-      }
       $this->response['data'] = $result;
-    } else {
-      $data = $request->all();
-      if ($data['condition'][0]['column'] === 'date') {
-        if ($data['condition'][0]['value'] == '%%') {
-          $this->date = Carbon::now()->format('Y-m-d');
-        } else {
-          $this->date = date(substr($data['condition'][0]['value'], 1, -1));
-        }
-        $result = Paddock::where($data['condition'][1]['column'], $data['condition'][1]['clause'], $data['condition'][1]['value'])
-          ->where($data['condition'][2]['column'], $data['condition'][2]['clause'], $data['condition'][2]['value'])
-          ->where('deleted_at', '=', null)
-          ->skip($data['offset'])
-          ->take($data['limit'])
-          ->get();
-        $this->response['data'] = $result;
 
-        for ($i = 0; $i < count($this->response['data']); $i++) {
-          $paddockData = $this->response['data'];
-          $paddock_id = $this->response['data'][$i]['id'];
-          $paddock_data = PaddockPlan::select()
-            ->where('paddock_id', '=', $paddock_id)
-            ->where('start_date', '<=', $this->date)
-            ->where('deleted_at', '=', null)
-            ->limit(1)
-            ->get();
-          // dd($paddock_data);
-          for ($x = 0; $x < count($paddock_data); $x++) {
-            $paddock_plan_tasks = PaddockPlanTask::select()->where("paddock_plan_id", "=", $paddock_data[$x]['id'])->where('deleted_at', '=', null)->get();
-            for ($p = 0; $p < count($paddock_plan_tasks); $p++) {
-              if ($paddock_plan_tasks[$p]['status'] === 'pending') {
-                $this->response['data'][$i]['plan_status'] = $paddock_plan_tasks[$p]['status'];
-              } else {
-                $this->response['data'][$i]['plan_status'] = 'completed';
-                break;
-              }
-            }
-            $this->response['data'][$x]['area'] = $this->response['data'][$x]['area'];
-            $this->response['data'][$x]['unit'] = 'Ha';
-            if (count($paddock_plan_tasks) > 0) {
-              $paddock_data[$x]['paddock_tasks_data'] = $paddock_plan_tasks;
-            }
-            $crop_name = Crop::select('name')->where('id', '=', $paddock_data[$x]['crop_id'])->where('deleted_at', '=', null)->get();
-            if (count($crop_name) > 0) {
-              $paddock_data[$x]['crop_name'] = $crop_name[0]['name'];
-            }
-            if (date($paddock_data[$x]['end_date']) >= $this->date) {
-              $this->response['data'][$i]['paddock_data'] = $paddock_data;
+      for ($i = 0; $i < count($this->response['data']); $i++) {
+        $paddockData = $this->response['data'];
+        $paddock_id = $this->response['data'][$i]['id'];
+        $paddock_data = PaddockPlan::select()
+          ->where('paddock_id', '=', $paddock_id)
+          ->where('start_date', '<=', $this->date)
+          ->where('deleted_at', '=', null)
+          ->limit(1)
+          ->get();
+        for ($x = 0; $x < count($paddock_data); $x++) {
+          $paddock_plan_tasks = PaddockPlanTask::select()->where("paddock_plan_id", "=", $paddock_data[$x]['id'])->where('deleted_at', '=', null)->get();
+          for ($p = 0; $p < count($paddock_plan_tasks); $p++) {
+            if ($paddock_plan_tasks[$p]['status'] === 'pending') {
+              $this->response['data'][$i]['plan_status'] = $paddock_plan_tasks[$p]['status'];
             } else {
-              $this->response['data'][$i]['paddock_data'] = [];
+              $this->response['data'][$i]['plan_status'] = 'completed';
+              break;
             }
           }
-        }
-      } else {
-        $this->model = new Paddock();
-        $this->retrieveDB($data);
-        for ($i = 0; $i < count($this->response['data']); $i++) {
-          $paddockData = $this->response['data'];
-          $paddock_id = $this->response['data'][$i]['id'];
-          $paddock_data = PaddockPlan::select()
-            ->where('paddock_id', '=', $paddock_id)
-            ->where('start_date', '<=', count($data['condition']) === 1 ? date($data['date']) : Carbon::now()->format('Y-m-d'))
-            ->where('deleted_at', '=', null)
-            ->orderBy('start_date', 'desc')
-            ->limit(1)
-            ->get();
-          if (count($paddock_data) > 0 && date($paddock_data[0]['end_date']) >= Carbon::now()->format('Y-m-d')) {
-            $paddock_plan_tasks = PaddockPlanTask::select()->where("paddock_plan_id", "=", $paddock_data[0]['id'])->where('deleted_at', '=', null)->get();
-            for ($p = 0; $p < count($paddock_plan_tasks); $p++) {
-              if ($paddock_plan_tasks[$p]['status'] === 'pending') {
-                $this->response['data'][$i]['plan_status'] = $paddock_plan_tasks[$p]['status'];
-              } else {
-                $this->response['data'][$i]['plan_status'] = 'completed';
-                break;
-              }
-            }
-            $this->response['data'][$i]['area'] = $this->response['data'][$i]['area'];
-            $this->response['data'][$i]['unit'] = 'Ha';
-            if (count($paddock_plan_tasks) > 0) {
-              $paddock_data[0]['paddock_tasks_data'] = $paddock_plan_tasks;
-            }
-            $crop_name = Crop::select('name')->where('id', '=', $paddock_data[0]['crop_id'])->where('deleted_at', '=', null)->get();
-            if (count($crop_name) > 0) {
-              $paddock_data[0]['crop_name'] = $crop_name[0]['name'];
-            }
+          $this->response['data'][$x]['area'] = $this->response['data'][$x]['area'];
+          $this->response['data'][$x]['unit'] = 'Ha';
+          if (count($paddock_plan_tasks) > 0) {
+            $paddock_data[$x]['paddock_tasks_data'] = $paddock_plan_tasks;
+          }
+          $crop_name = Crop::select('name')->where('id', '=', $paddock_data[$x]['crop_id'])->where('deleted_at', '=', null)->get();
+          if (count($crop_name) > 0) {
+            $paddock_data[$x]['crop_name'] = $crop_name[0]['name'];
+          }
+          if (date($paddock_data[$x]['end_date']) >= $this->date) {
             $this->response['data'][$i]['paddock_data'] = $paddock_data;
           } else {
             $this->response['data'][$i]['paddock_data'] = [];
           }
         }
+      }
+    } else {
+      $this->model = new Paddock();
+      $this->retrieveDB($data);
+      for ($i = 0; $i < count($this->response['data']); $i++) {
+        $paddockData = $this->response['data'];
+        $paddock_id = $this->response['data'][$i]['id'];
+        $paddock_data = PaddockPlan::select()
+          ->where('paddock_id', '=', $paddock_id)
+          ->where('start_date', '<=', count($data['condition']) === 1 ? date($data['date']) : Carbon::now()->format('Y-m-d'))
+          ->where('end_date', '>=', count($data['condition']) === 1 ? date($data['date']) : Carbon::now()->format('Y-m-d'))
+          ->where('deleted_at', '=', null)
+          ->orderBy('start_date', 'desc')
+          ->limit(1)
+          ->get();
+        if (count($paddock_data) > 0) {
+          $paddock_plan_tasks = PaddockPlanTask::select()->where("paddock_plan_id", "=", $paddock_data[0]['id'])->where('deleted_at', '=', null)->get();
+          for ($p = 0; $p < count($paddock_plan_tasks); $p++) {
+            if ($paddock_plan_tasks[$p]['status'] === 'pending') {
+              $this->response['data'][$i]['plan_status'] = $paddock_plan_tasks[$p]['status'];
+            } else {
+              $this->response['data'][$i]['plan_status'] = 'completed';
+              break;
+            }
+          }
+          $this->response['data'][$i]['area'] = $this->response['data'][$i]['area'];
+          $this->response['data'][$i]['unit'] = 'Ha';
+          if (count($paddock_plan_tasks) > 0) {
+            $paddock_data[0]['paddock_tasks_data'] = $paddock_plan_tasks;
+          }
+          $crop_name = Crop::select('name')->where('id', '=', $paddock_data[0]['crop_id'])->where('deleted_at', '=', null)->get();
+          if (count($crop_name) > 0) {
+            $paddock_data[0]['crop_name'] = $crop_name[0]['name'];
+          }
+          $this->response['data'][$i]['paddock_data'] = $paddock_data;
+        } else {
+          $this->response['data'][$i]['paddock_data'] = [];
+        }
+      }
+    }
+    if(sizeof($this->response['data']) > 0) {
+      for ($f = 0; $f < count($this->response['data']); $f++) {
+        $previous = PaddockPlan::select()
+        ->where('paddock_id', '=',  $this->response['data'][$f]['id'])
+        ->where('deleted_at', '=', null)
+        ->orderBy('end_date', 'desc')
+        ->limit(1)
+        ->get();
+        $this->response['data'][$f]['previous_plan'] = sizeof($previous) > 0 ? $previous : [];
       }
     }
     return $this->response();
