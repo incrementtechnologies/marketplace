@@ -51,6 +51,7 @@ class PaddockController extends APIController
         $paddock_data = PaddockPlan::select()
           ->where('paddock_id', '=', $paddock_id)
           ->where('start_date', '<=', $this->date)
+          ->where('end_date', '>=', $this->date)
           ->where('deleted_at', '=', null)
           ->limit(1)
           ->get();
@@ -73,11 +74,7 @@ class PaddockController extends APIController
           if (count($crop_name) > 0) {
             $paddock_data[$x]['crop_name'] = $crop_name[0]['name'];
           }
-          if (date($paddock_data[$x]['end_date']) >= $this->date) {
-            $this->response['data'][$i]['paddock_data'] = $paddock_data;
-          } else {
-            $this->response['data'][$i]['paddock_data'] = [];
-          }
+          $this->response['data'][$i]['paddock_data'] = sizeof($paddock_data) > 0 ? $paddock_data : [];
         }
       }
     } else {
