@@ -30,8 +30,6 @@ class PaddockController extends APIController
   public function retrieve(Request $request)
   {
     $data = $request->all();
-    
-    $data = $request->all();
     if ($data['condition'][0]['column'] === 'date') {
       if ($data['condition'][0]['value'] == '%%') {
         $this->date = Carbon::now()->format('Y-m-d');
