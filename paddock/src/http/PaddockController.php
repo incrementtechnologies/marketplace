@@ -40,6 +40,7 @@ class PaddockController extends APIController
         ->where($data['condition'][2]['column'], $data['condition'][2]['clause'], $data['condition'][2]['value'])
         ->where('deleted_at', '=', null)
         ->skip($data['offset'])
+        ->orderBy('name', 'asc')
         ->take($data['limit'])
         ->get();
       $this->response['data'] = $result;
