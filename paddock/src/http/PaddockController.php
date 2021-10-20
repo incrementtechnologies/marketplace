@@ -127,7 +127,14 @@ class PaddockController extends APIController
         ->orderBy('end_date', 'desc')
         ->limit(1)
         ->get();
+        $first = PaddockPlan::select()
+        ->where('paddock_id', '=',  $this->response['data'][$f]['id'])
+        ->where('deleted_at', '=', null)
+        ->orderBy('end_date', 'asc')
+        ->limit(1)
+        ->get();
         $this->response['data'][$f]['previous_plan'] = sizeof($previous) > 0 ? $previous : [];
+        $this->response['data'][$f]['first_plan'] = sizeof($first) > 0 ? $first : [];
       }
     }
     return $this->response();
