@@ -73,4 +73,14 @@ class MachineController extends APIController
     public function getMachineByParams($column, $value){
         return Machine::where($column, '=', $value)->first();
     }
+
+    public function delete(Request $request){
+        $data = $request->all();
+        $res = Machine::where('id', '=', $data['id'])->update(array(
+            'deleted_at' => Carbon::now(),
+            'status' => $data['status']
+        ));
+        $this->response['data'] = $res;
+        return $this->response();
+    }
 }
