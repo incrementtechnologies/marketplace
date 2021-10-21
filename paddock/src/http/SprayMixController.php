@@ -118,6 +118,7 @@ class SprayMixController extends APIController
         $array = ['pending', 'draft'];
         $getCropName = app($this->cropClass)->retrieveCrops($key['crops']);
         $temp[$i]['name'] = $key['name'];
+        $temp[$i]['spray_mix_product'] = SprayMixProduct::where('spray_mix_id', '=', $key['id'])->get();
         $temp[$i]['id'] = $key['id'];
         $temp[$i]['status'] = in_array($key['status'], $array) ? 'draft' : 'approved';
         $temp[$i]['max_rate'] = $this->numberConvention($key['maximum_rate']);
