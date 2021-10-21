@@ -41,7 +41,7 @@ class BatchController extends APIController
     $batchData['session'] = $merchant ? $merchant['prefix'] . $this->toCode($counter) : $this->toCode($counter);
     $batchData['applied_rate'] = $batchData['application_rate'];
     $batchData['status'] = sizeof($data['tasks']) > 0 ? 'inprogress' : $batchData['status'];
-    $batchData['created_at'] = Carbon::now()->setTimezone('GMT+8');
+    $batchData['created_at'] = Carbon::now();
     $batchProduct = $data['batch_products'];
     $batch = Batch::create($batchData);
     $this->response['data']['batch'] = $batch;
@@ -75,6 +75,8 @@ class BatchController extends APIController
       };
     }
     $result = Batch::where('id', '=', $this->response['data']['batch']['id'])->get();
+    $result[0]['created_at'] = Carbon::parse($result[0]['created_at'])->setTimezone('GMT+8');
+    $result[0]['updated_at'] = Carbon::parse($result[0]['updated_at'])->setTimezone('GMT+8');
     $this->response['data']['batch'] = $result;
     return $this->response();
   }
