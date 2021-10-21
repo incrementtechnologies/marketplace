@@ -41,7 +41,7 @@ class BatchController extends APIController
     $batchData['session'] = $merchant ? $merchant['prefix'] . $this->toCode($counter) : $this->toCode($counter);
     $batchData['applied_rate'] = $batchData['application_rate'];
     $batchData['status'] = sizeof($data['tasks']) > 0 ? 'inprogress' : $batchData['status'];
-    $batchData['created_at'] = Carbon::now();
+    $batchData['created_at'] = Carbon::now()->setTimezone('GMT+8');
     $batchProduct = $data['batch_products'];
     $batch = Batch::create($batchData);
     $this->response['data']['batch'] = $batch;
