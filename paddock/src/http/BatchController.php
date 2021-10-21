@@ -265,6 +265,11 @@ class BatchController extends APIController
         ->leftJoin('account_informations as T3', 'T3.account_id', '=', 'T2.id')
         ->where('T1.id', '=', null)
         ->where('batches.status', '=', 'completed')
+        ->where(function($query)use($con){
+            $query->where('batches.session', 'like', $con[0]['value'])
+            ->orWhere('T3.first_name', 'like', $con[0]['value'])
+            ->orWhere('T3.last_name', 'like', $con[0]['value']);
+        })
         ->limit($data['limit'])
         ->offset($data['offset'])
         ->get(['batches.*', 'T2.username', 'T3.first_name', 'T3.last_name']);
@@ -280,15 +285,15 @@ class BatchController extends APIController
         $item = $result[$i];
         $result[$i]['name'] = $item['first_name'].' '.$item['last_name'];
         $result[$i]['date_completed_formatted'] = Carbon::createFromFormat('Y-m-d H:i:s', $item['updated_at'])->copy()->tz($this->response['timezone'])->format('d/m/Y');
-        if($con[0]['value'] !== null){
-          if(str_contains(strtolower($result[$i]['name']), strtolower($con[0]['value'])) ||  str_contains(strtolower($item['session']), strtolower($con[0]['value']))){
-            array_push($res, $item);
-          }
-        }else{
-          array_push($res, $item);
-        }
+        // if($con[0]['value'] !== null){
+        //   if(str_contains(strtolower($result[$i]['name']), strtolower($con[0]['value'])) ||  str_contains(strtolower($item['session']), strtolower($con[0]['value']))){
+        //     array_push($res, $item);
+        //   }
+        // }else{
+        //   array_push($res, $item);
+        // }
       }
-      $this->response['data'] = $res;
+      $this->response['data'] = $result;
       $this->response['size'] = sizeof($size);
     }
     return $this->response();
