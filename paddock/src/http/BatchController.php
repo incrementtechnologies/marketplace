@@ -174,7 +174,7 @@ class BatchController extends APIController
       $tempMachine = array();
       for ($i=0; $i <= sizeof($tempMix)-1; $i++) { 
         $item = $tempMix[$i];
-        $recentSpray = app($this->sprayMixClass)->getByParams('id', $item['spray_mix_id'], ['name', 'id']);
+        $recentSpray = app($this->sprayMixClass)->getByParams('id', $item['spray_mix_id'], ['name', 'id', 'maximum_rate', 'minimum_rate', 'application_rate']);
         if($recentSpray !== null){
           array_push($tempSpray, $recentSpray);
         }
