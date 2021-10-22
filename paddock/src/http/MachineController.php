@@ -14,7 +14,9 @@ class MachineController extends APIController
     //
     function __construct(){
         $this->model = new Machine();
-        $this->notRequired = array();
+        $this->notRequired = array(
+            'status'
+        );
     }    
 
     public function retrieve(Request $request){
