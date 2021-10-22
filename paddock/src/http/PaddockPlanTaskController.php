@@ -395,28 +395,26 @@ class PaddockPlanTaskController extends APIController
                     ->first();
                 if ($task !== null && $task['spray_mix_id'] == $data['spray_mix_id']) {
                     $paddockPlan = app($this->paddockPlanClass)->retrievePlanByParams('id', $task['paddock_plan_id'], ['start_date', 'end_date', 'crop_id', 'paddock_id']);
-                    if (sizeof($paddockPlan) > 0 && ($paddockPlan[0]['start_date'] <= $currDate && $currDate <= $paddockPlan[0]['end_date'])) {
-                        $totalBatchArea = app($this->batchPaddockTaskClass)->getTotalBatchPaddockPlanTask($task['id']);
-                        $tempRes[$i]['area'] = (float)$key['area'];
-                        $totalArea =  $totalBatchArea != null ? (doubleval($key['spray_area']) - doubleval($totalBatchArea)) : doubleval($key['spray_area']);
-                        $tempRes[$i]['remaining_spray_area'] = $this->numberConvention($totalArea);
-                        $tempRes[$i]['units'] = "Ha";
-                        $tempRes[$i]['spray_areas'] = $tempRes[$i]['remaining_spray_area'];
-                        $tempRes[$i]['batch_areas'] = $totalBatchArea;
-                        $tempRes[$i]['spray_mix_units'] = "L/Ha";
-                        $tempRes[$i]['partial'] = false;
-                        $tempRes[$i]['paddock_id'] = $task['paddock_id'];
-                        $tempRes[$i]['name'] = $key['name'];
-                        $tempRes[$i]['spray_area'] = $key['spray_area'];
-                        $tempRes[$i]['plan_task_id'] = $task['id'];
-                        $tempRes[$i]['crop_name'] = app($this->cropClass)->retrieveCropName($paddockPlan[0]['crop_id']);
-                        $tempRes[$i]['partial_flag'] = false;
-                        $tempRes[$i]['due_date'] = $task['due_date'];
-                        $tempRes[$i]['arable_area'] = $task['arable_area'];
-                        $tempRes[$i]['rate_per_hectar'] = app('Increment\Marketplace\Paddock\Http\SprayMixProductController')->retrieveDetailsWithParams('spray_mix_id', $key['spray_mix_id'], ['rate']);
-                        if ($tempRes[$i]['remaining_spray_area'] > 0) {
-                            $available[] = $tempRes[$i];    
-                        }
+                    $totalBatchArea = app($this->batchPaddockTaskClass)->getTotalBatchPaddockPlanTask($task['id']);
+                    $tempRes[$i]['area'] = (float)$key['area'];
+                    $totalArea =  $totalBatchArea != null ? (doubleval($key['spray_area']) - doubleval($totalBatchArea)) : doubleval($key['spray_area']);
+                    $tempRes[$i]['remaining_spray_area'] = $this->numberConvention($totalArea);
+                    $tempRes[$i]['units'] = "Ha";
+                    $tempRes[$i]['spray_areas'] = $tempRes[$i]['remaining_spray_area'];
+                    $tempRes[$i]['batch_areas'] = $totalBatchArea;
+                    $tempRes[$i]['spray_mix_units'] = "L/Ha";
+                    $tempRes[$i]['partial'] = false;
+                    $tempRes[$i]['paddock_id'] = $task['paddock_id'];
+                    $tempRes[$i]['name'] = $key['name'];
+                    $tempRes[$i]['spray_area'] = $key['spray_area'];
+                    $tempRes[$i]['plan_task_id'] = $task['id'];
+                    $tempRes[$i]['crop_name'] = app($this->cropClass)->retrieveCropName($paddockPlan[0]['crop_id']);
+                    $tempRes[$i]['partial_flag'] = false;
+                    $tempRes[$i]['due_date'] = $task['due_date'];
+                    $tempRes[$i]['arable_area'] = $task['arable_area'];
+                    $tempRes[$i]['rate_per_hectar'] = app('Increment\Marketplace\Paddock\Http\SprayMixProductController')->retrieveDetailsWithParams('spray_mix_id', $key['spray_mix_id'], ['rate']);
+                    if ($tempRes[$i]['remaining_spray_area'] > 0) {
+                        $available[] = $tempRes[$i];    
                     }
                 }
                 $i++;
