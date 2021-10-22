@@ -51,7 +51,7 @@ class SprayMixController extends APIController
     //         ->select('T2.name', 'T2.id', 'T3.name', 'T3.id')
     //         ->get();
     $result = DB::table('batches AS T1')
-      ->select("T1.merchant_id", "T1.spray_mix_id", "T1.machine_id", "T2.id", "T4.name AS merchant_name")
+      ->select("T1.merchant_id", "T1.spray_mix_id", "T1.machine_id", "T2.id", "T4.name AS merchant_name", "T3.application_rate", 'T3.minimum_rate', 'T3.maximum_rate', 'T3.name')
       ->leftJoin("machines AS T2", "T2.id", "=", "T1.machine_id")
       ->leftJoin('spray_mixes AS T3', "T3.id", "=", "T1.spray_mix_id")
       ->leftJoin('merchants AS T4', "T4.id", "=", "T1.merchant_id")
