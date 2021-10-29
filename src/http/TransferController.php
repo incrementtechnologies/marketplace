@@ -78,7 +78,7 @@ class TransferController extends APIController
         if (sizeOf($existInbundledProducts) > 0) {
           if ($data['account_type'] === 'DISTRIBUTOR') {
             $key['product_trace'] = $existInbundledProducts[0]['product_trace'];
-            $existInBundled = app($this->bundledSettingsController)->getByParamsByConditionWithDelete(array(
+            $existInBundled = app($this->bundledSettingsController)->getByParamsByCondition(array(
               array('product_id', '=', $existInbundledProducts[0]['product_on_settings']),
               array('bundled', '=', $existInbundledProducts[0]['product_id'])
             ));
