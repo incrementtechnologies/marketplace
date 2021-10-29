@@ -203,4 +203,14 @@ class ProductAttributeController extends APIController
         return $payloadValue.' '.$unit;
       }
     }
+
+    public function delete(Request $request){
+      $data = $request->all();
+      $result = ProductAttribute::where('id', '=', $data['id'])->update(array(
+        'deleted_at' => Carbon::now()
+      ));
+      if($result){
+        app('Increment\Marketplace\Http\BundledSettingController')->deleteByVariation($data['id']);
+      }
+    }
 }

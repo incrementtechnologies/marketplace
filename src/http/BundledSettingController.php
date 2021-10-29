@@ -227,5 +227,15 @@ class BundledSettingController extends APIController
     return BundledSetting::where($column, '=', $value)->where('product_attribute_id', '=', $attrId)->count();
   }
 
+  public function deleteByVariation($attrId){
+    $result = BundledSetting::where('product_attribute_id', '=', $attrId)->update(array(
+      'deleted_at' => Carbon::now()
+    ));
+    if($result){
+      BundledProduct::where('product_attribute_id', '=', $attrId)->update(array(
+        'deleted_at' => Carbon::now()
+      ));
+    }
+  }
 
 }
