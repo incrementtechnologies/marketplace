@@ -329,7 +329,7 @@ class PaddockPlanTaskController extends APIController
                 $i++;
             }
             $finalResult = collect($array);
-            $finalResult = $finalResult->sortBy('date_completed_orig');
+            $finalResult = $finalResult->sortByDesc('date_completed_orig');
             $finalResult =  json_decode(json_encode($finalResult), true);
             $finalResult = array_values($finalResult);
             for ($a=0; $a <= sizeof($finalResult)-1; $a++) { 
