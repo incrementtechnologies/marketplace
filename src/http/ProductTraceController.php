@@ -77,9 +77,9 @@ class ProductTraceController extends APIController
   public function getTotalAttributeByParamsWithProductId($productId, $attrID)
   {
     if ($productId !== null) {
-      $result = ProductTrace::where('product_id', '=', $productId)->where('product_attribute_id', '=', $attrID)->where('status', '=', 'active')->orderBy('created_at', 'desc')->count();
+      $result = ProductTrace::where('product_id', '=', $productId)->where('product_attribute_id', '=', $attrID)->where('manufacturing_date', '!=', null)->where('batch_number', '!=', null)->where('status', '=', 'active')->orderBy('created_at', 'desc')->count();
     } else {
-      $result = ProductTrace::where('product_attribute_id', '=', $attrID)->where('status', '=', 'active')->orderBy('created_at', 'desc')->count();
+      $result = ProductTrace::where('product_attribute_id', '=', $attrID)->where('status', '=', 'active')->where('manufacturing_date', '!=', null)->where('batch_number', '!=', null)->orderBy('created_at', 'desc')->count();
     }
     return $result;
   }
