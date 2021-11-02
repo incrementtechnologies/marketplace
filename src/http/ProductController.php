@@ -482,7 +482,7 @@ class ProductController extends APIController
       $result = Product::leftJoin('product_attributes as T1', 'T1.product_id', '=', 'products.id')
       ->where('products.id', '=', $productId)
       ->where('T1.id', '=', $productAttribute)
-      ->select('title', 'payload', 'payload_value')->first();
+      ->select('title', 'payload', 'payload_value', 'products.id', 'T1.id as attrId')->first();
       return $result;
     }
 
