@@ -74,7 +74,13 @@ class BatchProductController extends APIController
       for ($i=0; $i <= sizeof($result)-1; $i++) { 
         $item = $result[$i];
         $product = app('Increment\Marketplace\Http\ProductController')->retrieveProductWithAttribute($item['product_id'], $item['product_attribute_id']);
+        $condition = array(
+          array('product_id', '=', $product['id']),
+          array('product_attribute_id', '=', $product['attrId'])
+        );
+        $batchNumber = app('Increment\Marketplace\Http\ProductTraceController')->getTraceByParams($condition, ['batch_number']);
         $result[$i]['product_name'] = $product['title'];
+        $result[$i]['batch_number'] = $batchNumber !== null ? $batchNumber['batch_number'] : null;
         $result[$i]['payload'] = $product['payload'];
         $result[$i]['payload_value'] = $product['payload_value'];
         $result[$i]['total_applied_rate'] = floor($totalApplied*100)/100;
