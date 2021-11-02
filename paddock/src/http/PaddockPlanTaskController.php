@@ -61,9 +61,36 @@ class PaddockPlanTaskController extends APIController
         $con = $data['condition'];
         $result = [];
         $result = Paddock::where($con[0]['column'], '=', $con[0]['value'])->skip($data['offset'])->take($data['limit'])->get();
-        $size = Paddock::where($con[0]['column'], '=', $con[0]['value'])->get();
         $currDate = Carbon::now()->toDateString();
         $finalResult = array();
+        $size = Paddock::where($con[0]['column'], '=', $con[0]['value'])->get();
+        $counter = 0;
+        if(sizeof($size) > 0){
+            for ($a=0; $a <= sizeof($size)-1; $a++) {
+                $item = $size[$a];
+                $task = PaddockPlanTask::where($con[0]['column'], '=', $con[0]['value'])
+                ->where('paddock_id', '=', $item['id'])
+                ->orderBy('due_date', 'asc')
+                ->first();
+                if ($task != null && ($task['status'] !== 'pending' || $task['status'] !== 'completed')) {
+                    $batchPaddock = app($this->batchPaddockTaskClass)->retrieveByParams('paddock_plan_task_id', $task['id'], ['batch_id']);
+                    $batchStatus = sizeof($batchPaddock) > 0 ? Batch::where('id', '=', $batchPaddock[0]['batch_id'])->first() : null;
+                    $totalBatchArea = app($this->batchPaddockTaskClass)->getTotalBatchPaddockPlanTask($task['id']);
+                    $area = (float)$item['area'];
+                    $totalArea =  $totalBatchArea != null ? ((float)$item['spray_area'] - (float)$totalBatchArea) : (float)$item['spray_area'];
+                    $remainingSprayArea = $this->numberConvention($totalArea);
+                    if ($remainingSprayArea > 0) {
+                        if($batchStatus !== null){
+                            if($batchStatus !== 'completed'){
+                                $counter ++;
+                            }
+                        }else{
+                            $counter ++;
+                        }
+                    }
+                }
+            }
+        }
         if (sizeof($result) > 0) {
             $result = json_decode(json_encode($result), true);
             $i = 0;
@@ -75,14 +102,12 @@ class PaddockPlanTaskController extends APIController
                 if ($task != null && ($task['status'] !== 'pending' || $task['status'] !== 'completed')) {
                     $taskId = $task['id'];
                     $paddockPlan = app($this->paddockPlanClass)->retrievePlanByParams('id', $task['paddock_plan_id'], ['start_date', 'end_date', 'crop_id', 'paddock_id']);
-                    // if (sizeof($paddockPlan) > 0 && ($paddockPlan[0]['start_date'] <= $currDate && $currDate <= $paddockPlan[0]['end_date'])) {
                     $batchPaddock = app($this->batchPaddockTaskClass)->retrieveByParams('paddock_plan_task_id', $taskId, ['batch_id']);
                     $batchStatus = sizeof($batchPaddock) > 0 ? Batch::where('id', '=', $batchPaddock[0]['batch_id'])->first() : null;
                     $totalBatchArea = app($this->batchPaddockTaskClass)->getTotalBatchPaddockPlanTask($taskId);
                     $result[$i]['area'] = (float)$key['area'];
                     $totalArea =  $totalBatchArea != null ? ((float)$key['spray_area'] - (float)$totalBatchArea) : (float)$key['spray_area'];
                     $result[$i]['remaining_spray_area'] = $this->numberConvention($totalArea);
-                    // $result[$i]['due_date'] = Carbon::createFromFormat('Y-m-d', $task['due_date'])->copy()->tz($this->response['timezone'])->format('d/m/Y');
                     $result[$i]['due_date'] = $task['due_date'];
                     $result[$i]['category'] = $this->retrieveByParams('id', $taskId, 'category');
                     $result[$i]['id'] =  $taskId;
@@ -126,7 +151,7 @@ class PaddockPlanTaskController extends APIController
                 $finalResult[$a]['due_date'] = Carbon::createFromFormat('Y-m-d', $items['due_date'])->copy()->tz($this->response['timezone'])->format('d/m/Y');
             }
             $this->response['data'] = $finalResult;
-            $this->response['size'] = sizeOf($size);
+            $this->response['size'] = $counter;
             return $this->response();
         }
     }
