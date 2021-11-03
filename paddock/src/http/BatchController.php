@@ -272,6 +272,7 @@ class BatchController extends APIController
         })
         ->limit($data['limit'])
         ->offset($data['offset'])
+        ->orderBy('batches.created_at', 'desc')
         ->get(['batches.*', 'T2.username', 'T3.first_name', 'T3.last_name']);
     $size = Batch::leftJoin('batch_paddock_tasks as T1', 'T1.batch_id', '=', 'batches.id')
     ->leftJoin('accounts as T2', 'T2.id', '=', 'batches.account_id')
