@@ -70,6 +70,7 @@ class PaddockPlanTaskController extends APIController
                 $item = $size[$a];
                 $task = PaddockPlanTask::where($con[0]['column'], '=', $con[0]['value'])
                 ->where('paddock_id', '=', $item['id'])
+                ->where('status', '=', 'approved')
                 ->orderBy('due_date', 'asc')
                 ->first();
                 if ($task != null && ($task['status'] !== 'pending' || $task['status'] !== 'completed')) {
@@ -97,6 +98,7 @@ class PaddockPlanTaskController extends APIController
             foreach ($result as $key) {
                 $task = PaddockPlanTask::where($con[0]['column'], '=', $con[0]['value'])
                     ->where('paddock_id', '=', $key['id'])
+                    ->where('status', '=', 'approved')
                     ->orderBy('due_date', 'asc')
                     ->first();
                 if ($task != null && ($task['status'] !== 'pending' || $task['status'] !== 'completed')) {
