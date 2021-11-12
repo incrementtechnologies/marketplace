@@ -231,9 +231,13 @@ class BundledSettingController extends APIController
     $result = BundledSetting::where('product_attribute_id', '=', $attrId)->update(array(
       'deleted_at' => Carbon::now()
     ));
+    $product = BundledSetting::where('product_attribute_id', '=', $attrId)->first();
     if($result){
       BundledProduct::where('product_attribute_id', '=', $attrId)->update(array(
         'deleted_at' => Carbon::now()
+      ));
+      Product::where('id', '=', $product['bundled'])->update(array(
+        'deleted_at' => Cabon::now(),
       ));
     }
   }
