@@ -547,6 +547,11 @@ class ProductTraceController extends APIController
       $this->response['data'][$i]['product'] = app($this->productController)->getByParams('id', $item['product_id']);
       $item = $this->response['data'][$i];
       $productTrace = $item['id'];
+      if($item['status'] === 'inactive'){
+        $this->response['data'] = null;
+        $this->response['error'] = 'Product trace is inactive';
+        return $this->response();
+      }
       if ($this->checkOwnProduct($item, $data['merchant_id']) == false) {
         $this->response['data'] = null;
         $this->response['error'] = 'You don\'t own this product!';
