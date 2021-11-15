@@ -105,12 +105,12 @@ class ProductController extends APIController
     public function retrieveBundled(Request $request){
       $data= $request->all();
       $con = $data['condition'];
-      $product = Product::where($con[0]['column'], $con[0]['clause'], $con[0]['value'])->where('deleted_at', '=', null)->get(['title', 'tags', 'id', 'description']);
+      $product = Product::where($con[0]['column'], $con[0]['clause'], $con[0]['value'])->where('deleted_at', '=', null)->select('title', 'tags', 'id', 'description')->first();
       $merchantId = app($this->merchantController)->getColumnByParams('account_id', $data['account_id'], 'id');
-      if(sizeof($product) > 0){
-        $tempVar = app($this->productAttrController)->getByParamsSortedCreatedAt('product_id', $product[0]['id'], $merchantId);
-        $product[0]['bundled'] = app($this->bundledSettingController)->getByParams('product_id', $product[0]['id'],  $merchantId);
-        $product[0]['variation'] = sizeof($tempVar) > 0 ? $tempVar[0] : null;
+      if($product !== null){
+        $tempVar = app($this->productAttrController)->getByParamsSortedCreatedAt('product_id', $product['id'], $merchantId);
+        $product['bundled'] = app($this->bundledSettingController)->getByParams('product_id', $product['id'],  $merchantId);
+        $product['variation'] = sizeof($tempVar) > 0 ? $tempVar[0] : null;
       }
       $this->response['data'] = $product;
       return $this->response();
@@ -119,12 +119,12 @@ class ProductController extends APIController
     public function retrieveBundledAgrisend(Request $request){
       $data= $request->all();
       $con = $data['condition'];
-      $product = Product::where($con[0]['column'], $con[0]['clause'], $con[0]['value'])->where('deleted_at', '=', null)->get(['title', 'tags', 'id', 'description']);
+      $product = Product::where($con[0]['column'], $con[0]['clause'], $con[0]['value'])->where('deleted_at', '=', null)->first('title', 'tags', 'id', 'description')->first();
       $merchantId = app($this->merchantController)->getColumnByParams('account_id', $data['account_id'], 'id');
       $temp = [];
-      if(sizeof($product) > 0){
+      if($product !== null){
         // $tempVar = app($this->productAttrController)->getByParamsSortedCreatedAt('product_id', $product[0]['id'], $merchantId);
-        $temp = app($this->bundledSettingController)->getByParamsWithProduct('product_id', $product[0]['id'],  $merchantId);
+        $temp = app($this->bundledSettingController)->getByParamsWithProduct('product_id', $product['id'],  $merchantId);
       }
       $this->response['data'] = $temp;
       return $this->response();
