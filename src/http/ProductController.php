@@ -119,7 +119,7 @@ class ProductController extends APIController
     public function retrieveBundledAgrisend(Request $request){
       $data= $request->all();
       $con = $data['condition'];
-      $product = Product::where($con[0]['column'], $con[0]['clause'], $con[0]['value'])->where('deleted_at', '=', null)->first('title', 'tags', 'id', 'description')->first();
+      $product = Product::where($con[0]['column'], $con[0]['clause'], $con[0]['value'])->where('deleted_at', '=', null)->select('title', 'tags', 'id', 'description')->first();
       $merchantId = app($this->merchantController)->getColumnByParams('account_id', $data['account_id'], 'id');
       $temp = [];
       if($product !== null){
