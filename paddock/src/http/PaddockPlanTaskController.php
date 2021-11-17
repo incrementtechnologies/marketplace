@@ -509,10 +509,10 @@ class PaddockPlanTaskController extends APIController
     {
         $data = $request->all();
         $i = 0;
-        foreach ($data['selectedPaddocks'] as $key => $value) {
+        foreach ($data['selectedPaddocks'] as $key) {
             $paddocks = app($this->paddockClass)->getByParams('id', $value['paddock_id'], ['id', 'name', 'spray_area']);
             $totalBatchArea = app($this->batchPaddockTaskClass)->getTotalBatchPaddockPlanTask($value['plan_task_id']);
-            dd($totalBatchArea, $key, $paddocks);
+            dd((int)$totalBatchArea, $key, $paddocks);
             if (((int)$totalBatchArea + (int)$key['remaining_spray_area']) > $paddocks['spray_area']) {
                 $this->response['error'] = 'Unavailable paddocks';
                 $this->response['data'] = [];
