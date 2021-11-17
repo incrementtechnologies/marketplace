@@ -57,12 +57,14 @@ class PaddockController extends APIController
           ->get();
         for ($x = 0; $x < count($paddock_data); $x++) {
           $paddock_plan_tasks = PaddockPlanTask::select()->where("paddock_plan_id", "=", $paddock_data[$x]['id'])->where('deleted_at', '=', null)->get();
-            if (sizeof($paddock_plan_tasks) > 0) {
-              $this->response['data'][$i]['plan_status'] = 'completed';
+          for ($p = 0; $p < count($paddock_plan_tasks); $p++) {
+            if ($paddock_plan_tasks[$p]['status'] === 'pending') {
+              $this->response['data'][$i]['plan_status'] = $paddock_plan_tasks[$p]['status'];
             } else {
-              $this->response['data'][$i]['plan_status'] = 'pending';
+              $this->response['data'][$i]['plan_status'] = 'completed';
               break;
             }
+          }
           $this->response['data'][$x]['area'] = $this->response['data'][$x]['area'];
           $this->response['data'][$x]['unit'] = 'Ha';
           if (count($paddock_plan_tasks) > 0) {
@@ -91,11 +93,13 @@ class PaddockController extends APIController
           ->get();
         if (count($paddock_data) > 0) {
           $paddock_plan_tasks = PaddockPlanTask::select()->where("paddock_plan_id", "=", $paddock_data[0]['id'])->where('deleted_at', '=', null)->get();
-          if (sizeof($paddock_plan_tasks) > 0) {
-            $this->response['data'][$i]['plan_status'] = 'completed';
-          } else {
-            $this->response['data'][$i]['plan_status'] = 'pending';
-            break;
+          for ($p = 0; $p < count($paddock_plan_tasks); $p++) {
+            if ($paddock_plan_tasks[$p]['status'] === 'pending') {
+              $this->response['data'][$i]['plan_status'] = $paddock_plan_tasks[$p]['status'];
+            } else {
+              $this->response['data'][$i]['plan_status'] = 'completed';
+              break;
+            }
           }
           $this->response['data'][$i]['area'] = $this->response['data'][$i]['area'];
           $this->response['data'][$i]['unit'] = 'Ha';
