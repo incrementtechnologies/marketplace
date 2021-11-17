@@ -72,7 +72,7 @@ class PaddockPlanController extends APIController
         $res = PaddockPlan::where('id', '=', $data['id'])->update(array(
             'deleted_at' => Carbon::now()
         ));
-        $resp = PaddockPlan::where('id', '=', $data['paddock_id'])->update(array(
+        $resp = Paddock::where('id', '=', $data['paddock_id'])->update(array(
             'status' => 'no_plan'
         ));
         $this->response['data'] = $res;
