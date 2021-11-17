@@ -318,6 +318,7 @@ class ProductTraceController extends APIController
           }else{
             $qty = app($this->transferredProductController)->retrieveProductQtyInDist($item, $data, 'regular');
           }
+          // dd($qty);
           $this->response['data'][$i]['product']['qty'] = $qty['qty'];
           $this->response['data'][$i]['product']['qty_in_bundled'] = $qty['qty_in_bundled'];
           $this->response['data'][$i]['setting_qty'] = sizeof($bundledSettingQty) > 0 ? $bundledSettingQty[0]['qty'] : 0; //$bundledSettingQty[0]['qty']
@@ -732,8 +733,7 @@ class ProductTraceController extends APIController
   public function create(Request $request)
   {
     $data = $request->all();
-
-
+    $data['manufacturing_date'] = str_replace('/', '-', $data['manufacturing_date']);
     if ($data['inventory_type'] === 'bundled_trace') {
       $qty = (int)$data['qty'];
       for ($i = 0; $i < $qty; $i++) {
