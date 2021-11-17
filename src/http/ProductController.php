@@ -494,19 +494,20 @@ class ProductController extends APIController
           $result[$i]['tag_array'] = $this->manageTags($result[$i]['tags']);
           $result[$i]['created_at_human'] = Carbon::createFromFormat('Y-m-d H:i:s', $result[$i]['created_at'])->copy()->tz($this->response['timezone'])->format('F j, Y H:i A');
           $result[$i]['inventories'] = null;
-          if(isset($data['product_attribute_id']) || $data['product_attribute_id'] !== null || $data['product_attribute_id'] !== "undefined"){
-            $result[$i]['product_traces'] = app($this->productTraceController)->getTraceByParams(array(
-              array('product_id', '=',  $result[$i]['id']),
-              array('product_attribute_id', '=', $data['product_attribute_id'])
-            ), ['batch_number', 'manufacturing_date']);
-          }else{
-            $result[$i]['product_traces'] = [];
-          }
           $result[$i]['variation'] = app($this->productAttrController)->getByParamsBasic('product_id', $result[$i]['id']);
           $result[$i]['merchant'] = app($this->merchantController)->getByParams('id', $result[$i]['merchant_id']);
           // $result[$i]['details'] = $this->retrieveProductDetailsByParams('id', $result[$i]['id']);
           $result[$i]['volume'] =  null;
           if($data){
+            if(isset($data['product_attribute_id']) || $data['product_attribute_id'] !== null || $data['product_attribute_id'] !== "undefined"){
+              $result[$i]['product_traces'] = app($this->productTraceController)->getTraceByParams(array(
+                array('product_id', '=',  $result[$i]['id']),
+                array('product_attribute_id', '=', $data['product_attribute_id'])
+              ), ['batch_number', 'manufacturing_date']);
+            }else{
+              $result[$i]['product_traces'] = [];
+            }
+            
             if(isset($data['product_attribute_id']) || $data['product_attribute_id'] !== null || $data['product_attribute_id'] !== "undefined"){
               $result[$i]['volume'] = app($this->productAttrController)->getProductUnits('id', $data['product_attribute_id']);
             }
