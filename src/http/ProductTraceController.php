@@ -733,7 +733,9 @@ class ProductTraceController extends APIController
   public function create(Request $request)
   {
     $data = $request->all();
-    $data['manufacturing_date'] = str_replace('/', '-', $data['manufacturing_date']);
+    if(isset($data['manufacturing_date'])){
+      $data['manufacturing_date'] = str_replace('/', '-', $data['manufacturing_date']);
+    }
     if ($data['inventory_type'] === 'bundled_trace') {
       $qty = (int)$data['qty'];
       for ($i = 0; $i < $qty; $i++) {
