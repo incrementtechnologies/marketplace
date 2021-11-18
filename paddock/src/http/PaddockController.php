@@ -58,10 +58,10 @@ class PaddockController extends APIController
         for ($x = 0; $x < count($paddock_data); $x++) {
           $paddock_plan_tasks = PaddockPlanTask::select()->where("paddock_plan_id", "=", $paddock_data[$x]['id'])->where('deleted_at', '=', null)->get();
           for ($p = 0; $p < count($paddock_plan_tasks); $p++) {
-            if ($paddock_plan_tasks[$p]['status'] === 'pending') {
-              $this->response['data'][$i]['plan_status'] = $paddock_plan_tasks[$p]['status'];
-            } else {
+            if (sizeof($paddock_plan_tasks) > 0) {
               $this->response['data'][$i]['plan_status'] = 'completed';
+            } else {
+              $this->response['data'][$i]['plan_status'] = 'pending';
               break;
             }
           }
@@ -94,10 +94,10 @@ class PaddockController extends APIController
         if (count($paddock_data) > 0) {
           $paddock_plan_tasks = PaddockPlanTask::select()->where("paddock_plan_id", "=", $paddock_data[0]['id'])->where('deleted_at', '=', null)->get();
           for ($p = 0; $p < count($paddock_plan_tasks); $p++) {
-            if ($paddock_plan_tasks[$p]['status'] === 'pending') {
-              $this->response['data'][$i]['plan_status'] = $paddock_plan_tasks[$p]['status'];
-            } else {
+            if (sizeof($paddock_plan_tasks) > 0) {
               $this->response['data'][$i]['plan_status'] = 'completed';
+            } else {
+              $this->response['data'][$i]['plan_status'] = 'pending';
               break;
             }
           }
