@@ -106,7 +106,7 @@ class TransferController extends APIController
               $bundled = $existInbundledProducts[$a];
               $productTrace = app($this->productTraceClass)->getDetailsByParams('id', $bundled['product_trace'], ['id', 'code', 'product_attribute_id']);
               if ($productTrace) {
-                $this->manageCreatedeliveries($data, $existInBundled, $key, $existInbundledProducts, $productTrace);
+                $this->manageCreatedeliveries($data, $existInBundled, $key, $existInbundledProducts, $productTrace, $bundled);
               } else {
                 $this->response['data'] = null;
                 $this->response['error'] = 'Invalid product trace.';
@@ -114,11 +114,11 @@ class TransferController extends APIController
               }
             }
           } else {
-            $this->manageCreatedeliveries($data, $existInBundled, $key, $existInbundledProducts, $productTrace);
+            $this->manageCreatedeliveries($data, $existInBundled, $key, $existInbundledProducts, $productTrace, null);
           }
         } else {
           if ($productTrace) {
-            $this->manageCreatedeliveries($data, $existInBundled, $key, $existInbundledProducts, $productTrace);
+            $this->manageCreatedeliveries($data, $existInBundled, $key, $existInbundledProducts, $productTrace, null);
           } else {
             $this->response['data'] = null;
             $this->response['error'] = 'Invalid product trace.';
@@ -131,7 +131,7 @@ class TransferController extends APIController
     return $this->response();
   }
 
-  public function manageCreatedeliveries($data, $existInBundled, $key, $existInbundledProducts, $productTrace)
+  public function manageCreatedeliveries($data, $existInBundled, $key, $existInbundledProducts, $productTrace, $origTrace)
   {
     $productId = sizeof($existInBundled) > 0 ? $existInBundled[0]['product_id'] : $key['product_id'];
     $item = array(
@@ -148,6 +148,7 @@ class TransferController extends APIController
     );
     if ($data['account_type'] === 'DISTRIBUTOR') {
       $item['payload'] = 'product_trace';
+      $item['payload_value'] = $origTrace !== null ? $origTrace['product_trace'] : $item['payload_value'];
       $item['bundled'] = null;
       $item['bundled_setting_qty'] = null;
     }
