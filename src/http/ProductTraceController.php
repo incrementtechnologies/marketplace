@@ -734,7 +734,12 @@ class ProductTraceController extends APIController
   {
     $data = $request->all();
     if(isset($data['manufacturing_date'])){
-      $data['manufacturing_date'] = str_replace('/', '-', $data['manufacturing_date']);
+      $tempDate = str_replace('/', '-', $data['manufacturing_date']);
+      if(strlen($tempDate) > 7){
+        $data['manufacturing_date'] = Carbon::parse($data['manufacturing_date'])->format('Y-m-d');
+      }else{
+        $data['manufacturing_date'] = Carbon::parse($data['manufacturing_date'])->format('Y-m');
+      }
     }
     if ($data['inventory_type'] === 'bundled_trace') {
       $qty = (int)$data['qty'];
