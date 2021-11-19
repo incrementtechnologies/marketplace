@@ -180,7 +180,7 @@ class ProductTraceController extends APIController
       $qty = $this->getProductQtyByParameter($item['batch_number'], $item['product_id'], $item['product_attribute_id'],  'active');
       $this->response['data'][$i]['total_qty'] = $qty['total_qty'];
       $this->response['data'][$i]['active_qty'] = $qty['active_qty'];
-      $this->response['data'][$i]['manufacturing_date'] = strlen($item['manufacturing_date']) <= 7 ? Carbon::parse($this->response['data'][$i]['manufacturing_date'])->copy()->tz($this->response['timezone'])->format('m/Y') : Carbon::parse($this->response['data'][$i]['manufacturing_date'])->copy()->tz($this->response['timezone'])->format('d/m/Y');
+      $this->response['data'][$i]['manufacturing_date'] = strlen($item['manufacturing_date']) <= 7 ? Carbon::parse($this->response['data'][$i]['manufacturing_date'])->copy()->tz($this->response['timezone'])->format('Y/m') : Carbon::parse($this->response['data'][$i]['manufacturing_date'])->copy()->tz($this->response['timezone'])->format('d/m/Y');
       $this->response['data'][$i]['manufacturing_date_orig'] = $manufaturedDate;
       $this->response['data'][$i]['created_at_human'] = Carbon::createFromFormat('Y-m-d H:i:s', $item['created_at'])->copy()->tz($this->response['timezone'])->format('F j, Y h:i A');
       array_push($response[1]['traces'], $this->response['data'][$i]);
@@ -411,7 +411,7 @@ class ProductTraceController extends APIController
       try {
         $this->response['data'][$i]['manufacturing_date'] = Carbon::createFromFormat('Y-m-d', $item['manufacturing_date'])->copy()->tz($this->response['timezone'])->format('d/m/Y');
       } catch(\Exception $e) {
-        $this->response['data'][$i]['manufacturing_date'] = Carbon::createFromFormat('Y-m', $item['manufacturing_date'])->copy()->tz($this->response['timezone'])->format('m/Y');
+        $this->response['data'][$i]['manufacturing_date'] = Carbon::createFromFormat('Y-m', $item['manufacturing_date'])->copy()->tz($this->response['timezone'])->format('Y/m');
       }
       if ($this->response['data'][$i]['product'] != null) {
         $type = $this->response['data'][$i]['product']['type'];
@@ -734,12 +734,7 @@ class ProductTraceController extends APIController
   {
     $data = $request->all();
     if(isset($data['manufacturing_date'])){
-      $tempDate = str_replace('/', '-', $data['manufacturing_date']);
-      if(strlen($tempDate) > 7){
-        $data['manufacturing_date'] = Carbon::parse($data['manufacturing_date'])->format('Y-m-d');
-      }else{
-        $data['manufacturing_date'] = Carbon::parse($data['manufacturing_date'])->format('Y-m');
-      }
+      $data['manufacturing_date'] = str_replace('/', '-', $data['manufacturing_date']);
     }
     if ($data['inventory_type'] === 'bundled_trace') {
       $qty = (int)$data['qty'];
