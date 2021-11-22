@@ -239,5 +239,7 @@ class BundledSettingController extends APIController
       ));
     }
   }
-
+  public function getColumnByParams($column, $value, $return){
+    return BundledSetting::where($column, '=', $value)->select($return)->first();
+  }
 }
