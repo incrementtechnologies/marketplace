@@ -405,13 +405,14 @@ class ProductTraceController extends APIController
         $this->response['error'] = 'You don\'t own this product!';
         return $this->response();
       }
+      $this->response['data'][$i]['parent_product_id']  =  app($this->bundledSettingController)->getColumnByParams('bundled', $item['product_id'], ['product_id']);
       $this->response['data'][$i]['details'] = $this->retrieveProductDetailsByParams('id', $item['product_id']);;
       $this->response['data'][$i]['created_at_human'] = Carbon::createFromFormat('Y-m-d H:i:s', $item['created_at'])->copy()->tz($this->response['timezone'])->format('F j, Y h:i A');
       $this->response['data'][$i]['bundled_product'] = app($this->bundledProductController)->getByParams('product_trace', $item['id']);
       try {
         $this->response['data'][$i]['manufacturing_date'] = Carbon::createFromFormat('Y-m-d', $item['manufacturing_date'])->copy()->tz($this->response['timezone'])->format('d/m/Y');
       } catch(\Exception $e) {
-        $this->response['data'][$i]['manufacturing_date'] = Carbon::createFromFormat('Y-m', $item['manufacturing_date'])->copy()->tz($this->response['timezone'])->format('Y/m');
+        $this->response['data'][$i]['manufacturing_date'] = $item['manufacturing_date'] !== null ? Carbon::createFromFormat('Y-m', $item['manufacturing_date'])->copy()->tz($this->response['timezone'])->format('Y/m') : null;
       }
       if ($this->response['data'][$i]['product'] != null) {
         $type = $this->response['data'][$i]['product']['type'];
