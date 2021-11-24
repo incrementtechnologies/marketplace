@@ -299,7 +299,9 @@ class PaddockPlanTaskController extends APIController
                     array_push($final, $result[$i]);
                 } else {
                     $result[$i]['due_date'] = Carbon::createFromFormat('Y-m-d H:i:s', $key['updated_at'])->copy()->tz($this->response['timezone'])->format('d/m/Y');
-                    if($key['status'] === $task['status']){
+                    $paddockArea = $result[$i]['paddock']['spray_area'];
+                    $totalBatchArea = app($this->batchPaddockTaskClass)->getTotalBatchPaddockPlanTask($result[$i]['paddock_plan_task_id']);
+                    if($key['status'] === $task['status'] && ((float)$paddockArea - $totalBatchArea) <= 0){
                         array_push($final, $result[$i]);
                     }
                 }
