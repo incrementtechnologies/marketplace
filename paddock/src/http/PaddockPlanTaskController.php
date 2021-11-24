@@ -487,7 +487,7 @@ class PaddockPlanTaskController extends APIController
                     $tempRes[$i]['partial_flag'] = false;
                     $tempRes[$i]['due_date'] = $task['due_date'];
                     $tempRes[$i]['arable_area'] = $task['arable_area'];
-                    $tempRes[$i]['rate_per_hectar'] = app('Increment\Marketplace\Paddock\Http\SprayMixProductController')->retrieveDetailsWithParams('spray_mix_id', $key['spray_mix_id'], ['rate']);
+                    $tempRes[$i]['rate_per_hectar'] = app('Increment\Marketplace\Paddock\Http\SprayMixProductController')->retrieveDetailsWithParams('spray_mix_id', $task['spray_mix_id'], ['rate']);
                     if ($tempRes[$i]['remaining_spray_area'] > 0) {
                         $available[] = $tempRes[$i];    
                     }
