@@ -151,7 +151,7 @@ class OrderRequestController extends APIController
             'date_of_delivery_formatted'  => Carbon::createFromFormat('Y-m-d H:i:s', $key['date_of_delivery'])->copy()->tz($this->response['timezone'])->format('d M'),
             'status'        => $key['status'],
             'delivered_by'  => $key['delivered_by'] ? $this->retrieveName($key['delivered_by']) : null,
-            'delivered_date'=> $key['date_delivered'] ? Carbon::parse($key['date_delivered'])->format('d/m/Y') : null,
+            'delivered_date'=> $key['date_delivered'] ? Carbon::parse($key['date_delivered'])->format('d/m/Y H:i:s') : null,
             'delivered_date_formatted'=> $key['date_delivered'] ? Carbon::createFromFormat('Y-m-d H:i:s', $key['date_delivered'])->copy()->tz($this->response['timezone'])->format('d M') : null,
             'code'          => $key['code'],
             'added_by'      => $key['code'],  
