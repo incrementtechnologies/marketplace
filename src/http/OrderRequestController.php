@@ -157,6 +157,7 @@ class OrderRequestController extends APIController
             'added_by'      => $key['code'],  
             'id'      => $key['id'],
             'order_number'      => $key['order_number'],
+            'updated_at'      => Carbon::parse($key['updated_at'])->format('Y-m-d H:i:s'),
             'daily_loading_list' => app($this->dailyLoadingListClass)->checkIfExist('order_request_id', $key['id']),
             'daily_loading_list_id' => isset($key['daily_loading_list_id']) ? $key['daily_loading_list_id'] : null,
             'created_at_human' => Carbon::createFromFormat('Y-m-d H:i:s', $key['date_of_delivery'])->copy()->tz($this->response['timezone'])->format('d M'),

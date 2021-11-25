@@ -400,6 +400,7 @@ class PaddockPlanTaskController extends APIController
                     }
                 }else{
                     $array[$i]['date_completed'] = $key['delivered_date_formatted'];
+                    $array[$i]['date_completed_orig'] = $key['updated_at'];
                 }
                 $i++;
             }
@@ -409,7 +410,7 @@ class PaddockPlanTaskController extends APIController
             $finalResult = array_values($finalResult);
             for ($a=0; $a <= sizeof($finalResult)-1; $a++) { 
                 $items = $finalResult[$a];
-                $finalResult[$a]['date_completed'] = isset($items['date_completed_orig']) ? Carbon::createFromFormat('Y-m-d H:i:s', $items['date_completed_orig'])->copy()->tz($this->response['timezone'])->format('d M') : null;
+                $finalResult[$a]['date_completed'] = isset($items['date_completed_orig']) ? Carbon::parse($items['date_completed_orig'])->format('d M') : null;
             }
         }
         return $finalResult;
