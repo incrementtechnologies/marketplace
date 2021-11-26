@@ -56,6 +56,10 @@ class BatchPaddockTaskController extends APIController
             ->where($column, '=',$value)->first();
     }
 
+    public function retrieveLastAdded($column, $value){
+        return BatchPaddockTask::where($column, '=', $value)->orderBy('updated_at', 'desc')->first();
+    }
+
     public function checkIfInProgress($column, $value){
         $inprogress = BatchPaddockTask::leftJoin('batches as T1', 'T1.id', '=', 'batch_paddock_tasks.batch_id')
             ->where($column, '=',$value)->where('T1.status', '=', 'inprogress')->get();

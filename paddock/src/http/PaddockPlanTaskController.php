@@ -290,7 +290,7 @@ class PaddockPlanTaskController extends APIController
         if(sizeof($result) > 0){
             $i= 0;
             foreach ($result as $key) {
-                $task = PaddockPlanTask::where('id', '=', $key['paddock_plan_task_id'])->first();
+                $task = PaddockPlanTask::where('id', '=', $key['paddock_plan_task_id'])->orderBy('updated_at', 'desc')->first();
                 $result[$i]['paddock'] = app($this->paddockClass)->getByParams('id', $task['paddock_id'], ['id', 'name', 'spray_area']);
                 $result[$i]['batch_status'] = $key['status'];
                 $result[$i]['spray_mix'] = app($this->sprayMixClass)->getByParams('id', $result[$i]['spray_mix_id'], ['id', 'name']);
@@ -298,7 +298,8 @@ class PaddockPlanTaskController extends APIController
                     $result[$i]['due_date'] = Carbon::createFromFormat('Y-m-d',  $task['due_date'])->copy()->tz($this->response['timezone'])->format('d/m/Y');
                     array_push($final, $result[$i]);
                 } else {
-                    $result[$i]['due_date'] = Carbon::createFromFormat('Y-m-d H:i:s', $key['updated_at'])->copy()->tz($this->response['timezone'])->format('d/m/Y');
+                    $lastAdded = app($this->batchPaddockTaskClass)->retrieveLastAdded('paddock_plan_task_id', $key['paddock_plan_task_id']);
+                    $result[$i]['due_date'] = Carbon::parse($lastAdded['updated_at'])->format('d/m/Y');
                     $paddockArea = $result[$i]['paddock']['spray_area'];
                     $totalBatchArea = app($this->batchPaddockTaskClass)->getTotalBatchPaddockPlanTask($result[$i]['paddock_plan_task_id']);
                     if($key['status'] === $task['status'] && ((float)$paddockArea - $totalBatchArea) <= 0){
@@ -456,7 +457,7 @@ class PaddockPlanTaskController extends APIController
         }
     }
 
-    public function retrieveAvailablePaddocks(Request $request)
+    public function retrieveAvailablePaddock_Old(Request $request)
     {
         $data = $request->all();
         $date =  Carbon::now();
@@ -466,7 +467,7 @@ class PaddockPlanTaskController extends APIController
             $i = 0;
             $available = array();
             foreach ($tempRes as $key) {
-                $task = PaddockPlanTask::where('paddock_id', '=', $key['id'])
+                $task = PaddockPlanTask::where('paddock_id', '=', 7)
                     ->orderBy('due_date', 'asc')
                     ->first();
                 if ($task !== null && $task['spray_mix_id'] == $data['spray_mix_id']) {
@@ -500,6 +501,67 @@ class PaddockPlanTaskController extends APIController
             return $this->response['data'] = [];
         }
         return $this->response();
+    }
+
+
+    public function retrieveAvailablePaddocks(Request $request)
+    {
+        $data = $request->all();
+        $result = [];
+        $date =  Carbon::now();
+        $currDate = $date->toDateString();
+        $result = Paddock::where('deleted_at', '=', null)->get();
+        $finalResult = array();
+        $counter = 0;
+        if (sizeof($result) > 0) {
+            $i = 0;
+            foreach ($result as $key) {
+                $tempDates = [];
+                $task = PaddockPlanTask::where('paddock_id', '=', $key['id'])
+                    ->orderBy('due_date', 'asc')
+                    ->where('spray_mix_id', '=', $data['spray_mix_id'])
+                    ->get();
+                if(sizeof($task) > 0){
+                    for ($a=0; $a <= sizeof($task)-1; $a++) {
+                        $each = $task[$a];
+                        array_push($tempDates, $each['due_date']);
+                    }
+                    foreach ($tempDates as $date) {
+                        $params = array(
+                            array('paddock_id', '=', $key['id']),
+                            array('due_date', '=', $date),
+                        );
+                        $remainingSpray = $this->getRemainingSprayArea($params, $key);
+                        if($remainingSpray !== null && $remainingSpray['remaining_spray_area'] > 0){
+                            $paddockPlan = app($this->paddockPlanClass)->retrievePlanByParams('id', $each['paddock_plan_id'], ['start_date', 'end_date', 'crop_id', 'paddock_id']);
+                            $totalBatchArea = app($this->batchPaddockTaskClass)->getTotalBatchPaddockPlanTask($each['id']);
+                            $result[$i]['area'] = (float)$key['area'];
+                            $totalArea =  $totalBatchArea != null ? (doubleval($key['spray_area']) - doubleval($totalBatchArea)) : doubleval($key['spray_area']);
+                            $result[$i]['remaining_spray_area'] = $this->numberConvention($totalArea);
+                            $result[$i]['units'] = "Ha";
+                            $result[$i]['spray_areas'] = $result[$i]['remaining_spray_area'];
+                            $result[$i]['batch_areas'] = $totalBatchArea;
+                            $result[$i]['spray_mix_units'] = "L/Ha";
+                            $result[$i]['partial'] = false;
+                            $result[$i]['paddock_id'] = $each['paddock_id'];
+                            $result[$i]['name'] = $each['name'];
+                            $result[$i]['spray_area'] = $each['spray_area'];
+                            $result[$i]['plan_task_id'] = $each['id'];
+                            $result[$i]['crop_name'] = app($this->cropClass)->retrieveCropName($paddockPlan[0]['crop_id']);
+                            $result[$i]['partial_flag'] = false;
+                            $result[$i]['due_date'] = $each['due_date'];
+                            $result[$i]['arable_area'] = $each['arable_area'];
+                            $result[$i]['rate_per_hectar'] = app('Increment\Marketplace\Paddock\Http\SprayMixProductController')->retrieveDetailsWithParams('spray_mix_id', $each['spray_mix_id'], ['rate']);
+                            array_push($finalResult, $result[$i]);
+                            break;
+                        }
+                    }
+                }
+                $i++;
+            }
+            $this->response['data'] = $finalResult;
+            return $this->response();
+        }
     }
 
     public function retrieveByParams($column, $value, $returns)
