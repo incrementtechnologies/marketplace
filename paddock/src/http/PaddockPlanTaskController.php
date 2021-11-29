@@ -521,7 +521,6 @@ class PaddockPlanTaskController extends APIController
                 $task = PaddockPlanTask::where('paddock_id', '=', $key['id'])
                     ->orderBy('due_date', 'asc')
                     ->get();
-                dd($task);
                 if(sizeof($task) > 0){
                     for ($a=0; $a <= sizeof($task)-1; $a++) {
                         $each = $task[$a];
@@ -554,6 +553,7 @@ class PaddockPlanTaskController extends APIController
                             array('paddock_id', '=', $key['id']),
                             array('due_date', '=', $oldesDate),
                         );
+                        dd($oldesDate, $date['date'], $data['spray_mix_id'], $date['spray_mix_id']);
                         $remainingSpray = $this->getRemainingSprayArea($params, $key);
                         if($oldesDate === $date['date'] && $data['spray_mix_id'] === $date['spray_mix_id']){
                             $paddockPlan = app($this->paddockPlanClass)->retrievePlanByParams('id', $each['paddock_plan_id'], ['start_date', 'end_date', 'crop_id', 'paddock_id']);
