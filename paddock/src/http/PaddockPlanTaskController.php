@@ -543,14 +543,14 @@ class PaddockPlanTaskController extends APIController
                             $result[$i]['batch_areas'] = $totalBatchArea;
                             $result[$i]['spray_mix_units'] = "L/Ha";
                             $result[$i]['partial'] = false;
+                            $result[$i]['spray_area'] = $key['spray_area'];
                             $result[$i]['paddock_id'] = $each['paddock_id'];
-                            $result[$i]['name'] = $each['name'];
-                            $result[$i]['spray_area'] = $each['spray_area'];
+                            $result[$i]['name'] = $key['name'];
                             $result[$i]['plan_task_id'] = $each['id'];
                             $result[$i]['crop_name'] = app($this->cropClass)->retrieveCropName($paddockPlan[0]['crop_id']);
                             $result[$i]['partial_flag'] = false;
                             $result[$i]['due_date'] = $each['due_date'];
-                            $result[$i]['arable_area'] = $each['arable_area'];
+                            $result[$i]['arable_area'] = $key['arable_area'];
                             $result[$i]['rate_per_hectar'] = app('Increment\Marketplace\Paddock\Http\SprayMixProductController')->retrieveDetailsWithParams('spray_mix_id', $each['spray_mix_id'], ['rate']);
                             array_push($finalResult, $result[$i]);
                             break;
