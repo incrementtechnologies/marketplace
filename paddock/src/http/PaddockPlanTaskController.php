@@ -193,12 +193,10 @@ class PaddockPlanTaskController extends APIController
 
     public function getRemainingSprayArea($params, $key){
         $task = PaddockPlanTask::where($params)->orderBy('due_date', 'asc')->first();
-
         if($task != null && $task['status'] !== 'pending'){
             $taskId = $task['id'];
             $totalBatchArea = app($this->batchPaddockTaskClass)->getTotalBatchPaddockPlanTask($taskId);
             $totalArea =  $totalBatchArea != null ? ((float)$key['spray_area'] - (float)$totalBatchArea) : (float)$key['spray_area'];
-
             return array(
                 'remaining_spray_area' => $this->numberConvention($totalArea),
                 'due_date' => $task['due_date'],
@@ -517,22 +515,46 @@ class PaddockPlanTaskController extends APIController
             $i = 0;
             foreach ($result as $key) {
                 $tempDates = [];
+                $oldestDate = null;
+                $dateList = [];
+                $resDates = [];
                 $task = PaddockPlanTask::where('paddock_id', '=', $key['id'])
                     ->orderBy('due_date', 'asc')
-                    ->where('spray_mix_id', '=', $data['spray_mix_id'])
                     ->get();
                 if(sizeof($task) > 0){
                     for ($a=0; $a <= sizeof($task)-1; $a++) {
                         $each = $task[$a];
-                        array_push($tempDates, $each['due_date']);
+                        array_push($tempDates, array(
+                            'date' => $each['due_date'],
+                            'spray_mix_id' => $each['spray_mix_id'],
+                            'paddock_id' => $each['paddock_id'],
+                            'spray_area' => $key['spray_area']
+                        ));
                     }
-                    foreach ($tempDates as $date) {
+                    for ($b=0; $b <= sizeof($tempDates)-1; $b++) {
+                        $eachDate = $tempDates[$b];
+                        for ($c=0; $c <= sizeof($tempDates)-1; $c++) {
+                            $el = $tempDates[$c];
+                            $params = array(
+                                array('paddock_id', '=', $el['paddock_id']),
+                                array('due_date', '=',$el['date']),
+                            );
+                            $remainingSpray = $this->getRemainingSprayArea($params, $eachDate);
+                            if($remainingSpray !== null && $remainingSpray['remaining_spray_area'] > 0  && $data['spray_mix_id'] === $eachDate['spray_mix_id']){
+                               array_push($dateList, $el);
+                               array_push($resDates, $el['date']);
+                            }
+                        }
+                    }
+                    $oldesDate = sizeof($resDates) > 0 ? min($resDates) : null;
+                    $c=0;
+                    foreach ($dateList as $date) {
                         $params = array(
                             array('paddock_id', '=', $key['id']),
-                            array('due_date', '=', $date),
+                            array('due_date', '=', $oldesDate),
                         );
                         $remainingSpray = $this->getRemainingSprayArea($params, $key);
-                        if($remainingSpray !== null && $remainingSpray['remaining_spray_area'] > 0){
+                        if($oldesDate === $date['date'] && $data['spray_mix_id'] === $date['spray_mix_id']){
                             $paddockPlan = app($this->paddockPlanClass)->retrievePlanByParams('id', $each['paddock_plan_id'], ['start_date', 'end_date', 'crop_id', 'paddock_id']);
                             $totalBatchArea = app($this->batchPaddockTaskClass)->getTotalBatchPaddockPlanTask($each['id']);
                             $result[$i]['area'] = (float)$key['area'];
@@ -555,6 +577,7 @@ class PaddockPlanTaskController extends APIController
                             array_push($finalResult, $result[$i]);
                             break;
                         }
+                        $c++;
                     }
                 }
                 $i++;
@@ -587,5 +610,9 @@ class PaddockPlanTaskController extends APIController
             $i++;
         }
         return $this->response();
+    }
+
+    public function retrieveFirst($condition){
+        return $result = PaddockPlanTask::where($condition)->orderBy('due_date', 'asc')->first();
     }
 }
