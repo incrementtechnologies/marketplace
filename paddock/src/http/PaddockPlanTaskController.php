@@ -533,6 +533,7 @@ class PaddockPlanTaskController extends APIController
                     }
                     for ($b=0; $b <= sizeof($tempDates)-1; $b++) {
                         $eachDate = $tempDates[$b];
+                        dd($eachDate);
                         for ($c=0; $c <= sizeof($tempDates)-1; $c++) {
                             $el = $tempDates[$c];
                             $params = array(
@@ -547,7 +548,6 @@ class PaddockPlanTaskController extends APIController
                         }
                     }
                     $oldesDate = sizeof($resDates) > 0 ? min($resDates) : null;
-                    dd($dateList);
                     $c=0;
                     foreach ($dateList as $date) {
                         $params = array(
