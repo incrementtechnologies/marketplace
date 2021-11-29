@@ -509,6 +509,7 @@ class PaddockPlanTaskController extends APIController
         $date =  Carbon::now();
         $currDate = $date->toDateString();
         $result = Paddock::where('deleted_at', '=', null)->get();
+        dd($result);
         $finalResult = array();
         $counter = 0;
         if (sizeof($result) > 0) {
