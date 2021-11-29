@@ -538,7 +538,7 @@ class PaddockPlanTaskController extends APIController
                             array('due_date', '=',$eachDate['date']),
                         );
                         $remainingSpray = $this->getRemainingSprayArea($params, $eachDate);
-                        if($remainingSpray !== null && $remainingSpray['remaining_spray_area'] > 0  && $data['spray_mix_id'] === $eachDate['spray_mix_id']){
+                        if($remainingSpray !== null && $remainingSpray['remaining_spray_area'] > 0  && (int)$data['spray_mix_id'] === (int)$eachDate['spray_mix_id']){
                             array_push($dateList, $eachDate);
                             array_push($resDates, $eachDate['date']);
                         }
@@ -551,7 +551,7 @@ class PaddockPlanTaskController extends APIController
                             array('due_date', '=', $oldesDate),
                         );
                         $remainingSpray = $this->getRemainingSprayArea($params, $key);
-                        if($oldesDate === $date['date'] && $data['spray_mix_id'] === $date['spray_mix_id']){
+                        if($oldesDate === $date['date'] && (int)$data['spray_mix_id'] === (int)$date['spray_mix_id']){
                             $paddockPlan = app($this->paddockPlanClass)->retrievePlanByParams('id', $each['paddock_plan_id'], ['start_date', 'end_date', 'crop_id', 'paddock_id']);
                             $totalBatchArea = app($this->batchPaddockTaskClass)->getTotalBatchPaddockPlanTask($each['id']);
                             $result[$i]['area'] = (float)$key['area'];
