@@ -509,7 +509,6 @@ class PaddockPlanTaskController extends APIController
         $date =  Carbon::now();
         $currDate = $date->toDateString();
         $result = Paddock::where('deleted_at', '=', null)->get();
-        dd($result);
         $finalResult = array();
         $counter = 0;
         if (sizeof($result) > 0) {
@@ -522,6 +521,7 @@ class PaddockPlanTaskController extends APIController
                 $task = PaddockPlanTask::where('paddock_id', '=', $key['id'])
                     ->orderBy('due_date', 'asc')
                     ->get();
+                dd($task);
                 if(sizeof($task) > 0){
                     for ($a=0; $a <= sizeof($task)-1; $a++) {
                         $each = $task[$a];
