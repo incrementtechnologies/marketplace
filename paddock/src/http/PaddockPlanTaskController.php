@@ -547,6 +547,7 @@ class PaddockPlanTaskController extends APIController
                         }
                     }
                     $oldesDate = sizeof($resDates) > 0 ? min($resDates) : null;
+                    dd($dateList);
                     $c=0;
                     foreach ($dateList as $date) {
                         $params = array(
