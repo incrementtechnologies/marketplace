@@ -48,7 +48,8 @@ class TransferController extends APIController
     $data = $request->all();
     $data['code'] = $this->generateCode();
     $this->insertDB($data);
-
+    $receiverMerchant = app('Increment\Marketplace\Http\MerchantController')->getByParams('id', $data['to']);
+    $receiver = app('Increment\Account\Http\AccountController')->getByParamsWithColumns($receiverMerchant['account_id'], ['account_type']);
     if ($this->response['data'] > 0) {
       app($this->dailyLoadingListClass)->updateByParams('order_request_id', $data['order_request_id'], array(
         'status'  => 'completed',
@@ -76,7 +77,7 @@ class TransferController extends APIController
         $existInBundled = [];
         $existInbundledProducts = app($this->bundledProductController)->getByParamsWithDelete('bundled_trace', $key['product_trace'], $data['account_type']);
         if (sizeOf($existInbundledProducts) > 0) {
-          if ($data['account_type'] === 'DISTRIBUTOR') {
+          if ($receiver['account_type'] === 'DISTRIBUTOR') {
             $key['product_trace'] = $existInbundledProducts[0]['product_trace'];
             $existInBundled = app($this->bundledSettingsController)->getByParamsByCondition(array(
               array('product_id', '=', $existInbundledProducts[0]['product_on_settings']),
@@ -100,13 +101,13 @@ class TransferController extends APIController
           $key['bundled_setting_qty'] = NULL;
         }
         $productTrace = app($this->productTraceClass)->getDetailsByParams('id', $key['product_trace'], ['id', 'code', 'product_attribute_id']);
-        if ($data['account_type'] === 'DISTRIBUTOR') {
+        if ($receiver['account_type'] === 'DISTRIBUTOR') {
           if (sizeof($existInbundledProducts) > 0) {
             for ($a = 0; $a <= sizeof($existInbundledProducts) - 1; $a++) {
               $bundled = $existInbundledProducts[$a];
               $productTrace = app($this->productTraceClass)->getDetailsByParams('id', $bundled['product_trace'], ['id', 'code', 'product_attribute_id']);
               if ($productTrace) {
-                $this->manageCreatedeliveries($data, $existInBundled, $key, $existInbundledProducts, $productTrace, $bundled);
+                $this->manageCreatedeliveries($data, $receiver,  $existInBundled, $key, $existInbundledProducts, $productTrace, $bundled);
               } else {
                 $this->response['data'] = null;
                 $this->response['error'] = 'Invalid product trace.';
@@ -114,11 +115,11 @@ class TransferController extends APIController
               }
             }
           } else {
-            $this->manageCreatedeliveries($data, $existInBundled, $key, $existInbundledProducts, $productTrace, null);
+            $this->manageCreatedeliveries($data, $receiver, $existInBundled, $key, $existInbundledProducts, $productTrace, null);
           }
         } else {
           if ($productTrace) {
-            $this->manageCreatedeliveries($data, $existInBundled, $key, $existInbundledProducts, $productTrace, null);
+            $this->manageCreatedeliveries($data, $receiver, $existInBundled, $key, $existInbundledProducts, $productTrace, null);
           } else {
             $this->response['data'] = null;
             $this->response['error'] = 'Invalid product trace.';
@@ -131,7 +132,7 @@ class TransferController extends APIController
     return $this->response();
   }
 
-  public function manageCreatedeliveries($data, $existInBundled, $key, $existInbundledProducts, $productTrace, $origTrace)
+  public function manageCreatedeliveries($data, $receiver, $existInBundled, $key, $existInbundledProducts, $productTrace, $origTrace)
   {
     $productId = sizeof($existInBundled) > 0 ? $existInBundled[0]['product_id'] : $key['product_id'];
     $item = array(
@@ -146,7 +147,7 @@ class TransferController extends APIController
       'status'      => 'active',
       'created_at'  => Carbon::now()
     );
-    if ($data['account_type'] === 'DISTRIBUTOR') {
+    if ($receiver['account_type'] === 'DISTRIBUTOR') {
       $item['payload'] = 'product_trace';
       $item['payload_value'] = $origTrace !== null ? $origTrace['product_trace'] : $item['payload_value'];
       $item['bundled'] = null;
