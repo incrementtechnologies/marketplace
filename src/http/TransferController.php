@@ -51,34 +51,33 @@ class TransferController extends APIController
     $receiverMerchant = app('Increment\Marketplace\Http\MerchantController')->getByParams('id', $data['to']);
     $receiver = app('Increment\Account\Http\AccountController')->getByParamsWithColumns($receiverMerchant['account_id'], ['account_type']);
     if ($this->response['data'] > 0) {
-      // app($this->dailyLoadingListClass)->updateByParams('order_request_id', $data['order_request_id'], array(
-      //   'status'  => 'completed',
-      //   'updated_at'  => Carbon::now()
-      // ));
+      app($this->dailyLoadingListClass)->updateByParams('order_request_id', $data['order_request_id'], array(
+        'status'  => 'completed',
+        'updated_at'  => Carbon::now()
+      ));
 
-      // app($this->orderRequestClass)->updateByParams($data['order_request_id'], array(
-      //   'status'  => 'completed',
-      //   'date_delivered'  => Carbon::now(),
-      //   'updated_at'  => Carbon::now()
-      // ));
+      app($this->orderRequestClass)->updateByParams($data['order_request_id'], array(
+        'status'  => 'completed',
+        'date_delivered'  => Carbon::now(),
+        'updated_at'  => Carbon::now()
+      ));
 
       $products = $data['products'];
       $i = 0;
       foreach ($products as $key) {
         $existTrace = TransferredProduct::where('payload_value', '=', $key['product_trace'])->orderBy('created_at', 'desc')->limit(1)->get();
         if (sizeof($existTrace) > 0) {
-          // TransferredProduct::where('id', '=', $existTrace[0]['id'])->update(
-          //   array(
-          //     'status' => 'inactive',
-          //     'updated_at'  => Carbon::now()
-          //   )
-          // );
+          TransferredProduct::where('id', '=', $existTrace[0]['id'])->update(
+            array(
+              'status' => 'inactive',
+              'updated_at'  => Carbon::now()
+            )
+          );
         }
         $existInBundled = [];
         $existInbundledProducts = app($this->bundledProductController)->getByParamsWithDelete('bundled_trace', $key['product_trace'], $data['account_type']);
         if (sizeOf($existInbundledProducts) > 0) {
           if ($receiver['account_type'] === 'DISTRIBUTOR') {
-            $key['product_trace'] = $existInbundledProducts[0]['product_trace'];
             $existInBundled = app($this->bundledSettingsController)->getByParamsByCondition(array(
               array('product_id', '=', $existInbundledProducts[0]['product_on_settings']),
               array('bundled', '=', $existInbundledProducts[0]['product_id'])
@@ -1194,6 +1193,7 @@ class TransferController extends APIController
     if (sizeof($result) > 0) {
       $array = array();
       foreach ($result as $key) {
+        // dd($key['payload_value']);
         $trace = app($this->productTraceClass)->getByParamsDetails('id', $key['payload_value']);
         $attributes = app($this->productAttrClass)->getProductUnits('id', $trace[0]['product_attribute_id']);
         // if(isset($data['user'])){
