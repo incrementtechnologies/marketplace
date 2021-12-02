@@ -78,11 +78,13 @@ class TransferController extends APIController
         $existInbundledProducts = app($this->bundledProductController)->getByParamsWithDelete('bundled_trace', $key['product_trace'], $data['account_type']);
         if (sizeOf($existInbundledProducts) > 0) {
           if ($receiver['account_type'] === 'DISTRIBUTOR') {
+            $key['product_trace'] = $key['product_trace'];
             $existInBundled = app($this->bundledSettingsController)->getByParamsByCondition(array(
               array('product_id', '=', $existInbundledProducts[0]['product_on_settings']),
               array('bundled', '=', $existInbundledProducts[0]['product_id'])
             ));
           } else {
+            $key['product_trace'] = $existInbundledProducts[0]['product_trace'];
             $existInBundled = app($this->bundledSettingsController)->getByParamsByCondition(array(
               array('product_id', '=', $existInbundledProducts[0]['product_on_settings']),
               array('bundled', '=', $existInbundledProducts[0]['product_id'])
@@ -96,6 +98,7 @@ class TransferController extends APIController
             $key['bundled_setting_qty'] = NULL;
           }
         } else {
+          $key['product_trace'] = $key['product_trace'];
           $key['bundled_id'] = NULL;
           $key['bundled_setting_qty'] = NULL;
         }
