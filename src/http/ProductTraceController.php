@@ -877,6 +877,13 @@ class ProductTraceController extends APIController
     return true;
   }
 
+  public function recoverDeleted($column, $value){
+    $result = ProductTrace::where($column, '=', $value)->where('deleted_at', '!=', null)->update(array(
+      'deleted_at' => null
+    ));
+    return $result;
+  }
+
   public function getTraceByParams($whereArray, $returns)
   {
     $result = ProductTrace::where($whereArray)->where('deleted_at', '=', null)->get($returns);
