@@ -188,6 +188,24 @@ class BundledProductController extends APIController
     return $this->response();
   }
 
+  public function recoverDeleted(Request $request){
+    $data = $reqeust->all();
+    for ($i=0; $i <= sizeof($data['products'])-1 ; $i++) {
+      $item = $data['products'][$i];
+      $deleted = BundledProduct::where('product_id', '=', $item['product_id'])->where('product_trace', '=', $item['product_trace'])->where('deleted', '!=', null)->first();
+      if($deleted !== null){
+        BundledProduct::where('bundled_trace', '=', $value)->update(
+          array(
+            'deleted_at' => null,
+          )
+        );
+        app($this->productTraceController)->recoverDeleted($data['bundled_trace']);
+      }
+    }
+    $this->response['data'] = 'recovered';
+    return $this->response();
+  }
+
   public function deleteByParams($column, $value, $transferId){
     $bundledItems = BundledProduct::where($column, '=', $value)->where('deleted_at', '=', null)->get();
     if(sizeof($bundledItems) > 0){
