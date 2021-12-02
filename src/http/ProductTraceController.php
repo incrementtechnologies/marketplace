@@ -581,7 +581,8 @@ class ProductTraceController extends APIController
 
   public function getByParamsDetails($column, $value)
   {
-    $result  = ProductTrace::where($column, '=', $value)->get();
+    $result  = DB::table('product_traces')->where($column, '=', $value)->get();
+    $result = json_decode(json_encode($result), true);
     if (sizeof($result) > 0) {
       $i = 0;
       foreach ($result as $key) {
