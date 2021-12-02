@@ -202,12 +202,21 @@ class TransferredProductController extends APIController
       ->where('status', '=', 'active')
       ->where('deleted_at', '=', null)
       ->count();
+    
+    $inactive = TransferredProduct::where('merchant_id', '=', $merchantId)
+      ->where('product_attribute_id', '=', $productAtributeId)
+      ->where('status', '=', 'inactive')
+      ->where('deleted_at', '=', null)
+      ->sum('bundled_setting_qty');
+
     $count = TransferredProduct::where('merchant_id', '=', $merchantId)
       ->where('product_attribute_id', '=', $productAtributeId)
       ->where('payload', '=', 'product_trace')
       ->where('status', '=', 'active')
       ->where('deleted_at', '=', null)
       ->count();
+
+    $temp = $temp-$inactive;
     if ($temp > 0) {
       $count += $temp;
     }
