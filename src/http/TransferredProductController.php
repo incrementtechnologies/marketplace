@@ -198,7 +198,6 @@ class TransferredProductController extends APIController
   {
     $temp = TransferredProduct::where('merchant_id', '=', $merchantId)
       ->where('product_attribute_id', '=', $productAtributeId)
-      ->where('payload', '=', 'bundled_trace')
       ->where('deleted_at', '=', null)
       ->count();
     
@@ -209,13 +208,6 @@ class TransferredProductController extends APIController
       ->where('deleted_at', '=', null)
       ->sum('bundled_setting_qty');
 
-    $count = TransferredProduct::where('merchant_id', '=', $merchantId)
-      ->where('product_attribute_id', '=', $productAtributeId)
-      ->where('payload', '=', 'product_trace')
-      ->where('status', '=', 'active')
-      ->where('deleted_at', '=', null)
-      ->count();
-    
     $inactiveRegular = TransferredProduct::where('merchant_id', '=', $merchantId)
       ->where('product_attribute_id', '=', $productAtributeId)
       ->where('payload', '=', 'product_trace')
@@ -223,6 +215,7 @@ class TransferredProductController extends APIController
       ->where('deleted_at', '=', null)
       ->count();
 
+    $count = 0;
     $temp = $temp-($inactiveRegular + $inactiveBundled);
     if ($temp > 0) {
       $count += $temp;
