@@ -176,7 +176,7 @@ class BundledProductController extends APIController
       }else{
         // nothing
       }
-      app($this->transferredProductClass)->deleteByParams($transferred['id']);
+      // app($this->transferredProductClass)->deleteByParams($transferred['id']);
     }
     BundledProduct::where('bundled_trace', '=', $data['bundled_trace'])->update(
       array(
