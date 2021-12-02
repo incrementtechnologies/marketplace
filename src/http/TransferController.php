@@ -101,6 +101,7 @@ class TransferController extends APIController
           $key['bundled_setting_qty'] = NULL;
         }
         $productTrace = app($this->productTraceClass)->getDetailsByParams('id', $key['product_trace'], ['id', 'code', 'product_attribute_id']);
+        
         if ($receiver['account_type'] === 'DISTRIBUTOR') {
           if (sizeof($existInbundledProducts) > 0) {
             for ($a = 0; $a <= sizeof($existInbundledProducts) - 1; $a++) {
@@ -147,13 +148,12 @@ class TransferController extends APIController
       'status'      => 'active',
       'created_at'  => Carbon::now()
     );
-    if ($receiver['account_type'] === 'DISTRIBUTOR') {
+    if ($receiver['account_type'] === 'USER') {
       $item['payload'] = 'product_trace';
       $item['payload_value'] = $origTrace !== null ? $origTrace['product_trace'] : $item['payload_value'];
       $item['bundled'] = null;
       $item['bundled_setting_qty'] = null;
     }
-
     TransferredProduct::insert($item);
 
     $merchant_products = array(
