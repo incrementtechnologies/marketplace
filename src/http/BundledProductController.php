@@ -118,13 +118,13 @@ class BundledProductController extends APIController
 
   public function getByParamsWithDelete($column, $value, $type){
     $result = BundledProduct::where($column, '=', $value)->where('deleted_at', '=', null)->get();
-    if($type == 'DISTRIBUTOR'){
-      if(sizeof($result) > 0){
-        BundledProduct::where($column, '=', $value)->update(array(
-          'deleted_at' => Carbon::now()
-        ));
-      }
-    }
+    // if($type == 'DISTRIBUTOR'){
+    //   if(sizeof($result) > 0){
+    //     BundledProduct::where($column, '=', $value)->update(array(
+    //       'deleted_at' => Carbon::now()
+    //     ));
+    //   }
+    // }
     return sizeof($result) > 0 ? $result : [];
   }
 

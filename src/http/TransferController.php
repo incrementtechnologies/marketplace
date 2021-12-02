@@ -75,7 +75,7 @@ class TransferController extends APIController
           );
         }
         $existInBundled = [];
-        $existInbundledProducts = app($this->bundledProductController)->getByParamsWithDelete('bundled_trace', $key['product_trace'], $data['account_type']);
+        $existInbundledProducts = app($this->bundledProductController)->getByParamsBundled('bundled_trace', $key['product_trace']);
         if (sizeOf($existInbundledProducts) > 0) {
           if ($receiver['account_type'] === 'DISTRIBUTOR') {
             $key['product_trace'] = $key['product_trace'];
@@ -103,8 +103,7 @@ class TransferController extends APIController
           $key['bundled_setting_qty'] = NULL;
         }
         $productTrace = app($this->productTraceClass)->getDetailsByParams('id', $key['product_trace'], ['id', 'code', 'product_attribute_id']);
-        
-        if ($receiver['account_type'] === 'DISTRIBUTOR') {
+        // if ($receiver['account_type'] === 'DISTRIBUTOR') {
           if (sizeof($existInbundledProducts) > 0) {
             for ($a = 0; $a <= sizeof($existInbundledProducts) - 1; $a++) {
               $bundled = $existInbundledProducts[$a];
@@ -120,15 +119,17 @@ class TransferController extends APIController
           } else {
             $this->manageCreatedeliveries($data, $receiver, $existInBundled, $key, $existInbundledProducts, $productTrace, null);
           }
-        } else {
-          if ($productTrace) {
-            $this->manageCreatedeliveries($data, $receiver, $existInBundled, $key, $existInbundledProducts, $productTrace, null);
-          } else {
-            $this->response['data'] = null;
-            $this->response['error'] = 'Invalid product trace.';
-            return $this->response();
-          }
-        }
+        // }
+        // else {
+        //   dd($existInBundled);
+          // if ($productTrace) {
+          //   $this->manageCreatedeliveries($data, $receiver, $existInBundled, $key, $existInbundledProducts, $productTrace, null);
+          // } else {
+          //   $this->response['data'] = null;
+          //   $this->response['error'] = 'Invalid product trace.';
+          //   return $this->response();
+          // }
+        // }
         $i++;
       }
     }
