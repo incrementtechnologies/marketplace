@@ -1195,6 +1195,7 @@ class TransferController extends APIController
     $result = app($this->transferredProductsClass)->retrieveWithGroupBy('transfer_id', $this->response['data'][0]['id']);
     if (sizeof($result) > 0) {
       $array = array();
+      $i=0;
       foreach ($result as $key) {
         $trace = app($this->productTraceClass)->getByParamsDetails('id', $key['payload_value']);
         $attributes = app($this->productAttrClass)->getProductUnits('id', $trace[0]['product_attribute_id']);
@@ -1220,7 +1221,8 @@ class TransferController extends APIController
           'manufacturing_date' => $trace[0]['manufacturing_date'],
           'product_attribute' => $attributes
         );
-        $array[] = $item;
+        array_push($array, $item);
+        $i++;
       }
       $this->response['data'] = $array;
     }
