@@ -192,7 +192,7 @@ class BundledProductController extends APIController
     $data = $request->all();
     for ($i=0; $i <= sizeof($data['products'])-1 ; $i++) {
       $item = $data['products'][$i];
-      $deleted = BundledProduct::where('product_id', '=', $item['product_id'])->where('product_trace', '=', $item['product_trace'])->where('deleted-at', '!=', null)->first();
+      $deleted = BundledProduct::where('product_id', '=', $item['product_id'])->where('product_trace', '=', $item['product_trace'])->where('deleted_at', '!=', null)->first();
       if($deleted !== null){
         BundledProduct::where('bundled_trace', '=', $deleted['bundled_trace'])->update(
           array(
