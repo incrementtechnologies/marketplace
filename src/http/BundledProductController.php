@@ -156,28 +156,28 @@ class BundledProductController extends APIController
 
   public function delete(Request $request){
     $data = $request->all();
-    $transferred = app($this->transferredProductClass)->getByParamsOnly('payload_value', $data['bundled_trace']);
-    if($transferred != null){
-      $bundledItems = BundledProduct::where('bundled_trace', '=', $data['bundled_trace'])->get();
-      if(sizeof($bundledItems) > 0){
-        $parameter = array();
-        foreach ($bundledItems as $key) {
-          $newArray = array(
-            'transfer_id' => $transferred['transfer_id'],
-            'payload'     => 'product_traces',
-            'payload_value' => $key['product_trace'],
-            'product_id'  => $key['product_on_settings'],
-            'product_attribute_id' => $key['product_attribute_id'],
-            'created_at'  => Carbon::now()
-          );
-          $parameter[] = $newArray;
-        }
-        app($this->transferredProductClass)->insert($parameter);
-      }else{
-        // nothing
-      }
-      // app($this->transferredProductClass)->deleteByParams($transferred['id']);
-    }
+    // $transferred = app($this->transferredProductClass)->getByParamsOnly('payload_value', $data['bundled_trace']);
+    // if($transferred != null){
+    //   $bundledItems = BundledProduct::where('bundled_trace', '=', $data['bundled_trace'])->get();
+    //   if(sizeof($bundledItems) > 0){
+    //     $parameter = array();
+    //     foreach ($bundledItems as $key) {
+    //       $newArray = array(
+    //         'transfer_id' => $transferred['transfer_id'],
+    //         'payload'     => 'product_traces',
+    //         'payload_value' => $key['product_trace'],
+    //         'product_id'  => $key['product_on_settings'],
+    //         'product_attribute_id' => $key['product_attribute_id'],
+    //         'created_at'  => Carbon::now()
+    //       );
+    //       $parameter[] = $newArray;
+    //     }
+    //     app($this->transferredProductClass)->insert($parameter);
+    //   }else{
+    //     // nothing
+    //   }
+    //   // app($this->transferredProductClass)->deleteByParams($transferred['id']);
+    // }
     BundledProduct::where('bundled_trace', '=', $data['bundled_trace'])->update(
       array(
         'deleted_at' => Carbon::now()
