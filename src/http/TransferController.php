@@ -1191,12 +1191,10 @@ class TransferController extends APIController
     if (sizeof($this->response['data']) <= 0) {
       return $this->response();
     }
-    $result = app($this->transferredProductsClass)->getAllByParamsOnly('transfer_id', $this->response['data'][0]['id']);
-    // return $result;
+    $result = app($this->transferredProductsClass)->retrieveWithGroupBy('transfer_id', $this->response['data'][0]['id']);
     if (sizeof($result) > 0) {
       $array = array();
       foreach ($result as $key) {
-        // dd($key['payload_value']);
         $trace = app($this->productTraceClass)->getByParamsDetails('id', $key['payload_value']);
         $attributes = app($this->productAttrClass)->getProductUnits('id', $trace[0]['product_attribute_id']);
         // if(isset($data['user'])){
@@ -1215,6 +1213,7 @@ class TransferController extends APIController
 
         $item = array(
           'title'         => $trace[0]['product']['title'],
+          'trace' => $key['payload_value'],
           'type'  => $trace[0]['product']['type'],
           'batch_number'  => $trace[0]['batch_number'],
           'manufacturing_date' => $trace[0]['manufacturing_date'],
