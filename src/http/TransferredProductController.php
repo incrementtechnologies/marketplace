@@ -197,7 +197,7 @@ class TransferredProductController extends APIController
   public function getRemainingProductQtyDistributor($productId, $merchantId, $productAtributeId)
   {
     $temp = TransferredProduct::where('merchant_id', '=', $merchantId)
-      ->where('product_attribute_id', '=', 24)
+      ->where('product_attribute_id', '=', $productAtributeId)
       ->where('payload', '=', 'bundled_trace')
       ->where('status', '=', 'active')
       ->where('deleted_at', '=', null)
@@ -259,7 +259,7 @@ class TransferredProductController extends APIController
   public function getSizeNoDate($column, $value)
   {
     $productTrace = TransferredProduct::where($column, '=', $value)->where('payload', '=', 'product_trace')->where('deleted_at', '=', null)->count();
-    $bundled = TransferredProduct::where($column, '=', $value)->where('payload', '=', 'bundled_trace')->where('deleted_at', '=', null)->sum('bundled_setting_qty');
+    $bundled = TransferredProduct::where($column, '=', $value)->where('payload', '=', 'bundled_trace')->where('deleted_at', '=', null)->count();
     if ($bundled > 0) {
       $productTrace += $bundled;
     }
