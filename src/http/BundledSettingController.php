@@ -172,8 +172,19 @@ class BundledSettingController extends APIController
       $result = json_decode(json_encode($result), true);
       foreach ($result as $key) {
         $bundledProduct = DB::table('products as T1')->where('T1.id', '=', $key['bundled'])->where('T1.deleted_at' , '=', null)->get();
-        $traceQty = app($this->productTraceController)->getProductQtyByParams($result[$i]['bundled'], $result[$i]['product_attribute_id']);
-        $totalTransferredBundled = app($this->transferredProductController)->getTotalTransferredBundledProducts($result[$i]['bundled']);
+        $traceQty = app($this->productTraceController)->countByParams('bundled', $result[$i]['product_attribute_id']);
+        $totalTransferredBundled = app($this->transferredProductController)->getTotalTransferredBundledProducts($result[$i]['bundled'], $merchantId);
+        $transferredQty = 0;
+        $traces = app($this->productTraceController)->getBundledTraces($result[$i]['product_attribute_id']);
+        if(sizeof($traces) > 0){
+          for ($a=0; $a <= sizeof($traces) - 1; $a++) { 
+            $item = $traces[$a];
+            $tempTransferred = app($this->transferredProductController)->getAllByParamsOnly('payload_value', $item->id);
+            if($tempTransferred !== null){
+              $transferredQty += 1;
+            }
+          }
+        }
         
         $parentTrace = app($this->productTraceController)->getTraceByParams(
             array(
@@ -187,7 +198,7 @@ class BundledSettingController extends APIController
         $result[$i]['variation'] = app($this->productAttrController)->getByParamsWithMerchant('id', $result[$i]['product_attribute_id'], $merchantId);
         $result[$i]['created_at_human'] = Carbon::createFromFormat('Y-m-d H:i:s', $result[$i]['created_at'])->copy()->tz($this->response['timezone'])->format('F j, Y H:i A');
         $result[$i]['qty'] = (int)$result[$i]['qty'];
-        $result[$i]['scanned_qty'] =  $traceQty - sizeOf($totalTransferredBundled);
+        $result[$i]['scanned_qty'] =  sizeof($traces) > 0 ? (sizeof($traces) - $transferredQty) : $transferredQty;
         $result[$i]['product'] = app($this->productController)->getProductColumnWithReturns('id', $result[$i]['bundled'], ['title']);
         $result[$i]['component_product'] = app($this->productController)->getProductColumnWithReturns('id', $result[$i]['product_id'], ['title']);
         $result[$i]['component_qty'] = app($this->productTraceController)->getProductQtyByParams($result[$i]['product_id'], $result[$i]['product_attribute_id']);
