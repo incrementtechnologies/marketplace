@@ -292,11 +292,18 @@ class TransferredProductController extends APIController
     $productTrace = TransferredProduct::leftJoin('transfers', 'transfers.id', '=', 'transferred_products.transfer_id')
       ->where($condition)->where('transferred_products.payload', '=', 'product_trace')->where('status', '=', 'active')->count();
     $bundled = TransferredProduct::leftJoin('transfers', 'transfers.id', '=', 'transferred_products.transfer_id')
-      ->where($condition)->where('transferred_products.payload',  '=', 'bundled_trace')->where('status', '=', 'active')->get([DB::raw('SUM(transferred_products.bundled_setting_qty) as bundledQty')]);
-    if (sizeof($bundled) > 0) {
-      $productTrace += $bundled[0]['bundledQty'];
+      ->where($condition)->where('transferred_products.payload',  '=', 'bundled_trace')->where('status', '=', 'active')->count();
+    if ($bundled > 0) {
+      $productTrace += $bundled;
     }
     return $productTrace;
+  }
+
+  public function getTotalTransferredByMerchant($AttrId, $merchantId){
+    $transferred = TransferredProduct::leftJoin('transfers as T1', 'T1.id', 'transferred_products.transfer_id')
+      ->where('product_attribute_id', '=', $AttrId)->where('T1.from', '=', $merchantId['id'])->count();
+    
+    return $transferred;
   }
 
   public function retrieveBundledTransferred($productId, $attrId, $returns)
