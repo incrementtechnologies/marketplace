@@ -65,15 +65,15 @@ class TransferController extends APIController
       $products = $data['products'];
       $i = 0;
       foreach ($products as $key) {
-        $existTrace = TransferredProduct::where('payload_value', '=', $key['product_trace'])->orderBy('created_at', 'desc')->limit(1)->get();
-        if (sizeof($existTrace) > 0) {
-          TransferredProduct::where('id', '=', $existTrace[0]['id'])->update(
+        // $existTrace = TransferredProduct::where('payload_value', '=', $key['product_trace'])->orderBy('created_at', 'desc')->limit(1)->get();
+        // if (sizeof($existTrace) > 0) {
+          TransferredProduct::where('id', '=', $key['product_trace'])->update(
             array(
               'status' => 'inactive',
               'updated_at'  => Carbon::now()
             )
           );
-        }
+        // }
         $existInBundled = [];
         $existInbundledProducts = app($this->bundledProductController)->getByParamsBundled('bundled_trace', $key['product_trace']);
         if (sizeOf($existInbundledProducts) > 0) {
