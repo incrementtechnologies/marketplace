@@ -280,7 +280,7 @@ class ProductTraceController extends APIController
         return $this->response();
       }
 
-      if ($this->checkOwnProduct($item, $data['merchant_id']) == false) {
+      if ($this->checkOwnTrace($item, $data['merchant_id']) == false) {
         $this->response['data'] = null;
         $this->response['error'] = 'You don\'t own this product!';
         return $this->response();
@@ -494,6 +494,45 @@ class ProductTraceController extends APIController
     } else {
       if (intval($trace['product']['merchant_id']) == intval($merchantId)) {
         return true;
+      }
+    }
+    return false;
+  }
+
+  public function checkOwnTrace($trace, $merchantId){
+    $bundled = app($this->bundledProductController)->getTrace($trace['id']);
+    if($bundled !== null){
+      $params = array(
+        array(function($query)use($bundled){
+          $query->where('payload_value', '=', $bundled['bundled_trace'])
+            ->orWhere('payload_value', '=', $bundled['product_trace']);
+        }),
+        array('merchant_id', '=', $merchantId),
+        array('status', '=', 'active')
+      );
+      $transferred = app($this->transferredProductController)->retrieveByCondition($params);
+      if(sizeof($transferred) > 0){
+        return true;
+      }else if(intval($trace['product']['merchant_id']) == intval($merchantId)){
+        return true;
+      }else{
+        return false;
+      }
+    }else{
+      $params = array(
+        array(function($query)use($trace){
+          $query->where('payload_value', '=', $trace['id']);
+        }),
+        array('merchant_id', '=', $merchantId),
+        array('status', '=', 'active')
+      );
+      $transferred = app($this->transferredProductController)->retrieveByCondition($params);
+      if(sizeof($transferred) > 0){
+        return true;
+      }else if(intval($trace['product']['merchant_id']) == intval($merchantId)){
+        return true;
+      }else{
+        return false;
       }
     }
     return false;

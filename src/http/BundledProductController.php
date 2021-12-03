@@ -239,4 +239,10 @@ class BundledProductController extends APIController
     $res = BundledProduct::where('bundled_trace', '=', $bundledTrace)->where('deleted_at', '=', null)->get(['bundled_trace']);
     return sizeof($res);
   }
+
+  public function getTrace($traceId){
+    $res = DB::table('bundled_products')->where('bundled_trace', '=', $traceId)->orWhere('product_trace', '=', $traceId)->first();
+    $res = json_decode(json_encode($res), true);
+    return $res;
+  }
 }

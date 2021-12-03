@@ -345,6 +345,10 @@ class TransferredProductController extends APIController
     return true;
   }
 
+  public function retrieveByCondition($condition){
+    return TransferredProduct::where($condition)->get();
+  }
+
   public function retrieveProductQtyInDist($item, $data, $type){
     $regular = TransferredProduct::where('payload', '=', 'product_trace')
       ->where('product_id', '=', $item['product_id'])
