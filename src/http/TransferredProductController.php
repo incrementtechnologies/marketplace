@@ -318,9 +318,13 @@ class TransferredProductController extends APIController
     return $result;
   }
 
-  public function getTotalTransferredBundledProducts($productId)
+  public function getTotalTransferredBundledProducts($productId, $merchant)
   {
-    $temp = TransferredProduct::where('bundled', '=', $productId)->groupBy('bundled')->get(['bundled_setting_qty']);
+    $temp = TransferredProduct::leftJoin('transfers as T1', 'T1.id', '=', 'transferred_products.transfer_id')
+      ->where('bundled', '=', $productId)
+      ->where('T1.from', '=', $merchant['id'])
+      ->groupBy('payload_value')
+      ->get();
     return $temp;
   }
 
