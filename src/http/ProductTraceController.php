@@ -976,4 +976,23 @@ class ProductTraceController extends APIController
   public function retrieveDeletedTrace($traceId){
     return DB::table('product_traces')->where('id', '=', $traceId)->where('deleted_at', '!=', null)->get();
   }
+
+  public function countByParams($category, $attrID){
+    if($category === 'bundled'){
+      $total = DB::table('product_traces')->where('product_attribute_id', '=', $attrID)->where('batch_number', '=', null)->where('manufacturing_date', '=', null)->count();
+      $deleted = DB::table('product_traces')->where('product_attribute_id', '=', $attrID)->where('batch_number', '=', null)->where('manufacturing_date', '=', null)->where('deleted_at', '!=', null)->count();
+      $notDeleted = DB::table('product_traces')->where('product_attribute_id', '=', $attrID)->where('batch_number', '=', null)->where('manufacturing_date', '=', null)->where('deleted_at', '=', null)->count();
+      return array(
+        'total' => $total,
+        'deleted' => $deleted,
+        'not_deleted' => $notDeleted
+      );
+    }else{
+      return DB::table('product_traces')->where('product_attribute_id', '=', $attrID)->where('batch_number', '!=', null)->where('manufacturing_date', '!=', null)->where('deleted_at', '=', null)->count();
+    }
+  }
+
+  public function getBundledTraces($attrID){
+    return DB::table('product_traces')->where('product_attribute_id', '=', $attrID)->where('batch_number', '=', null)->where('manufacturing_date', '=', null)->where('deleted_at', '=', null)->get();
+  }
 }
