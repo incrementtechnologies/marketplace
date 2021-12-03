@@ -972,4 +972,8 @@ class ProductTraceController extends APIController
       ->update(array('deleted_at' => Carbon::now()));
     return $this->response();
   }
+
+  public function retrieveDeletedTrace($traceId){
+    return DB::table('product_traces')->where('id', '=', $traceId)->where('deleted_at', '!=', null)->get();
+  }
 }
