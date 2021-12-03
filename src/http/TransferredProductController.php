@@ -350,32 +350,43 @@ class TransferredProductController extends APIController
   }
 
   public function retrieveProductQtyInDist($item, $data, $type){
+
+    $totalBundled = 0;
+    $totalRegular = 0;
+
     $regular = TransferredProduct::where('payload', '=', 'product_trace')
       ->where('product_id', '=', $item['product_id'])
       ->where('merchant_id', '=', $data['merchant_id'])
       ->where('status', '=', 'active')
       ->count();
-
-    if($type == 'bundled'){
-      $product  = TransferredProduct::where('payload', '=', 'bundled_trace')
-        ->where('bundled', '=', $item['product_id'])
-        ->where('merchant_id', '=', $data['merchant_id'])
-        ->where('status', '=', 'active')
-        ->where('product_attribute_id', '=', $item['product_attribute_id'])
-        ->first();
-      $bundled = app($this->bundledSettingController)->countNumberOfBundledPerProd($product['product_id'], $product['product_attribute_id']);
-    }else{
-      $bundled  = TransferredProduct::where('payload', '=', 'bundled_trace')
-        ->where('product_id', '=', $item['product_id'])
-        ->where('merchant_id', '=', $data['merchant_id'])
-        ->where('status', '=', 'active')
-        ->where('product_attribute_id', '=', $item['product_attribute_id'])
-        ->sum('bundled_setting_qty');
+    $totalRegular+=$regular;
+    
+    $bundledTransferred = TransferredProduct::where('payload', '=', 'bundled_trace')
+    ->where(function($query)use($item){
+      $query->where('product_id', '=', $item['product_id'])
+        ->orWhere('bundled', '=', $item['product_id']);
+    })
+    ->where('merchant_id', '=', $data['merchant_id'])
+    ->where('status', '=', 'active')
+    ->where('product_attribute_id', '=', $item['product_attribute_id'])
+    ->groupBy('payload_value')
+    ->get();
+    // dd($bundledTransferred);
+    if(sizeof($bundledTransferred) > 0){
+      for ($i=0; $i <= sizeof($bundledTransferred)-1 ; $i++) { 
+        $each = $bundledTransferred[$i];
+        $isBreak = app($this->productTraceController)->retrieveDeletedTrace($each['payload_value']);
+        if(sizeof($isBreak) > 0){
+          $totalRegular += $each['bundled_setting_qty'];
+        }else{
+          $totalBundled += 1;
+        }
+      }
     }
 
     return array(
-      'qty' => (int)$regular,
-      'qty_in_bundled' => (int)$bundled
+      'qty' => (int)$totalRegular,
+      'qty_in_bundled' => (int)$totalBundled
     );
   }
 }
