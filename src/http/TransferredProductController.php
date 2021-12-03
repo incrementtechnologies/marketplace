@@ -379,7 +379,7 @@ class TransferredProductController extends APIController
         if(sizeof($isBreak) > 0){
           $totalRegular += $each['bundled_setting_qty'];
         }else{
-          $totalBundled += 1;
+          $totalBundled += $each['bundled_setting_qty'];
         }
       }
     }
