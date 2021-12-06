@@ -67,7 +67,7 @@ class TransferController extends APIController
       foreach ($products as $key) {
         // $existTrace = TransferredProduct::where('payload_value', '=', $key['product_trace'])->orderBy('created_at', 'desc')->limit(1)->get();
         // if (sizeof($existTrace) > 0) {
-          TransferredProduct::where('id', '=', $key['product_trace'])->where('merchant_id', '=', $data['from'])->update(
+          TransferredProduct::where('payload_value', '=', $key['product_trace'])->where('merchant_id', '=', $data['from'])->update(
             array(
               'status' => 'inactive',
               'updated_at'  => Carbon::now()
@@ -119,17 +119,6 @@ class TransferController extends APIController
           } else {
             $this->manageCreatedeliveries($data, $receiver, $existInBundled, $key, $existInbundledProducts, $productTrace, null);
           }
-        // }
-        // else {
-        //   dd($existInBundled);
-          // if ($productTrace) {
-          //   $this->manageCreatedeliveries($data, $receiver, $existInBundled, $key, $existInbundledProducts, $productTrace, null);
-          // } else {
-          //   $this->response['data'] = null;
-          //   $this->response['error'] = 'Invalid product trace.';
-          //   return $this->response();
-          // }
-        // }
         $i++;
       }
     }
