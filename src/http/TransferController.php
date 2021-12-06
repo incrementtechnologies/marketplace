@@ -67,7 +67,7 @@ class TransferController extends APIController
       foreach ($products as $key) {
         // $existTrace = TransferredProduct::where('payload_value', '=', $key['product_trace'])->orderBy('created_at', 'desc')->limit(1)->get();
         // if (sizeof($existTrace) > 0) {
-          TransferredProduct::where('id', '=', $key['product_trace'])->update(
+          TransferredProduct::where('id', '=', $key['product_trace'])->where('merchant_id', '=', $data['from'])->update(
             array(
               'status' => 'inactive',
               'updated_at'  => Carbon::now()
