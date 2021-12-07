@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\APIController;
 use Increment\Marketplace\Models\Transfer;
 use Increment\Marketplace\Models\TransferredProduct;
+use Increment\Marketplace\Models\BundledProduct;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use phpDocumentor\Reflection\Types\Null_;
@@ -51,23 +52,26 @@ class TransferController extends APIController
     $receiverMerchant = app('Increment\Marketplace\Http\MerchantController')->getByParams('id', $data['to']);
     $receiver = app('Increment\Account\Http\AccountController')->getByParamsWithColumns($receiverMerchant['account_id'], ['account_type']);
     if ($this->response['data'] > 0) {
-      app($this->dailyLoadingListClass)->updateByParams('order_request_id', $data['order_request_id'], array(
-        'status'  => 'completed',
-        'updated_at'  => Carbon::now()
-      ));
+      // app($this->dailyLoadingListClass)->updateByParams('order_request_id', $data['order_request_id'], array(
+      //   'status'  => 'completed',
+      //   'updated_at'  => Carbon::now()
+      // ));
 
-      app($this->orderRequestClass)->updateByParams($data['order_request_id'], array(
-        'status'  => 'completed',
-        'date_delivered'  => Carbon::now(),
-        'updated_at'  => Carbon::now()
-      ));
+      // app($this->orderRequestClass)->updateByParams($data['order_request_id'], array(
+      //   'status'  => 'completed',
+      //   'date_delivered'  => Carbon::now(),
+      //   'updated_at'  => Carbon::now()
+      // ));
 
       $products = $data['products'];
       $i = 0;
       foreach ($products as $key) {
         $traceIsBreak = app($this->bundledProductController)->getTrace($key['product_trace']);
         if ($traceIsBreak !== null) {
-          $existTrace = TransferredProduct::where('payload_value', '=', $traceIsBreak['product_trace'])->orWhere('payload_value', '=', $traceIsBreak['bundled_trace'])->first();
+          $existTrace = TransferredProduct::where(function($query)use($traceIsBreak){
+            $query->where('payload_value', '=', $traceIsBreak['product_trace'])
+              ->orWhere('payload_value', '=', $traceIsBreak['bundled_trace']);
+          })->where('status', '=', 'active')->first();
           if($existTrace !== null){
             TransferredProduct::where('id', '=', $existTrace['id'])->update(
               array(
