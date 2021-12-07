@@ -216,8 +216,6 @@ class TransferredProductController extends APIController
       ->where('deleted_at', '=', null)
       ->count();
     
-    dd($inactiveBundled, $inactiveRegular);
-
     $count = 0;
     $temp = $temp-($inactiveRegular + $inactiveBundled);
     if ($temp > 0) {
