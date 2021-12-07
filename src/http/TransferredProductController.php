@@ -206,7 +206,7 @@ class TransferredProductController extends APIController
       ->where('payload', '=', 'bundled_trace')
       ->where('status', '=', 'inactive')
       ->where('deleted_at', '=', null)
-      ->distinct('payload_value')
+      ->groupBy('payload_value')
       ->sum('bundled_setting_qty');
 
     $inactiveRegular = TransferredProduct::where('merchant_id', '=', $merchantId)
@@ -215,6 +215,8 @@ class TransferredProductController extends APIController
       ->where('status', '=', 'inactive')
       ->where('deleted_at', '=', null)
       ->count();
+    
+    dd($inactiveBundled, $inactiveRegular);
 
     $count = 0;
     $temp = $temp-($inactiveRegular + $inactiveBundled);
