@@ -66,17 +66,26 @@ class TransferController extends APIController
       $i = 0;
       foreach ($products as $key) {
         $traceIsBreak = app($this->bundledProductController)->getTrace($key['product_trace']);
-        // $existTrace = TransferredProduct::where('payload_value', '=', $key['product_trace'])->orderBy('created_at', 'desc')->limit(1)->get();
         if ($traceIsBreak !== null) {
-          TransferredProduct::where(function($query)use($traceIsBreak){
-            $query->where('payload_value', '=', $traceIsBreak['product_trace'])
-            ->orWhere('payload_value', '=', $traceIsBreak['bundled_trace']);
-          })->where('merchant_id', '=', $data['from'])->update(
-            array(
-              'status' => 'inactive',
-              'updated_at'  => Carbon::now()
-            )
-          );
+          $existTrace = TransferredProduct::where('payload_value', '=', $traceIsBreak['product_trace'])->orWhere('payload_value', '=', $traceIsBreak['bundled_trace'])->first();
+          if($existTrace !== null){
+            TransferredProduct::where('id', '=', $existTrace['id'])->update(
+              array(
+                'status' => 'inactive',
+                'updated_at'  => Carbon::now()
+              )
+            );
+          }else{
+            TransferredProduct::where(function($query)use($traceIsBreak){
+              $query->where('payload_value', '=', $traceIsBreak['product_trace'])
+              ->orWhere('payload_value', '=', $traceIsBreak['bundled_trace']);
+            })->where('merchant_id', '=', $data['from'])->update(
+              array(
+                'status' => 'inactive',
+                'updated_at'  => Carbon::now()
+              )
+            );
+          }
         }else{
           TransferredProduct::where('payload_value', '=', $key['product_trace'])->where('merchant_id', '=', $data['from'])->update(array(
             'status' => 'inactive',
