@@ -79,7 +79,7 @@ class TransferController extends APIController
           );
         }else{
           TransferredProduct::where('payload_value', '=', $key['product_trace'])->where('merchant_id', '=', $data['from'])->update(array(
-            'status' => 'inative',
+            'status' => 'inactive',
             'updated_at' => Carbon::now()
           ));
         }
