@@ -52,16 +52,16 @@ class TransferController extends APIController
     $receiverMerchant = app('Increment\Marketplace\Http\MerchantController')->getByParams('id', $data['to']);
     $receiver = app('Increment\Account\Http\AccountController')->getByParamsWithColumns($receiverMerchant['account_id'], ['account_type']);
     if ($this->response['data'] > 0) {
-      // app($this->dailyLoadingListClass)->updateByParams('order_request_id', $data['order_request_id'], array(
-      //   'status'  => 'completed',
-      //   'updated_at'  => Carbon::now()
-      // ));
+      app($this->dailyLoadingListClass)->updateByParams('order_request_id', $data['order_request_id'], array(
+        'status'  => 'completed',
+        'updated_at'  => Carbon::now()
+      ));
 
-      // app($this->orderRequestClass)->updateByParams($data['order_request_id'], array(
-      //   'status'  => 'completed',
-      //   'date_delivered'  => Carbon::now(),
-      //   'updated_at'  => Carbon::now()
-      // ));
+      app($this->orderRequestClass)->updateByParams($data['order_request_id'], array(
+        'status'  => 'completed',
+        'date_delivered'  => Carbon::now(),
+        'updated_at'  => Carbon::now()
+      ));
 
       $products = $data['products'];
       $i = 0;
