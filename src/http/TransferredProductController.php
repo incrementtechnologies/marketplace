@@ -201,23 +201,40 @@ class TransferredProductController extends APIController
       ->where('deleted_at', '=', null)
       ->count();
     
-    $inactiveBundled = TransferredProduct::where('merchant_id', '=', $merchantId)
+    $inactiveTempBundled = TransferredProduct::where('merchant_id', '=', $merchantId)
       ->where('product_attribute_id', '=', $productAtributeId)
       ->where('payload', '=', 'bundled_trace')
       ->where('status', '=', 'inactive')
       ->where('deleted_at', '=', null)
       ->groupBy('payload_value')
-      ->sum('bundled_setting_qty');
+      ->get(['bundled_setting_qty', 'payload_value']);
+    
+   
 
+    $inactiveBundled = 0;
+    $activeBundled = 0;
+    for ($i=0; $i <= sizeof($inactiveTempBundled)-1 ; $i++) { 
+      $item = $inactiveTempBundled[$i];
+      $inactiveBundled += (int)$item['bundled_setting_qty'];
+
+      $activeTempBundled = TransferredProduct::where('merchant_id', '=', $merchantId)
+        ->where('product_attribute_id', '=', $productAtributeId)
+        ->where('payload', '=', 'bundled_trace')
+        ->where('payload_value', '=', $item['payload_value'])
+        ->where('status', '=', 'active')
+        ->where('deleted_at', '=', null)
+        ->count();
+      $activeBundled += $activeTempBundled;
+    }
     $inactiveRegular = TransferredProduct::where('merchant_id', '=', $merchantId)
       ->where('product_attribute_id', '=', $productAtributeId)
       ->where('payload', '=', 'product_trace')
       ->where('status', '=', 'inactive')
       ->where('deleted_at', '=', null)
       ->count();
-    
+
     $count = 0;
-    $temp = $temp-($inactiveRegular + $inactiveBundled);
+    $temp = $temp-($inactiveRegular + abs($inactiveBundled - $activeBundled));
     if ($temp > 0) {
       $count += $temp;
     }
@@ -365,6 +382,9 @@ class TransferredProductController extends APIController
 
     $totalBundled = 0;
     $totalRegular = 0;
+    $bundledQty = 0;
+
+    // $isBreak = app('Increment\Marketplace\Http\BundledProductController')->getTrace('');
 
     $regular = TransferredProduct::where('payload', '=', 'product_trace')
       ->where('product_id', '=', $item['product_id'])
@@ -392,13 +412,14 @@ class TransferredProductController extends APIController
           $totalRegular += $each['bundled_setting_qty'];
         }else{
           $totalBundled += $each['bundled_setting_qty'];
+          $bundledQty += 1;
         }
       }
     }
 
     return array(
       'qty' => (int)$totalRegular,
-      'qty_in_bundled' => (int)$totalBundled
+      'qty_in_bundled' => $type === 'bundled' ? (int)$bundledQty : (int)$totalBundled,
     );
   }
 }
