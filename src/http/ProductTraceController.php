@@ -318,7 +318,6 @@ class ProductTraceController extends APIController
           }else{
             $qty = app($this->transferredProductController)->retrieveProductQtyInDist($item, $data, 'regular');
           }
-          // dd($qty);
           $this->response['data'][$i]['product']['qty'] = $qty['qty'];
           $this->response['data'][$i]['product']['qty_in_bundled'] = $qty['qty_in_bundled'];
           $this->response['data'][$i]['setting_qty'] = sizeof($bundledSettingQty) > 0 ? $bundledSettingQty[0]['qty'] : 0; //$bundledSettingQty[0]['qty']
@@ -326,7 +325,7 @@ class ProductTraceController extends APIController
         } else {
           $bundled = $this->response['data'][$i]['bundled_product'];
           if ($bundled != null) {
-            $this->response['data'][$i]['product']['qty'] = 0; // what about if existing item
+            $this->response['data'][$i]['product']['qty'] = 0;
             $this->response['data'][$i]['product']['qty_in_bundled'] = $bundled[0]['size'];
             $this->response['data'][$i]['product']['trace_qty'] = app($this->landBlockProductClass)->getRemainingByTrace($data['merchant_id'], $item['id'], $item['product_id']);
           } else {
