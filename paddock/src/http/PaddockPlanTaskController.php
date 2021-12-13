@@ -60,7 +60,7 @@ class PaddockPlanTaskController extends APIController
         $data = $request->all();
         $con = $data['condition'];
         $result = [];
-        $result = Paddock::where($con[0]['column'], '=', $con[0]['value'])->skip($data['offset'])->take($data['limit'])->get();
+        $result = Paddock::where($con[0]['column'], '=', $con[0]['value'])->get();
         $currDate = Carbon::now()->toDateString();
         $finalResult = array();
         $size = Paddock::where($con[0]['column'], '=', $con[0]['value'])->get();
@@ -177,6 +177,7 @@ class PaddockPlanTaskController extends APIController
                 $items = $finalResult[$a];
                 $finalResult[$a]['due_date'] = Carbon::createFromFormat('Y-m-d', $items['due_date'])->copy()->tz($this->response['timezone'])->format('d/m/Y');
             }
+            $finalResult = array_slice($finalResult, $data['offset'], $data['limit']);
             $this->response['data'] = $finalResult;
             $this->response['size'] = $counter;
             return $this->response();
