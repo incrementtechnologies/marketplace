@@ -398,8 +398,7 @@ class ProductTraceController extends APIController
       //   $this->response['error'] = 'Duplicate tag!';
       //   return $this->response();
       // }
-
-      if ($this->checkOwnProduct($item, $data['merchant_id']) == false) {
+      if ($this->checkOwnTrace($item, $data['merchant_id']) == false) {
         $this->response['data'] = null;
         $this->response['error'] = 'You don\'t own this product!';
         return $this->response();
