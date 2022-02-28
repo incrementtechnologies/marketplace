@@ -230,9 +230,11 @@ class BatchController extends APIController
         $result[$i]['remaining_spray_area'] = $remaining <= 0 ? 0 :  $this->numberConvention($remaining);
         $result[$i]['total_batch_area'] = app($this->batchPaddockTaskClass)->retrieveTotalAreaByBatch($key['batch_id']);
         if ($key['updated_at'] !== null) {
-          $result[$i]['date'] = Carbon::createFromFormat('Y-m-d H:i:s', $key['updated_at'])->copy()->tz($this->response['timezone'])->format('d M');
+          // $temp = Carbon::createFromFormat('Y-m-d H:i:s', $key['updated_at'])->copy()->tz($this->response['timezone'])->format('d M');
+          // dd($temp);
+          $result[$i]['date'] = Carbon::parse($key['updated_at'])->format('d M');
         } else {
-          $result[$i]['date'] = Carbon::createFromFormat('Y-m-d H:i:s', $key['created_at'])->copy()->tz($this->response['timezone'])->format('d M');
+          $result[$i]['date'] = Carbon::parse($key['created_at'])->format('d M');
         }
         $i++;
       }
