@@ -169,8 +169,8 @@ class PaddockController extends APIController
           $this->response['data'][$i]['due_date'] = Carbon::createFromFormat('Y-m-d', $task[0]['due_date'])->copy()->tz($this->response['timezone'])->format('d/m/Y');
           $this->response['data'][$i]['due_date_formatted'] = Carbon::createFromFormat('Y-m-d', $task[0]['due_date'])->copy()->tz($this->response['timezone'])->format('d M');
           $temp = app($this->batchPaddockTaskClass)->retrieveBatchByPaddockPlanTask($data['id']);
-          $this->response['data'][$i]['start_date'] = $temp !== null ? Carbon::createFromFormat('Y-m-d H:i:s', $temp['created_at'])->copy()->tz($this->response['timezone'])->format('d/m/Y H:i') : null;
-          $this->response['data'][$i]['end_date'] = $temp !== null ? Carbon::createFromFormat('Y-m-d H:i:s', $temp['updated_at'])->copy()->tz($this->response['timezone'])->format('d/m/Y H:i') : null;
+          $this->response['data'][$i]['start_date'] = $temp !== null ? Carbon::parse($temp['created_at'])->format('d/m/Y H:i') : null;
+          $this->response['data'][$i]['end_date'] = $temp !== null ? Carbon::parse($temp['updated_at'])->format('d/m/Y H:i') : null;
           $this->response['data'][$i]['updated_date'] = $temp !== null ? Carbon::createFromFormat('Y-m-d H:i:s', $temp['updated_at'])->copy()->tz($this->response['timezone'])->format('d/m/Y') : 
             Carbon::createFromFormat('Y-m-d H:i:s', $task[0]['updated_at'])->copy()->tz($this->response['timezone'])->format('d/m/Y');
         }
