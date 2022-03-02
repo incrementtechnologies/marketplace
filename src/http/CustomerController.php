@@ -81,6 +81,7 @@ class CustomerController extends APIController
         $this->response['error'] = 'Email already existed to the list.';
         return $this->response();
       }
+      
       $account = app('Increment\Account\Http\AccountController')->retrieveByEmail($data['email']);
       if($account != null){
         $this->manageMerchant($data, 'account_id', $account['id'], true);
@@ -420,8 +421,39 @@ class CustomerController extends APIController
   }
 
   public function checkIfExist($merchant, $column, $value){
-    $result = Customer::where('merchant', '=', $merchant)->where($column, '=', $value)->get();
-    return sizeof($result) > 0 ? true : false;
+    $toMerchantId = null;
+    $fromEmail = null;
+    $isExist = false;
+    $toAccount = app('Increment\Account\Http\AccountController')->retrieveByEmail($value);
+    if($toAccount !== null){
+      $toMechantId =  app('Increment\Marketplace\Http\MerchantController')->getColumnValueByParams('account_id', $toAccount['id'], 'id');
+    }
+
+    $fromAccount = app('Increment\Marketplace\Http\MerchantController')->getColumnValueByParams('id', $merchant, 'account_id');
+    if($fromAccount !== null){
+      $account = app('Increment\Account\Http\AccountController')->getAllowedData($fromAccount['account_id']);
+      $fromEmail = $account !== null ? $account['email'] : null;
+    }
+
+    $asSender = Customer::where('merchant', '=', $merchant)->where(function($query)use($toMechantId, $value){
+      $query->where('email', '=', $value)
+      ->orWhere('merchant_id', '=', $toMechantId);
+    })->get();
+
+
+    $asReceiver = Customer::where(function($query)use($fromEmail, $merchant, $toMechantId){
+      $query->where('merchant_id', '=', $merchant)
+      ->orWhere('email', '=', $fromEmail);
+    })->where('merchant', '=', $toMechantId)->get();
+
+    if(sizeof($asSender) > 0){
+      $exist = true;
+    }else if(sizeof($asReceiver) > 0){
+      $exist = true;
+    }else{
+      $exist = false;
+    }
+    return $exist;
   }
 
   public function generateCode(){
