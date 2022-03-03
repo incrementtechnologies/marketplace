@@ -164,11 +164,11 @@ class PaddockController extends APIController
         $this->response['data'][$i]['remaining_spray_area'] = $this->numberConvention($totalArea);
         $this->response['data'][$i]['batch_area'] = $totalBatchArea;
         $this->response['data'][$i]['last_updated'] = $lastTaskUpdated !== null && $lastTaskUpdated['deleted_at'] === null ? Carbon::parse($lastTaskUpdated['updated_at'])->format('d/m/Y') : Carbon::parse($lastTaskUpdated['deleted_at'])->format('d/m/Y');
-        $paddockPlan = PaddockPlan::select()->where("paddock_id", "=",  $task[0]['paddock_id'])->orderBy('start_date', 'desc')->limit(1)->get();
-        if (sizeof($paddockPlan) > 0) {
-          $this->response['data'][$i]['started'] = $paddockPlan[0]['start_date'];
+        $paddockPlan = PaddockPlan::select()->where("paddock_id", "=",  $task[0]['paddock_id'])->orderBy('start_date', 'asc')->first();
+        if ($paddockPlan !== null) {
+          $this->response['data'][$i]['started'] = $paddockPlan['start_date'];
           $this->response['data'][$i]['actual_tasks'] = app($this->batchClass)->retrieveAppliedTask($data['id']);
-          $crop = Crop::where("id", "=", $paddockPlan[0]['crop_id'])->get();
+          $crop = Crop::where("id", "=", $paddockPlan['crop_id'])->get();
           $this->response['data'][$i]['crop_name'] = sizeof($crop) > 0 ? $crop[0]['name'] : null;
           $this->response['data'][$i]['spray_mix'] = app($this->sprayMixClass)->getByParamsDefault('id', $task[0]['spray_mix_id']);
           $this->response['data'][$i]['due_date'] = Carbon::createFromFormat('Y-m-d', $task[0]['due_date'])->copy()->tz($this->response['timezone'])->format('d/m/Y');
