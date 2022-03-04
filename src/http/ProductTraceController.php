@@ -508,10 +508,19 @@ class ProductTraceController extends APIController
         array('merchant_id', '=', $merchantId),
         array('status', '=', 'active')
       );
-      $transferred = app($this->transferredProductController)->retrieveByCondition($params);
-      if(sizeof($transferred) > 0){
+      $isOwned = app($this->transferredProductController)->retrieveByCondition($params); //check if product is transferred to you
+
+      $parameter =  array(
+        array(function($query)use($bundled){
+          $query->where('payload_value', '=', $bundled['bundled_trace'])
+            ->orWhere('payload_value', '=', $bundled['product_trace']);
+        })
+      );
+      $isTransferred = app($this->transferredProductController)->retrieveByCondition($parameter); // check if product is already transferred to others
+
+      if(sizeof($isOwned) > 0){
         return true;
-      }else if(intval($trace['product']['merchant_id']) == intval($merchantId)){
+      }else if(intval($trace['product']['merchant_id']) == intval($merchantId) && sizeof($isTransferred) <= 0){
         return true;
       }else{
         return false;
