@@ -426,7 +426,7 @@ class CustomerController extends APIController
     $isExist = false;
     $toAccount = app('Increment\Account\Http\AccountController')->retrieveByEmail($value);
     if($toAccount !== null){
-      $toMechantId =  app('Increment\Marketplace\Http\MerchantController')->getColumnValueByParams('account_id', $toAccount['id'], 'id');
+      $toMerchantId =  app('Increment\Marketplace\Http\MerchantController')->getColumnValueByParams('account_id', $toAccount['id'], 'id');
     }
 
     $fromAccount = app('Increment\Marketplace\Http\MerchantController')->getColumnValueByParams('id', $merchant, 'account_id');
@@ -435,16 +435,16 @@ class CustomerController extends APIController
       $fromEmail = $account !== null ? $account['email'] : null;
     }
 
-    $asSender = Customer::where('merchant', '=', $merchant)->where(function($query)use($toMechantId, $value){
+    $asSender = Customer::where('merchant', '=', $merchant)->where(function($query)use($toMerchantId, $value){
       $query->where('email', '=', $value)
-      ->orWhere('merchant_id', '=', $toMechantId);
+      ->orWhere('merchant_id', '=', $toMerchantId);
     })->get();
 
 
-    $asReceiver = Customer::where(function($query)use($fromEmail, $merchant, $toMechantId){
+    $asReceiver = Customer::where(function($query)use($fromEmail, $merchant, $toMerchantId){
       $query->where('merchant_id', '=', $merchant)
       ->orWhere('email', '=', $fromEmail);
-    })->where('merchant', '=', $toMechantId)->get();
+    })->where('merchant', '=', $toMerchantId)->get();
 
     if(sizeof($asSender) > 0){
       $exist = true;
