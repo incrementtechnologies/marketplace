@@ -431,7 +431,7 @@ class CustomerController extends APIController
 
     $fromAccount = app('Increment\Marketplace\Http\MerchantController')->getColumnValueByParams('id', $merchant, 'account_id');
     if($fromAccount !== null){
-      $account = app('Increment\Account\Http\AccountController')->getAllowedData($fromAccount['account_id']);
+      $account = app('Increment\Account\Http\AccountController')->getAllowedData($fromAccount);
       $fromEmail = $account !== null ? $account['email'] : null;
     }
 
