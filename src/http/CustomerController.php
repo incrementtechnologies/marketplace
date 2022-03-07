@@ -424,34 +424,46 @@ class CustomerController extends APIController
     $toMerchantId = null;
     $fromEmail = null;
     $isExist = false;
-    $toAccount = app('Increment\Account\Http\AccountController')->retrieveByEmail($value);
-    if($toAccount !== null){
-      $toMerchantId =  app('Increment\Marketplace\Http\MerchantController')->getColumnValueByParams('account_id', $toAccount['id'], 'id');
-    }
-
-    $fromAccount = app('Increment\Marketplace\Http\MerchantController')->getColumnValueByParams('id', $merchant, 'account_id');
-    if($fromAccount !== null){
-      $account = app('Increment\Account\Http\AccountController')->getAllowedData($fromAccount);
-      $fromEmail = $account !== null ? $account['email'] : null;
-    }
-
-    $asSender = Customer::where('merchant', '=', $merchant)->where(function($query)use($toMerchantId, $value){
-      $query->where('email', '=', $value)
-      ->orWhere('merchant_id', '=', $toMerchantId);
-    })->get();
-
-
-    $asReceiver = Customer::where(function($query)use($fromEmail, $merchant, $toMerchantId){
-      $query->where('merchant_id', '=', $merchant)
-      ->orWhere('email', '=', $fromEmail);
-    })->where('merchant', '=', $toMerchantId)->get();
-
-    if(sizeof($asSender) > 0){
-      $exist = true;
-    }else if(sizeof($asReceiver) > 0){
-      $exist = true;
-    }else{
-      $exist = false;
+    if($column === 'email'){
+      $toAccount = app('Increment\Account\Http\AccountController')->retrieveByEmail($value);
+      if($toAccount !== null){
+        $toMerchantId =  app('Increment\Marketplace\Http\MerchantController')->getColumnValueByParams('account_id', $toAccount['id'], 'id');
+      }
+  
+      $fromAccount = app('Increment\Marketplace\Http\MerchantController')->getColumnValueByParams('id', $merchant, 'account_id');
+      if($fromAccount !== null){
+        $account = app('Increment\Account\Http\AccountController')->getAllowedData($fromAccount);
+        $fromEmail = $account !== null ? $account['email'] : null;
+      }
+  
+      $asSender = Customer::where('merchant', '=', $merchant)->where(function($query)use($toMerchantId, $value){
+        $query->where('email', '=', $value)
+        ->orWhere('merchant_id', '=', $toMerchantId);
+      })->get();
+  
+  
+      $asReceiver = Customer::where(function($query)use($fromEmail, $merchant, $toMerchantId){
+        $query->where('merchant_id', '=', $merchant)
+        ->orWhere('email', '=', $fromEmail);
+      })->where('merchant', '=', $toMerchantId)->get();
+  
+      if(sizeof($asSender) > 0){
+        $exist = true;
+      }else if(sizeof($asReceiver) > 0){
+        $exist = true;
+      }else{
+        $exist = false;
+      }
+    }else if($column === 'merchant_id'){
+      $asReceiver = Customer::where('merchant', '=', $merchant)->where('merchant_id', '=', $value)->get();
+      $asSender = Customer::where('merchant', '=', $value)->where('merchant_id', '=', $merchant)->get();
+      if(sizeof($asReceiver) > 0){
+        $exist = true;
+      }else if(sizeof($asSender) > 0){
+        $exist = true;
+      }else{
+        $exist = false;
+      }
     }
     return $exist;
   }
