@@ -72,7 +72,7 @@ class DailyLoadingListController extends APIController
     $data = $request->all();
     
     $tempResult = DB::table('daily_loading_lists as T1')
-      ->join('order_request_items as T2', 'T2.order_request_id', '=', 'T1.order_request_id')
+      ->leftjoin('order_request_items as T2', 'T2.order_request_id', '=', 'T1.order_request_id')
       ->where('T1.merchant_id', '=', $data['merchant_id'])
       ->where('T1.account_id', '=', $data['account_id'])
       ->where('T1.deleted_at', '=', null)
@@ -80,7 +80,6 @@ class DailyLoadingListController extends APIController
       ->where('T1.status', '=', 'pending')
       ->select(['T2.*', 'T1.id as daily_loading_list_id'])
       ->get();
-
     $results = json_decode($tempResult->groupBy('product_attribute_id'), true);
     
     if(sizeof($results) > 0){
