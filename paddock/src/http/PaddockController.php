@@ -40,6 +40,7 @@ class PaddockController extends APIController
         ->where($data['condition'][2]['column'], $data['condition'][2]['clause'], $data['condition'][2]['value'])
         ->where('deleted_at', '=', null)
         ->skip($data['offset'])
+        ->orderBy('name', 'asc')
         ->take($data['limit'])
         ->get();
       $this->response['data'] = $result;
@@ -50,16 +51,17 @@ class PaddockController extends APIController
         $paddock_data = PaddockPlan::select()
           ->where('paddock_id', '=', $paddock_id)
           ->where('start_date', '<=', $this->date)
+          ->where('end_date', '>=', $this->date)
           ->where('deleted_at', '=', null)
           ->limit(1)
           ->get();
         for ($x = 0; $x < count($paddock_data); $x++) {
           $paddock_plan_tasks = PaddockPlanTask::select()->where("paddock_plan_id", "=", $paddock_data[$x]['id'])->where('deleted_at', '=', null)->get();
           for ($p = 0; $p < count($paddock_plan_tasks); $p++) {
-            if ($paddock_plan_tasks[$p]['status'] === 'pending') {
-              $this->response['data'][$i]['plan_status'] = $paddock_plan_tasks[$p]['status'];
-            } else {
+            if (sizeof($paddock_plan_tasks) > 0) {
               $this->response['data'][$i]['plan_status'] = 'completed';
+            } else {
+              $this->response['data'][$i]['plan_status'] = 'pending';
               break;
             }
           }
@@ -72,11 +74,7 @@ class PaddockController extends APIController
           if (count($crop_name) > 0) {
             $paddock_data[$x]['crop_name'] = $crop_name[0]['name'];
           }
-          if (date($paddock_data[$x]['end_date']) >= $this->date) {
-            $this->response['data'][$i]['paddock_data'] = $paddock_data;
-          } else {
-            $this->response['data'][$i]['paddock_data'] = [];
-          }
+          $this->response['data'][$i]['paddock_data'] = sizeof($paddock_data) > 0 ? $paddock_data : [];
         }
       }
     } else {
@@ -96,10 +94,10 @@ class PaddockController extends APIController
         if (count($paddock_data) > 0) {
           $paddock_plan_tasks = PaddockPlanTask::select()->where("paddock_plan_id", "=", $paddock_data[0]['id'])->where('deleted_at', '=', null)->get();
           for ($p = 0; $p < count($paddock_plan_tasks); $p++) {
-            if ($paddock_plan_tasks[$p]['status'] === 'pending') {
-              $this->response['data'][$i]['plan_status'] = $paddock_plan_tasks[$p]['status'];
-            } else {
+            if (sizeof($paddock_plan_tasks) > 0) {
               $this->response['data'][$i]['plan_status'] = 'completed';
+            } else {
+              $this->response['data'][$i]['plan_status'] = 'pending';
               break;
             }
           }
@@ -126,7 +124,14 @@ class PaddockController extends APIController
         ->orderBy('end_date', 'desc')
         ->limit(1)
         ->get();
+        $first = PaddockPlan::select()
+        ->where('paddock_id', '=',  $this->response['data'][$f]['id'])
+        ->where('deleted_at', '=', null)
+        ->orderBy('end_date', 'asc')
+        ->limit(1)
+        ->get();
         $this->response['data'][$f]['previous_plan'] = sizeof($previous) > 0 ? $previous : [];
+        $this->response['data'][$f]['first_plan'] = sizeof($first) > 0 ? $first : [];
       }
     }
     return $this->response();

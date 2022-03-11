@@ -66,4 +66,16 @@ class PaddockPlanController extends APIController
             return null;
         } 
     }
+
+    public function delete(Request $request){
+        $data = $request->all();
+        $res = PaddockPlan::where('id', '=', $data['id'])->update(array(
+            'deleted_at' => Carbon::now()
+        ));
+        $resp = Paddock::where('id', '=', $data['paddock_id'])->update(array(
+            'status' => 'no_plan'
+        ));
+        $this->response['data'] = $res;
+        return $this->response();
+    }
 }
