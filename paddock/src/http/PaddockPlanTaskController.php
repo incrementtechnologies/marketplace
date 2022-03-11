@@ -572,7 +572,9 @@ class PaddockPlanTaskController extends APIController
                             $result[$i]['due_date'] = $each['due_date'];
                             $result[$i]['arable_area'] = $key['arable_area'];
                             $result[$i]['rate_per_hectar'] = app('Increment\Marketplace\Paddock\Http\SprayMixProductController')->retrieveDetailsWithParams('spray_mix_id', $each['spray_mix_id'], ['rate']);
-                            array_push($finalResult, $result[$i]);
+                            if($result[$i]['remaining_spray_area'] > 0){
+                                array_push($finalResult, $result[$i]);
+                            }
                             break;
                         }
                         $iter++;
