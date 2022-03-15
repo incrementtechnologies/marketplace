@@ -405,18 +405,61 @@ class CustomerController extends APIController
 
   public function retrieveList(Request $request){
     $data = $request->all();
-    $this->retrieveDB($data);
-    $result = $this->response['data'];
+    $this->con = $data['condition'];
+    // $this->retrieveDB($data);
+    $fin = array();
+    $result = DB::table('customers as T1')
+    ->leftJoin('merchants as T2', 'T2.id', '=', 'T1.merchant_id')
+    ->leftJoin('accounts as T3', 'T3.id', '=', 'T2.account_id')
+    ->whereNull('T1.deleted_at')
+    ->Where(function($quer){
+          $quer->Where($this->con[1]['column'], $this->con[1]['clause'], $this->con[1]['value'])
+          ->Where(function($query) {
+            if($this->con[0]['column'] == 'email') {
+              return $query->Where('T1.'.$this->con[0]['column'], $this->con[0]['clause'], $this->con[0]['value'])
+                          ->orWhere('T2.name', $this->con[0]['clause'], $this->con[0]['value']);
+            } else if ($this->con[0]['column'] == 'account_type') {
+              return $query->Where('T3.'.$this->con[0]['column'], $this->con[0]['clause'], $this->con[0]['value']);
+            } else {
+              return $query->Where('T1.'.$this->con[0]['column'], $this->con[0]['clause'], $this->con[0]['value']);
+            }
+          })
+          ->orWhere($this->con[2]['column'], '=', $this->con[2]['value']);
+    })
+    ->select('T1.merchant', 'T1.merchant_id', 'T2.name', 'T3.account_type', 'T1.email', 'T1.code', 'T1.status', 'T1.id', 'T1.deleted_at')
+    ->get();
     if(sizeof($result) > 0){
       $i = 0;
       $this->response['data'] = [];
       foreach ($result as $key) {
-        if($result[$i]['merchant_id'] != null){
-          $this->response['data'][] = app($this->merchantClass)->getByParams('id', $result[$i]['merchant_id']);
+        if($key->email != null && $key->merchant_id == null){
+          $fin[$i]['name'] = $key->email;
+          $accounts = app($this->accountClass)->retrieveByEmail($name);
+          $fin[$i]['type'] = $accounts['account_type'];
+        }else{
+          if(intVal($key->merchant) != intVal($data['merchant_id'])){
+            $merchant = app($this->merchantClass)->getByParamsWithAccount('id', $key->merchant);
+            $accounts = app($this->accountClass)->retrieveById($merchant->account_id);
+            $fin[$i]['type'] = $accounts[0]['account_type'];
+            $fin[$i]['name'] = $merchant['name'];
+          }
+           else {
+            $fin[$i]['name']= $key->name;
+            $fin[$i]['type'] = $key->account_type;
+          }
         }
+        $fin[$i]['code'] = $key->code;
+        $fin[$i]['status'] = $key->status;
+        $fin[$i]['merchant'] = $key->merchant;
+        $fin[$i]['merchant_id'] = $key->merchant_id;
+        $fin[$i]['id'] = $key->id;
+        // if($result[$i]['merchant_id'] != null){
+        //   $this->response['data'][] = app($this->merchantClass)->getByParams('id', $result[$i]['merchant_id']);
+        // }
         $i++;
       }
     }
+    $this->response['data'] = $fin;
     return $this->response();
   }
 
