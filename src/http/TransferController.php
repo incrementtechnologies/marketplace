@@ -69,7 +69,7 @@ class TransferController extends APIController
         $traceIsBreak = app($this->bundledProductController)->getBrokenTrace($key['product_trace']);
         if ($traceIsBreak !== null) {
           $existTrace = TransferredProduct::where(function($query)use($traceIsBreak){
-            $query->where('payload_value', '=', $traceIsBreak['product_trace']);
+            $query->where('payload_value', '=', $traceIsBreak['bundled_trace']);
           })->where('status', '=', 'active')->first();
           if($existTrace !== null){
             TransferredProduct::where('id', '=', $existTrace['id'])->update(
