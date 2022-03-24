@@ -69,11 +69,22 @@ class CustomerController extends APIController
   public function create(Request $request){
     $data = $request->all();
     if(isset($data['business_code'])){
-      return $this->manageMerchant($data, 'business_code', $data['business_code'], false);
+      if($this->selfInvitation($data['merchant'], null, $data['business_code']) == true){
+        $this->response['data'] = null;
+        $this->response['error'] = 'You cannot invite yourself';
+        return $this->response();
+      }else{
+        return $this->manageMerchant($data, 'business_code', $data['business_code'], false);
+      }
     }else{
       if(!isset($data['email'])){
         $this->response['data'] = null;
         $this->response['error'] = 'Email address is required!';
+        return $this->response();
+      }
+      if($this->selfInvitation($data['merchant'], $data['email'], null) == true){
+        $this->response['data'] = null;
+        $this->response['error'] = 'You cannot invite yourself';
         return $this->response();
       }
       if($this->checkIfExist($data['merchant'], 'email', $data['email']) == true){
@@ -540,5 +551,30 @@ class CustomerController extends APIController
     }
     $this->response['data'] = $temp;
     return $this->response();
+  }
+  
+  public function selfInvitation($inviterId, $email, $abn){
+    $selfInvite = false;
+    if($email){
+      $receipient = app('Increment\Account\Http\AccountController')->retrieveWithMerchant('email', $email);
+      if($receipient){
+        if($inviterId == $receipient['merchant']['id']){
+          $selfInvite = true;
+        }else{
+          $selfInvite = false;
+        }
+      }
+    }
+    if($abn){
+      $receipient = app('Increment\Marketplace\Http\MerchantController')->getByParams('business_code', $abn);
+      if($receipient){
+        if($inviterId == $receipient['id']){
+          $selfInvite = true;
+        }else{
+          $selfInvite = false;
+        }
+      }
+    }
+    return $selfInvite;
   }
 }
