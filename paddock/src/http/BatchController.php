@@ -68,7 +68,7 @@ class BatchController extends APIController
         $taskData['spray_mix_id'] = $batchData['spray_mix_id'];
         $taskData['machine_id'] = $batchData['machine_id'];
         $taskData['merchant_id'] = $data['tasks']['merchant_id'];
-        $taskData['account_id'] =  $data['tasks']['account_id'];
+        $taskData['account_id'] =  $batchProduct[0]['account_id'];
         $taskData['area'] =  $key['area'];
         BatchPaddockTask::create($taskData);
         $j++;
