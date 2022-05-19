@@ -279,7 +279,6 @@ class ProductTraceController extends APIController
         $this->response['error'] = 'Duplicate tag!';
         return $this->response();
       }
-
       if ($this->checkOwnTrace($item, $data['merchant_id']) == false) {
         $this->response['data'] = null;
         $this->response['error'] = 'You don\'t own this product!';
@@ -530,12 +529,17 @@ class ProductTraceController extends APIController
         array(function($query)use($trace){
           $query->where('payload_value', '=', $trace['id']);
         }),
-        array('merchant_id', '=', $merchantId),
+        array('from', '=', $merchantId),
         array('status', '=', 'active')
       );
       $transferred = app($this->transferredProductController)->retrieveByCondition($params);
       if(sizeof($transferred) > 0){
-        return true;
+        $transferredProduct = $transferred[0];
+        if($transferredProduct['merchant_id'] === $merchantId){
+          return true;
+        }else{
+          return false;
+        }
       }else if(intval($trace['product']['merchant_id']) == intval($merchantId)){
         return true;
       }else{

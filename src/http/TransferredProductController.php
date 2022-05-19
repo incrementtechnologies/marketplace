@@ -392,7 +392,7 @@ class TransferredProductController extends APIController
   }
 
   public function retrieveByCondition($condition){
-    return TransferredProduct::where($condition)->get();
+    return TransferredProduct::leftJoin('transfers as T1', 'T1.id', '=', 'transferred_products.transfer_id')->where($condition)->get();
   }
 
   public function retrieveProductQtyInDist($item, $data, $type){
