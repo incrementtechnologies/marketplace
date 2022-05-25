@@ -540,7 +540,7 @@ class ProductTraceController extends APIController
       $transferred = app($this->transferredProductController)->retrieveByCondition($params);
       if(sizeof($transferred) > 0){
         $transferredProduct = $transferred[0];
-        if($transferredProduct['merchant_id'] === $merchantId){
+        if($transferredProduct['merchant_id'] == $merchantId){
           return true;
         }else{
           return false;
