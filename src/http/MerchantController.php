@@ -151,4 +151,13 @@ class MerchantController extends APIController
     $result = Merchant::select($getColumns)->where($column, '=', $value)->get();
     return sizeof($result) > 0 ? $result[0] : null;
   }
+  public function getAccountType($merchantId){
+    $result = Merchant::where('id', '=', $merchantId)->first();
+    if($result !== null){
+      $account = app('Increment\Account\Http\AccountController')->getByParamsWithColumns($result['account_id'], ['account_type']);
+      return $account !== null ? $account['account_type'] : null;
+    }else{
+      return null;
+    }
+  }
 }

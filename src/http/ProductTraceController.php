@@ -529,9 +529,14 @@ class ProductTraceController extends APIController
         array(function($query)use($trace){
           $query->where('payload_value', '=', $trace['id']);
         }),
-        array('from', '=', $merchantId),
         array('status', '=', 'active')
       );
+      $accountType = app('Increment\MarketPlace\Http\MerchantController')->getAccountType($merchantId);
+      if($accountType === 'MANUFACTURER'){
+        $params[] =  array('from', '=', $merchantId);
+      }else{
+        $params[] =  array('to', '=', $merchantId);
+      }
       $transferred = app($this->transferredProductController)->retrieveByCondition($params);
       if(sizeof($transferred) > 0){
         $transferredProduct = $transferred[0];
