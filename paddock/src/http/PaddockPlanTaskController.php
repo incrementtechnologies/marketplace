@@ -531,8 +531,7 @@ class PaddockPlanTaskController extends APIController
                     }
                     usort($dates, function($a, $b) {return strtolower($a['due_date']) > strtolower($b['due_date']);});
                     $oldestDate = sizeof($dates) > 0 ? $dates[0] : null;
-                    dd($oldestDate);
-                    if($oldestDate !== null && $oldestDate['spray_mix_id'] === $data['spray_mix_id']) {
+                    if($oldestDate !== null && $oldestDate['spray_mix_id'] == $data['spray_mix_id']) {
                         $paddockPlan = app($this->paddockPlanClass)->retrievePlanByParams('id', $each['paddock_plan_id'], ['start_date', 'end_date', 'crop_id', 'paddock_id']);
                         $totalBatchArea = app($this->batchPaddockTaskClass)->getTotalBatchPaddockPlanTask($each['id']);
                         $result[$i]['area'] = (float)$item['area'];
