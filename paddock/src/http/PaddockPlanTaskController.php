@@ -405,11 +405,12 @@ class PaddockPlanTaskController extends APIController
                             $array[$i]['recent_event'] = 'Task';
                             $array[$i]['label'] = $array[$i]['paddock']['name'];
                         }
-                    }else{
-                        $array[$i]['recent_event'] = 'Manual Batch';
-                        $array[$i]['date_completed_orig'] = $key['updated_at'];
-                        $array[$i]['label'] = 'SESSION NUMBER: '.$key['session'];
                     }
+                    // else{
+                    //     $array[$i]['recent_event'] = 'Manual Batch';
+                    //     $array[$i]['date_completed_orig'] = $key['updated_at'];
+                    //     $array[$i]['label'] = 'SESSION NUMBER: '.$key['session'];
+                    // }
                 }else{
                     $array[$i]['recent_event'] = 'Order';
                     $array[$i]['label'] = 'ORDER NUMBER: '.$key['order_number'];
