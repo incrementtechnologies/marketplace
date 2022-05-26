@@ -372,16 +372,16 @@ class PaddockPlanTaskController extends APIController
 
     public function retrievePaddockPlanTaskByParamsCompleted($column, $column2, $value)
     {
-        // $batch = DB::table('batches as T1')
-        //     ->rightJoin('batch_paddock_tasks as T2', 'T1.id', '=', 'T2.batch_id')
-        //     ->where('T1.' . $column, '=', $value)
-        //     ->where('status', '=', 'completed')
-        //     ->where('T1.deleted_at', '=', null)
-        //     ->orderBy('T1.created_at', 'desc')->get()->toArray();
-        $batch = Batch::where($column, '=', $value)
-        ->where('status', '=', 'completed')
-        ->where('deleted_at', '=', null)
-        ->orderBy('created_at', 'desc')->get()->toArray();
+        $batch = DB::table('batches as T1')
+            ->rightJoin('batch_paddock_tasks as T2', 'T1.id', '=', 'T2.batch_id')
+            ->where('T1.' . $column, '=', $value)
+            ->where('status', '=', 'completed')
+            ->where('T1.deleted_at', '=', null)
+            ->orderBy('T1.created_at', 'desc')->get()->toArray();
+        // $batch = Batch::where($column, '=', $value)
+        // ->where('status', '=', 'completed')
+        // ->where('deleted_at', '=', null)
+        // ->orderBy('created_at', 'desc')->get()->toArray();
         $orders = OrderRequest::where($column, '=', $value)->orWhere($column2, '=', $value)->where('status', '=', 'completed')->orderBy('created_at', 'desc')->get();
         $orderArray = app($this->orderRequestClass)->manageResultsMobile($orders);
         $obj = array_merge($batch, $orderArray);
