@@ -403,13 +403,16 @@ class PaddockPlanTaskController extends APIController
                             $array[$i]['spray_mix'] = app($this->sprayMixClass)->getByParams('id', $array[$i]['spray_mix_id'], ['id', 'name']);
                             $array[$i]['machine'] = app($this->machineClass)->getMachineNameByParams('id', $array[$i]['machine_id']);
                             $array[$i]['recent_event'] = 'Task';
+                            $array[$i]['label'] = $array[$i]['paddock']['name'];
                         }
                     }else{
                         $array[$i]['recent_event'] = 'Manual Batch';
                         $array[$i]['date_completed_orig'] = $key['updated_at'];
+                        $array[$i]['label'] = 'SESSION NUMBER: '.$key['session'];
                     }
                 }else{
                     $array[$i]['recent_event'] = 'Order';
+                    $array[$i]['label'] = 'ORDER NUMBER: '.$key['order_number'];
                     $array[$i]['date_completed'] = $key['delivered_date_formatted'];
                     $array[$i]['date_completed_orig'] = $key['updated_at'];
                 }
