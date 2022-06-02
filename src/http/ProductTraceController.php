@@ -799,7 +799,7 @@ class ProductTraceController extends APIController
         $this->response['data'] = $temp;
       }
     } else {
-      $currQty = ProductTrace::where('batch_number', '=', $data['batch_number'])->where('deleted_at', '=', null)->count();
+      $currQty = ProductTrace::where('batch_number', '=', $data['batch_number'])->where('product_attribute_id', '=', $data['product_attribute_id'])->where('deleted_at', '=', null)->count();
       $qty = null;
       if (isset($data['isEdit'])) {
         $qty = ((int)$data['qty'] - (int)$currQty);
