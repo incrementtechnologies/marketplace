@@ -803,7 +803,6 @@ class ProductTraceController extends APIController
       $qty = null;
       if (isset($data['isEdit'])) {
         $qty = ((int)$data['qty'] - (int)$currQty);
-        dd((int)$data['qty'], (int)$currQty);
         for ($i = 0; $i <= $qty-1; $i++) {
           $data['code'] = $this->generateCode();
           $data['status'] = 'inactive';
