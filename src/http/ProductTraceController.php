@@ -884,20 +884,20 @@ class ProductTraceController extends APIController
     //
   }
 
-  public function update(Request $request)
-  {
-    $data = $request->all();
-    $result = ProductTrace::where('rf', '=', $data['rf'])->get();
-    if (sizeof($result) > 0) {
-      $this->response['data'] = null;
-      $this->response['error'] = 'Drum tag is already used!';
-    } else {
-      $this->model = new ProductTrace();
-      $this->updateDB($data);
-      $this->response['data'] = $data['id'];
-    }
-    return $this->response();
-  }
+  // public function update(Request $request)
+  // {
+  //   $data = $request->all();
+  //   $result = ProductTrace::where('rf', '=', $data['rf'])->get();
+  //   if (sizeof($result) > 0) {
+  //     $this->response['data'] = null;
+  //     $this->response['error'] = 'Drum tag is already used!';
+  //   } else {
+  //     $this->model = new ProductTrace();
+  //     $this->updateDB($data);
+  //     $this->response['data'] = $data['id'];
+  //   }
+  //   return $this->response();
+  // }
 
   public function getByParamsByFlag($column, $value)
   {
