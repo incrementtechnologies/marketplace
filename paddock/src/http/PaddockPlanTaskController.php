@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\APIController;
 use Increment\Marketplace\Paddock\Models\PaddockPlanTask;
 use Increment\Marketplace\Paddock\Models\Paddock;
+use Increment\Marketplace\Paddock\Models\PaddockPlan;
 use Increment\Marketplace\Paddock\Models\SprayMix;
 use Increment\Marketplace\Models\OrderRequest;
 use Increment\Marketplace\Paddock\Models\Batch;
@@ -524,50 +525,59 @@ class PaddockPlanTaskController extends APIController
         $date =  Carbon::now();
         $currDate = $date->toDateString();
         $result = Paddock::where('deleted_at', '=', null)->where('merchant_id', '=', $data['merchant_id'])
-            ->get();
+            ->get(); //retrieve all paddocks
         $finalResult = array();
         $counter = 0;
         if(sizeof($result) > 0){
             for ($i=0; $i <= sizeof($result)-1 ; $i++) {
                 $item = $result[$i];
                 $dates = [];
-                $tasksPerPaddock = PaddockPlanTask::where('paddock_id', '=', $item['id'])->get();
-                if(sizeof($tasksPerPaddock) > 0){
-                    for ($b=0; $b <= sizeof($tasksPerPaddock)-1 ; $b++) {
-                        $each = $tasksPerPaddock[$b];
-                        $params = array(
-                            array('paddock_id', '=', $each['paddock_id']),
-                            array('due_date', '=', $each['due_date']),
-                        );
-                        $remainingSpray = $this->getRemainingSprayArea($params, $item);
-                        if($remainingSpray !== null && $remainingSpray['remaining_spray_area'] > 0){
-                            array_push($dates, $each);
-                        }
+                $paddockPlan = PaddockPlan::where('paddock_id', '=', $item['id'])->where('start_date', '<=', $date)->where('end_date', '>=', $date)->get(); //retrieve all paddock plan where end date is not end
+                if(sizeof($paddockPlan) > 0){
+                    for ($a=0; $a <= sizeof($paddockPlan)-1 ; $a++) { 
+                        $el = $paddockPlan[$a];
+                        $tasksPerPaddock = PaddockPlanTask::where('paddock_id', '=', $item['id']) //get all paddock plan task under each paddock where due date is w/n start & end date
+                            ->where('paddock_plan_id', '=', $el['id'])
+                            ->whereBetween('due_date', [$el['start_date'], $el['end_date']])
+                            ->get();
                     }
-                    usort($dates, function($a, $b) {return strtolower($a['due_date']) > strtolower($b['due_date']);});
-                    $oldestDate = sizeof($dates) > 0 ? $dates[0] : null;
-                    if($oldestDate !== null && $oldestDate['spray_mix_id'] == $data['spray_mix_id']) {
-                        $paddockPlan = app($this->paddockPlanClass)->retrievePlanByParams('id', $each['paddock_plan_id'], ['start_date', 'end_date', 'crop_id', 'paddock_id']);
-                        $totalBatchArea = app($this->batchPaddockTaskClass)->getTotalBatchPaddockPlanTask($each['id']);
-                        $result[$i]['area'] = (float)$item['area'];
-                        $totalArea =  $totalBatchArea != null ? (doubleval($item['spray_area']) - doubleval($totalBatchArea)) : doubleval($item['spray_area']);
-                        $result[$i]['remaining_spray_area'] = $this->numberConvention($totalArea);
-                        $result[$i]['units'] = "Ha";
-                        $result[$i]['spray_areas'] = $result[$i]['remaining_spray_area'];
-                        $result[$i]['batch_areas'] = $totalBatchArea;
-                        $result[$i]['spray_mix_units'] = "L/Ha";
-                        $result[$i]['partial'] = false;
-                        $result[$i]['spray_area'] = $item['spray_area'];
-                        $result[$i]['paddock_id'] = $each['paddock_id'];
-                        $result[$i]['name'] = $item['name'];
-                        $result[$i]['plan_task_id'] = $each['id'];
-                        $result[$i]['crop_name'] = app($this->cropClass)->retrieveCropName($paddockPlan[0]['crop_id']);
-                        $result[$i]['partial_flag'] = false;
-                        $result[$i]['due_date'] = $each['due_date'];
-                        $result[$i]['arable_area'] = $item['arable_area'];
-                        $result[$i]['rate_per_hectar'] = app('Increment\Marketplace\Paddock\Http\SprayMixProductController')->retrieveDetailsWithParams('spray_mix_id', $each['spray_mix_id'], ['rate']);
-                        if($result[$i]['remaining_spray_area'] > 0){
-                            array_push($finalResult, $result[$i]);
+                    if(sizeof($tasksPerPaddock) > 0){
+                        for ($b=0; $b <= sizeof($tasksPerPaddock)-1 ; $b++) {
+                            $each = $tasksPerPaddock[$b];
+                            $params = array(
+                                array('paddock_id', '=', $each['paddock_id']),
+                                array('due_date', '=', $each['due_date']),
+                            );
+                            $remainingSpray = $this->getRemainingSprayArea($params, $item); //get remaining spray area per paddock id
+                            if($remainingSpray !== null && $remainingSpray['remaining_spray_area'] > 0){
+                                array_push($dates, $each);
+                            }
+                        }
+                        usort($dates, function($a, $b) {return strtolower($a['due_date']) > strtolower($b['due_date']);}); //get the oldest date
+                        $oldestDate = sizeof($dates) > 0 ? $dates[0] : null;
+                        if($oldestDate !== null && $oldestDate['spray_mix_id'] == $data['spray_mix_id']) {
+                            $paddockPlan = app($this->paddockPlanClass)->retrievePlanByParams('id', $oldestDate['paddock_plan_id'], ['start_date', 'end_date', 'crop_id', 'paddock_id']);
+                            $totalBatchArea = app($this->batchPaddockTaskClass)->getTotalBatchPaddockPlanTask($oldestDate['id']);
+                            $result[$i]['area'] = (float)$item['area'];
+                            $totalArea =  $totalBatchArea != null ? (doubleval($item['spray_area']) - doubleval($totalBatchArea)) : doubleval($item['spray_area']);
+                            $result[$i]['remaining_spray_area'] = $this->numberConvention($totalArea);
+                            $result[$i]['units'] = "Ha";
+                            $result[$i]['spray_areas'] = $result[$i]['remaining_spray_area'];
+                            $result[$i]['batch_areas'] = $totalBatchArea;
+                            $result[$i]['spray_mix_units'] = "L/Ha";
+                            $result[$i]['partial'] = false;
+                            $result[$i]['spray_area'] = $item['spray_area'];
+                            $result[$i]['paddock_id'] = $oldestDate['paddock_id'];
+                            $result[$i]['name'] = $item['name'];
+                            $result[$i]['plan_task_id'] = $oldestDate['id'];
+                            $result[$i]['crop_name'] = app($this->cropClass)->retrieveCropName($paddockPlan[0]['crop_id']);
+                            $result[$i]['partial_flag'] = false;
+                            $result[$i]['due_date'] = $oldestDate['due_date'];
+                            $result[$i]['arable_area'] = $item['arable_area'];
+                            $result[$i]['rate_per_hectar'] = app('Increment\Marketplace\Paddock\Http\SprayMixProductController')->retrieveDetailsWithParams('spray_mix_id', $oldestDate['spray_mix_id'], ['rate']);
+                            if($result[$i]['remaining_spray_area'] > 0){
+                                array_push($finalResult, $result[$i]);
+                            }
                         }
                     }
                 }
