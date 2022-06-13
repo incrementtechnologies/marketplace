@@ -467,20 +467,13 @@ class PaddockPlanTaskController extends APIController
             for ($i=0; $i <= sizeof($result)-1 ; $i++) {
                 $item = $result[$i];
                 $dates = [];
-                // $paddockPlan = PaddockPlan::where('paddock_id', '=', $item['id'])->where('start_date', '<=', $date)->where('end_date', '>=', $date)->get(); //retrieve all paddock plan where end date is not end
-                // if(sizeof($paddockPlan) > 0){
-                //     for ($a=0; $a <= sizeof($paddockPlan)-1 ; $a++) { 
-                //         $el = $paddockPlan[$a];
-                //     }
-                $tasksPerPaddock = PaddockPlanTask::where('paddock_id', '=', $item['id']) //get all paddock plan task under each paddock where due date is w/n start & end date
-                    // ->where('paddock_plan_id', '=', $el['id'])
-                    // ->whereBetween('due_date', [$el['start_date'], $el['end_date']])
-                    ->get();
+                $tasksPerPaddock = PaddockPlanTask::where('paddock_id', '=', $item['id'])->where('status', '!=', 'completed')->get();
                 if(sizeof($tasksPerPaddock) > 0){
                     for ($b=0; $b <= sizeof($tasksPerPaddock)-1 ; $b++) {
                         $each = $tasksPerPaddock[$b];
                         $params = array(
                             array('paddock_id', '=', $each['paddock_id']),
+                            array('status', '!=', 'completed'),
                             array('due_date', '=', $each['due_date']),
                         );
                         $remainingSpray = $this->getRemainingSprayArea($params, $item); //get remaining spray area per paddock id
