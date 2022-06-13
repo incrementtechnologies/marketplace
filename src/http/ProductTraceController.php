@@ -375,28 +375,6 @@ class ProductTraceController extends APIController
 
       $item = $this->response['data'][$i];
 
-      // if(isset($data['nfc']) && ($item['nfc'] == null || $item['nfc'] == '')){
-      // no need to update on end user
-      // $nfcResult = ProductTrace::where('nfc', '=', $data['nfc'])->get();
-      // if(sizeof($nfcResult) > 0){
-      //   $this->response['data'] = null;
-      //   $this->response['error'] = 'Tag is already taken!';
-      //   return $this->response();
-      // }else{
-      //   ProductTrace::where('id', '=', $item['id'])->update(array(
-      //     'nfc' => $data['nfc'],
-      //     'updated_at' => Carbon::now(),
-      //     'status' => 'active'
-      //   ));
-      //   $this->response['data'][$i]['nfc'] = $data['nfc'];
-      // }
-      // }
-
-      // if(isset($data['nfc']) && $item['nfc'] != null && $item['nfc'] != $data['nfc']){
-      //   $this->response['data'] = null;
-      //   $this->response['error'] = 'Duplicate tag!';
-      //   return $this->response();
-      // }
       if ($this->checkOwnTrace($item, $data['merchant_id']) == false) {
         $this->response['data'] = null;
         $this->response['error'] = 'You don\'t own this product!';
