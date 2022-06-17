@@ -415,7 +415,7 @@ class PaddockPlanTaskController extends APIController
 
     public function retrievePaddockPlanTaskByParamsDue($column, $value)
     {
-        $temp = Batch::leftJoin('batch_paddock_tasks as T1', 'T1.batch_id', '=', 'batches.id')
+        $temp = Batch::rightJoin('batch_paddock_tasks as T1', 'T1.batch_id', '=', 'batches.id')
             ->where('batches.'.$column, '=', $value)
             ->where('batches.deleted_at', '=', null)
             ->where('status', '=', 'inprogress')
