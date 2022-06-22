@@ -64,35 +64,6 @@ class PaddockPlanTaskController extends APIController
         $result = Paddock::where($con[0]['column'], '=', $con[0]['value'])->get();
         $currDate = Carbon::now()->toDateString();
         $finalResult = array();
-        $size = Paddock::where($con[0]['column'], '=', $con[0]['value'])->get();
-        $counter = 0;
-        if(sizeof($size) > 0){
-            for ($a=0; $a <= sizeof($size)-1; $a++) {
-                $item = $size[$a];
-                $task = PaddockPlanTask::where($con[0]['column'], '=', $con[0]['value'])
-                ->where('paddock_id', '=', $item['id'])
-                // ->where('status', '=', 'approved')
-                ->orderBy('due_date', 'asc')
-                ->first();
-                if ($task != null && ($task['status'] !== 'pending' || $task['status'] !== 'completed')) {
-                    $batchPaddock = app($this->batchPaddockTaskClass)->retrieveByParams('paddock_plan_task_id', $task['id'], ['batch_id']);
-                    $batchStatus = sizeof($batchPaddock) > 0 ? Batch::where('id', '=', $batchPaddock[0]['batch_id'])->first() : null;
-                    $totalBatchArea = app($this->batchPaddockTaskClass)->getTotalBatchPaddockPlanTask($task['id']);
-                    $area = (float)$item['area'];
-                    $totalArea =  $totalBatchArea != null ? ((float)$item['spray_area'] - (float)$totalBatchArea) : (float)$item['spray_area'];
-                    $remainingSprayArea = $this->numberConvention($totalArea);
-                    if ($remainingSprayArea > 0) {
-                        if($batchStatus !== null){
-                            if($batchStatus !== 'completed'){
-                                $counter ++;
-                            }
-                        }else{
-                            $counter ++;
-                        }
-                    }
-                }
-            }
-        }
         if (sizeof($result) > 0) {
             $result = json_decode(json_encode($result), true);
             $i = 0;
@@ -100,20 +71,20 @@ class PaddockPlanTaskController extends APIController
                 $tempDates = [];
                 $task = PaddockPlanTask::where($con[0]['column'], '=', $con[0]['value'])
                     ->where('paddock_id', '=', $key['id'])
-                    ->where('status', '!=', 'completed')
+                    ->where('status', '!=', 'pending')
                     ->orderBy('due_date', 'asc')
                     ->get();
                 if(sizeof($task) > 0){
                     for ($a=0; $a <= sizeof($task)-1; $a++) {
                         $each = $task[$a];
-                        array_push($tempDates, $each['due_date']);
+                        array_push($tempDates, $each);
                     }
                     foreach ($tempDates as $date) {
                         $params = array(
                             array($con[0]['column'], '=', $con[0]['value']),
                             array('paddock_id', '=', $key['id']),
-                            array('due_date', '=', $date),
-                            array('status', '!=', 'completed')
+                            array('id', '=', $date['id']),
+                            array('due_date', '=', $date['due_date']),
                         );
                         $remainingSpray = $this->getRemainingSprayArea($params, $key);
                         if($remainingSpray !== null && $remainingSpray['remaining_spray_area'] > 0){
@@ -159,9 +130,9 @@ class PaddockPlanTaskController extends APIController
                 $items = $finalResult[$a];
                 $finalResult[$a]['due_date'] = Carbon::createFromFormat('Y-m-d', $items['due_date'])->copy()->tz($this->response['timezone'])->format('d/m/Y');
             }
+            $this->response['size'] = sizeof($finalResult);
             $finalResult = array_slice($finalResult, $data['offset'], $data['limit']);
             $this->response['data'] = $finalResult;
-            $this->response['size'] = $counter;
             return $this->response();
         }
     }
