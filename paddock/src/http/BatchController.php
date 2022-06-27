@@ -116,22 +116,21 @@ class BatchController extends APIController
     $data = $request->all();
     $batchTask = app($this->batchPaddockTaskClass)->retrieveByParams('batch_id', $data['id'], ['paddock_plan_task_id']);
     if (sizeOf($batchTask) > 0) {
-      $i = 0;
-      foreach ($batchTask as $key => $value) {
-        $task = PaddockPlanTask::where('id', '=', $batchTask[$i]['paddock_plan_task_id'])->get();
-        $paddock = Paddock::where('id', '=', $task[0]['paddock_id'])->get(['spray_area']);
-        $paddockArea = sizeof($paddock) > 0 ? $paddock[0]['spray_area'] : 0;
-        $totalBatchArea = app($this->batchPaddockTaskClass)->getTotalBatchPaddockPlanTask($batchTask[$i]['paddock_plan_task_id']);
-
-        PaddockPlanTask::where('id', '=', $batchTask[$i]['paddock_plan_task_id'])->update(array(
-          'status' => (doubleval($paddockArea) - $totalBatchArea) <= 0 ? 'completed' : 'inprogress',
+      for ($i=0; $i <= sizeof($batchTask)-1 ; $i++) { 
+        $item = $batchTask[$i];
+        $task = PaddockPlanTask::where('id', '=', $item['paddock_plan_task_id'])->first();
+        $paddock = Paddock::where('id', '=', $task['paddock_id'])->get(['spray_area']);
+        $paddockArea = $paddock !== null ? $paddock['spray_area'] : 0;
+        $totalBatchArea = app($this->batchPaddockTaskClass)->getTotalBatchPaddockPlanTask($item['paddock_plan_task_id']);
+  
+        PaddockPlanTask::where('id', '=', $item['paddock_plan_task_id'])->update(array(
+          'status' => ((float)$paddockArea - (float)$totalBatchArea) <= 0 ? 'completed' : 'inprogress',
           'updated_at' => Carbon::now(),
         ));
         $result = Batch::where('id', '=', $data['id'])->update(array(
           'status' =>  'completed',
           'updated_at' => Carbon::now()
         ));
-        $i++;
       }
     }
     $this->response['data'] = $result;
