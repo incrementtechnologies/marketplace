@@ -39,7 +39,11 @@ class BatchController extends APIController
     $merchant = app($this->merchantClass)->getColumnByParams('id', $batchData['merchant_id'], 'prefix');
     $counter = Batch::where('merchant_id', '=', $batchData['merchant_id'])->count();
     $batchData['session'] = $merchant ? $merchant['prefix'] . $this->toCode($counter) : $this->toCode($counter);
-    $batchData['applied_rate'] = $batchData['application_rate'];
+    if($batchData['spray_mix_id'] != null){
+      $batchData['applied_rate'] = $batchData['used_rate'];
+    }else{
+      $batchData['applied_rate'] = $batchData['application_rate'];
+    }
     $batchData['status'] = sizeof($data['tasks']) > 0 ? 'inprogress' : $batchData['status'];
     $batchData['created_at'] = Carbon::now();
     $batchProduct = $data['batch_products'];
@@ -51,7 +55,11 @@ class BatchController extends APIController
       $batchProduct[$i]['batch_id'] = $this->response['data']['batch']['id'];
       $batchId = $this->response['data']['batch']['id'];
       $batchProduct[$i]['batch_id'] = $batchId;
-      $batchProduct[$i]['applied_rate'] = $key['used_rate'];
+      if($batchData['spray_mix_id'] != null){
+        $batchProduct[$i]['applied_rate'] = $key['used_rate'];
+      }else{
+        $batchData['applied_rate'] = $batchData['applied_rate'];
+      }
       BatchProduct::create($batchProduct[$i]);
       $i++;
     }
