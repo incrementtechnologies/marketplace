@@ -39,11 +39,7 @@ class BatchController extends APIController
     $merchant = app($this->merchantClass)->getColumnByParams('id', $batchData['merchant_id'], 'prefix');
     $counter = Batch::where('merchant_id', '=', $batchData['merchant_id'])->count();
     $batchData['session'] = $merchant ? $merchant['prefix'] . $this->toCode($counter) : $this->toCode($counter);
-    if($batchData['spray_mix_id'] != null){
-      $batchData['applied_rate'] = $batchData['used_rate'];
-    }else{
-      $batchData['applied_rate'] = $batchData['application_rate'];
-    }
+    $batchData['applied_rate'] = $batchData['application_rate'];
     $batchData['status'] = sizeof($data['tasks']) > 0 ? 'inprogress' : $batchData['status'];
     $batchData['created_at'] = Carbon::now();
     $batchProduct = $data['batch_products'];
@@ -119,7 +115,7 @@ class BatchController extends APIController
       for ($i=0; $i <= sizeof($batchTask)-1 ; $i++) { 
         $item = $batchTask[$i];
         $task = PaddockPlanTask::where('id', '=', $item['paddock_plan_task_id'])->first();
-        $paddock = Paddock::where('id', '=', $task['paddock_id'])->get(['spray_area']);
+        $paddock = Paddock::where('id', '=', $task['paddock_id'])->select('spray_area')->first();
         $paddockArea = $paddock !== null ? $paddock['spray_area'] : 0;
         $totalBatchArea = app($this->batchPaddockTaskClass)->getTotalBatchPaddockPlanTask($item['paddock_plan_task_id']);
   
