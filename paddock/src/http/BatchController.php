@@ -120,7 +120,7 @@ class BatchController extends APIController
         $totalBatchArea = app($this->batchPaddockTaskClass)->getTotalBatchPaddockPlanTask($item['paddock_plan_task_id']);
   
         PaddockPlanTask::where('id', '=', $item['paddock_plan_task_id'])->update(array(
-          'status' => ((float)$paddockArea - (float)$totalBatchArea) <= 0 ? 'completed' : 'inprogress',
+          'status' => ((float)$paddockArea - (float)$totalBatchArea) == 0 ? 'completed' : 'inprogress',
           'updated_at' => Carbon::now(),
         ));
         $result = Batch::where('id', '=', $data['id'])->update(array(
