@@ -14,7 +14,6 @@ use Increment\Marketplace\Paddock\Models\PaddockPlan;
 use Increment\Marketplace\Paddock\Models\Paddock;
 use Increment\Marketplace\Paddock\Models\Crop;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 
 class BatchController extends APIController
@@ -112,7 +111,6 @@ class BatchController extends APIController
   {
     $data = $request->all();
     $batchTask = app($this->batchPaddockTaskClass)->retrieveByParams('batch_id', $data['id'], ['paddock_plan_task_id']);
-    $status = 'inprogress';
     if (sizeOf($batchTask) > 0) {
       for ($i=0; $i <= sizeof($batchTask)-1 ; $i++) { 
         $item = $batchTask[$i];
@@ -120,16 +118,9 @@ class BatchController extends APIController
         $paddock = Paddock::where('id', '=', $task['paddock_id'])->select('spray_area')->first();
         $paddockArea = $paddock !== null ? $paddock['spray_area'] : 0;
         $totalBatchArea = app($this->batchPaddockTaskClass)->getTotalBatchPaddockPlanTask($item['paddock_plan_task_id']);
-        Log::info('<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>: '.((float)$paddockArea - (float)$totalBatchArea));
-        if(((float)$paddockArea - (float)$totalBatchArea) > 0){
-          $status = 'inprogress';
-        }else if(((float)$paddockArea - (float)$totalBatchArea) == 0){
-          $status = 'completed';
-        }else{
-          $status = 'inprogress';
-        }
+  
         PaddockPlanTask::where('id', '=', $item['paddock_plan_task_id'])->update(array(
-          'status' => $status,
+          'status' => ((float)$paddockArea - (float)$totalBatchArea) == 0 ? 'completed' : 'inprogress',
           'updated_at' => Carbon::now(),
         ));
         $result = Batch::where('id', '=', $data['id'])->update(array(
