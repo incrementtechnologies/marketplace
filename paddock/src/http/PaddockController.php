@@ -164,7 +164,7 @@ class PaddockController extends APIController
         $this->response['data'][$i]['remaining_spray_area'] = $this->numberConvention($totalArea);
         $this->response['data'][$i]['batch_area'] = $totalBatchArea;
         $this->response['data'][$i]['last_updated'] = $lastTaskUpdated !== null && $lastTaskUpdated['deleted_at'] === null ? Carbon::parse($lastTaskUpdated['updated_at'])->format('d/m/Y') : Carbon::parse($lastTaskUpdated['deleted_at'])->format('d/m/Y');
-        $paddockPlan = PaddockPlan::select()->where("paddock_id", "=",  $task[0]['paddock_id'])->orderBy('start_date', 'asc')->first();
+        $paddockPlan = PaddockPlan::select()->where("id", "=",  $task[0]['paddock_plan_id'])->orderBy('start_date', 'asc')->first();
         if ($paddockPlan !== null) {
           $this->response['data'][$i]['started'] = $paddockPlan['start_date'];
           $this->response['data'][$i]['actual_tasks'] = app($this->batchClass)->retrieveAppliedTask($data['id']);
