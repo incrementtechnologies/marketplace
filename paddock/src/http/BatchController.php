@@ -171,8 +171,8 @@ class BatchController extends APIController
   public function retrieveApplyTasksRecents(Request $request)
   {
     $data = $request->all();
-    $tempMix = Batch::where('merchant_id', '=', $data['merchant_id'])->groupBy('spray_mix_id')->orderBy('updated_at')->limit(3)->get();
-    $tempMac = Batch::where('merchant_id', '=', $data['merchant_id'])->groupBy('machine_id')->orderBy('updated_at')->limit(3)->get();
+    $tempMix = Batch::where('merchant_id', '=', $data['merchant_id'])->groupBy('spray_mix_id')->orderBy('updated_at', 'desc')->limit(3)->get();
+    $tempMac = Batch::where('merchant_id', '=', $data['merchant_id'])->groupBy('machine_id')->orderBy('updated_at', 'desc')->limit(3)->get();
     if(sizeof($tempMix) > 0 && sizeof($tempMac) > 0){
       $tempSpray = array();
       $tempMachine = array();
