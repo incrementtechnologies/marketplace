@@ -15,7 +15,7 @@ class UpdateProductsTableChangeDataTypeToLongText extends Migration
     {
             
         Schema::table('products', function (Blueprint $table) {
-            $table->longText('details')->after('status')->nullable();
+            $table->longText('details')->after('status')->nullable()->change();
         });
     }
 

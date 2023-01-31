@@ -198,7 +198,6 @@ class ProductController extends APIController
             ->get();  
         }
       }
-
       $this->response['data'] = $result;
       // $this->model = new Product();
       // $this->retrieveDB($data);
