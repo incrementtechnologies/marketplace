@@ -285,7 +285,7 @@ class ProductTraceController extends APIController
         return $this->response();
       }
 
-      $this->response['data'][$i]['created_at_human'] = Carbon::createFromFormat('Y-m-d H:i:s', $item['created_at'])->copy()->tz($this->response['timezone'])->format('F j, Y h:i A');
+      $this->response['data'][$i]['created_at_human'] = Carbon::parse($item['created_at'], $this->response['timezone'])->format('F j, Y h:i A');
       $this->response['data'][$i]['bundled_product'] = app($this->bundledProductController)->getByParams('product_trace', $item['id']);
       if ($item['batch_number'] == null && $item['status'] == 'active') {
         $bundledSettingQty = app($this->bundledSettingController)->getQtyByParamsBundled($item['product_id'], $item['product_attribute_id']);
@@ -308,7 +308,7 @@ class ProductTraceController extends APIController
           }else{
             $this->response['data'][$i]['product']['qty_in_bundled'] = $qty['qty_in_bundled'];
           }
-          $this->response['data'][$i]['setting_qty'] = sizeof($bundledSettingQty) > 0 ? $bundledSettingQty[0]['qty'] : 0; //$bundledSettingQty[0]['qty'] 
+          $this->response['data'][$i]['setting_qty'] = sizeof($bundledSettingQty) > 0 ? $bundledSettingQty[0]['qty'] : 0; //$bundledSettingQty[0]['qty']
           $this->response['data'][$i]['product']['trace_qty'] = 1;
         } else if ($data['account_type'] == 'DISTRIBUTOR' || $this->response['data'][$i]['bundled_product'] !== null) {
           // $qty = $this->getBalanceQtyWithInBundled('product_id', $item['product_id'], 'active', $data['merchant_id'], $item['product_attribute_id']);
@@ -335,7 +335,7 @@ class ProductTraceController extends APIController
           }
         }
         // if($data['account_type'] == 'MANUFACTURER' || $type == 'bundled'){
-        //   $this->response['data'][$i]['product']['qty'] = $this->getBalanceQty('product_id', $item['product_id'], 'active');  
+        //   $this->response['data'][$i]['product']['qty'] = $this->getBalanceQty('product_id', $item['product_id'], 'active');
         // }else{
         //   $this->response['data'][$i]['product']['qty'] = app($this->transferController)->getQtyTransferred($data['merchant_id'], $item['product_id']);
         // }
@@ -425,7 +425,7 @@ class ProductTraceController extends APIController
         $type = $result[$i]['product']['type'];
         $result[$i]['product']['qty'] = null;
         // if($data['account_type'] == 'MANUFACTURER' || $type == 'bundled'){
-        //   $result[$i]['product']['qty'] = $this->getBalanceQty('product_id', $item['product_id'], 'active');  
+        //   $result[$i]['product']['qty'] = $this->getBalanceQty('product_id', $item['product_id'], 'active');
         // }else{
         //   $result[$i]['product']['qty'] = app($this->transferController)->getQtyTransferred($data['merchant_id'], $item['product_id']);
         // }

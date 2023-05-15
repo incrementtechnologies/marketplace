@@ -752,18 +752,24 @@ class TransferController extends APIController
 
         $merchantFrom = app($this->merchantClass)->getColumnValueByParams('id', $temp[$i]['from'], 'name');
         $merchant =  app($this->merchantClass)->getColumnValueByParams('id', $temp[$i]['to'], 'name');
-        $temp[$i]['title']     =  $temp[$i]['title'];
         $temp[$i]['id']        = $key['id'];
         $temp[$i]['merchant']  = array('name' => $merchant);
         $temp[$i]['merchant_from'] = $merchantFrom;
         $temp[$i]['qty']   = app($this->transferredProductsClass)->getRemainingProductQtyDistributor($temp[$i]['id'], $data['merchant_id'], $temp[$i]['product_attribute_id']);
-        $temp[$i]['volume'] = app($this->productAttrClass)->getProductUnits('id', $key['product_attribute_id']);
+        $attribute = app($this->productAttrClass)->getProductUnitsByColumns($key['product_attribute_id']);
+        if($attribute){
+          $volWithLabel = app($this->productAttrClass)->convertVariation($attribute['payload'], $attribute['payload_value']);
+          $temp[$i]['volume'] = $volWithLabel;
+          $temp[$i]['attribute'] = $attribute['payload_value'];
+        }else{
+          $temp[$i]['volume'] = null;
+          $temp[$i]['attribute'] = null;
+        }
         $temp[$i]['qty_in_bundled'] = $this->getBundledProducts($data['merchant_id'], $key['id']);
-        $temp[$i]['type']    = $temp[$i]['type'];
-        $temp[$i]['code'] = $temp[$i]['code'];
         $temp[$i]['batch_number'] = isset($key['batch_number']) ? $key['batch_number'] : null;
         $temp[$i]['manufacturing_date'] = isset($key['manufacturing_date']) ? $key['manufacturing_date'] : null;
         $temp[$i]['details'] = $this->retrieveProductDetailsByParams('id', $key['id']);
+        $temp[$i]['variation'] = app($this->productAttrClass)->getByParams('id', $temp[$i]['product_attribute_id']);
         $i++;
       }
       $this->response['data'] = $temp;
@@ -1020,7 +1026,7 @@ class TransferController extends APIController
       //       'product_qty' => $productQty != null && $volume > 0 ? number_format(($productQty->qty - floatval($consumed / $volume)), 2) : 0,
       //       'unit' => $products[$i]->payload,
       //       'unit_value' => $products[$i]->payload_value,
-      //       'qty' => app($this->batcProductClass)->getProductQtyTrace($products[$i]->merchant_id, 'product_id', $products[$i]->product_id, $products[$i]->payload_value, $productQty != null ? $productQty->qty : 0), 
+      //       'qty' => app($this->batcProductClass)->getProductQtyTrace($products[$i]->merchant_id, 'product_id', $products[$i]->product_id, $products[$i]->payload_value, $productQty != null ? $productQty->qty : 0),
       //     );
       //     $this->response['data'][$i]['inventory'] = $array;
       //     $this->response['data'][$i]['merchant'] = array(

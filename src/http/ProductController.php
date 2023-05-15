@@ -93,7 +93,7 @@ class ProductController extends APIController
       }
       return $this->response();
     }
-    
+
     // public function retrieveBundledMobile(Request $request){
     //   $data = $request->all();
     //   $cond = $data['condition'];
@@ -177,7 +177,7 @@ class ProductController extends APIController
       if(sizeof($con) == 1){
         $result = Product::where($con[0]['column'], $con[0]['clause'], $con[0]['value'])
             ->where('type', '!=', 'bundled')
-            ->get();  
+            ->get();
       }else if(sizeof($con) == 2){
         if(isset($data['mobile'])){
           $result = Product::where($con[0]['column'], $con[0]['clause'], $con[0]['value'])
@@ -187,7 +187,7 @@ class ProductController extends APIController
               ->orderBy(array_keys($data['sort'])[0], $data['sort'][array_keys($data['sort'])[0]])
               ->skip($data['offset'])
               ->take($data['limit'])
-              ->get();        
+              ->get();
         }else{
           $result = Product::where($con[0]['column'], $con[0]['clause'], $con[0]['value'])
             ->where($con[1]['column'], $con[1]['clause'], $con[1]['value'])
@@ -195,7 +195,7 @@ class ProductController extends APIController
             ->orderBy(array_keys($data['sort'])[0], $data['sort'][array_keys($data['sort'])[0]])
             ->skip($data['offset'])
             ->take($data['limit'])
-            ->get();  
+            ->get();
         }
       }
       $this->response['data'] = $result;
@@ -211,7 +211,7 @@ class ProductController extends APIController
         $this->response['size'] = Product::where($data['condition'][0]['column'], $data['condition'][0]['clause'], $data['condition'][0]['value'])->where($data['condition'][1]['column'], $data['condition'][1]['clause'], $data['condition'][1]['value'])->where('type', '!=', 'bundled')->where('deleted_at', '=', null)->count();
       }else if(sizeof($data['condition']) == 1){
         $this->response['size'] = Product::where($data['condition'][0]['column'], $data['condition'][0]['clause'], $data['condition'][0]['value'])->where('type', '!=', 'bundled')->where('deleted_at', '=', null)->count();
-      }  
+      }
       return $this->response();
     }
 
@@ -232,7 +232,7 @@ class ProductController extends APIController
         $this->response['size'] = Product::where($data['condition'][0]['column'], $data['condition'][0]['clause'], $data['condition'][0]['value'])->where($data['condition'][1]['column'], $data['condition'][1]['clause'], $data['condition'][1]['value'])->where('deleted_at', '=', null)->count();
       }else if(sizeof($data['condition']) == 1){
         $this->response['size'] = Product::where($data['condition'][0]['column'], $data['condition'][0]['clause'], $data['condition'][0]['value'])->where('deleted_at', '=', null)->count();
-      }  
+      }
       return $this->response();
     }
 
@@ -248,7 +248,7 @@ class ProductController extends APIController
       if(sizeof($result) > 0 && $data['order_request_id'] != null){
         $this->response['data'][0]['product_trace'] = app($this->transferClasss)->getProductTraceByOrderId($data['order_request_id'], $result[0]['id']);
       }
-      
+
       return $this->response();
     }
 
@@ -363,9 +363,9 @@ class ProductController extends APIController
           $result[$i]['featured'] = app($this->productImageController)->getProductImage($result[$i]['id'], 'featured');
           // $result[$i]['images'] = app($this->productImageController)->getProductImage($result[$i]['id'], null);
           // $result[$i]['variation'] = app($this->productAttrController)->getByParams('product_id', $result[$i]['id']);
-         } 
+         }
       }
-      return sizeof($result) > 0 ? $result[0] : null;      
+      return sizeof($result) > 0 ? $result[0] : null;
     }
 
     public function getProductByParamsWithAttribute($column, $value, $attrId){
@@ -383,7 +383,7 @@ class ProductController extends APIController
           // $result[$i]['images'] = app($this->productImageController)->getProductImage($result[$i]['id'], null);
           // $result[$i]['variation'] = app($this->productAttrController)->getByParams('product_id', $result[$i]['id']);
          }
-        return sizeof($result) > 0 ? $result[0] : null;      
+        return sizeof($result) > 0 ? $result[0] : null;
       }
     }
 
@@ -392,12 +392,13 @@ class ProductController extends APIController
       if(sizeof($result) > 0){
         $i= 0;
         foreach ($result as $key) {
+          $result[$i]['details'] = $key['details'] ? json_decode($key['details']) : null;
           $result[$i]['merchant'] = app($this->merchantController)->getByParams('id', $result[$i]['merchant_id']);
           $result[$i]['featured'] = app($this->productImageController)->getProductImage($result[$i]['id'], 'featured');
           $result[$i]['variation'] = app($this->productAttrController)->getByParams('id', $attrId);
-         } 
+         }
       }
-      return sizeof($result) > 0 ? $result[0] : null;     
+      return sizeof($result) > 0 ? $result[0] : null;
     }
 
     public function getProductByParamsEndUser($column, $value){
@@ -409,9 +410,9 @@ class ProductController extends APIController
           $result[$i]['featured'] = app($this->productImageController)->getProductImage($result[$i]['id'], 'featured');
           // $result[$i]['images'] = app($this->productImageController)->getProductImage($result[$i]['id'], null);
           $result[$i]['variation'] = app($this->productAttrController)->getByParams('product_id', $result[$i]['id']);
-         } 
+         }
       }
-      return sizeof($result) > 0 ? $result[0] : null;      
+      return sizeof($result) > 0 ? $result[0] : null;
     }
 
 
@@ -424,9 +425,9 @@ class ProductController extends APIController
           $result[$i]['featured'] = app($this->productImageController)->getProductImage($result[$i]['id'], 'featured');
           // $result[$i]['images'] = app($this->productImageController)->getProductImage($result[$i]['id'], null);
           $result[$i]['variation'] = app($this->productAttrController)->getByParams('product_id', $result[$i]['id']);
-         } 
+         }
       }
-      return sizeof($result) > 0 ? $result[0] : null;      
+      return sizeof($result) > 0 ? $result[0] : null;
     }
 
 
@@ -438,9 +439,9 @@ class ProductController extends APIController
           $result[$i]['merchant'] = app($this->merchantController)->getByParamsProduct('id', $result[$i]['merchant_id']);
           $result[$i]['variation'] = app($this->productAttrController)->getByParams('product_id', $result[$i]['id']);
           $result[$i]['qty'] = app($this->transferClasss)->getQtyTransferred($result[$i]['merchant_id'], $result[$i]['id']);
-         } 
+         }
       }
-      return sizeof($result) > 0 ? $result : null;      
+      return sizeof($result) > 0 ? $result : null;
     }
 
     public function getProductName($column, $value){
@@ -451,9 +452,9 @@ class ProductController extends APIController
           $result[$i]['variation'] = app($this->productAttrController)->getByParams('product_id', $result[$i]['id']);
           $result[$i]['qty'] = app($this->transferClasss)->getQtyTransferred($result[$i]['merchant_id'], $result[$i]['id']);
           $result[$i]['batch_number'] = array();
-         } 
+         }
       }
-      return sizeof($result) > 0 ? $result : null;      
+      return sizeof($result) > 0 ? $result : null;
     }
 
 
@@ -463,9 +464,9 @@ class ProductController extends APIController
         $i= 0;
         foreach ($result as $key) {
           $result[$i]['variation'] = app($this->productAttrController)->getByParams('product_id', $result[$i]['id']);
-         } 
+         }
       }
-      return sizeof($result) > 0 ? $result[0] : null;      
+      return sizeof($result) > 0 ? $result[0] : null;
     }
 
     public function retrieveProductByBundledSetting($column, $value, $return){
@@ -506,7 +507,7 @@ class ProductController extends APIController
             }else{
               $result[$i]['product_traces'] = [];
             }
-            
+
             if(isset($data['product_attribute_id']) || $data['product_attribute_id'] !== null || $data['product_attribute_id'] !== "undefined"){
               $result[$i]['volume'] = app($this->productAttrController)->getProductUnits('id', $data['product_attribute_id']);
             }
@@ -547,12 +548,12 @@ class ProductController extends APIController
           $result[$i]['images'] = app($this->productImageController)->getProductImage($result[$i]['type'] == 'bundled' ? $parentProduct[0]['product_id'] : $result[$i]['id'], null);
           $result[$i]['tag_array'] = $this->manageTags($result[$i]['tags']);
           $result[$i]['details'] = $this->retrieveProductDetailsByParams('id', $result[$i]['type'] == 'bundled' ? $parentProduct[0]['product_id'] : $result[$i]['id']);
-          $result[$i]['created_at_human'] = Carbon::createFromFormat('Y-m-d H:i:s', $result[$i]['created_at'])->copy()->tz($this->response['timezone'])->format('F j, Y H:i A');
+          $result[$i]['created_at_human'] = Carbon::parse($result[$i]['created_at'], $this->response['timezone'])->format('F j, Y H:i A');
           // $result[$i]['bundled_products'] = app($this->bundledProductController)->getByParams('product_id', $result[$i]['id']);
           // $result[$i]['bundled_settings'] = app($this->bundledSettingController)->getByParams('bundled', $result[$i]['id']);
           // if($accountId !== null){
           //   $result[$i]['wishlist_flag'] = app($this->wishlistController)->checkWishlist($result[$i]['id'], $accountId);
-          //   $result[$i]['checkout_flag'] = app($this->checkoutController)->checkCheckout($result[$i]['id'], $accountId); 
+          //   $result[$i]['checkout_flag'] = app($this->checkoutController)->checkCheckout($result[$i]['id'], $accountId);
           // }
           $result[$i]['inventories'] = null;
           $result[$i]['product_traces'] = null;
@@ -587,7 +588,7 @@ class ProductController extends APIController
           $result[$i]['bundled_settings'] = app($this->bundledSettingController)->getByParams('bundled', $result[$i]['id']);
           if($accountId !== null){
             $result[$i]['wishlist_flag'] = app($this->wishlistController)->checkWishlist($result[$i]['id'], $accountId);
-            $result[$i]['checkout_flag'] = app($this->checkoutController)->checkCheckout($result[$i]['id'], $accountId); 
+            $result[$i]['checkout_flag'] = app($this->checkoutController)->checkCheckout($result[$i]['id'], $accountId);
           }
           $result[$i]['inventories'] = null;
           $result[$i]['product_traces'] = null;
@@ -613,7 +614,7 @@ class ProductController extends APIController
         if(strpos($tags, ',')){
             $array  = explode(',', $tags);
             if(sizeof($array) > 0){
-              for ($i = 0; $i < sizeof($array); $i++) { 
+              for ($i = 0; $i < sizeof($array); $i++) {
                 $resultArray = array(
                   'title' => $array[$i]
                 );
