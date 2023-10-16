@@ -549,6 +549,7 @@ class ProductController extends APIController
           $result[$i]['tag_array'] = $this->manageTags($result[$i]['tags']);
           $result[$i]['details'] = $this->retrieveProductDetailsByParams('id', $result[$i]['type'] == 'bundled' ? $parentProduct[0]['product_id'] : $result[$i]['id']);
           $result[$i]['created_at_human'] = Carbon::parse($result[$i]['created_at'], $this->response['timezone'])->format('F j, Y H:i A');
+          $result[$i]['variation'] = app($this->productAttrController)->getByParamsBasic('product_id', $result[$i]['id']);
           // $result[$i]['bundled_products'] = app($this->bundledProductController)->getByParams('product_id', $result[$i]['id']);
           // $result[$i]['bundled_settings'] = app($this->bundledSettingController)->getByParams('bundled', $result[$i]['id']);
           // if($accountId !== null){
