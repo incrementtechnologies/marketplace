@@ -73,6 +73,7 @@ class ProductTraceController extends APIController
     ->select('batch_number', DB::raw('count(*) as total'))
     ->where('product_id', '=', $data['product_id'])
     ->where('product_attribute_id', '=', $data['product_attribute_id'])
+    ->where('deleted_at', '=', null)
     ->groupBy('batch_number')
     ->pluck('total','batch_number');
 
