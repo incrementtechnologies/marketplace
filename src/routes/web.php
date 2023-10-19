@@ -139,6 +139,7 @@ Route::post($route.'retrieve_by_params_end_user', $controller."retrieveByParamsE
 Route::post($route.'retrieve_by_bundled', $controller."retrieveByBundled");
 Route::post($route.'retrieve_by_bundled_agrisend', $controller."retrieveByBundledAgrisend");
 Route::post($route.'retrieve_with_transfer', $controller."retrieveWithTransfer");
+Route::post($route.'retrieve_inactive', $controller.'retrieveInactive');
 Route::post($route.'update', $controller."update");
 Route::post($route.'update_trace', $controller."updateTrace");
 Route::post($route.'delete', $controller."delete");

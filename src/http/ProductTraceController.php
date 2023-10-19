@@ -62,6 +62,24 @@ class ProductTraceController extends APIController
 
     return $result;
   }
+
+  public function retrieveInactive(Request $request){
+    $data = $request->all();
+
+    // group by batches
+    // count the inactive of the batches
+
+    $result = DB::table('product_traces')
+    ->select('batch_number', DB::raw('count(*) as total'))
+    ->where('product_id', '=', $data['product_id'])
+    ->where('product_attribue_id', '=', $data['product_attribute_id'])
+    ->groupBy('batch_number')
+    ->pluck('total','batch_number');
+
+    return $result;
+
+
+  }
   public function retrieveBundledTrace($attrID, $productId, $returns)
   {
     $whereArray = array(
