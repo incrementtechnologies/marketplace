@@ -70,7 +70,7 @@ class ProductTraceController extends APIController
     // count the inactive of the batches
 
     $result = DB::table('product_traces')
-    ->select('batch_number', DB::raw('count(*) as total'))
+    ->select('batch_number, manufacturing_date', DB::raw('count(*) as total'))
     ->where('product_id', '=', $data['product_id'])
     ->where('product_attribute_id', '=', $data['product_attribute_id'])
     ->where('deleted_at', '=', null)
