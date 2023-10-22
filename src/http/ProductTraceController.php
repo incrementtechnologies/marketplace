@@ -72,9 +72,11 @@ class ProductTraceController extends APIController
     $result = DB::table('product_traces')
     ->where('product_id', '=', $data['product_id'])
     ->where('product_attribute_id', '=', $data['product_attribute_id'])
+    ->where('status', '=', 'inactive')
     ->where('deleted_at', '=', null)
-    ->groupBy('batch_number')
     ->get();
+
+    $result = $result->groupBy('batch_number');
 
     return $result;
 
