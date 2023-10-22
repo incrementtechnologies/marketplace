@@ -88,7 +88,9 @@ class ProductTraceController extends APIController
       $response[] = $item;
     }
 
-    return $response;
+    $this->response['data'] = $response;
+
+    return $this->response();
   }
   public function retrieveBundledTrace($attrID, $productId, $returns)
   {
