@@ -78,9 +78,17 @@ class ProductTraceController extends APIController
 
     $result = $result->groupBy('batch_number');
 
-    return $result;
+    $response = [];
+    foreach ($result as $key => $value) {
+      $item = array(
+        'batch_number' => $key,
+        'total' => sizeof($value),
+        'manufacturing_date' => sizeof($value) > 0 ? $value[0]['manufacturing_date'] : null
+      );
+      $response[] = $item;
+    }
 
-
+    return $response;
   }
   public function retrieveBundledTrace($attrID, $productId, $returns)
   {
