@@ -4,7 +4,7 @@ namespace Increment\Marketplace\Http;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\APIController;
-use Increment\Marketplace\Models\ProductTrace as ProductTraceModel;
+use Increment\Marketplace\Models\ProductTrace;
 use Increment\Marketplace\Models\BundledProduct;
 use Increment\Marketplace\Models\TransferredProduct;
 use Illuminate\Support\Facades\Hash;
