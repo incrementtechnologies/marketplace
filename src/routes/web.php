@@ -148,7 +148,7 @@ Route::get($route.'test', $controller."test");
 
 // Product Traces
 $route = env('PACKAGE_ROUTE', '').'/product_traces/';
-$controller = 'Increment\Marketplace\Http\ProductTrace@';
+$controller = 'Increment\Marketplace\Http\TraceController@';
 Route::post($route.'activate', $controller."activate");
 
 

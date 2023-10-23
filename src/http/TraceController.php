@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Hash;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
-class ProductTrace extends APIController
+class TraceController extends APIController
 {
 
   public $productController = 'Increment\Marketplace\Http\ProductController';
