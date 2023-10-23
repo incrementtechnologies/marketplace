@@ -146,6 +146,12 @@ Route::post($route.'delete', $controller."delete");
 Route::post($route.'delete_all', $controller."deleteAll");
 Route::get($route.'test', $controller."test");
 
+// Product Traces
+$route = env('PACKAGE_ROUTE', '').'/product_traces/';
+$controller = 'Increment\Marketplace\Http\ProductTrace@';
+Route::post($route.'activate', $controller."activate");
+
+
 // Transferrs
 $route = env('PACKAGE_ROUTE', '').'/transfers/';
 $controller = 'Increment\Marketplace\Http\TransferController@';
