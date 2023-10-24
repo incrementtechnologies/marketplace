@@ -49,13 +49,12 @@ class TraceController extends APIController
             $this->response['data'][$i]['volume'] = app($this->productAttrClass)->getProductUnits('id', $item['product_attribute_id']);
             $item = $this->response['data'][$i];
 
-            if (isset($data['activation'])) {
-                if (isset($data['nfc']) && $item['nfc'] !== null && $item['status'] === 'active') {
-                    $this->response['data'] = null;
-                    $this->response['error'] = 'Tag is already active';
-                    return $this->response();
-                }
+            if (isset($data['nfc']) && $item['nfc'] !== null && $item['status'] === 'active') {
+                $this->response['data'] = null;
+                $this->response['error'] = 'Tag is already active';
+                return $this->response();
             }
+            
             if (isset($data['nfc']) && ($item['nfc'] == null || $item['nfc'] == '')) {
                 $nfcResult = ProductTrace::where('nfc', '=', $data['nfc'])->where('deleted_at', '=', null)->get();
                 if (sizeof($nfcResult) > 0) {
@@ -72,16 +71,9 @@ class TraceController extends APIController
                 }
             }
 
-
             if (isset($data['nfc']) && $item['nfc'] != null && $item['nfc'] != $data['nfc']) {
                 $this->response['data'] = null;
                 $this->response['error'] = 'Duplicate tag!';
-                return $this->response();
-            }
-
-            if ($this->checkOwnTrace($item, $data['merchant_id']) == false) {
-                $this->response['data'] = null;
-                $this->response['error'] = 'You don\'t own this product!';
                 return $this->response();
             }
         }
