@@ -847,7 +847,7 @@ class ProductTraceController extends APIController
       $result = app($this->bundledProductController)->insertData($data['products'], $this->response['data']);
       if ($result == false) {
         $this->response['data'] = null;
-        $this->repsonse['error'] = 'Unable to manage the request!';
+        $this->response['error'] = 'Unable to manage the request!';
       }
     }
     return $this->response();
