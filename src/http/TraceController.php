@@ -28,7 +28,10 @@ class TraceController extends APIController
         $this->model = new ProductTrace();
 
         $this->notRequired = array(
-            'rf', 'nfc', 'manufacturing_date', 'batch_number'
+            'rf',
+            'nfc',
+            'manufacturing_date',
+            'batch_number'
         );
 
         $this->localization();
@@ -54,7 +57,7 @@ class TraceController extends APIController
                 $this->response['error'] = 'Tag is already active';
                 return $this->response();
             }
-            
+
             if (isset($data['nfc']) && ($item['nfc'] == null || $item['nfc'] == '')) {
                 $nfcResult = ProductTrace::where('nfc', '=', $data['nfc'])->where('deleted_at', '=', null)->get();
                 if (sizeof($nfcResult) > 0) {
@@ -62,11 +65,13 @@ class TraceController extends APIController
                     $this->response['error'] = 'Tag is already taken!';
                     return $this->response();
                 } else {
-                    ProductTrace::where('id', '=', $item['id'])->update(array(
-                        'nfc' => $data['nfc'],
-                        'updated_at' => Carbon::now(),
-                        'status' => 'active'
-                    ));
+                    ProductTrace::where('id', '=', $item['id'])->update(
+                        array(
+                            'nfc' => $data['nfc'],
+                            'updated_at' => Carbon::now(),
+                            'status' => 'active'
+                        )
+                    );
                     $this->response['data'][$i]['nfc'] = $data['nfc'];
                 }
             }
@@ -87,20 +92,24 @@ class TraceController extends APIController
         $bundled = app($this->bundledProductController)->getTrace($trace['id']);
         if ($bundled !== null) {
             $params = array(
-                array(function ($query) use ($bundled) {
-                    $query->where('payload_value', '=', $bundled['bundled_trace'])
-                        ->orWhere('payload_value', '=', $bundled['product_trace']);
-                }),
+                array(
+                    function ($query) use ($bundled) {
+                        $query->where('payload_value', '=', $bundled['bundled_trace'])
+                            ->orWhere('payload_value', '=', $bundled['product_trace']);
+                    }
+                ),
                 array('merchant_id', '=', $merchantId),
                 array('status', '=', 'active')
             );
             $isOwned = app($this->transferredProductController)->retrieveByCondition($params); //check if product is transferred to you
 
-            $parameter =  array(
-                array(function ($query) use ($bundled) {
-                    $query->where('payload_value', '=', $bundled['bundled_trace'])
-                        ->orWhere('payload_value', '=', $bundled['product_trace']);
-                })
+            $parameter = array(
+                array(
+                    function ($query) use ($bundled) {
+                        $query->where('payload_value', '=', $bundled['bundled_trace'])
+                            ->orWhere('payload_value', '=', $bundled['product_trace']);
+                    }
+                )
             );
             $isTransferred = app($this->transferredProductController)->retrieveByCondition($parameter); // check if product is already transferred to others
 
@@ -117,9 +126,9 @@ class TraceController extends APIController
             );
             $accountType = app('Increment\MarketPlace\Http\MerchantController')->getAccountType($merchantId);
             if ($accountType === 'MANUFACTURER') {
-                $params[] =  array('from', '=', $merchantId);
+                $params[] = array('from', '=', $merchantId);
             } else {
-                $params[] =  array('to', '=', $merchantId);
+                $params[] = array('to', '=', $merchantId);
                 $params[] = array('status', '=', 'active');
             }
             $transferred = app($this->transferredProductController)->retrieveByCondition($params);
@@ -136,6 +145,25 @@ class TraceController extends APIController
                 return false;
             }
         }
-        return false;
+    }
+
+
+    public function createBundledTrace(Request $request)
+    {
+        $data = $request->all();
+        $data['code'] = $this->generateCode();
+        $data['status'] = 'active';
+        $data['product_attribute_id'] = 12;
+        $this->model = new ProductTrace();
+        $this->insertDB($data);
+        if ($this->response['data'] > 0) {
+            // add product to bundled
+            $result = app($this->bundledProductController)->insertData($data['products'], $this->response['data']);
+            if ($result == false) {
+                $this->response['data'] = null;
+                $this->response['error'] = 'Unable to manage the request!';
+            }
+        }
+        return $this->response();
     }
 }
