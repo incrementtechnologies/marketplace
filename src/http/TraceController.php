@@ -153,7 +153,6 @@ class TraceController extends APIController
         $data = $request->all();
         $data['code'] = $this->generateCode();
         $data['status'] = 'active';
-        $data['product_attribute_id'] = 12;
         $this->model = new ProductTrace();
         $this->insertDB($data);
         if ($this->response['data'] > 0) {
