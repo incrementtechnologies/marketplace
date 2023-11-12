@@ -26,11 +26,23 @@ class BundledSettingController extends APIController
 
   public function create(Request $request){
     $data = $request->all();
-    $result = BundledSetting::where('bundled', '=', $data['bundled'])->where('product_id', '=', $data['product_id'])->where('deleted_at', '=', null)->get();
+
+    // get product attribute id
+
+    $productAttribute = app($this->productAttrController)->getAttributeByProductId($data['$bundled']);
+
+    if($productAttribute == null){
+      $this->response['data'] = null;
+      $this->response['error'] = 'Bundled Product Attribute not found';
+      return $this->response();
+    }
+
+    $result = BundledSetting::where('bundled', '=', $data['bundled'])->where('bundled_attribute', '=', $productAttribute[0]['id'])->where('product_id', '=', $data['product_id'])->where('deleted_at', '=', null)->get();
     if(sizeof($result) > 0){
       $this->response['data'] = null;
       $this->response['error'] = 'Already existed!';
     }else{
+      $data['bundled_attribute'] = $productAttribute[0]['id'];
       $this->model = new BundledSetting();
       $this->insertDB($data);
       $bundled = BundledSetting::where('bundled', '=', $data['bundled'])->where('deleted_at', '=', null)->get();

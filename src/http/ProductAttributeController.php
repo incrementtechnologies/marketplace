@@ -17,6 +17,11 @@ class ProductAttributeController extends APIController
       return (sizeof($result) > 0) ? $result : null;
     }
 
+    public function getAttributeByProductId($productId){
+      $result = ProductAttribute::where('product_id', '=', $productId)->where('deleted_at', '=', null)->get();
+      return (sizeof($result) > 0) ? $result : null;
+    }
+
     public function getProductUnit($id){
       $result = ProductAttribute::where('product_id', '=', $id)->where('deleted_at', '=', null)->select('id', 'payload', 'payload_value')->get();
       return (sizeof($result) > 0) ? $result : null;
