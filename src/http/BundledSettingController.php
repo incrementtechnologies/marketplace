@@ -29,7 +29,7 @@ class BundledSettingController extends APIController
 
     // get product attribute id
 
-    $productAttribute = app($this->productAttrController)->getAttributeByProductId($data['$bundled']);
+    $productAttribute = app($this->productAttrController)->getAttributeByProductId($data['bundled']);
 
     if($productAttribute == null){
       $this->response['data'] = null;
