@@ -250,6 +250,7 @@ Route::get($route.'test', $controller."test");
 $route = env('PACKAGE_ROUTE', '').'/daily_loading_lists/';
 $controller = 'Increment\Marketplace\Http\DailyLoadingListController@';
 Route::post($route.'create', $controller."create");
+Route::post($route.'create_multiple', $controller."createMultiple");
 Route::post($route.'retrieve', $controller."retrieve");
 Route::post($route.'retrieve_basic', $controller."retrieveBasic");
 Route::post($route.'retrieve_summary_total', $controller."retrieveSummaryTotal");
