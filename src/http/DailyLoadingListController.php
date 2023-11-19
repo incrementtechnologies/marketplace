@@ -69,7 +69,7 @@ class DailyLoadingListController extends APIController
           $id = $this->insertDB($nData);
 
           if ($id > 0) {
-            app($this->orderRequestClass)->updateByParams($data['order_request_id'], array(
+            app($this->orderRequestClass)->updateByParams($item['id'], array(
               'delivered_by' => $data['account_id'],
               'status'       => 'in_progress',
               'updated_at'   => Carbon::now()
