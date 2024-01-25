@@ -106,6 +106,20 @@ class BundledProductController extends APIController
     return sizeof($result) > 0 ? $result : null;
   }
 
+  public function getByParamsWithBundledDetails($column, $value){
+    $this->localization();
+    $result = BundledProduct::where($column, '=', $value)->where('deleted_at', '=', null)->get();
+    if(sizeof($result) > 0){
+      $i = 0;
+      foreach ($result as $key) {
+        $result[$i]['product_traces'] = app($this->productTraceController)->getByParamsByFlag('id', $result[$i]['product_trace']);
+        $result[$i]['created_at_human'] = Carbon::createFromFormat('Y-m-d H:i:s', $result[$i]['created_at'])->copy()->tz($this->response['timezone'])->format('F j, Y h:i A');
+        $i++;
+      }
+    }
+    return sizeof($result) > 0 ? $result : null;
+  }
+
   public function getByParamsNoDetails($column, $value){
     $result = BundledProduct::where($column, '=', $value)->where('deleted_at', '=', null)->get();
     return sizeof($result) > 0 ? $result[0] : null;

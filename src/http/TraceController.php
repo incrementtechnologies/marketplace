@@ -147,6 +147,35 @@ class TraceController extends APIController
         }
     }
 
+    public function scanTrace(Request $request)
+    {
+        $data = $request->all();
+        $this->model = new ProductTrace();
+        $this->retrieveDB($data);
+        $i = 0;
+
+
+        foreach ($this->response['data'] as $key) {
+            $item = $this->response['data'][$i];
+            $this->response['data'][$i]['product'] = app($this->productController)->getProductByParamsWithVariationId('id', $item['product_id'], $item['product_attribute_id']);
+            // $this->response['data'][$i]['volume'] = app($this->productAttrClass)->getProductUnits('id', $item['product_attribute_id']);
+
+
+            // If the tag is a product trace
+            $bundled = app($this->bundledProductController)->getByParams('product_trace', $item['id']);
+
+            if($bundled == null){
+                // If the tag is a bundled trace
+                // get all tags in the bundle
+                $this->response['data'][$i]['bundled_product'] = app($this->bundledProductController)->getByParamsWithBundledDetails('bundled_trace', $item['id']);
+            }else{
+                $this->response['data'][$i]['bundled_product'] = $bundled;
+            }
+        }
+
+        return $this->response();
+    }
+
 
     public function createBundledTrace(Request $request)
     {

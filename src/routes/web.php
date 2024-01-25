@@ -151,6 +151,7 @@ $route = env('PACKAGE_ROUTE', '').'/product_traces/';
 $controller = 'Increment\Marketplace\Http\TraceController@';
 Route::post($route.'activate', $controller."activate");
 Route::post($route.'create_bundled_trace', $controller."createBundledTrace");
+Route::post($route.'scan_trace', $controller."scanTrace");
 
 
 // Transferrs
