@@ -162,7 +162,7 @@ class TraceController extends APIController
 
 
             // If the tag is a product trace
-            $bundled = app($this->bundledProductController)->getByParams('product_trace', $item['id']);
+            $bundled = app($this->bundledProductController)->getBundledTracesByParams('product_trace', $item['id']);
 
             if($bundled == null){
                 // If the tag is a bundled trace

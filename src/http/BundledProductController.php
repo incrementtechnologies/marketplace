@@ -99,7 +99,21 @@ class BundledProductController extends APIController
         $result[$i]['product_trace_details'] = app($this->productTraceController)->getByParamsDetails('id', $result[$i]['product_trace']);
         $result[$i]['bundled_trace_details'] = app($this->productTraceController)->getByParamsDetails('id', $result[$i]['bundled_trace']);
         $result[$i]['created_at_human'] = Carbon::createFromFormat('Y-m-d H:i:s', $result[$i]['created_at'])->copy()->tz($this->response['timezone'])->format('F j, Y h:i A');
-        $result[$i]['trace'] = $this->getByParamsWithBundledDetails('bundled_trace', $result[$i]['bundled_trace']);
+        $result[$i]['size'] = BundledProduct::where('bundled_trace', '=', $result[$i]['bundled_trace'])->where('deleted_at', '=', null)->count();
+        $i++;
+      }
+    }
+    return sizeof($result) > 0 ? $result : null;
+  }
+
+  public function getBundledTracesByParams($column, $value){
+    $this->localization();
+    $result = BundledProduct::where($column, '=', $value)->where('deleted_at', '=', null)->get();
+    if(sizeof($result) > 0){
+      $i = 0;
+      foreach ($result as $key) {
+        $result[$i]['created_at_human'] = Carbon::createFromFormat('Y-m-d H:i:s', $result[$i]['created_at'])->copy()->tz($this->response['timezone'])->format('F j, Y h:i A');
+        $result[$i]['traces'] = $this->getByParamsWithBundledDetails('bundled_trace', $result[$i]['bundled_trace']);
         $result[$i]['size'] = $result[$i]['trace'] ? sizeof($result[$i]['trace']) : 0;
         $i++;
       }
