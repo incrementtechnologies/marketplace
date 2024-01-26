@@ -167,9 +167,11 @@ class TraceController extends APIController
             if($bundled == null){
                 // If the tag is a bundled trace
                 // get all tags in the bundle
-                $this->response['data'][$i]['bundled_product'] = app($this->bundledProductController)->getByParamsWithBundledDetails('bundled_trace', $item['id']);
+                $this->response['data'][$i]['bundled_product'] = null;
+                $this->response['data'][$i]['traces'] = app($this->bundledProductController)->getByParamsWithBundledDetails('bundled_trace', $item['id']);
             }else{
-                $this->response['data'][$i]['bundled_product'] = $bundled;
+                $this->response['data'][$i]['bundled_product'] = $bundled ? $bundled['result'] : null;
+                $this->response['data'][$i]['traces']  = $bundled ? $bundled['traces'] : null;
             }
         }
 
