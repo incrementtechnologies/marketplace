@@ -112,7 +112,7 @@ class BundledProductController extends APIController
     if(sizeof($result) > 0){
       $i = 0;
       foreach ($result as $key) {
-        $result[$i]['product_traces'] = app($this->productTraceController)->getByParamsByFlag('id', $result[$i]['product_trace']);
+        $result[$i]['product_traces'] = app($this->productTraceController)->getTraceDetailsByParams('id', $result[$i]['product_trace']);
         $result[$i]['created_at_human'] = Carbon::createFromFormat('Y-m-d H:i:s', $result[$i]['created_at'])->copy()->tz($this->response['timezone'])->format('F j, Y h:i A');
         $i++;
       }
