@@ -159,17 +159,15 @@ class TraceController extends APIController
 
         foreach ($this->response['data'] as $key) {
             $item = $this->response['data'][$i];
+              
+            $this->response['data'][$i]['product'] = app($this->productController)->getProductByParamsWithVariationId('id', $item['product_id'], $item['product_attribute_id']);
+            // $this->response['data'][$i]['volume'] = app($this->productAttrClass)->getProductUnits('id', $item['product_attribute_id']);
 
             if ($this->checkOwnTrace($item, $data['merchant_id']) == false) {
                 $this->response['data'] = null;
                 $this->response['error'] = 'You don\'t own this product!';
                 return $this->response();
             }
-
-              
-            $this->response['data'][$i]['product'] = app($this->productController)->getProductByParamsWithVariationId('id', $item['product_id'], $item['product_attribute_id']);
-            // $this->response['data'][$i]['volume'] = app($this->productAttrClass)->getProductUnits('id', $item['product_attribute_id']);
-
 
             // If the tag is a product trace
             $bundled = app($this->bundledProductController)->getBundledTracesByParams('product_trace', $item['id']);
