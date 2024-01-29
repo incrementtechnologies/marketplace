@@ -23,6 +23,8 @@ class TraceController extends APIController
     public $landBlockProductClass = 'App\Http\Controllers\LandBlockProductController';
     public $batchProductClass = 'Increment\Marketplace\Paddock\Http\BatchProductController';
 
+    public $merchantClass = 'Increment\MarketPlace\Http\MerchantController';
+
     function __construct()
     {
         $this->model = new ProductTrace();
@@ -124,7 +126,7 @@ class TraceController extends APIController
             $params = array(
                 array('payload_value', '=', $trace['id'])
             );
-            $accountType = app('Increment\MarketPlace\Http\MerchantController')->getAccountType($merchantId);
+            $accountType = app($this->merchantClass)->getAccountType($merchantId);
             if ($accountType === 'MANUFACTURER') {
                 $params[] = array('from', '=', $merchantId);
             } else {
