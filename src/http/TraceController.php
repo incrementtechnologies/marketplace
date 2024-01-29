@@ -164,7 +164,7 @@ class TraceController extends APIController
             // $this->response['data'][$i]['volume'] = app($this->productAttrClass)->getProductUnits('id', $item['product_attribute_id']);
 
             $item = $this->response['data'][$i];
-            
+
             if ($this->checkOwnTrace($item, $data['merchant_id']) == false) {
                 $this->response['data'] = null;
                 $this->response['error'] = 'You don\'t own this product!';
@@ -180,7 +180,7 @@ class TraceController extends APIController
                 $this->response['data'][$i]['bundled_product'] = null;
                 $this->response['data'][$i]['traces'] = app($this->bundledProductController)->getByParamsWithBundledDetails('bundled_trace', $item['id']);
             }else{
-                $this->response['data'][$i]['bundled_product'] = $bundled ? $bundled['result'] : null;
+                $this->response['data'][$i]['bundled_product'] = $bundled && $bundled['result'] && sizeof($bundled['result']) ? $bundled['result'][0] : null;
                 $this->response['data'][$i]['traces']  = $bundled ? $bundled['traces'] : null;
             }
         }
