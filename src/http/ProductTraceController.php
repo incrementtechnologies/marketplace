@@ -536,7 +536,7 @@ class ProductTraceController extends APIController
       $params = array(
         array('payload_value', '=', $trace['id'])
       );
-      $accountType = app('Increment\MarketPlace\Http\MerchantController')->getAccountType($merchantId);
+      $accountType = app('Increment\Marketplace\Http\MerchantController')->getAccountType($merchantId);
       if($accountType === 'MANUFACTURER'){
         $params[] =  array('from', '=', $merchantId);
       }else{

@@ -23,7 +23,7 @@ class TraceController extends APIController
     public $landBlockProductClass = 'App\Http\Controllers\LandBlockProductController';
     public $batchProductClass = 'Increment\Marketplace\Paddock\Http\BatchProductController';
 
-    public $merchantClass = 'Increment\MarketPlace\Http\MerchantController';
+    public $merchantClass = 'Increment\Marketplace\Http\MerchantController';
 
     function __construct()
     {
