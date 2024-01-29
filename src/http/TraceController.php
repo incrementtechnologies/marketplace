@@ -163,6 +163,8 @@ class TraceController extends APIController
             $this->response['data'][$i]['product'] = app($this->productController)->getProductByParamsWithVariationId('id', $item['product_id'], $item['product_attribute_id']);
             // $this->response['data'][$i]['volume'] = app($this->productAttrClass)->getProductUnits('id', $item['product_attribute_id']);
 
+            $item = $this->response['data'][$i];
+            
             if ($this->checkOwnTrace($item, $data['merchant_id']) == false) {
                 $this->response['data'] = null;
                 $this->response['error'] = 'You don\'t own this product!';
