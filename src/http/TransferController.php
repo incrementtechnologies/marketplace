@@ -44,6 +44,12 @@ class TransferController extends APIController
 		return $this->response();
 	}
 
+	public function testingMethod(Request $request)
+	{
+		$this->response['data'] = 'test';
+		return $this->response();
+	}
+
 	public function createDeliveryTransfer(Request $request)
 	{
 		$data = $request->all();
