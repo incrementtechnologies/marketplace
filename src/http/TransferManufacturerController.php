@@ -10,9 +10,8 @@ use Increment\Marketplace\Models\TransferredProduct;
 use Increment\Marketplace\Models\BundledProduct;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
-use phpDocumentor\Reflection\Types\Null_;
 
-class TransferController extends APIController
+class TransferManufacturerController extends APIController
 {
 	public $transferredProductsClass = 'Increment\Marketplace\Http\TransferredProductController';
 	public $merchantClass = 'Increment\Marketplace\Http\MerchantController';
