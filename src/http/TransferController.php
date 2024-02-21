@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Increment\Marketplace\Http;
 
 use Illuminate\Http\Request;
@@ -10,7 +9,6 @@ use Increment\Marketplace\Models\TransferredProduct;
 use Increment\Marketplace\Models\BundledProduct;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
-use phpDocumentor\Reflection\Types\Null_;
 
 class TransferController extends APIController
 {
@@ -50,7 +48,7 @@ class TransferController extends APIController
 		return $this->response();
 	}
 
-	public function createDeliveryTransfer(Request $request)
+	public function createDelivery(Request $request)
 	{
 		$data = $request->all();
 		$data['code'] = $this->generateCode();

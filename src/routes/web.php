@@ -158,7 +158,7 @@ Route::post($route.'scan_trace', $controller."scanTrace");
 $route = env('PACKAGE_ROUTE', '').'/transfers/';
 $controller = 'Increment\Marketplace\Http\TransferController@';
 Route::post($route.'create', $controller."create");
-Route::post($route.'create_deliveries', $controller."test");
+Route::post($route.'create_deliveries', $controller."createDelivery");
 Route::post($route.'retrieve', $controller."retrieve");
 Route::post($route.'basic_retrieve', $controller."basicRetrieve");
 Route::post($route.'retrieve_by_pagination', $controller."retrieveByPagination");
