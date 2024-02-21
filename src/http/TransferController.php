@@ -44,10 +44,8 @@ class TransferController extends APIController
 		return $this->response();
 	}
 
-	public function createDeliveries(Request $request)
+	public function createDeliveryTransfer(Request $request)
 	{
-		return "hello";
-		
 		$data = $request->all();
 		$data['code'] = $this->generateCode();
 		$this->insertDB($data);
